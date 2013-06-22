@@ -292,7 +292,7 @@ void plClothingSDLModifier::HandleSingleSDR(const plStateDataRecord *sdr, plClot
         {
             skinVar->Get(tint);
             if (clothing)
-                clothing->TintSkin(tint[0] / 255.f, tint[1] / 255.f, tint[2] / 255.f, false /* update */, false /*broadcast*/);
+                clothing->TintSkin(tint[0] / 255.f, tint[1] / 255.f, tint[2] / 255.f, false /* update */, false /*broadcast*/, false /*netForce*/);
         }
         plSimpleStateVariable* faceBlends = sdr->FindVar(kStrFaceBlends);
         if (faceBlends->IsUsed())
