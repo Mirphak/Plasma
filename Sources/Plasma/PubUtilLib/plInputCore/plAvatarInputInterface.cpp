@@ -321,7 +321,7 @@ void    plAvatarInputInterface::RestoreDefaultKeyMappings( void )
     fControlMap->BindKey( KEY_NUMPAD_SUBTRACT,          B_CAMERA_ZOOM_OUT );
 
     fControlMap->BindKey( KEY_SHIFT,                    B_CONTROL_MODIFIER_FAST );
-    fControlMap->BindKey( KEY_Z,                        B_CONTROL_MODIFIER_STRAFE );
+    fControlMap->BindKey( plCtrlKeyCombo( KEY_Z ),      B_CONTROL_MODIFIER_STRAFE );
     fControlMap->BindKey( KEY_UP,                       B_CONTROL_MOVE_FORWARD );
     fControlMap->BindKey( KEY_DOWN,                     B_CONTROL_MOVE_BACKWARD );
     fControlMap->BindKey( KEY_LEFT,                     B_CONTROL_ROTATE_LEFT );
@@ -364,12 +364,12 @@ void    plAvatarInputInterface::RestoreDefaultKeyMappings( void )
     fControlMap->BindKeyToConsoleCmd( KEY_F8,                                   "Game.KICreateMarkerFolder" );
 
 #ifndef PLASMA_EXTERNAL_RELEASE
-    fControlMap->BindKey( plShiftKeyCombo( KEY_P ),     B_CONTROL_TOGGLE_PHYSICAL );
-    fControlMap->BindKey( KEY_U,                        B_CONTROL_MOVE_UP );
-    fControlMap->BindKey( KEY_H,                        B_CONTROL_MOVE_DOWN );
-    fControlMap->BindKey( plShiftKeyCombo( KEY_C ),     B_TOGGLE_DRIVE_MODE );
+    fControlMap->BindKey( KEY_F10 ,                     B_CONTROL_TOGGLE_PHYSICAL );
+    fControlMap->BindKey( KEY_F11 ,                     B_CONTROL_MOVE_UP );
+    fControlMap->BindKey( KEY_F12 ,                     B_CONTROL_MOVE_DOWN );
+    fControlMap->BindKey( plCtrlKeyCombo( KEY_C ),      B_TOGGLE_DRIVE_MODE );
     
-    fControlMap->BindKeyToConsoleCmd( KEY_L,            "NextStatusLog" );
+    fControlMap->BindKeyToConsoleCmd( plCtrlKeyCombo( KEY_L ),  "NextStatusLog" );
 #endif
 }
 
