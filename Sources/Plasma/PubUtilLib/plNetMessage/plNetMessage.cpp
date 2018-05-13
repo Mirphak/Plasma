@@ -226,7 +226,7 @@ int plNetMessage::PeekBuffer(const char* bufIn, int bufLen, uint32_t peekOptions
     readStream.LogSetList(el);
     readStream.Init(bufLen, bufIn);
     readStream.LogSubStreamStart("plNetMessage");
-    readStream.LogStringString(plString::Format("ClassName: %s", this->ClassName()).c_str());
+    readStream.LogStringString(ST::format("ClassName: {}", this->ClassName()).c_str());
     int ret;
     if (peekOptions & kBaseClassOnly)
     {
@@ -700,12 +700,12 @@ void plNetMsgStreamedObject::WriteVersion(hsStream* s, hsResMgr* mgr)
 
 ////////////////////////////////////////////////////////////////////
 // debug
-plString plNetMsgSDLState::AsString() const
+ST::string plNetMsgSDLState::AsString() const
 {
     ISetDescName();     // set desc name for debug if necessary
 
-    return plString::Format("object:%s, initial:%d, %s",
-        ObjectInfo()->GetObjectName().c_str(), fIsInitialState, plNetMsgStreamedObject::AsString().c_str() );
+    return ST::format("object:{}, initial:{}, {}",
+        ObjectInfo()->GetObjectName(), fIsInitialState, plNetMsgStreamedObject::AsString());
 }
 
 //
@@ -879,7 +879,7 @@ void plNetMsgRoomsList::AddRoom(plKey rmKey)
     fRoomNames.push_back(rmKey->GetName());
 }
 
-void plNetMsgRoomsList::AddRoomLocation(plLocation loc, const plString& rmName)
+void plNetMsgRoomsList::AddRoomLocation(plLocation loc, const ST::string& rmName)
 {
     fRooms.push_back(loc);
     fRoomNames.push_back(rmName);

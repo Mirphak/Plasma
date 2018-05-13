@@ -110,44 +110,6 @@ void HSMemory::Clear(void* m, uint32_t byteLen)
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-#if 0
-template <class T> T* hsSoftNew(T*& obj)
-{
-    try {
-        obj = new T;
-    }
-    catch (...) {
-        obj = nil;
-    }
-    return obj;
-}
-
-inline template <class T> T* hsSoftNew(T*& obj, unsigned count)
-{
-    try {
-        obj = new T[count];
-    }
-    catch (...) {
-        obj = nil;
-    }
-    return obj;
-}
-#endif
-
-void* HSMemory::SoftNew(uint32_t size)
-{
-    uint32_t* p;
-
-    hsTry {
-        p = new uint32_t[(size + 3) >> 2];
-    } hsCatch(...) {
-        p = nil;
-    }
-    return p;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////
-
 struct hsPrivateChunk {
     hsPrivateChunk* fNext;
     char*           fAvailableAddr;
@@ -219,19 +181,6 @@ void* hsChunkAllocator::Allocate(uint32_t size, const void* data)
     if (data)
         HSMemory::BlockMove(data, addr, size);
 
-    return addr;
-}
-
-void* hsChunkAllocator::SoftAllocate(uint32_t size, const void* data)
-{
-    void*   addr;
-
-    hsTry {
-        addr = this->Allocate(size, data);
-    }
-    hsCatch(...) {
-        addr = nil;
-    }
     return addr;
 }
 
@@ -717,7 +666,7 @@ void SortNDumpUnfreedMemory(const char *nm, bool full) // file name base, and FU
 #endif
 
     char fname[512];
-    sprintf(fname,"%s_dmp.txt",nm);
+    snprintf(fname,arrsize(fname),"%s_dmp.txt",nm);
     char *errStr = "";
 
 
@@ -807,7 +756,7 @@ static  _CrtMemBlockHeader *cmbh_last;  // Remember this header for next increme
         
         CreateDirectory("Reports",NULL);            // stick em in a sub directory
         char fnm[512];
-        sprintf(fnm,"Reports\\%s",fname);
+        snprintf(fnm,arrsize(fnm),"Reports\\%s",fname);
  
         FILE * DumpLogFile = fopen( fnm, "w" );
 //      long allocs=0;
@@ -835,7 +784,7 @@ static  _CrtMemBlockHeader *cmbh_last;  // Remember this header for next increme
         static int first=1;
         if (!full)          // if this is a partial mem dump, write to the ROOMS.txt file a summary
         {   
-            sprintf(fnm,"Reports\\%s","ROOMS.txt");
+            snprintf(fnm,arrsize(fnm),"Reports\\%s","ROOMS.txt");
  
             if (first)
             {   DumpLogFile = fopen( fnm, "w" );    // first time clobber the old

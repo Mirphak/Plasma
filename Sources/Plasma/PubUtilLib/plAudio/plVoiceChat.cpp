@@ -411,7 +411,7 @@ plVoiceSound::plVoiceSound()
     fEAXSettings.SetRoomParams(-1200, -100, 0, 0);
     fLastUpdate = 0;
 
-    plString keyName = plString::Format("VoiceSound_%d", fCount);
+    ST::string keyName = ST::format("VoiceSound_{}", fCount);
     fCount++;
     hsgResMgr::ResMgr()->NewKey(keyName, this, plLocation::kGlobalFixedLoc);
 }
@@ -435,7 +435,7 @@ bool plVoiceSound::LoadSound( bool is3D )
     header.fBitsPerSample  = 16;
     header.fNumChannels = 1;
     header.fNumSamplesPerSec = FREQUENCY;
-    header.fBlockAlign = header.fNumChannels * header.fBitsPerSample / 2;
+    header.fBlockAlign = header.fNumChannels * header.fBitsPerSample / 8;
     header.fAvgBytesPerSec = header.fNumSamplesPerSec * header.fBlockAlign;
 
     fDSoundBuffer = new plDSoundBuffer(0, header, true, false, false, true);

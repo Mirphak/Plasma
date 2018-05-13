@@ -123,11 +123,9 @@ bool    pfConsoleEngine::PrintCmdHelp( char *name, void (*PrintFn)( const char *
     pfConsoleCmd        *cmd;
     pfConsoleCmdGroup   *group, *subGrp;
     const char          *ptr;
-    static char         string[ 512 ];
     static char         tempString[ 512 ];
     uint32_t              i;
 
-    
     /// Scan for subgroups. This can be an empty loop
     group = pfConsoleCmdGroup::GetBaseGroup();
     ptr = console_strtok( name, false );
@@ -152,17 +150,15 @@ bool    pfConsoleEngine::PrintCmdHelp( char *name, void (*PrintFn)( const char *
 
         // Print help for this group
         if( group == pfConsoleCmdGroup::GetBaseGroup() )
-            strcpy( string, "Base commands and groups:" );
+            PrintFn("Base commands and groups:");
         else
-            sprintf( string, "Group %s:", group->GetName() );
-        PrintFn( string );
-        PrintFn( "  Subgroups:" );
+            PrintFn(ST::format("Group {}:", group->GetName()).c_str());
+        PrintFn("  Subgroups:");
         for( subGrp = group->GetFirstSubGroup(); subGrp != nil; subGrp = subGrp->GetNext() )
         {
-            sprintf( string, "    %s", subGrp->GetName() );
-            PrintFn( string );
+            PrintFn(ST::format("    {}", subGrp->GetName()).c_str());
         }
-        PrintFn( "  Commands:" );
+        PrintFn("  Commands:");
         for( cmd = group->GetFirstCommand(); cmd != nil; cmd = cmd->GetNext() )
         {
             const char* p = cmd->GetHelp();
@@ -171,8 +167,7 @@ bool    pfConsoleEngine::PrintCmdHelp( char *name, void (*PrintFn)( const char *
             }
             tempString[ i ] = 0;
 
-            sprintf( string, "    %s: %s", cmd->GetName(), tempString );
-            PrintFn( string );
+            PrintFn(ST::format("    {}: {}", cmd->GetName(), tempString).c_str());
         }
 
         return true;
@@ -187,12 +182,9 @@ bool    pfConsoleEngine::PrintCmdHelp( char *name, void (*PrintFn)( const char *
     }
 
     /// That's it!
-    sprintf( string, "\nHelp for the command %s:", cmd->GetName() );
-    PrintFn( string );
-    sprintf( string, "\\i%s", cmd->GetHelp() );
-    PrintFn( string );
-    sprintf( string, "\\iUsage: %s", cmd->GetSignature() );
-    PrintFn( string );
+    PrintFn(ST::format("\nHelp for the command {}:", cmd->GetName()).c_str());
+    PrintFn(ST::format("\\i{}", cmd->GetHelp()).c_str());
+    PrintFn(ST::format("\\iUsage: {}", cmd->GetSignature()).c_str());
 
     return true;
 }
@@ -204,7 +196,6 @@ const char  *pfConsoleEngine::GetCmdSignature( char *name )
     pfConsoleCmd        *cmd;
     pfConsoleCmdGroup   *group, *subGrp;
     const char          *ptr;
-    static char         string[ 512 ];
 
     
     /// Scan for subgroups. This can be an empty loop
@@ -236,7 +227,7 @@ const char  *pfConsoleEngine::GetCmdSignature( char *name )
     }
 
     /// That's it!
-    return (char *)cmd->GetSignature();
+    return cmd->GetSignature();
 }
 
 //// Dummy Local Function ////////////////////////////////////////////////////
@@ -377,12 +368,9 @@ bool    pfConsoleEngine::RunCommand( char *line, void (*PrintFn)( const char * )
                     cmd->GetSigEntry( (uint8_t)numParams ) != pfConsoleCmd::kNone ) )
     {
         // Print help string and return
-        static char     string[ 512 ];
-
         ISetErrorMsg( "" ); // Printed on next line
-        PrintFn( "Invalid parameters to command" );
-        sprintf( string, "Usage: %s", cmd->GetSignature() );
-        PrintFn( string );
+        PrintFn("Invalid parameters to command");
+        PrintFn(ST::format("Usage: {}", cmd->GetSignature()).c_str());
         return false;
     }
 

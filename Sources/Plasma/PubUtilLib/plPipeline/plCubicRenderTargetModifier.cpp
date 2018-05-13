@@ -127,8 +127,6 @@ void    plCubicRenderTargetModifier::ICreateRenderRequest( int face )
 bool    plCubicRenderTargetModifier::IEval( double secs, float del, uint32_t dirty )
 {
     hsPoint3    center;
-    hsMatrix44  mtx, invMtx;
-    int         i;
 
     plRenderRequestMsg  *msg;
 
@@ -150,7 +148,7 @@ bool    plCubicRenderTargetModifier::IEval( double secs, float del, uint32_t dir
     fCubic->SetCameraMatrix(center);
 
     /// Submit render requests!
-    for( i = 0; i < 6; i++ )
+    for (int i = 0; i < 6; i++)
     {
         if( fRequests[ i ] != nil )
         {
@@ -169,51 +167,51 @@ bool    plCubicRenderTargetModifier::IEval( double secs, float del, uint32_t dir
 
 bool    plCubicRenderTargetModifier::MsgReceive( plMessage* msg )
 {
-    plSceneObject       *scene;
-    plCubicRenderTarget *cubic;
-    int                 i;
-
-
     plEvalMsg* eval = plEvalMsg::ConvertNoRef(msg);
-    if( eval )
+    if (eval)
     {
         const double secs = eval->DSeconds();
         const float del = eval->DelSeconds();
-        IEval( secs, del, 0 );
-        return true;
-    }
-    plRefMsg            *refMsg = plRefMsg::ConvertNoRef( msg );
-    if( refMsg )
-    {
-        if( scene = plSceneObject::ConvertNoRef( refMsg->GetRef() ) )
-        {
-            if( refMsg->GetContext() & ( plRefMsg::kOnCreate | plRefMsg::kOnRequest | plRefMsg::kOnReplace ) )
-                AddTarget( scene );
-            else
-                RemoveTarget( scene );
-        }
-        if( cubic = plCubicRenderTarget::ConvertNoRef( refMsg->GetRef() ) )
-        {
-            if( refMsg->GetContext() & ( plRefMsg::kOnCreate | plRefMsg::kOnRequest | plRefMsg::kOnReplace ) )
-            {
-                fCubic = cubic;
-                for( i = 0; i < 6; i++ )
-                    ICreateRenderRequest( i );
-            }
-            else
-            {
-                fCubic = nil;
-                for( i = 0; i < 6; i++ )
-                {
-                    delete fRequests[ i ];
-                    fRequests[ i ] = nil;
-                }
-            }
-        }
+        IEval(secs, del, 0);
         return true;
     }
 
-    return plModifier::MsgReceive( msg );
+    plRefMsg* refMsg = plRefMsg::ConvertNoRef(msg);
+    if (refMsg)
+    {
+        plSceneObject* scene = plSceneObject::ConvertNoRef(refMsg->GetRef());
+        if (scene)
+        {
+            if (refMsg->GetContext() & (plRefMsg::kOnCreate | plRefMsg::kOnRequest | plRefMsg::kOnReplace))
+                AddTarget(scene);
+            else
+                RemoveTarget(scene);
+        }
+
+        plCubicRenderTarget* cubic = plCubicRenderTarget::ConvertNoRef(refMsg->GetRef());
+        if (cubic)
+        {
+            if (refMsg->GetContext() & (plRefMsg::kOnCreate | plRefMsg::kOnRequest | plRefMsg::kOnReplace))
+            {
+                fCubic = cubic;
+                for (int i = 0; i < 6; i++)
+                    ICreateRenderRequest(i);
+            }
+            else
+            {
+                fCubic = nullptr;
+                for (int i = 0; i < 6; i++)
+                {
+                    delete fRequests[i];
+                    fRequests[i] = nullptr;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    return plModifier::MsgReceive(msg);
 }
 
 //// AddTarget ////////////////////////////////////////////////////////////////

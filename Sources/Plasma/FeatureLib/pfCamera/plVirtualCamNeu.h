@@ -81,9 +81,10 @@ protected:
     
 
     void Output();
+    void SetOutputFOV();
     void IUpdate();
     void INext();
-        
+
 public:
     enum flags
     {
@@ -174,7 +175,7 @@ public:
     void ClearStack();
 
     void AddCameraLoaded(plSceneObject* pCam) { fCamerasLoaded.push_back(pCam); }
-    bool RestoreFromName(const plString& name);
+    bool RestoreFromName(const ST::string& name);
     void StartUnPan();
     // these are for console access
     static bool fUseAccelOverride, freeze, alwaysCutForColin, WalkPan3rdPerson,StayInFirstPersonForever;

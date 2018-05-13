@@ -44,6 +44,9 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "hsStream.h"
 #include "hsExceptions.h"
 
+#include "plProduct.h"
+#include <ctime>
+
 #include "plPNG.h"
 #include "plGImage/plMipmap.h"
 
@@ -95,21 +98,21 @@ plMipmap* plPNG::IRead(hsStream* inStream)
             png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
             if (!png_ptr) {
-                throw(false);
+                throw false;
             }
 
             info_ptr = png_create_info_struct(png_ptr);
 
             if (!info_ptr) {
                 png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
-                throw(false);
+                throw false;
             }
 
             end_info = png_create_info_struct(png_ptr);
 
             if (!end_info) {
                 png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
-                throw(false);
+                throw false;
             }
 
             //  Assign delegate function for reading from hsStream
@@ -169,10 +172,8 @@ plMipmap* plPNG::IRead(hsStream* inStream)
             delete [] row_ptrs;
         }
     } catch (...) {
-        if (newMipmap != NULL) {
-            delete newMipmap;
-            newMipmap = NULL;
-        }
+        delete newMipmap;
+        newMipmap = nullptr;
     }
 
     return newMipmap;
@@ -191,7 +192,7 @@ plMipmap* plPNG::ReadFromFile(const plFileName& fileName)
     return ret;
 }
 
-bool plPNG::IWrite(plMipmap* source, hsStream* outStream)
+bool plPNG::IWrite(plMipmap* source, hsStream* outStream, const std::multimap<ST::string, ST::string>& textFields)
 {
     bool result = true;
 
@@ -200,14 +201,14 @@ bool plPNG::IWrite(plMipmap* source, hsStream* outStream)
         png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
         if (!png_ptr) {
-            throw(false);
+            throw false;
         }
 
         png_infop info_ptr = png_create_info_struct(png_ptr);
 
         if (!info_ptr) {
             png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
-            throw(false);
+            throw false;
         }
 
         //  Assign delegate function for writing to hsStream
@@ -228,11 +229,46 @@ bool plPNG::IWrite(plMipmap* source, hsStream* outStream)
             row_ptrs[i] = (png_bytep)srcp + (i * stride);
         }
 
+        // Write image data
         png_write_image(png_ptr, row_ptrs);
+
+        // Prepare Textual Metadata
+        char time_string[50]; // RFC-1123: "Day, DD-Mon-YYYY hh:mm:ss";
+        time_t rawtime = time(nullptr);
+        strftime(time_string, sizeof(time_string), "%a, %d-%b-%Y %T", gmtime(&rawtime));
+
+        // Add our standard fields, then combine with the custom fields
+        std::multimap<ST::string, ST::string> all_fields;
+        all_fields.emplace("Software", plProduct::ProductString());
+        all_fields.emplace("Creation Time", time_string);
+        for (auto field : textFields)
+            all_fields.insert(field);
+
+        png_text* text = new png_text[all_fields.size()];
+        size_t num_txtfields = 0;
+        for (auto it = all_fields.begin(); it != all_fields.end(); it++, num_txtfields++) {
+            // The PNG specification requires Latin-1 in the 'key' field
+            text[num_txtfields].key = (png_charp)(strdup(it->first.left(PNG_KEYWORD_MAX_LENGTH).trim().to_latin_1().data()));
+            text[num_txtfields].text = (png_charp)(it->second.c_str());
+            text[num_txtfields].lang = "en-us";  //  Language used in 'text' and 'lang_key'.
+            text[num_txtfields].lang_key = "";   //  Translation of 'key' into 'lang', if needed.
+            text[num_txtfields].compression = PNG_ITXT_COMPRESSION_NONE;
+        }
+
+        // Write Textual Metadata
+        png_set_text(png_ptr, info_ptr, text, num_txtfields);
+
+        // Finish Up
         png_write_end(png_ptr, info_ptr);
+
+        //  Clean up text buffers
+        for (size_t i = 0; i < num_txtfields; i++)
+            free(text[i].key);
+
         //  Clean up allocated structs
         png_destroy_write_struct(&png_ptr, &info_ptr);
         delete [] row_ptrs;
+        delete [] text;
     } catch (...) {
         result = false;
     }
@@ -240,7 +276,7 @@ bool plPNG::IWrite(plMipmap* source, hsStream* outStream)
     return result;
 }
 
-bool plPNG::WriteToFile(const plFileName& fileName, plMipmap* sourceData)
+bool plPNG::WriteToFile(const plFileName& fileName, plMipmap* sourceData, const std::multimap<ST::string, ST::string>& textFields)
 {
     hsUNIXStream out;
 
@@ -248,7 +284,7 @@ bool plPNG::WriteToFile(const plFileName& fileName, plMipmap* sourceData)
         return false;
     }
 
-    bool ret = IWrite(sourceData, &out);
+    bool ret = IWrite(sourceData, &out, textFields);
     out.Close();
     return ret;
 }

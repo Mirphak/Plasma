@@ -60,15 +60,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "hsThread.h"
 #include "hsTemplates.h"
 #include "hsTimer.h"
+#include "hsWindows.h"
 #include "plStatusLog.h"
 #include "plUnifiedTime/plUnifiedTime.h"
 #include "plProduct.h"
 
 #include "plEncryptLogLine.h"
 
-#if HS_BUILD_FOR_WIN32
-    #include <Shlobj.h>
-#endif
 
 //////////////////////////////////////////////////////////////////////////////
 //// plStatusLogMgr Stuff ////////////////////////////////////////////////////
@@ -136,7 +134,7 @@ plStatusLog *plStatusLogMgr::CreateStatusLog( uint8_t numDisplayLines, const plF
     plStatusLog** nextLog = &fDisplays;
     while (*nextLog)
     {
-        if (filename.AsString().CompareI((*nextLog)->GetFileName().AsString()) <= 0)
+        if (filename.AsString().compare_i((*nextLog)->GetFileName().AsString()) <= 0)
             break;
         nextLog = &(*nextLog)->fNext;
     }
@@ -208,7 +206,7 @@ plStatusLog *plStatusLogMgr::FindLog( const plFileName &filename, bool createIfN
 
     while( log != nil )
     {
-        if (log->GetFileName().AsString().CompareI(filename.AsString()) == 0)
+        if (log->GetFileName().AsString().compare_i(filename.AsString()) == 0)
             return log;
 
         log = log->fNext;
@@ -277,14 +275,14 @@ plStatusLog::plStatusLog( uint8_t numDisplayLines, const plFileName &filename, u
     if (filename.IsValid())
     {
         fFilename = filename;
-        fSema = new hsSemaphore(1, fFilename.AsString().c_str());
+        fSema = new hsGlobalSemaphore(1, fFilename.AsString().c_str());
     }
     else
     {
         fFilename = "";
         flags |= kDontWriteFile;
 
-        fSema = new hsSemaphore(1);
+        fSema = new hsGlobalSemaphore(1);
     }
 
     fOrigFlags = fFlags = flags;
@@ -328,17 +326,17 @@ bool plStatusLog::IReOpen( void )
     if(!(fFlags & kDontWriteFile))
     {
         plFileName fileNoExt;
-        plString ext;
+        ST::string ext;
         IParseFileName(fileNoExt, ext);
-        plFileName fileToOpen = plString::Format("%s.0.%s", fileNoExt.AsString().c_str(), ext.c_str());
+        plFileName fileToOpen = ST::format("{}.0.{}", fileNoExt, ext);
         if (!(fFlags & kDontRotateLogs))
         {
             plFileName work, work2;
-            work = plString::Format("%s.3.%s", fileNoExt.AsString().c_str(), ext.c_str());
+            work = ST::format("{}.3.{}", fileNoExt, ext);
             plFileSystem::Unlink(work);
-            work2 = plString::Format("%s.2.%s", fileNoExt.AsString().c_str(), ext.c_str());
+            work2 = ST::format("{}.2.{}", fileNoExt, ext);
             plFileSystem::Move(work2, work);
-            work = plString::Format("%s.1.%s", fileNoExt.AsString().c_str(), ext.c_str());
+            work = ST::format("{}.1.{}", fileNoExt, ext);
             plFileSystem::Move(work, work2);
             plFileSystem::Move(fileToOpen, work);
         }
@@ -389,7 +387,7 @@ void    plStatusLog::IFini( void )
     delete [] fColors;
 }
 
-void plStatusLog::IParseFileName(plFileName& fileNoExt, plString& ext) const
+void plStatusLog::IParseFileName(plFileName& fileNoExt, ST::string& ext) const
 {
     plFileName base = plStatusLogMgr::IGetBasePath();
     plFileName file;
@@ -496,6 +494,23 @@ bool plStatusLog::IAddLine( const char *line, int32_t count, uint32_t color )
 }
 
 //// AddLine /////////////////////////////////////////////////////////////////
+
+bool plStatusLog::AddLine(const ST::string& line)
+{
+    if (fLoggingOff && !fForceLog) {
+        return true;
+    }
+
+    bool ret = true;
+    std::vector<ST::string> lines = line.split('\n');
+
+    for (const ST::string& str : lines)
+    {
+        ret &= IAddLine(str.c_str(), -1, kWhite);
+    }
+
+    return ret;
+}
 
 bool plStatusLog::AddLine( const char *line, uint32_t color )
 {
@@ -678,7 +693,7 @@ bool plStatusLog::IPrintLineToFile( const char *line, uint32_t count )
             }
             if (fFlags & kThreadID)
             {
-                snprintf(work, arrsize(work), "[t=%lu] ", hsThread::GetMyThreadId());
+                snprintf(work, arrsize(work), "[t=%lu] ", hsThread::ThisThreadHash());
                 strncat(buf, work, arrsize(work));
             }
 
@@ -715,21 +730,22 @@ bool plStatusLog::IPrintLineToFile( const char *line, uint32_t count )
 
     }
 
-    if ( fFlags & kDebugOutput )
+    ST::string out_str = ST::string::from_utf8(line, count) + "\n";
+    if (fFlags & kDebugOutput)
     {
+
 #if HS_BUILD_FOR_WIN32
 #ifndef PLASMA_EXTERNAL_RELEASE
-        plString str = plString::Format( "%.*s\n", count, line );
-        OutputDebugString( str.c_str() );
+        OutputDebugString(out_str.c_str());
 #endif
 #else
-        fprintf( stderr, "%.*s\n", count, line );
+        fputs(out_str.c_str(), stderr);
 #endif
     }
 
-    if ( fFlags & kStdout )
+    if (fFlags & kStdout)
     {
-        fprintf( stdout, "%.*s\n", count, line );
+        fputs(out_str.c_str(), stdout);
     }
 
     return ret;

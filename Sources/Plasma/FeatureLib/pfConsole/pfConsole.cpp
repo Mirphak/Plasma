@@ -45,30 +45,30 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //                                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
-#include "pfPython/cyPythonInterface.h"
-
-#include "HeadSpin.h"
 #include "pfConsole.h"
 #include "pfConsoleCore/pfConsoleEngine.h"
-#include "plPipeline/plDebugText.h"
+
+#include "HeadSpin.h"
+#include "plFileSystem.h"
+#include "plgDispatch.h"
+#include "plPipeline.h"
+#include "plProduct.h"
+#include "hsTimer.h"
+
+#include "plGImage/plPNG.h"
 #include "plInputCore/plInputDevice.h"
 #include "plInputCore/plInputInterface.h"
 #include "plInputCore/plInputInterfaceMgr.h"
-#include "pnInputCore/plKeyMap.h"
 #include "pnInputCore/plKeyDef.h"
+#include "pnInputCore/plKeyMap.h"
+#include "pnKeyedObject/plFixedKey.h"
 #include "plMessage/plInputEventMsg.h"
+#include "plMessage/plCaptureRenderMsg.h"
 #include "plMessage/plConsoleMsg.h"
 #include "plMessage/plInputIfaceMgrMsg.h"
-#include "pnKeyedObject/plFixedKey.h"
-#include "hsTimer.h"
-#include "plgDispatch.h"
-#include "plPipeline.h"
-
 #include "plNetClient/plNetClientMgr.h"
-
-#ifndef PLASMA_EXTERNAL_RELEASE
-#include "pfGameMgr/pfGameMgr.h"
-#endif // PLASMA_EXTERNAL_RELEASE
+#include "plPipeline/plDebugText.h"
+#include "pfPython/cyPythonInterface.h"
 
 
 //// Static Class Stuff //////////////////////////////////////////////////////
@@ -205,10 +205,6 @@ pfConsole::~pfConsole()
 
     plgDispatch::Dispatch()->UnRegisterForExactType( plConsoleMsg::Index(), GetKey() );
     plgDispatch::Dispatch()->UnRegisterForExactType( plControlEventMsg::Index(), GetKey() );
-
-#ifndef PLASMA_EXTERNAL_RELEASE 
-    pfGameMgr::GetInstance()->RemoveReceiver(GetKey());
-#endif // PLASMA_EXTERNAL_RELEASE
 }
 
 pfConsole * pfConsole::GetInstance () {
@@ -248,10 +244,6 @@ void    pfConsole::Init( pfConsoleEngine *engine )
     // Register for keyboard event messages
     plgDispatch::Dispatch()->RegisterForExactType( plConsoleMsg::Index(), GetKey() );
     plgDispatch::Dispatch()->RegisterForExactType( plControlEventMsg::Index(), GetKey() );
-
-#ifndef PLASMA_EXTERNAL_RELEASE 
-    pfGameMgr::GetInstance()->AddReceiver(GetKey());
-#endif // PLASMA_EXTERNAL_RELEASE
 }
 
 //// ISetMode ////////////////////////////////////////////////////////////////
@@ -266,8 +258,42 @@ void    pfConsole::ISetMode( uint8_t mode )
 
 //// MsgReceive //////////////////////////////////////////////////////////////
 
+#include <algorithm>
 bool    pfConsole::MsgReceive( plMessage *msg )
 {
+    // Handle screenshot saving...
+    plCaptureRenderMsg* capMsg = plCaptureRenderMsg::ConvertNoRef(msg);
+    if (capMsg) {
+        plFileName screenshots = plFileName::Join(plFileSystem::GetUserDataPath(), "Screenshots");
+        plFileSystem::CreateDir(screenshots, false); // just in case...
+        ST::string prefix = plProduct::ShortName();
+
+        // List all of the PNG indices we have taken up already...
+        ST::string pattern = ST::format("{}*.png", prefix);
+        std::vector<plFileName> images = plFileSystem::ListDir(screenshots, pattern.c_str());
+        std::set<uint32_t> indices;
+        std::for_each(images.begin(), images.end(),
+            [&] (const plFileName& fn) {
+                ST::string idx = fn.GetFileNameNoExt().substr(prefix.size());
+                indices.insert(idx.to_uint(10));
+            }
+        );
+
+        // Now that we have an ordered set of indices, save this screenshot to the first one we don't have.
+        uint32_t num = 0;
+        for (auto it = indices.begin(); it != indices.end(); ++it, ++num) {
+            if (*it != num)
+                break;
+        }
+
+        // Got our num, save the screenshot.
+        plFileName fn = ST::format("{}{04}.png", prefix, num);
+        plPNG::Instance().WriteToFile(plFileName::Join(screenshots, fn), capMsg->GetMipmap());
+
+        AddLineF("Saved screenshot as '%s'", fn.AsString().c_str());
+        return true;
+    }
+
     plControlEventMsg *ctrlMsg = plControlEventMsg::ConvertNoRef( msg );
     if( ctrlMsg != nil )
     {
@@ -288,246 +314,34 @@ bool    pfConsole::MsgReceive( plMessage *msg )
             {
                 // Change the following line once we have a better way of reporting
                 // errors in the parsing
-                static char str[ 256 ];
-                static char msg[ 1024 ];
-
-                sprintf( str, "Error parsing %s", cmd->GetString() );
-                sprintf( msg, "%s:\n\nCommand: '%s'\n%s", fEngine->GetErrorMsg(), fEngine->GetLastErrorLine(),
+                ST::string str = ST::format("Error parsing {}", cmd->GetString());
+                ST::string msg = ST::format("{}:\n\nCommand: '{}'\n{}", fEngine->GetErrorMsg(), fEngine->GetLastErrorLine(),
 #ifdef HS_DEBUGGING
                         "" );
 
-                hsAssert( false, msg );
+                hsAssert( false, msg.c_str() );
 #else
                         "\nPress OK to continue parsing files." );
 
-                hsMessageBox( msg, str, hsMessageBoxNormal );
+                hsMessageBox( msg.c_str(), str.c_str(), hsMessageBoxNormal );
 #endif
             }
         }
         else if( cmd->GetCmd() == plConsoleMsg::kAddLine )
-            IAddParagraph( (char *)cmd->GetString() );
+            IAddParagraph( cmd->GetString() );
         else if( cmd->GetCmd() == plConsoleMsg::kExecuteLine )
         {
             if( !fEngine->RunCommand( (char *)cmd->GetString(), IAddLineCallback ) )
             {
                 // Change the following line once we have a better way of reporting
                 // errors in the parsing
-                static char msg[ 1024 ];
-
-                sprintf( msg, "%s:\n\nCommand: '%s'\n", fEngine->GetErrorMsg(), fEngine->GetLastErrorLine() );
-                IAddLineCallback( msg ); 
+                AddLineF("%s:\n\nCommand: '%s'\n", fEngine->GetErrorMsg(), fEngine->GetLastErrorLine());
             }
         }
             
         return true;
     }
 
-
-    //========================================================================
-    // pfGameMgrMsg
-#ifndef PLASMA_EXTERNAL_RELEASE
-    if (pfGameMgrMsg * gameMgrMsg = pfGameMgrMsg::ConvertNoRef(msg)) {
-
-        switch (gameMgrMsg->netMsg->messageId) {
-
-            //================================================================
-            // InviteReceived           
-            case kSrv2Cli_GameMgr_InviteReceived: {
-                const Srv2Cli_GameMgr_InviteReceived & gmMsg = *(const Srv2Cli_GameMgr_InviteReceived *)gameMgrMsg->netMsg;
-                const plString & inviterName = plNetClientMgr::GetInstance()->GetPlayerNameById(gmMsg.inviterId);
-                AddLineF("[GameMgr] Invite received: %S, %u. Inviter: %s", pfGameMgr::GetInstance()->GetGameNameByTypeId(gmMsg.gameTypeId), gmMsg.newGameId, inviterName.c_str("<Unknown>"));
-            }
-            return true;
-
-            //================================================================
-            // InviteRevoked            
-            case kSrv2Cli_GameMgr_InviteRevoked: {
-                const Srv2Cli_GameMgr_InviteRevoked & gmMsg = *(const Srv2Cli_GameMgr_InviteRevoked *)gameMgrMsg->netMsg;
-                const plString & inviterName = plNetClientMgr::GetInstance()->GetPlayerNameById(gmMsg.inviterId);
-                AddLineF("[GameMgr] Invite revoked: %S, %u. Inviter: %s", pfGameMgr::GetInstance()->GetGameNameByTypeId(gmMsg.gameTypeId), gmMsg.newGameId, inviterName.c_str("<Unknown>"));
-            }
-            return true;
-            
-            DEFAULT_FATAL(gameMgrMsg->netMsg->messageId);
-        };
-    }
-#endif // PLASMA_EXTERNAL_RELEASE
-    //========================================================================
-    
-    //========================================================================
-    // pfGameCliMsg
-#ifndef PLASMA_EXTERNAL_RELEASE
-    if (pfGameCliMsg * gameCliMsg = pfGameCliMsg::ConvertNoRef(msg)) {
-    
-        pfGameCli * cli = gameCliMsg->gameCli;
-    
-        //====================================================================
-        // Handle pfGameCli msgs
-        switch (gameCliMsg->netMsg->messageId) {
-            //================================================================
-            // PlayerJoined
-            case kSrv2Cli_Game_PlayerJoined: {
-                const Srv2Cli_Game_PlayerJoined & netMsg = *(const Srv2Cli_Game_PlayerJoined *)gameCliMsg->netMsg;
-                AddLineF(
-                    "[Game %s:%u] Player joined: %s",
-                    cli->GetName(),
-                    cli->GetGameId(),
-                    netMsg.playerId
-                        ? plNetClientMgr::GetInstance()->GetPlayerNameById(netMsg.playerId).c_str()
-                        : "Computer"
-                );
-            }
-            return true;
-
-            //================================================================
-            // PlayerLeft
-            case kSrv2Cli_Game_PlayerLeft: {
-                const Srv2Cli_Game_PlayerLeft & netMsg = *(const Srv2Cli_Game_PlayerLeft *)gameCliMsg->netMsg;
-                AddLineF(
-                    "[Game %s:%u] Player left: %s",
-                    cli->GetName(),
-                    cli->GetGameId(),
-                    netMsg.playerId
-                        ? plNetClientMgr::GetInstance()->GetPlayerNameById(netMsg.playerId).c_str()
-                        : "Computer"
-                );
-            }
-            return true;
-            
-            //================================================================
-            // InviteFailed
-            case kSrv2Cli_Game_InviteFailed: {
-                const Srv2Cli_Game_InviteFailed & netMsg = *(const Srv2Cli_Game_InviteFailed *)gameCliMsg->netMsg;
-                AddLineF(
-                    "[Game %s:%u] Invite failed for playerId %u, error %u",
-                    cli->GetName(),
-                    cli->GetGameId(),
-                    netMsg.inviteeId,
-                    netMsg.error
-                );
-            }
-            return true;
-
-            //================================================================
-            // OwnerChange
-            case kSrv2Cli_Game_OwnerChange: {
-                const Srv2Cli_Game_OwnerChange & netMsg = *(const Srv2Cli_Game_OwnerChange *)gameCliMsg->netMsg;
-                AddLineF(
-                    "[Game %s:%u] Owner changed to playerId %u",
-                    cli->GetName(),
-                    cli->GetGameId(),
-                    netMsg.ownerId
-                );
-            }
-            return true;
-        }
-
-        //====================================================================
-        // Handle Tic-Tac-Toe msgs
-        if (gameCliMsg->gameCli->GetGameTypeId() == kGameTypeId_TicTacToe) {
-        
-            pfGmTicTacToe * ttt = pfGmTicTacToe::ConvertNoRef(cli);
-            ASSERT(ttt);
-            
-            switch (gameCliMsg->netMsg->messageId) {
-                //============================================================
-                // GameStarted
-                case kSrv2Cli_TTT_GameStarted: {
-                    const Srv2Cli_TTT_GameStarted & netMsg = *(const Srv2Cli_TTT_GameStarted *)gameCliMsg->netMsg;
-                    if (netMsg.yourTurn)
-                        AddLineF(
-                            "[Game %s:%u] Game started. You are X's. You go first.",
-                            cli->GetName(),
-                            cli->GetGameId()
-                        );
-                    else
-                        AddLineF(
-                            "[Game %s:%u] Game started. You are O's. Other player goes first.",
-                            cli->GetName(),
-                            cli->GetGameId()
-                        );
-                    ttt->ShowBoard();
-                }
-                return true;
-
-                //============================================================
-                // GameOver
-                case kSrv2Cli_TTT_GameOver: {
-                    const Srv2Cli_TTT_GameOver & netMsg = *(const Srv2Cli_TTT_GameOver *)gameCliMsg->netMsg;
-                    switch (netMsg.result) {
-                        case kTTTGameResultWinner:
-                            if (netMsg.winnerId == NetCommGetPlayer()->playerInt)
-                                AddLineF(
-                                    "[Game %s:%u] Game over. You won!",
-                                    cli->GetName(),
-                                    cli->GetGameId()
-                                );
-                            else
-                                AddLineF(
-                                    "[Game %s:%u] Game over. You lost.",
-                                    cli->GetName(),
-                                    cli->GetGameId()
-                                );
-                        break;
-                        
-                        case kTTTGameResultTied:
-                            AddLineF(
-                                "[Game %s:%u] Game over. You tied.",
-                                cli->GetName(),
-                                cli->GetGameId()
-                            );
-                        break;
-                        
-                        case kTTTGameResultGave:
-                            AddLineF(
-                                "[Game %s:%u] Game over. You win by default.",
-                                cli->GetName(),
-                                cli->GetGameId()
-                            );
-                        break;
-                            
-                        default:
-                            AddLineF(
-                                "[Game %s:%u] Game over. Server-side error %u.",
-                                cli->GetName(),
-                                cli->GetGameId(),
-                                netMsg.result
-                            );
-                        break;
-                    }
-                }
-                return true;
-                
-                //============================================================
-                // MoveMade
-                case kSrv2Cli_TTT_MoveMade: {
-                    const Srv2Cli_TTT_MoveMade & netMsg = *(const Srv2Cli_TTT_MoveMade *)gameCliMsg->netMsg;
-                    const char * playerName
-                        = netMsg.playerId
-                            ? plNetClientMgr::GetInstance()->GetPlayerNameById(netMsg.playerId).c_str()
-                            : "Computer";
-                    AddLineF(
-                        "[Game %s:%u] %s moved:",
-                        cli->GetName(),
-                        cli->GetGameId(),
-                        playerName
-                    );
-                    ttt->ShowBoard();
-                }
-                return true;
-                
-                DEFAULT_FATAL(gameCliMsg->netMsg->messageId);
-            }
-        }
-        else {
-            FATAL("Unknown game type");
-        }
-        
-        return true;
-    }
-#endif // PLASMA_EXTERNAL_RELEASE
-    //========================================================================
-    
     return hsKeyedObject::MsgReceive(msg);
 }
 
@@ -756,9 +570,7 @@ void    pfConsole::IHandleKey( plKeyEventMsg *msg )
                 // if there was a line then bump num lines
                 if ( fWorkingLine[0] != 0 )
                 {
-                    char displine[300];
-                    sprintf(displine,"... %s",fWorkingLine);
-                    AddLine( displine );
+                    AddLineF("... %s", fWorkingLine);
                     fPythonMultiLines++;
                 }
 
@@ -796,9 +608,7 @@ void    pfConsole::IHandleKey( plKeyEventMsg *msg )
                 // was there actually anything in the input buffer?
                 if ( fWorkingLine[0] != 0 )
                 {
-                    char displine[300];
-                    sprintf(displine,">>> %s",fWorkingLine);
-                    AddLine( displine );
+                    AddLineF(">>> %s", fWorkingLine);
                     // check to see if this is going to be a multi line mode ( a ':' at the end)
                     if ( fWorkingLine[eol-1] == ':' )
                     {
@@ -997,8 +807,8 @@ void    pfConsole::Draw( plPipeline *p )
 
 
     plDebugText&    drawText = plDebugText::Instance();
-    
-    thisTime = (float)hsTimer::PrecTicksToSecs( hsTimer::GetPrecTickCount() );
+
+    thisTime = hsTimer::GetSeconds<float>();
 
     if( fMode == kModeHidden && fEffectCounter == 0 )
     {

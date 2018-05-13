@@ -55,7 +55,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plgDispatch.h"
 
 #include "plAgeLoader/plAgeLoader.h"
-#include "plNetClient/plNetObjectDebugger.h"
+#include "plNetCommon/plNetObjectDebugger.h"
 #include "plNetClient/plNetClientMgr.h"
 #include "plNetClient/plNetLinkingMgr.h"
 #include "plAgeLoader/plResPatcher.h"
@@ -64,7 +64,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pnKeyedObject/plKey.h"
 #include "pnKeyedObject/plKeyImp.h"
 #include "pnModifier/plLogicModBase.h"
-#include "pfCharacter/plPlayerModifier.h"
 #include "hsTimer.h"
 #include "pnMessage/plClientMsg.h"
 #include "pnMessage/plEnableMsg.h"
@@ -95,8 +94,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plSDL/plSDL.h"
 
 #include "plNetGameLib/plNetGameLib.h"
-
-#include "pfGameMgr/pfGameMgr.h"
 
 
 #define PF_SANITY_CHECK( cond, msg ) { if( !( cond ) ) { PrintString( msg ); return; } }
@@ -194,9 +191,9 @@ PF_CONSOLE_FILE_DUMMY(Net)
 // utility functions
 //
 //////////////////////////////////////////////////////////////////////////////
-plKey FindSceneObjectByName(const plString& name, const plString& ageName, char* statusStr, bool subString=false);
-plKey FindObjectByName(const plString& name, int type, const plString& ageName, char* statusStr, bool subString=false);
-plKey FindObjectByNameAndType(const plString& name, const char* typeName, const plString& ageName,
+plKey FindSceneObjectByName(const ST::string& name, const ST::string& ageName, char* statusStr, bool subString=false);
+plKey FindObjectByName(const ST::string& name, int type, const ST::string& ageName, char* statusStr, bool subString=false);
+plKey FindObjectByNameAndType(const ST::string& name, const char* typeName, const ST::string& ageName,
                                char* statusStr, bool subString=false);
 void PrintStringF(void pfun(const char *),const char * fmt, ...);
 
@@ -227,12 +224,12 @@ PF_CONSOLE_CMD( Net,        // groupName
                "broadcast chat msg" )   // helpString
 {
     // send chat text
-    plString text=plNetClientMgr::GetInstance()->GetPlayerName();
+    ST::string text=plNetClientMgr::GetInstance()->GetPlayerName();
     text += ":";
     int i;
     for(i=0;i<numParams;i++)
     {
-        text += plString::FromUtf8( (char*)params[i] );
+        text += ST::string::from_utf8( (char*)params[i] );
         text += " ";
     }
     plConsoleMsg    *cMsg = new plConsoleMsg( plConsoleMsg::kAddLine, text.c_str() );
@@ -336,7 +333,7 @@ PF_CONSOLE_CMD( Net,        // groupName
                "Link to an age." )  // helpString
 {   
     plAgeLinkStruct link;
-    link.GetAgeInfo()->SetAgeFilename( params[0] );
+    link.GetAgeInfo()->SetAgeFilename( (const char *)params[0] );
     link.SetLinkingRules( plNetCommon::LinkingRules::kBasicLink );
     plNetLinkingMgr::GetInstance()->LinkToAge( &link );
     PrintString("Linking to age...");
@@ -350,7 +347,7 @@ PF_CONSOLE_CMD( Net,        // groupName
                "Link to a specific age by guid." )  // helpString
 {   
     plAgeLinkStruct link;
-    link.GetAgeInfo()->SetAgeFilename( params[0] );
+    link.GetAgeInfo()->SetAgeFilename( (const char *)params[0] );
     //link.GetAgeInfo()->SetAgeInstanceName( params[0] );
     //link.GetAgeInfo()->SetAgeUserDefinedName( params[0] );
     plUUID guid( (const char *)params[1] );
@@ -375,7 +372,7 @@ PF_CONSOLE_CMD( Net,
                "Link to specified age using Original Age Linking Book rules" )
 {
     plAgeLinkStruct link;
-    link.GetAgeInfo()->SetAgeFilename( params[0] );
+    link.GetAgeInfo()->SetAgeFilename( (const char *)params[0] );
     link.SpawnPoint() = plSpawnPointInfo( (const char *)params[1], (const char *)params[1] );
     link.SetLinkingRules( plNetCommon::LinkingRules::kOriginalBook );
     plNetLinkingMgr::GetInstance()->LinkToAge( &link );
@@ -388,7 +385,7 @@ PF_CONSOLE_CMD( Net,
                "Link to specified age using Personal Age Linking Book rules" )
 {
     plAgeLinkStruct link;
-    link.GetAgeInfo()->SetAgeFilename( params[0] );
+    link.GetAgeInfo()->SetAgeFilename( (const char *)params[0] );
     link.SetLinkingRules( plNetCommon::LinkingRules::kOwnedBook );
     plNetLinkingMgr::GetInstance()->LinkToAge( &link );
     PrintString("Linking to age I own...");
@@ -400,7 +397,7 @@ PF_CONSOLE_CMD( Net,
                "Link to specified age using Personal Age Linking Book rules" )
 {
     plAgeLinkStruct link;
-    link.GetAgeInfo()->SetAgeFilename( params[0] );
+    link.GetAgeInfo()->SetAgeFilename( (const char *)params[0] );
     link.SetLinkingRules( plNetCommon::LinkingRules::kVisitBook );
     plNetLinkingMgr::GetInstance()->LinkToAge( &link );
     PrintString("Linking to age I can visit...");
@@ -412,7 +409,7 @@ PF_CONSOLE_CMD( Net,
                "Link to a sub-age of the current age" )
 {
     plAgeLinkStruct link;
-    link.GetAgeInfo()->SetAgeFilename( params[0] );
+    link.GetAgeInfo()->SetAgeFilename( (const char *)params[0] );
     link.SetLinkingRules( plNetCommon::LinkingRules::kSubAgeBook );
     plNetLinkingMgr::GetInstance()->LinkToAge( &link );
     PrintString("Linking to a sub-age...");
@@ -481,7 +478,7 @@ PF_CONSOLE_CMD( Net,
     plNetLinkingMgr * lm = plNetLinkingMgr::GetInstance();
 
     plAgeInfoStruct info;
-    info.SetAgeFilename( params[0] );
+    info.SetAgeFilename( (const char *)params[0] );
     
     plAgeLinkStruct link;
     if (!VaultGetOwnedAgeLink(&info, &link)) {
@@ -545,7 +542,7 @@ PF_CONSOLE_CMD( Net,        // groupName
                "returns the age of the age" )   // helpString
 {
     PrintStringF(PrintString, "Current age is %s, elapsed time since birth = %f secs", 
-        NetCommGetAge()->ageDatasetName, plNetClientMgr::GetInstance()->GetCurrentAgeElapsedSeconds());
+        NetCommGetAge()->ageDatasetName.c_str(), plNetClientMgr::GetInstance()->GetCurrentAgeElapsedSeconds());
 }
 
 PF_CONSOLE_CMD( Net, DownloadViaManifest,
@@ -790,11 +787,7 @@ PF_CONSOLE_CMD( Net_Vault,
                "string stationName, string mtSpawnPt",
                "Register an MT Station with your Nexus" )
 {
-    wchar_t wName[MAX_PATH];
-    wchar_t wObj[MAX_PATH];
-    StrToUnicode(wName, params[0], arrsize(wName));
-    StrToUnicode(wObj, params[1], arrsize(wObj));
-    VaultRegisterMTStationAndWait ( wName, wObj );
+    VaultRegisterMTStationAndWait((char*)params[0], (char*)params[1]);
     PrintString("Registered MT Station.");
 }
 
@@ -806,8 +799,8 @@ PF_CONSOLE_CMD( Net_Vault,
                "Add an instance of the specified age to your bookshelf" )
 {
     plAgeLinkStruct link;
-    link.GetAgeInfo()->SetAgeFilename( params[0] );
-    link.GetAgeInfo()->SetAgeInstanceName( params[0] );
+    link.GetAgeInfo()->SetAgeFilename( (const char *)params[0] );
+    link.GetAgeInfo()->SetAgeInstanceName( (const char *)params[0] );
     plUUID guid = plUUID::Generate();
     link.GetAgeInfo()->SetAgeInstanceGuid( &guid);
     link.SetSpawnPoint( kDefaultSpawnPoint );
@@ -822,7 +815,7 @@ PF_CONSOLE_CMD( Net_Vault,
                "Remove the specified age from your bookshelf" )
 {
     plAgeInfoStruct info;
-    info.SetAgeFilename( params[0] );
+    info.SetAgeFilename( (const char *)params[0] );
     bool success = VaultUnregisterOwnedAgeAndWait(&info);
     PrintStringF(PrintString, "Operation %s.", success ? "Successful" : "Failed");
 }
@@ -834,8 +827,8 @@ PF_CONSOLE_CMD( Net_Vault,
                "Add an instance of the specified age to your private links" )
 {
     plAgeLinkStruct link;
-    link.GetAgeInfo()->SetAgeFilename( params[0] );
-    link.GetAgeInfo()->SetAgeInstanceName( params[0] );
+    link.GetAgeInfo()->SetAgeFilename( (const char *)params[0] );
+    link.GetAgeInfo()->SetAgeInstanceName( (const char *)params[0] );
     plUUID guid = plUUID::Generate();
     link.GetAgeInfo()->SetAgeInstanceGuid( &guid);
     link.SetSpawnPoint( kDefaultSpawnPoint );
@@ -850,7 +843,7 @@ PF_CONSOLE_CMD( Net_Vault,
                "Remove all instances of the specified age from your private links" )
 {
     plAgeInfoStruct info;
-    info.SetAgeFilename( params[0] );
+    info.SetAgeFilename( (const char *)params[0] );
 
     unsigned count = 0;
     while (VaultUnregisterVisitAgeAndWait(&info))
@@ -861,208 +854,3 @@ PF_CONSOLE_CMD( Net_Vault,
 
 #endif
 
-/*****************************************************************************
-*
-*   GameMgr
-*
-***/
-
-#ifndef LIMIT_CONSOLE_COMMANDS
-
-//============================================================================
-// GameMgr group
-PF_CONSOLE_GROUP(GameMgr)
-
-//============================================================================
-PF_CONSOLE_CMD(
-    GameMgr,
-    ListGames,
-    "",
-    "List all games we're currently playing"
-) {
-    ARRAY(unsigned) arr;
-    pfGameMgr::GetInstance()->GetGameIds(&arr);
-    PrintStringF(PrintString, "You are playing %u games", arr.Count());
-    for (unsigned i = 0; i < arr.Count(); ++i) {
-        pfGameCli * game = pfGameMgr::GetInstance()->GetGameCli(arr[i]);
-        PrintStringF(PrintString, "%u: Game %u, %s", i, arr[i], game->ClassName());
-    }
-}
-
-//============================================================================
-PF_CONSOLE_CMD(
-    GameMgr,
-    JoinGame,
-    "int gameId",
-    "Join the specified game of tic-tac-toe."
-) {
-    unsigned gameId = (int)params[0];
-
-    pfGameMgr::GetInstance()->JoinGame(
-        pfConsole::GetInstance()->GetKey(),
-        gameId
-    );
-}
-
-
-//============================================================================
-// GameMgr.TicTacToe group
-PF_CONSOLE_SUBGROUP(GameMgr, TicTacToe)
-
-//============================================================================
-PF_CONSOLE_CMD(
-    GameMgr_TicTacToe,
-    CreateGame,
-    "int numPlayers",
-    "Create a new game of tic-tac-toe. numPlayers in [1..2]"
-) {
-    TTT_CreateParam init;
-    init.playerCount = (int)params[0];
-    
-    unsigned createOptions = 0;
-
-    pfGameMgr::GetInstance()->CreateGame(
-        pfConsole::GetInstance()->GetKey(),
-        kGameTypeId_TicTacToe,
-        createOptions,
-        sizeof(init),
-        &init
-    );
-}
-
-//============================================================================
-PF_CONSOLE_CMD(
-    GameMgr_TicTacToe,
-    JoinCommonGame,
-    "",
-    "Join the common game of tic-tac-toe."
-) {
-    TTT_CreateParam init;
-    init.playerCount = 2;
-
-    unsigned gameNumber = 1;
-
-    pfGameMgr::GetInstance()->JoinCommonGame(
-        pfConsole::GetInstance()->GetKey(),
-        kGameTypeId_TicTacToe,
-        gameNumber,
-        sizeof(init),
-        &init
-    );
-}
-
-//============================================================================
-PF_CONSOLE_CMD(
-    GameMgr_TicTacToe,
-    MakeMove,
-    "int gameId, int row, int col",
-    "Make your move. row and col in [0..2]"
-) {
-    pfGameCli * game = pfGameMgr::GetInstance()->GetGameCli((int)params[0]);
-    if (!game) {
-        PrintStringF(PrintString, "Game %u not found", (int)params[0]);
-        return;
-    }
-    pfGmTicTacToe * ttt = pfGmTicTacToe::ConvertNoRef(game);
-    if (!ttt) {
-        PrintStringF(PrintString, "Game %u is not a game of tie-tac-toe", (int)params[0]);
-        return;
-    }
-    
-    unsigned row = (int)params[1];
-    unsigned col = (int)params[2];
-    
-    ttt->MakeMove(row, col);
-}
-
-//============================================================================
-PF_CONSOLE_CMD(
-    GameMgr_TicTacToe,
-    ShowBoard,
-    "int gameId",
-    "Show the game board"
-) {
-    pfGameCli * game = pfGameMgr::GetInstance()->GetGameCli((int)params[0]);
-    if (!game) {
-        PrintStringF(PrintString, "Game %u not found", (int)params[0]);
-        return;
-    }
-    pfGmTicTacToe * ttt = pfGmTicTacToe::ConvertNoRef(game);
-    if (!ttt) {
-        PrintStringF(PrintString, "Game %u is not a game of tie-tac-toe", (int)params[0]);
-        return;
-    }
-    
-    ttt->ShowBoard();
-}
-
-//============================================================================
-PF_CONSOLE_CMD(
-    GameMgr_TicTacToe,
-    InvitePlayer,
-    "int gameId, string playerName",
-    "Invite a player to play tic-tac-toe with you"
-) {
-    pfGameCli * game = pfGameMgr::GetInstance()->GetGameCli((int)params[0]);
-    if (!game) {
-        PrintStringF(PrintString, "Game %u not found", (int)params[0]);
-        return;
-    }
-    pfGmTicTacToe * ttt = pfGmTicTacToe::ConvertNoRef(game);
-    if (!ttt) {
-        PrintStringF(PrintString, "Game %u is not a game of tie-tac-toe", (int)params[0]);
-        return;
-    }
-
-    if (unsigned playerId = plNetClientMgr::GetInstance()->GetPlayerIdByName(plString::FromUtf8((const char *)params[1]))) {
-        ttt->InvitePlayer(playerId);
-        PrintStringF(PrintString, "Sent invite to playerId %u", playerId);
-    }
-    else {
-        PrintStringF(PrintString, "Player %s not found in this age", (const char *)params[1]);
-    }
-}
-
-//============================================================================
-PF_CONSOLE_CMD(
-    GameMgr_TicTacToe,
-    Uninvite,
-    "int gameId, int playerId",
-    "Revoke an invitation to your game of tic-tac-toe"
-) {
-    pfGameCli * game = pfGameMgr::GetInstance()->GetGameCli((int)params[0]);
-    if (!game) {
-        PrintStringF(PrintString, "Game %u not found", (int)params[0]);
-        return;
-    }
-    pfGmTicTacToe * ttt = pfGmTicTacToe::ConvertNoRef(game);
-    if (!ttt) {
-        PrintStringF(PrintString, "Game %u is not a game of tie-tac-toe", (int)params[0]);
-        return;
-    }
-    
-    ttt->UninvitePlayer((int)params[1]);
-}
-
-//============================================================================
-PF_CONSOLE_CMD(
-    GameMgr_TicTacToe,
-    LeaveGame,
-    "int gameId",
-    "Abandon the game of tic-tac-toe"
-) {
-    pfGameCli * game = pfGameMgr::GetInstance()->GetGameCli((int)params[0]);
-    if (!game) {
-        PrintStringF(PrintString, "Game %u not found", (int)params[0]);
-        return;
-    }
-    pfGmTicTacToe * ttt = pfGmTicTacToe::ConvertNoRef(game);
-    if (!ttt) {
-        PrintStringF(PrintString, "Game %u is not a game of tie-tac-toe", (int)params[0]);
-        return;
-    }
-    
-    ttt->LeaveGame();
-}
-
-#endif

@@ -84,7 +84,7 @@ CLASS_INDEX_LIST_START
     CLASS_INDEX(plModifier),
     CLASS_INDEX(plSingleModifier),
     CLASS_INDEX(plSimpleModifier),
-    CLASS_INDEX(pfSecurePreloader),
+    CLASS_INDEX(UNUSED_pfSecurePreloader),
     CLASS_INDEX(UNUSED_plRandomTMModifier),
     CLASS_INDEX(plInterestingModifier),
     CLASS_INDEX(plDetectorModifier),
@@ -121,7 +121,7 @@ CLASS_INDEX_LIST_START
     CLASS_INDEX(plLayerAnimation),
     CLASS_INDEX(plLayerDepth),
     CLASS_INDEX(plLayerMovie),
-    CLASS_INDEX(plLayerBink),
+    CLASS_INDEX(UNUSED_plLayerBink),
     CLASS_INDEX(plLayerAVI),
     CLASS_INDEX(plSound),
     CLASS_INDEX(plWin32Sound),
@@ -367,6 +367,7 @@ CLASS_INDEX_LIST_START
     CLASS_INDEX(plDynamicCamMap),
     CLASS_INDEX(plRidingAnimatedPhysicalDetector),
     CLASS_INDEX(plVolumeSensorConditionalObjectNoArbitration),
+    CLASS_INDEX(plPXSubWorld),
 //---------------------------------------------------------
 // Keyed objects above this line, unkeyed (such as messages) below..
 //---------------------------------------------------------
@@ -725,7 +726,7 @@ CLASS_INDEX_LIST_START
     CLASS_INDEX(plAvBrainDrive),
     CLASS_INDEX(plAvBrainSample),
     CLASS_INDEX(plAvBrainGeneric),
-    CLASS_INDEX(plPreloaderMsg),
+    CLASS_INDEX(UNUSED_plPreloaderMsg),
     CLASS_INDEX(plAvBrainLadder),
     CLASS_INDEX(plInputIfaceMgrMsg),
     CLASS_INDEX(pfKIMsg),
@@ -951,6 +952,9 @@ CLASS_INDEX_LIST_START
     CLASS_INDEX(pfGameScoreListMsg),
     CLASS_INDEX(pfGameScoreTransferMsg),
     CLASS_INDEX(pfGameScoreUpdateMsg),
+    CLASS_INDEX(plLoadClothingMsg),
+    CLASS_INDEX(pl3DPipeline),
+    CLASS_INDEX(plGLPipeline),
 CLASS_INDEX_LIST_END
 
 #endif // plCreatableIndex_inc

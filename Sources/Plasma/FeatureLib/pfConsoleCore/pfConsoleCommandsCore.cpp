@@ -47,7 +47,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "pfConsoleCmd.h"
 #include "pnNetBase/pnNetBase.h"
-#include "pfUtilBase64.h"
+#include <string_theory/codecs>
 
 #include <algorithm>
 
@@ -66,7 +66,7 @@ void PrintStringF(void pfun(const char *),const char * fmt, ...)
 
     char buffy[512];
     va_start(args, fmt);
-    vsprintf(buffy, fmt, args);
+    vsnprintf(buffy, arrsize(buffy), fmt, args);
     va_end(args);
     pfun(buffy);
 }
@@ -89,7 +89,7 @@ PF_CONSOLE_CMD(
     "string url",
     "Set the server's status URL"
 ) {
-    SetServerStatusUrl(params[0]);
+    SetServerStatusUrl((char*)params[0]);
 }
 
 //============================================================================
@@ -99,7 +99,7 @@ PF_CONSOLE_CMD(
     "string url",
     "Set the server's new user sign-up URL"
 ) {
-    SetServerSignupUrl(params[0]);
+    SetServerSignupUrl((char*)params[0]);
 }
 
 //============================================================================
@@ -109,7 +109,17 @@ PF_CONSOLE_CMD(
     "string name",
     "Set the displayable server name"
 ) {
-    SetServerDisplayName(params[0]);
+    SetServerDisplayName((char*)params[0]);
+}
+
+//============================================================================
+PF_CONSOLE_CMD(
+    Server,
+    Port,
+    "int port",
+    "Set server's port"
+) {
+    SetClientPort((int)params[0]);
 }
 
 
@@ -124,7 +134,7 @@ PF_CONSOLE_CMD(
     "string address",
     "Set the File Server address"
 ) {
-    SetFileSrvHostname(params[0]);
+    SetFileSrvHostname((char*)params[0]);
 }
 
 
@@ -139,7 +149,7 @@ PF_CONSOLE_CMD(
     "string address",
     "Set the Auth Server address"
 ) {
-    SetAuthSrvHostname(params[0]);
+    SetAuthSrvHostname((char*)params[0]);
 }
 
 //============================================================================
@@ -149,15 +159,16 @@ PF_CONSOLE_CMD(
     "string base64Key",
     "Set the Auth Server N key"
 ) {
-    int baseLength = strlen((const char *)params[0]);
-    if ((kNetDiffieHellmanKeyBits / 8) != Base64DecodeSize(baseLength, (const char *)params[0])) {
+    ST::string base64key = ST::string::from_utf8(params[0]);
+    ST_ssize_t base64len = ST::base64_decode(base64key, nullptr, 0);
+    if ((kNetDiffieHellmanKeyBits / 8) != base64len) {
         PrintStringF(PrintString, "Invalid key: should be exactly %u bytes",
                      kNetDiffieHellmanKeyBits / 8);
         return;
     }
 
-    Base64Decode(strlen((const char *)params[0]), (const char *)params[0],
-                 kNetDiffieHellmanKeyBits / 8, kAuthDhNData);
+    ST_ssize_t bytes = ST::base64_decode(base64key, kAuthDhNData, sizeof(kAuthDhNData));
+    ASSERT(bytes >= 0);
 }
 
 //============================================================================
@@ -167,15 +178,26 @@ PF_CONSOLE_CMD(
     "string base64Key",
     "Set the Auth Server X key"
 ) {
-    int baseLength = strlen((const char *)params[0]);
-    if ((kNetDiffieHellmanKeyBits / 8) != Base64DecodeSize(baseLength, (const char *)params[0])) {
+    ST::string base64key = ST::string::from_utf8(params[0]);
+    ST_ssize_t base64len = ST::base64_decode(base64key, nullptr, 0);
+    if ((kNetDiffieHellmanKeyBits / 8) != base64len) {
         PrintStringF(PrintString, "Invalid key: should be exactly %u bytes",
                      kNetDiffieHellmanKeyBits / 8);
         return;
     }
 
-    Base64Decode(strlen((const char *)params[0]), (const char *)params[0],
-                 kNetDiffieHellmanKeyBits / 8, kAuthDhXData);
+    ST_ssize_t bytes = ST::base64_decode(base64key, kAuthDhXData, sizeof(kAuthDhXData));
+    ASSERT(bytes >= 0);
+}
+
+//============================================================================
+PF_CONSOLE_CMD(
+    Server_Auth,
+    G,
+    "int GValue",
+    "Set the Auth Server G value"
+    ) {
+    kAuthDhGValue = (int)params[0];
 }
 
 
@@ -190,15 +212,16 @@ PF_CONSOLE_CMD(
     "string base64Key",
     "Set the Game Server N key"
 ) {
-    int baseLength = strlen((const char *)params[0]);
-    if ((kNetDiffieHellmanKeyBits / 8) != Base64DecodeSize(baseLength, (const char *)params[0])) {
+    ST::string base64key = ST::string::from_utf8(params[0]);
+    ST_ssize_t base64len = ST::base64_decode(base64key, nullptr, 0);
+    if ((kNetDiffieHellmanKeyBits / 8) != base64len) {
         PrintStringF(PrintString, "Invalid key: should be exactly %u bytes",
                      kNetDiffieHellmanKeyBits / 8);
         return;
     }
 
-    Base64Decode(strlen((const char *)params[0]), (const char *)params[0],
-                 kNetDiffieHellmanKeyBits / 8, kGameDhNData);
+    ST_ssize_t bytes = ST::base64_decode(base64key, kGameDhNData, sizeof(kGameDhNData));
+    ASSERT(bytes >= 0);
 }
 
 //============================================================================
@@ -208,15 +231,26 @@ PF_CONSOLE_CMD(
     "string base64Key",
     "Set the Game Server X key"
 ) {
-    int baseLength = strlen((const char *)params[0]);
-    if ((kNetDiffieHellmanKeyBits / 8) != Base64DecodeSize(baseLength, (const char *)params[0])) {
+    ST::string base64key = ST::string::from_utf8(params[0]);
+    ST_ssize_t base64len = ST::base64_decode(base64key, nullptr, 0);
+    if ((kNetDiffieHellmanKeyBits / 8) != base64len) {
         PrintStringF(PrintString, "Invalid key: should be exactly %u bytes",
                      kNetDiffieHellmanKeyBits / 8);
         return;
     }
 
-    Base64Decode(strlen((const char *)params[0]), (const char *)params[0],
-                 kNetDiffieHellmanKeyBits / 8, kGameDhXData);
+    ST_ssize_t bytes = ST::base64_decode(base64key, kGameDhXData, sizeof(kGameDhXData));
+    ASSERT(bytes >= 0);
+}
+
+//============================================================================
+PF_CONSOLE_CMD(
+    Server_Game,
+    G,
+    "int GValue",
+    "Set the Game Server G value"
+    ) {
+    kGameDhGValue = (int)params[0];
 }
 
 
@@ -231,7 +265,7 @@ PF_CONSOLE_CMD(
     "string address",
     "Set the GateKeeper Server address"
 ) {
-    SetGateKeeperSrvHostname(params[0]);
+    SetGateKeeperSrvHostname((char*)params[0]);
 }
 
 //============================================================================
@@ -241,15 +275,16 @@ PF_CONSOLE_CMD(
     "string base64Key",
     "Set the GateKeeper Server N key"
 ) {
-    int baseLength = strlen((const char *)params[0]);
-    if ((kNetDiffieHellmanKeyBits / 8) != Base64DecodeSize(baseLength, (const char *)params[0])) {
+    ST::string base64key = ST::string::from_utf8(params[0]);
+    ST_ssize_t base64len = ST::base64_decode(base64key, nullptr, 0);
+    if ((kNetDiffieHellmanKeyBits / 8) != base64len) {
         PrintStringF(PrintString, "Invalid key: should be exactly %u bytes",
                      kNetDiffieHellmanKeyBits / 8);
         return;
     }
 
-    Base64Decode(strlen((const char *)params[0]), (const char *)params[0],
-                 kNetDiffieHellmanKeyBits / 8, kGateKeeperDhNData);
+    ST_ssize_t bytes = ST::base64_decode(base64key, kGateKeeperDhNData, sizeof(kGateKeeperDhNData));
+    ASSERT(bytes >= 0);
 }
 
 //============================================================================
@@ -259,13 +294,24 @@ PF_CONSOLE_CMD(
     "string base64Key",
     "Set the GateKeeper Server X key"
 ) {
-    int baseLength = strlen((const char *)params[0]);
-    if ((kNetDiffieHellmanKeyBits / 8) != Base64DecodeSize(baseLength, (const char *)params[0])) {
+    ST::string base64key = ST::string::from_utf8(params[0]);
+    ST_ssize_t base64len = ST::base64_decode(base64key, nullptr, 0);
+    if ((kNetDiffieHellmanKeyBits / 8) != base64len) {
         PrintStringF(PrintString, "Invalid key: should be exactly %u bytes",
                      kNetDiffieHellmanKeyBits / 8);
         return;
     }
 
-    Base64Decode(strlen((const char *)params[0]), (const char *)params[0],
-                 kNetDiffieHellmanKeyBits / 8, kGateKeeperDhXData);
+    ST_ssize_t bytes = ST::base64_decode(base64key, kGateKeeperDhXData, sizeof(kGateKeeperDhXData));
+    ASSERT(bytes >= 0);
+}
+
+//============================================================================
+PF_CONSOLE_CMD(
+    Server_Gate,
+    G,
+    "int GValue",
+    "Set the GateKeeper Server G value"
+    ) {
+    kGateKeeperDhGValue = (int)params[0];
 }

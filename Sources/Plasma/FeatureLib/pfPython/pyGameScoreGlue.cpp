@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#include "plString.h"
 #pragma hdrstop
 
 #include "pyGameScore.h"
@@ -74,7 +73,7 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptGameScore, getGameType)
 
 PYTHON_METHOD_DEFINITION_NOARGS(ptGameScore, getName)
 {
-    return PyUnicode_FromStringEx(self->fThis->GetGameName());
+    return PyUnicode_FromSTString(self->fThis->GetGameName());
 }
 
 PYTHON_METHOD_DEFINITION_NOARGS(ptGameScore, remove)
@@ -133,7 +132,7 @@ PYTHON_METHOD_DEFINITION(ptGameScore, setPoints, args)
 {
     int32_t numPoints = 0;
     PyObject* keyObj  = nil;
-    if (!PyArg_ParseTuple(args, "i|O", &numPoints))
+    if (!PyArg_ParseTuple(args, "i|O", &numPoints, &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "setPoints expects an int and an optional ptKey");
         PYTHON_RETURN_ERROR;
@@ -167,7 +166,7 @@ PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createAgeScore, args, kwargs)
         PYTHON_RETURN_ERROR;
     }
 
-    plString name = PyString_AsStringEx(nameObj);
+    ST::string name = PyString_AsStringEx(nameObj);
     pyKey*   rcvr = pyKey::ConvertFrom(keyObj);
     pyGameScore::CreateAgeScore(name, type, points, *rcvr);
     PYTHON_RETURN_NONE; // get result in callback
@@ -191,7 +190,7 @@ PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createGlobalScore, args, kwarg
         PYTHON_RETURN_ERROR;
     }
 
-    plString name = PyString_AsStringEx(nameObj);
+    ST::string name = PyString_AsStringEx(nameObj);
     pyKey*   rcvr = pyKey::ConvertFrom(keyObj);
     pyGameScore::CreateGlobalScore(name, type, points, *rcvr);
     PYTHON_RETURN_NONE; // get result in callback
@@ -215,7 +214,7 @@ PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createPlayerScore, args, kwarg
         PYTHON_RETURN_ERROR;
     }
 
-    plString name = PyString_AsStringEx(nameObj);
+    ST::string name = PyString_AsStringEx(nameObj);
     pyKey*   rcvr = pyKey::ConvertFrom(keyObj);
     pyGameScore::CreatePlayerScore(name, type, points, *rcvr);
     PYTHON_RETURN_NONE; // get result in callback
@@ -240,7 +239,7 @@ PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createScore, args, kwargs)
         PYTHON_RETURN_ERROR;
     }
 
-    plString name = PyString_AsStringEx(nameObj);
+    ST::string name = PyString_AsStringEx(nameObj);
     pyKey*   rcvr = pyKey::ConvertFrom(keyObj);
     pyGameScore::CreateScore(ownerID, name, type, points, *rcvr);
     PYTHON_RETURN_NONE; // get result in callback
@@ -261,7 +260,7 @@ PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findAgeScores, args)
         PYTHON_RETURN_ERROR;
     }
 
-    plString name = PyString_AsStringEx(nameObj);
+    ST::string name = PyString_AsStringEx(nameObj);
     pyKey*   rcvr = pyKey::ConvertFrom(keyObj);
     pyGameScore::FindAgeScores(name, *rcvr);
     PYTHON_RETURN_NONE; // get result in callback
@@ -282,7 +281,7 @@ PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findGlobalScores, args)
         PYTHON_RETURN_ERROR;
     }
 
-    plString name = PyString_AsStringEx(nameObj);
+    ST::string name = PyString_AsStringEx(nameObj);
     pyKey*   rcvr = pyKey::ConvertFrom(keyObj);
     pyGameScore::FindGlobalScores(name, *rcvr);
     PYTHON_RETURN_NONE; // get result in callback
@@ -303,7 +302,7 @@ PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findPlayerScores, args)
         PYTHON_RETURN_ERROR;
     }
 
-    plString name = PyString_AsStringEx(nameObj);
+    ST::string name = PyString_AsStringEx(nameObj);
     pyKey*   rcvr = pyKey::ConvertFrom(keyObj);
     pyGameScore::FindPlayerScores(name, *rcvr);
     PYTHON_RETURN_NONE; // get result in callback
@@ -325,9 +324,43 @@ PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findScores, args)
         PYTHON_RETURN_ERROR;
     }
 
-    plString name = PyString_AsStringEx(nameObj);
+    ST::string name = PyString_AsStringEx(nameObj);
     pyKey*   rcvr = pyKey::ConvertFrom(keyObj);
     pyGameScore::FindScores(ownerId, name, *rcvr);
+    PYTHON_RETURN_NONE; // get result in callback
+}
+
+PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findAgeHighScores, args)
+{
+    PyObject* nameObj;
+    uint32_t maxScores;
+    PyObject* keyObj;
+    if (!PyArg_ParseTuple(args, "OIO", &nameObj, &maxScores, &keyObj) ||
+        !PyString_CheckEx(nameObj) || !pyKey::Check(keyObj)) {
+        PyErr_SetString(PyExc_TypeError, "findAgeHighScores expects a string, an int, and a ptKey");
+        PYTHON_RETURN_ERROR;
+    }
+
+    ST::string name = PyString_AsStringEx(nameObj);
+    pyKey*   rcvr = pyKey::ConvertFrom(keyObj);
+    pyGameScore::FindAgeHighScores(name, maxScores, *rcvr);
+    PYTHON_RETURN_NONE; // get result in callback
+}
+
+PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findGlobalHighScores, args)
+{
+    PyObject* nameObj;
+    uint32_t maxScores;
+    PyObject* keyObj;
+    if (!PyArg_ParseTuple(args, "OIO", &nameObj, &maxScores, &keyObj) ||
+        !PyString_CheckEx(nameObj) || !pyKey::Check(keyObj)) {
+        PyErr_SetString(PyExc_TypeError, "findGlobalHighScores expects a string, an int, and a ptKey");
+        PYTHON_RETURN_ERROR;
+    }
+
+    ST::string name = PyString_AsStringEx(nameObj);
+    pyKey*   rcvr = pyKey::ConvertFrom(keyObj);
+    pyGameScore::FindGlobalHighScores(name, maxScores, *rcvr);
     PYTHON_RETURN_NONE; // get result in callback
 }
 
@@ -348,6 +381,8 @@ PYTHON_START_METHODS_TABLE(ptGameScore)
     PYTHON_METHOD_STATIC(ptGameScore, findGlobalScores, "Params: scoreName, key\nFinds matching global scores"),
     PYTHON_METHOD_STATIC(ptGameScore, findPlayerScores, "Params: scoreName, key\nFinds matching player scores"),
     PYTHON_METHOD_STATIC(ptGameScore, findScores, "Params: ownerID, scoreName, key\nFinds matching scores for an arbitrary owner"),
+    PYTHON_METHOD_STATIC(ptGameScore, findAgeHighScores, "Params: name, maxScores, key\nFinds the highest matching scores for the current age's owners"),
+    PYTHON_METHOD_STATIC(ptGameScore, findGlobalHighScores, "Params: name, maxScores, key\nFinds the highest matching scores"),
 PYTHON_END_METHODS_TABLE;
 
 // Type structure definition

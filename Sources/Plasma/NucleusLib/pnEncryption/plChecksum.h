@@ -45,6 +45,11 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "HeadSpin.h"
 #include <openssl/md5.h>
 #include <openssl/sha.h>
+#include <openssl/opensslv.h>
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define OPENSSL_HAVE_SHA0 1
+#endif
 
 class plChecksum
 {
@@ -70,35 +75,35 @@ class plMD5Checksum
         uint8_t fChecksum[MD5_DIGEST_LENGTH];
 
     public:
-        plMD5Checksum(size_t size, uint8_t *buffer);
+        plMD5Checksum(size_t size, uint8_t* buffer);
         plMD5Checksum();
-        plMD5Checksum(const plMD5Checksum &rhs);
-        plMD5Checksum(const plFileName &fileName);
+        plMD5Checksum(const plMD5Checksum& rhs);
+        plMD5Checksum(const plFileName& fileName);
         plMD5Checksum(hsStream* stream);
 
-        bool    IsValid() const { return fValid; }
-        void    Clear();
+        bool IsValid() const { return fValid; }
+        void Clear();
 
-        void    CalcFromFile(const plFileName &fileName);
-        void    CalcFromStream(hsStream* stream);
+        void CalcFromFile(const plFileName& fileName);
+        void CalcFromStream(hsStream* stream);
 
-        void    Start();
-        void    AddTo(size_t size, const uint8_t *buffer);
-        void    Finish();
+        void Start();
+        void AddTo(size_t size, const uint8_t* buffer);
+        void Finish();
 
-        const uint8_t *GetValue() const { return fChecksum; }
-        size_t      GetSize() const { return sizeof(fChecksum); }
+        const uint8_t* GetValue() const { return fChecksum; }
+        size_t GetSize() const { return sizeof(fChecksum); }
 
         // Backdoor for cached checksums (ie, if you loaded it off disk)
         void SetValue(uint8_t* checksum);
 
         // Note: GetAsHexString() returns a pointer to a static string;
         // do not rely on the contents of this string between calls!
-        const char  *GetAsHexString() const;
-        void        SetFromHexString( const char *string );
+        const char* GetAsHexString() const;
+        void SetFromHexString(const char* string);
 
-        bool    operator==(const plMD5Checksum &rhs) const;
-        bool    operator!=(const plMD5Checksum &rhs) const { return !operator==(rhs); }
+        bool operator==(const plMD5Checksum& rhs) const;
+        bool operator!=(const plMD5Checksum& rhs) const { return !operator==(rhs); }
 };
 
 /* A bunch of things might store either a SHA or a SHA1 checksum, this provides
@@ -106,6 +111,7 @@ class plMD5Checksum
  */
 typedef uint8_t ShaDigest[SHA_DIGEST_LENGTH];
 
+#ifdef OPENSSL_HAVE_SHA0
 class plSHAChecksum
 {
     protected:
@@ -144,6 +150,7 @@ class plSHAChecksum
         bool operator==(const plSHAChecksum& rhs) const;
         bool operator!=(const plSHAChecksum& rhs) const { return !operator==(rhs); }
 };
+#endif
 
 class plSHA1Checksum
 {
@@ -153,7 +160,7 @@ class plSHA1Checksum
         ShaDigest fChecksum;
 
     public:
-        plSHA1Checksum(size_t size, uint8_t* buffer);
+        plSHA1Checksum(size_t size, const uint8_t* buffer);
         plSHA1Checksum();
         plSHA1Checksum(const plSHA1Checksum& rhs);
         plSHA1Checksum(const plFileName& fileName);
