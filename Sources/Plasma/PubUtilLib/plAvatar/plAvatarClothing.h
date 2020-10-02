@@ -183,7 +183,7 @@ public:
     void TintItem(plClothingItem *item, float red, float green, float blue, bool update = true, bool broadcast = true, 
                   bool netForce = false, bool retry = true, uint8_t fLayer = plClothingElement::kLayerTint1);
     void TintSkin(float red, float green, float blue,
-                  bool update = true, bool broadcast = true);
+                  bool update = true, bool broadcast = true, bool netForce = false);
     void MorphItem(plClothingItem *item, uint8_t layer, uint8_t delta, float weight, bool retry = true);
     void SetAge(float age, bool update = true, bool broadcast = true);
     void SetSkinBlend(float blend, uint8_t layer, bool update = true, bool broadcast = true);

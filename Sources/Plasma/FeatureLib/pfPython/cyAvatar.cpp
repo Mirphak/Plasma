@@ -1307,7 +1307,7 @@ void cyAvatar::TintSkinU(pyColor& tint, bool update)
         if (so != nil)
         {
             avMod = (plArmatureMod*)so->GetModifierByType(plArmatureMod::Index());
-            avMod->GetClothingOutfit()->TintSkin(tint.getRed(),tint.getGreen(),tint.getBlue(),update,true);
+            avMod->GetClothingOutfit()->TintSkin(tint.getRed(),tint.getGreen(),tint.getBlue(),update,true,fNetForce);
         }
     }
 }

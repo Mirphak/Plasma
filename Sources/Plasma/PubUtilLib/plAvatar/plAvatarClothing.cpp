@@ -512,7 +512,7 @@ void plClothingOutfit::TintItem(plClothingItem *item, float red, float green, fl
 }
 
 void plClothingOutfit::TintSkin(float red, float green, float blue,
-                                bool update /* = true */, bool broadcast /* = true */)
+                                bool update /* = true */, bool broadcast /* = true */, bool netForce /* = false */)
 {
     plClothingMsg *msg = new plClothingMsg();
     msg->AddReceiver(GetKey());
@@ -520,6 +520,11 @@ void plClothingOutfit::TintSkin(float red, float green, float blue,
     msg->fColor.Set(red, green, blue, 1.f);
     if (broadcast)
         msg->SetBCastFlag(plMessage::kNetPropagate);
+    if (netForce)
+    {
+        msg->SetBCastFlag(plMessage::kNetPropagate);
+        msg->SetBCastFlag(plMessage::kNetForce);
+    }
     if (update)
         msg->AddCommand(plClothingMsg::kUpdateTexture);
     
