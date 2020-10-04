@@ -80,6 +80,9 @@ struct pythonClassName \
 // This makes sure that our python new function can access our constructors
 #define PYTHON_CLASS_NEW_FRIEND(pythonClassName) friend PyObject *pythonClassName##_new(PyTypeObject *type, PyObject *args, PyObject *keywords)
 
+#define PYTHON_CLASS_VAULT_NODE_NEW_DEFINITION \
+    static PyObject* New(hsRef<RelVaultNode> vaultNode=nullptr);
+
 // This defines the basic new function for a class
 #define PYTHON_CLASS_NEW_DEFINITION static PyObject *New()
 
@@ -87,6 +90,15 @@ struct pythonClassName \
 PyObject *glueClassName::New() \
 { \
     pythonClassName *newObj = (pythonClassName*)pythonClassName##_type.tp_new(&pythonClassName##_type, NULL, NULL); \
+    return (PyObject*)newObj; \
+}
+
+#define PYTHON_CLASS_VAULT_NODE_NEW_IMPL(pythonClassName, glueClassName) \
+PyObject* glueClassName::New(hsRef<RelVaultNode> nfsNode) \
+{ \
+    pythonClassName* newObj = (pythonClassName*)pythonClassName##_type.tp_new(&pythonClassName##_type, nullptr, nullptr); \
+    if (nfsNode) \
+        newObj->fThis->fNode = std::move(nfsNode); \
     return (PyObject*)newObj; \
 }
 
@@ -566,17 +578,28 @@ static PyObject *methodName(PyObject *self) /* and now for the actual function *
     PYTHON_RETURN_NONE; \
 }
 
+#define PYTHON_START_GLOBAL_METHOD_TABLE(name) \
+    { \
+        static PyMethodDef name##_globalMethods[] = {
+
 // this goes in the definition function
-#define PYTHON_GLOBAL_METHOD(vectorVarName, methodName) vectorVarName.push_back(methodName##_method)
+#define PYTHON_GLOBAL_METHOD(methodName) methodName##_method,
 
 // not necessary, but for continuity with the NOARGS function definition above
-#define PYTHON_GLOBAL_METHOD_NOARGS(vectorVarName, methodName) vectorVarName.push_back(methodName##_method);
+#define PYTHON_GLOBAL_METHOD_NOARGS(methodName) methodName##_method,
 
 // not necessary, but for continuity with the WKEY function definition above
-#define PYTHON_GLOBAL_METHOD_WKEY(vectorVarName, methodName) vectorVarName.push_back(methodName##_method)
+#define PYTHON_GLOBAL_METHOD_WKEY(methodName) methodName##_method,
 
 // not necessary, but for continuity with the BASIC function definition above
-#define PYTHON_BASIC_GLOBAL_METHOD(vectorVarName, methodName) vectorVarName.push_back(methodName##_method)
+#define PYTHON_BASIC_GLOBAL_METHOD(methodName) methodName##_method,
+
+#define PYTHON_END_GLOBAL_METHOD_TABLE(moduleVarName, name) \
+            { nullptr, nullptr, 0, nullptr } \
+        }; \
+        if (PyModule_AddFunctions(moduleVarName, name##_globalMethods) < 0) \
+            return; \
+    }
 
 /////////////////////////////////////////////////////////////////////
 // Enum glue (these should all be inside a function)

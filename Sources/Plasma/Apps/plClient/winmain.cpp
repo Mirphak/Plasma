@@ -999,6 +999,9 @@ bool WinInit(HINSTANCE hInst)
 #include "plResMgr/plVersion.h"
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow)
 {
+    // Install our unhandled exception filter for trapping all those nasty crashes
+    SetUnhandledExceptionFilter(plCustomUnhandledExceptionFilter);
+
     PF_CONSOLE_INIT_ALL()
 
     // Set global handle
@@ -1183,9 +1186,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
     }
 
     NetCliAuthAutoReconnectEnable(true);
-
-    // Install our unhandled exception filter for trapping all those nasty crashes
-    SetUnhandledExceptionFilter(plCustomUnhandledExceptionFilter);
 
     // We should quite frankly be done initing the client by now. But, if not, spawn the good old
     // "Starting URU, please wait..." dialog (not so yay)
