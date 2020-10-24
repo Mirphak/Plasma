@@ -166,7 +166,7 @@ class pfConsoleInputInterface : public plInputInterface
             {
                 fControlMap->UnmapAllBindings();
 #ifndef PLASMA_EXTERNAL_RELEASE
-                // KEY_TILDE is "ù" on french keyboard but never used at begining of sentense, so don't need to change it.
+                // KEY_TILDE is "u grave" on french keyboard.
                 fControlMap->BindKey( KEY_TILDE , B_SET_CONSOLE_MODE );
 #endif
             }

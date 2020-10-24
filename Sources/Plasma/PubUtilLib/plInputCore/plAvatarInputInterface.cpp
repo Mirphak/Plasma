@@ -364,9 +364,9 @@ void    plAvatarInputInterface::RestoreDefaultKeyMappings()
     fControlMap->BindKeyToConsoleCmd( KEY_F8,                                   "Game.KICreateMarkerFolder" );
 
 #ifndef PLASMA_EXTERNAL_RELEASE
-    fControlMap->BindKey( KEY_F10 ,                     B_CONTROL_TOGGLE_PHYSICAL );
-    fControlMap->BindKey( KEY_F11 ,                     B_CONTROL_MOVE_UP );
-    fControlMap->BindKey( KEY_F12 ,                     B_CONTROL_MOVE_DOWN );
+    fControlMap->BindKey( plCtrlKeyCombo( KEY_P ),      B_CONTROL_TOGGLE_PHYSICAL );
+    fControlMap->BindKey( KEY_U,                        B_CONTROL_MOVE_UP );
+    fControlMap->BindKey( KEY_H,                        B_CONTROL_MOVE_DOWN );
     fControlMap->BindKey( plCtrlKeyCombo( KEY_C ),      B_TOGGLE_DRIVE_MODE );
     
     fControlMap->BindKeyToConsoleCmd( plCtrlKeyCombo( KEY_L ),  "NextStatusLog" );
