@@ -43,9 +43,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #define plTimerCallbackMsg_inc
 
 #include "pnMessage/plMessage.h"
-#include "hsStream.h"
-
-class hsResMgr;
 
 class plTimerCallbackMsg : public plMessage
 {
@@ -61,19 +58,8 @@ public:
     int32_t fID;
     float fTime;
 
-    virtual void Read(hsStream* stream, hsResMgr* mgr)
-    {
-        plMessage::IMsgRead(stream, mgr);
-        fID = stream->ReadLE32();
-        fTime = stream->ReadLEScalar();
-    }
-
-    virtual void Write(hsStream* stream, hsResMgr* mgr)
-    {
-        plMessage::IMsgWrite(stream, mgr);
-        stream->WriteLE32(fID);
-        stream->WriteLEScalar(fTime);
-    }
+    void Read(hsStream* stream, hsResMgr* mgr) override;
+    void Write(hsStream* stream, hsResMgr* mgr) override;
 };
 
 #endif // plTimerCallbackMsg_inc

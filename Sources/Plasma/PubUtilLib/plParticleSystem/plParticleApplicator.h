@@ -47,12 +47,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 class plParticleGenerator;
 class plParticleSystem;
+class plSceneObject;
 
 class plParticleApplicator : public plAGApplicator
 {
 protected:
     plParticleGenerator *IGetParticleGen(plSceneObject *so);
-    virtual void IApply(const plAGModifier *mod, double time) = 0;
+    void IApply(const plAGModifier *mod, double time) override = 0;
 
 public:
     CLASSNAME_REGISTER( plParticleApplicator );
@@ -62,7 +63,7 @@ public:
 class plParticleLifeMinApplicator : public plParticleApplicator
 {
 protected:
-    virtual void IApply(const plAGModifier *mod, double time);
+    void IApply(const plAGModifier *mod, double time) override;
 
 public:
     CLASSNAME_REGISTER( plParticleLifeMinApplicator );
@@ -72,7 +73,7 @@ public:
 class plParticleLifeMaxApplicator : public plParticleApplicator
 {
 protected:
-    virtual void IApply(const plAGModifier *mod, double time);
+    void IApply(const plAGModifier *mod, double time) override;
 
 public:
     CLASSNAME_REGISTER( plParticleLifeMaxApplicator );
@@ -82,7 +83,7 @@ public:
 class plParticlePPSApplicator : public plParticleApplicator
 {
 protected:
-    virtual void IApply(const plAGModifier *mod, double time);
+    void IApply(const plAGModifier *mod, double time) override;
 
 public:
     CLASSNAME_REGISTER( plParticlePPSApplicator );
@@ -92,7 +93,7 @@ public:
 class plParticleAngleApplicator : public plParticleApplicator
 {
 protected:
-    virtual void IApply(const plAGModifier *mod, double time);
+    void IApply(const plAGModifier *mod, double time) override;
 
 public:
     CLASSNAME_REGISTER( plParticleAngleApplicator );
@@ -102,7 +103,7 @@ public:
 class plParticleVelMinApplicator : public plParticleApplicator
 {
 protected:
-    virtual void IApply(const plAGModifier *mod, double time);
+    void IApply(const plAGModifier *mod, double time) override;
 
 public:
     CLASSNAME_REGISTER( plParticleVelMinApplicator );
@@ -112,7 +113,7 @@ public:
 class plParticleVelMaxApplicator : public plParticleApplicator
 {
 protected:
-    virtual void IApply(const plAGModifier *mod, double time);
+    void IApply(const plAGModifier *mod, double time) override;
 
 public:
     CLASSNAME_REGISTER( plParticleVelMaxApplicator );
@@ -122,7 +123,7 @@ public:
 class plParticleScaleMinApplicator : public plParticleApplicator
 {
 protected:
-    virtual void IApply(const plAGModifier *mod, double time);
+    void IApply(const plAGModifier *mod, double time) override;
 
 public:
     CLASSNAME_REGISTER( plParticleScaleMinApplicator );
@@ -132,7 +133,7 @@ public:
 class plParticleScaleMaxApplicator : public plParticleApplicator
 {
 protected:
-    virtual void IApply(const plAGModifier *mod, double time);
+    void IApply(const plAGModifier *mod, double time) override;
 
 public:
     CLASSNAME_REGISTER( plParticleScaleMaxApplicator );
@@ -142,7 +143,7 @@ public:
 class plParticleGravityApplicator : public plParticleApplicator
 {
 protected:
-    virtual void IApply(const plAGModifier *mod, double time);
+    void IApply(const plAGModifier *mod, double time) override;
 
 public:
     CLASSNAME_REGISTER( plParticleGravityApplicator );
@@ -152,7 +153,7 @@ public:
 class plParticleDragApplicator : public plParticleApplicator
 {
 protected:
-    virtual void IApply(const plAGModifier *mod, double time);
+    void IApply(const plAGModifier *mod, double time) override;
 
 public:
     CLASSNAME_REGISTER( plParticleDragApplicator );

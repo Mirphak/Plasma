@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pfGameGUIMgr/pfGUIRadioGroupCtrl.h"
 
@@ -52,7 +51,7 @@ pyGUIControlRadioGroup::pyGUIControlRadioGroup(pyKey& gckey) :pyGUIControl(gckey
 {
 }
 
-pyGUIControlRadioGroup::pyGUIControlRadioGroup(plKey objkey) : pyGUIControl(objkey)
+pyGUIControlRadioGroup::pyGUIControlRadioGroup(plKey objkey) : pyGUIControl(std::move(objkey))
 {
 }
 

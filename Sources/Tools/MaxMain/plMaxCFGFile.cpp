@@ -41,11 +41,9 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include "HeadSpin.h"
-#include "hsWindows.h"
 #include "plFileSystem.h"
 
-#include <max.h>
-#pragma hdrstop
+#include "MaxAPI.h"
 
 #include "plMaxCFGFile.h"
 #include "plFile/plBrowseFolder.h"
@@ -53,7 +51,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 plFileName plMaxConfig::GetPluginIni()
 {
     // Get the plugin CFG dir
-    return plFileName::Join(GetCOREInterface()->GetDir(APP_PLUGCFG_DIR), "PlasmaMAX2.ini");
+    return plFileName::Join(M2ST(GetCOREInterface()->GetDir(APP_PLUGCFG_DIR)), "PlasmaMAX2.ini");
 }
 
 plFileName plMaxConfig::GetClientPath(bool getNew, bool quiet)
@@ -71,7 +69,7 @@ plFileName plMaxConfig::GetClientPath(bool getNew, bool quiet)
     if ((len == 0 || getNew) && !quiet)
     {
         // If the user selects one, save it
-        plasmaPath = plBrowseFolder::GetFolder(plasmaPath, "Specify your client folder");
+        plasmaPath = plBrowseFolder::GetFolder(plasmaPath, "Select your Plasma 2.0 client folder");
         if (plasmaPath.IsValid())
             WritePrivateProfileStringW(L"SceneViewer", L"Directory", plasmaPath.WideString().data(),
                                        plugDir.WideString().data());
@@ -90,6 +88,7 @@ void plMaxConfig::SetClientPath(const plFileName &path)
 
 bool plMaxConfig::AssetManInterfaceDisabled()
 {
+#ifdef MAXASS_AVAILABLE
     static bool inited = false;
     static bool disabled = false;
 
@@ -111,4 +110,7 @@ bool plMaxConfig::AssetManInterfaceDisabled()
     }
 
     return disabled;
+#else
+    return true;
+#endif
 }

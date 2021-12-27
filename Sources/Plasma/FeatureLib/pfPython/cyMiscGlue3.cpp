@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "cyMisc.h"
 #include "pyGlueHelpers.h"
@@ -54,7 +53,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtSendPetitionToCCR, args, "Params: message,reas
 {
     char* message;
     unsigned char reason = 0;
-    char* title = nil;
+    char* title = nullptr;
     if (!PyArg_ParseTuple(args, "s|bs", &message, &reason, &title))
     {
         PyErr_SetString(PyExc_TypeError, "PtSendPetitionToCCR expects a string, and an optional unsigned 8-bit int and optional string");
@@ -140,7 +139,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtAtTimeCallback, args, "Params: selfkey,time,id
             "- 'time' is how much time from now (in seconds) to call back\n"
             "- 'id' is an integer id that will be returned in the OnTimer call")
 {
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     float time;
     int id;
     if (!PyArg_ParseTuple(args, "Ofi", &keyObj, &time, &id))
@@ -160,7 +159,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtAtTimeCallback, args, "Params: selfkey,time,id
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtClearTimerCallbacks, args, "Params: key\nThis will remove timer callbacks to the specified key")
 {
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "PtClearTimerCallbacks expects a ptKey");
@@ -192,7 +191,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtFindSceneobject, args, "Params: name,ageName\n
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtFindSceneobjects, args, "Params: name\nThis will try to find a any sceneobject containing string in name")
 {
-    char* name = NULL;
+    char* name = nullptr;
     if (!PyArg_ParseTuple(args, "s", &name))
     {
         PyErr_SetString(PyExc_TypeError, "PtFindSceneobject expects string");
@@ -215,11 +214,9 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtFindActivator, args, "Params: name\nThis will 
     return cyMisc::FindActivator(ST::string::from_utf8(name));
 }
 
-PYTHON_BASIC_GLOBAL_METHOD_DEFINITION(PtClearCameraStack, cyMisc::ClearCameraStack, "Clears the camera stack")
-
 PYTHON_GLOBAL_METHOD_DEFINITION(PtWasLocallyNotified, args, "Params: selfKey\nReturns 1 if the last notify was local or 0 if the notify originated on the network")
 {
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "PtWasLocallyNotified expects a ptKey");
@@ -239,8 +236,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtAttachObject, args, "Params: child,parent,netF
             "- parentKey is the ptKey or ptSceneobject of the one being attached to\n"
             "(both arguments must be ptKeys or ptSceneobjects, you cannot mix types)")
 {
-    PyObject* childObj = NULL;
-    PyObject* parentObj = NULL;
+    PyObject* childObj = nullptr;
+    PyObject* parentObj = nullptr;
     char netForce = 0;
     if (!PyArg_ParseTuple(args, "OO|b", &childObj, &parentObj, &netForce))
     {
@@ -272,8 +269,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtDetachObject, args, "Params: child,parent,netF
             "- parent is the ptKey or ptSceneobject of the one being detached from\n"
             "(both arguments must be ptKeys or ptSceneobjects, you cannot mix types)")
 {
-    PyObject* childObj = NULL;
-    PyObject* parentObj = NULL;
+    PyObject* childObj = nullptr;
+    PyObject* parentObj = nullptr;
     char netForce = 0;
     if (!PyArg_ParseTuple(args, "OO|b", &childObj, &parentObj, &netForce))
     {
@@ -302,7 +299,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtDetachObject, args, "Params: child,parent,netF
 
 /*PYTHON_GLOBAL_METHOD_DEFINITION(PtLinkToAge, args, "Params: selfKey,ageName,spawnPointName\nDEPRECIATED: Links you to the specified age and spawnpoint")
 {
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     char* ageName;
     char* spawnPointName;
     if (!PyArg_ParseTuple(args, "Oss", &keyObj, &ageName, &spawnPointName))
@@ -322,7 +319,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtDetachObject, args, "Params: child,parent,netF
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtDirtySynchState, args, "Params: selfKey,SDLStateName,flags\nDO NOT USE - handled by ptSDL")
 {
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     char* SDLStateName;
     unsigned long flags;
     if (!PyArg_ParseTuple(args, "Osl", &keyObj, &SDLStateName, &flags))
@@ -342,7 +339,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtDirtySynchState, args, "Params: selfKey,SDLSta
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtDirtySynchClients, args, "Params: selfKey,SDLStateName,flags\nDO NOT USE - handled by ptSDL")
 {
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     char* SDLStateName;
     unsigned long flags;
     if (!PyArg_ParseTuple(args, "Osl", &keyObj, &SDLStateName, &flags))
@@ -362,7 +359,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtDirtySynchClients, args, "Params: selfKey,SDLS
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtEnableControlKeyEvents, args, "Params: selfKey\nEnable control key events to call OnControlKeyEvent(controlKey,activateFlag)")
 {
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "PtEnableControlKeyEvents expects a ptKey");
@@ -380,7 +377,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtEnableControlKeyEvents, args, "Params: selfKey
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtDisableControlKeyEvents, args, "Params: selfKey\nDisable the control key events from calling OnControlKeyEvent")
 {
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "PtDisableControlKeyEvents expects a ptKey");
@@ -413,7 +410,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtFadeLocalAvatar, args, "Params: fade\nFade (or
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtSetOfferBookMode, args, "Params: selfkey,ageFilename,ageInstanceName\nPut us into the offer book interface")
 {
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     char* ageFilename;
     char* ageInstanceName;
     if (!PyArg_ParseTuple(args, "Oss", &keyObj, &ageFilename, &ageInstanceName))
@@ -530,8 +527,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtToggleAvatarClickability, args, "Params: on\nT
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtTransferParticlesToObject, args, "Params: objFrom, objTo, num\nTransfers num particles from objFrom to objTo")
 {
-    PyObject* objFrom = NULL;
-    PyObject* objTo = NULL;
+    PyObject* objFrom = nullptr;
+    PyObject* objTo = nullptr;
     int num;
     if (!PyArg_ParseTuple(args, "OOi", &objFrom, &objTo, &num))
     {
@@ -552,7 +549,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtTransferParticlesToObject, args, "Params: objF
 PYTHON_GLOBAL_METHOD_DEFINITION(PtSetParticleDissentPoint, args, "Params: x, y, z, particlesys\nSets the dissent point of the particlesys to x,y,z")
 {
     float x,y,z;
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     if (!PyArg_ParseTuple(args, "fffO", &x, &y, &z, &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "PtSetParticleDissentPoint expects three floats and a ptKey");
@@ -571,7 +568,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtSetParticleDissentPoint, args, "Params: x, y, 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtGetControlEvents, args, "Params: on, key\nRegisters or unregisters for control event messages")
 {
     char on;
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     if (!PyArg_ParseTuple(args, "bO", &on, &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "PtGetControlEvents expects a boolean and a ptKey");
@@ -599,8 +596,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtUsingUnicode, "Returns true if the curr
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtFakeLinkAvatarToObject, args, "Params: avatar,object\nPseudo-links avatar to object within the same age\n")
 {
-    PyObject* avatarObj = NULL;
-    PyObject* objectObj = NULL;
+    PyObject* avatarObj = nullptr;
+    PyObject* objectObj = nullptr;
     if (!PyArg_ParseTuple(args, "OO", &avatarObj, &objectObj))
     {
         PyErr_SetString(PyExc_TypeError, "PtFakeLinkAvatarToObject expects two ptKeys");
@@ -617,22 +614,24 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtFakeLinkAvatarToObject, args, "Params: avatar,
     PYTHON_RETURN_NONE;
 }
 
-PYTHON_GLOBAL_METHOD_DEFINITION(PtWearDefaultClothingType, args, "Params: key,type\nForces the avatar to wear the default clothing of the specified type")
+PYTHON_GLOBAL_METHOD_DEFINITION_WKEY(PtWearDefaultClothingType, args, kw, "Params: key, type, broadcast=False\nForces the avatar to wear the default clothing of the specified type")
 {
-    PyObject* keyObj = NULL;
+    char* kwlist[] = { "key", "type", "broadcast", nullptr };
+    PyObject* keyObj = nullptr;
     unsigned long type;
-    if (!PyArg_ParseTuple(args, "Ol", &keyObj, &type))
+    bool broadcast = false;
+    if (!PyArg_ParseTupleAndKeywords(args, kw, "Ol|b", kwlist, &keyObj, &type, &broadcast))
     {
-        PyErr_SetString(PyExc_TypeError, "PtWearDefaultClothingType expects a ptKey and an unsigned long");
+        PyErr_SetString(PyExc_TypeError, "PtWearDefaultClothingType expects a ptKey, an unsigned long, and an optional bool");
         PYTHON_RETURN_ERROR;
     }
     if (!pyKey::Check(keyObj))
     {
-        PyErr_SetString(PyExc_TypeError, "PtWearDefaultClothingType expects a ptKey and an unsigned long");
+        PyErr_SetString(PyExc_TypeError, "PtWearDefaultClothingType expects a ptKey, an unsigned long, and an optional bool");
         PYTHON_RETURN_ERROR;
     }
     pyKey* key = pyKey::ConvertFrom(keyObj);
-    cyMisc::WearDefaultClothingType(*key, type);
+    cyMisc::WearDefaultClothingType(*key, type, broadcast);
     PYTHON_RETURN_NONE;
 }
 
@@ -698,7 +697,6 @@ void cyMisc::AddPlasmaMethods3(PyObject* m)
         PYTHON_GLOBAL_METHOD(PtFindSceneobject)
         PYTHON_GLOBAL_METHOD(PtFindSceneobjects)
         PYTHON_GLOBAL_METHOD(PtFindActivator)
-        PYTHON_BASIC_GLOBAL_METHOD(PtClearCameraStack)
         PYTHON_GLOBAL_METHOD(PtWasLocallyNotified)
 
         PYTHON_GLOBAL_METHOD(PtAttachObject)

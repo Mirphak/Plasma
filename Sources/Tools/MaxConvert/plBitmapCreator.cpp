@@ -43,10 +43,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "HeadSpin.h"
 #include "hsWindows.h"
 
-#include <Max.h>
-#include <commdlg.h>
-#include <bmmlib.h>
-#pragma hdrstop
+#include "MaxMain/MaxAPI.h"
 
 #include "plGImage/plMipmap.h"
 #include "hsExceptionStack.h"
@@ -76,7 +73,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 class plCommonBitmapLib : public plCommonObjLib
 {
     public:
-        virtual bool    IsInteresting( const plKey &objectKey )
+        bool    IsInteresting(const plKey &objectKey) override
         {
             if( objectKey->GetUoid().GetClassType() == plCubicEnvironmap::Index() ||
                 objectKey->GetUoid().GetClassType() == plMipmap::Index() )
@@ -92,7 +89,7 @@ static plCommonBitmapLib        sCommonBitmapLib;
 
 plBitmapCreator::plBitmapCreator()
 {
-    fErrorMsg = nil;
+    fErrorMsg = nullptr;
 }
 plBitmapCreator::~plBitmapCreator()
 {
@@ -134,7 +131,7 @@ plMipmap *plBitmapCreator::ICreateBitmap(plBitmapData *bd)
 
     // Load the bitmap
     BitmapInfo bi;
-    bi.SetName(bd->fileName.AsString().c_str());
+    bi.SetName(ST2M(bd->fileName.AsString()));
 
 #if 0 // This isn't really an issue since the textures are packed -Colin
     const int kMaxFileNameLength = 30;
@@ -162,7 +159,7 @@ plMipmap *plBitmapCreator::ICreateBitmap(plBitmapData *bd)
             fWarned |= kWarnedNoMoreBitmapLoadErr;
         }
         */
-        return nil;
+        return nullptr;
     }
     BitmapStorage *storage = bm->Storage();
     BitmapInfo *bInfo = &storage->bi;
@@ -192,7 +189,7 @@ plMipmap *plBitmapCreator::ICreateBitmap(plBitmapData *bd)
         IInvertAlpha(*hBitmap);
 
     // Do it
-    plMipmap *hMipmap = nil;
+    plMipmap *hMipmap = nullptr;
     if (sigma > 0.f)
     {
         hMipmap = new plMipmap(hBitmap, sigma, bd->createFlags, bd->detailDropoffStart, 
@@ -265,14 +262,14 @@ void plBitmapCreator::ICheckOutBitmap(BitmapInfo* bInfo, Bitmap* bm, const plFil
 
     // Check out bitmap
     if (bm->Flags() & MAP_FLIPPED)
-        MessageBox(GetActiveWindow(), "Bitmap is flipped horizontally", fileName.AsString().c_str(), MB_OK);
+        plMaxMessageBox(GetActiveWindow(), _T("Bitmap is flipped horizontally"), ST2T(fileName.AsString()), MB_OK);
     if (bm->Flags() & MAP_INVERTED)
-        MessageBox(GetActiveWindow(), "Bitmap is inverted vertically", fileName.AsString().c_str(), MB_OK);
+        plMaxMessageBox(GetActiveWindow(), _T("Bitmap is inverted vertically"), ST2T(fileName.AsString()), MB_OK);
 
     if (bInfo->Flags() & MAP_FLIPPED)
-        MessageBox(GetActiveWindow(), "BI:Bitmap is flipped horizontally", fileName.AsString().c_str(), MB_OK);
+        plMaxMessageBox(GetActiveWindow(), _T("BI:Bitmap is flipped horizontally"), ST2T(fileName.AsString()), MB_OK);
     if (bInfo->Flags() & MAP_INVERTED)
-        MessageBox(GetActiveWindow(), "BI:Bitmap is inverted vertically", fileName.AsString().c_str(), MB_OK);
+        plMaxMessageBox(GetActiveWindow(), _T("BI:Bitmap is inverted vertically"), ST2T(fileName.AsString()), MB_OK);
 
     hsGuardEnd;
 }
@@ -506,14 +503,14 @@ plBitmap *plBitmapCreator::ICreateTexture( plBitmapData *bd, const plLocation &l
     {
         fErrorMsg->Set( true, "Bitmap Error", "No bitmap data" ).Show();
         fErrorMsg->Set();
-        return nil;
+        return nullptr;
     }
 
     if (!bd->fileName.IsValid())
     {
         fErrorMsg->Set( true, "Bitmap Error", "Material texture has null bitmap name." ).Show();
         fErrorMsg->Set();
-        return nil;
+        return nullptr;
     }
 
     // Get and mangle key name
@@ -551,7 +548,7 @@ plBitmap *plBitmapCreator::ICreateTexture( plBitmapData *bd, const plLocation &l
     plKey key;
 
     plBitmap *texture = plBitmap::ConvertNoRef( sCommonBitmapLib.FindObject( name, ( bd->isStaticCubicEnvMap ) ? plCubicEnvironmap::Index() : plMipmap::Index() ) );
-    //hsAssert( texture == nil || texture->GetKey()->GetUoid().GetLocation() == textureLoc, "Somehow our texture objectLib has a texture not in the right page? Should be harmless tho..." );
+    //hsAssert(texture == nullptr || texture->GetKey()->GetUoid().GetLocation() == textureLoc, "Somehow our texture objectLib has a texture not in the right page? Should be harmless tho...");
 
     // Texture reuse optimization
     if( texture )
@@ -564,8 +561,8 @@ plBitmap *plBitmapCreator::ICreateTexture( plBitmapData *bd, const plLocation &l
         if (!texture->IsSameModifiedTime(fileTime.dwLowDateTime, fileTime.dwHighDateTime))
         {
             DeleteExportedBitmap( texture->GetKey() );
-            texture = nil;
-            key = nil;
+            texture = nullptr;
+            key = nullptr;
         }
     }
 
@@ -590,22 +587,26 @@ plBitmap *plBitmapCreator::ICreateTexture( plBitmapData *bd, const plLocation &l
             /// Build and set the faces
             bd->fileName = bd->faceNames[ plStaticEnvLayer::kTopFace ];
             face = ICreateBitmap( bd );
-            if( face == nil ) return nil;
+            if (face == nullptr)
+                return nullptr;
             cubic->CopyToFace( face, plCubicEnvironmap::kTopFace );
 
             bd->fileName = bd->faceNames[ plStaticEnvLayer::kBottomFace ];
             face = ICreateBitmap( bd );
-            if( face == nil ) return nil;
+            if (face == nullptr)
+                return nullptr;
             cubic->CopyToFace( face, plCubicEnvironmap::kBottomFace );
 
             bd->fileName = bd->faceNames[ plStaticEnvLayer::kLeftFace ];
             face = ICreateBitmap( bd );
-            if( face == nil ) return nil;
+            if (face == nullptr)
+                return nullptr;
             cubic->CopyToFace( face, plCubicEnvironmap::kLeftFace );
 
             bd->fileName = bd->faceNames[ plStaticEnvLayer::kRightFace ];
             face = ICreateBitmap( bd );
-            if( face == nil ) return nil;
+            if (face == nullptr)
+                return nullptr;
             cubic->CopyToFace( face, plCubicEnvironmap::kRightFace );
 
             /// NOTE: For whatever reason, MAX decided that the front and back faces should be'
@@ -617,12 +618,14 @@ plBitmap *plBitmapCreator::ICreateTexture( plBitmapData *bd, const plLocation &l
 
             bd->fileName = bd->faceNames[ plStaticEnvLayer::kBackFace ];
             face = ICreateBitmap( bd );
-            if( face == nil ) return nil;
+            if (face == nullptr)
+                return nullptr;
             cubic->CopyToFace( face, plCubicEnvironmap::kFrontFace );
 
             bd->fileName = bd->faceNames[ plStaticEnvLayer::kFrontFace ];
             face = ICreateBitmap( bd );
-            if( face == nil ) return nil;
+            if (face == nullptr)
+                return nullptr;
             cubic->CopyToFace( face, plCubicEnvironmap::kBackFace );
 
 
@@ -634,7 +637,7 @@ plBitmap *plBitmapCreator::ICreateTexture( plBitmapData *bd, const plLocation &l
         {
             plMipmap *mipmap = ICreateBitmap(bd);
             if (!mipmap)
-                return nil;
+                return nullptr;
 
             key = hsgResMgr::ResMgr()->NewKey( name, mipmap, textureLoc );
 
@@ -677,7 +680,7 @@ plMipmap    *plBitmapCreator::CreateBlankMipmap( uint32_t width, uint32_t height
 
     // Is it already created?
     plKey key = hsgResMgr::ResMgr()->FindKey( plUoid( textureLoc, plMipmap::Index(), keyName ) );
-    if( key != nil )
+    if (key != nullptr)
         return plMipmap::ConvertNoRef( key->GetObjectPtr() );
 
     // Create

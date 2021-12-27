@@ -42,10 +42,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef plClientMsg_inc
 #define plClientMsg_inc
 
-#include "pnMessage/plMessage.h"
-#include "pnMessage/plRefMsg.h"
-#include "hsStream.h"
-#include "hsResMgr.h"
+#include "plRefMsg.h"
 
 #include "pnKeyedObject/plUoid.h"
 
@@ -111,11 +108,11 @@ public:
 
     int GetClientMsgFlag() const { return fMsgFlag; }
 
-    void AddRoomLoc(plLocation loc);
+    void AddRoomLoc(const plLocation& loc);
 
     // Used for kLoadAgeKeys, kLetGoOfAgeKeys only
     ST::string  GetAgeName() const { return fAgeName; }
-    void        SetAgeName(const ST::string& age) { fAgeName = age; }
+    void        SetAgeName(ST::string age) { fAgeName = std::move(age); }
 
     int GetNumRoomLocs() { return fRoomLocs.size(); }
     const plLocation& GetRoomLoc(int i) const { return fRoomLocs[i]; }
@@ -149,17 +146,8 @@ public:
     int8_t                    fWhich;
 
     // IO - not really applicable to ref msgs, but anyway
-    void Read(hsStream* stream, hsResMgr* mgr) override {
-        plRefMsg::Read(stream, mgr);
-        stream->ReadLE(&fType);
-        stream->ReadLE(&fWhich);
-    }
-
-    void Write(hsStream* stream, hsResMgr* mgr) override {
-        plRefMsg::Write(stream, mgr);
-        stream->WriteLE(fType);
-        stream->WriteLE(fWhich);
-    }
+    void Read(hsStream* stream, hsResMgr* mgr) override;
+    void Write(hsStream* stream, hsResMgr* mgr) override;
 };
 
 #endif // plClientMsg

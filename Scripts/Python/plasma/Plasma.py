@@ -40,6 +40,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
       Mead, WA   99021
 
  *==LICENSE==* """
+
+from __future__ import annotations
+from typing import Callable, Tuple, Union
+
 def PtAcceptInviteInGame(friendName,inviteKey):
     """Sends a VaultTask to the server to perform the invite"""
     pass
@@ -631,6 +635,12 @@ def PtLocalAvatarRunKeyDown():
     """Returns true if the run key is being held down for the local avatar"""
     pass
 
+def PtLocalizedYesNoDialog(cb: Union[None, Callable, ptKey], path: str, *args, /, *, dialogType: int = PtConfirmationType.YesNo) -> None:
+    """This will display a confirmation dialog to the user with the localized text `path`
+       with any optional localization `args` applied. This dialog _has_ to be answered by the user,
+       and their answer will be returned in a Notify message or callback given by `cb`."""
+    ...
+
 def PtMaxListenDistSq():
     """Returns the maximum distance (squared) of the listen range"""
     pass
@@ -856,11 +866,11 @@ def PtWasLocallyNotified(selfKey):
     """Returns 1 if the last notify was local or 0 if the notify originated on the network"""
     pass
 
-def PtWearDefaultClothing(key):
+def PtWearDefaultClothing(key, broadcast=False):
     """Forces the avatar to wear the default clothing set"""
     pass
 
-def PtWearDefaultClothingType(key,type):
+def PtWearDefaultClothingType(key, type, broadcast=False):
     """Forces the avatar to wear the default clothing of the specified type"""
     pass
 
@@ -872,11 +882,11 @@ def PtWhatGUIControlType(guiKey):
     """Returns the control type of the key passed in"""
     pass
 
-def PtYesNoDialog(selfkey,dialogMessage):
-    """This will display a Yes/No dialog to the user with the text dialogMessage
-This dialog _has_ to be answered by the user.
-And their answer will be returned in a Notify message."""
-    pass
+def PtYesNoDialog(cb: Union[None, ptKey, Callable], message: str, /, dialogType: int = PtConfirmationType.YesNo) -> None:
+    """This will display a confirmation dialog to the user with the text `message`. This dialog
+       _has_ to be answered by the user, and their answer will be returned in a Notify message
+       or callback given by `cb`."""
+    ...
 
 class ptAgeInfoStruct:
     """Class to hold AgeInfo struct data"""
@@ -4177,6 +4187,10 @@ class ptGUIControlMultiLineEdit(ptGUIControl):
         """Clears all text from the multi-line edit control."""
         pass
 
+    def clearLink(self) -> None:
+        """Ends the hyperlink hotspot, if any, at the current cursor position."""
+        ...
+
     def clickable(self):
         """Sets this listbox to be clickable by the user."""
         pass
@@ -4228,6 +4242,14 @@ class ptGUIControlMultiLineEdit(ptGUIControl):
     def getBufferSize(self):
         """Returns the size of the buffer"""
         pass
+
+    def getCursor(self) -> int:
+        """Get the current position of the cursor in the encoded buffer."""
+        ...
+
+    def getCurrentLink(self) -> int:
+        """Returns the link the mouse is currently over."""
+        ...
 
     def getEncodedBuffer(self):
         """Returns the encoded buffer in a python buffer object. Do NOT use result with setEncodedBufferW."""
@@ -4294,6 +4316,10 @@ class ptGUIControlMultiLineEdit(ptGUIControl):
 'color' is a ptColor object."""
         pass
 
+    def insertLink(self, linkId: int) -> None:
+        """Inserts a link hotspot at the current cursor position."""
+        ...
+
     def insertString(self,string):
         """Inserts a string at the current cursor position."""
         pass
@@ -4325,6 +4351,10 @@ class ptGUIControlMultiLineEdit(ptGUIControl):
     def isLocked(self):
         """Is the multi-line edit control locked? Returns 1 if true otherwise returns 0"""
         pass
+
+    def isUpdating(self) -> bool:
+        """Is someone else already suppressing redraws of the control?"""
+        ...
 
     def isVisible(self):
         """Returns whether this GUI control is visible"""
@@ -9667,6 +9697,10 @@ class ptWaveSet:
         """None"""
         pass
 
+    def addBuoy(self, soKey: ptKey) -> None:
+        """Adds the specified object as a buoy"""
+        pass
+
     def getDepthFalloff(self):
         """Returns the attribute's value"""
         pass
@@ -9793,6 +9827,10 @@ class ptWaveSet:
 
     def getWindDir(self):
         """Returns the attribute's value"""
+        pass
+
+    def removeBuoy(self, soKey: ptKey) -> None:
+        """Removes the specified object as a buoy"""
         pass
 
     def setDepthFalloff(self,s, secs = 0):
@@ -9922,4 +9960,3 @@ class ptWaveSet:
     def setWindDir(self,s, secs = 0):
         """Sets the attribute to s over secs time"""
         pass
-

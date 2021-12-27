@@ -60,7 +60,7 @@ private:
     plKey fWaterKey;
 
 protected:
-    pyWaveSet(): fWaterKey(nil) {} // for python glue only, do NOT call
+    pyWaveSet() = default; // for python glue only, do NOT call
     pyWaveSet(plKey key);
     pyWaveSet(pyKey& key);
 
@@ -185,6 +185,13 @@ public:
 
     PyObject* GetEnvCenter() const; // returns pyPoint3
     float GetEnvRadius() const;
+
+    // ==============================================================================
+    // Buoy functions
+    // ==============================================================================
+
+    void AddBuoy(const pyKey& soKey) const;
+    void RemoveBuoy(const pyKey& soKey) const;
 };
 
 

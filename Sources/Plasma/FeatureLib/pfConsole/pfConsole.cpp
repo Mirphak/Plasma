@@ -46,36 +46,43 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //////////////////////////////////////////////////////////////////////////////
 
 #include "pfConsole.h"
-#include "pfConsoleCore/pfConsoleEngine.h"
 
 #include "HeadSpin.h"
-#include "plFileSystem.h"
 #include "plgDispatch.h"
+#include "plFileSystem.h"
 #include "plPipeline.h"
 #include "plProduct.h"
 #include "hsTimer.h"
+
+#include <set>
+#include <string_theory/format>
+#include <string_theory/string>
+#include <vector>
+
+#include "pnInputCore/plKeyDef.h"
+#include "pnInputCore/plKeyMap.h"
+#include "pnKeyedObject/plFixedKey.h"
+#include "pnNetCommon/plNetApp.h"
 
 #include "plGImage/plPNG.h"
 #include "plInputCore/plInputDevice.h"
 #include "plInputCore/plInputInterface.h"
 #include "plInputCore/plInputInterfaceMgr.h"
-#include "pnInputCore/plKeyDef.h"
-#include "pnInputCore/plKeyMap.h"
-#include "pnKeyedObject/plFixedKey.h"
-#include "plMessage/plInputEventMsg.h"
 #include "plMessage/plCaptureRenderMsg.h"
 #include "plMessage/plConsoleMsg.h"
+#include "plMessage/plInputEventMsg.h"
 #include "plMessage/plInputIfaceMgrMsg.h"
-#include "plNetClient/plNetClientMgr.h"
 #include "plPipeline/plDebugText.h"
+
+#include "pfConsoleCore/pfConsoleEngine.h"
 #include "pfPython/cyPythonInterface.h"
 
 
 //// Static Class Stuff //////////////////////////////////////////////////////
 
-pfConsole   *pfConsole::fTheConsole = nil;
+pfConsole   *pfConsole::fTheConsole = nullptr;
 uint32_t      pfConsole::fConsoleTextColor = 0xff00ff00;
-plPipeline  *pfConsole::fPipeline = nil;
+plPipeline  *pfConsole::fPipeline = nullptr;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -90,7 +97,7 @@ class pfConsoleInputInterface : public plInputInterface
 
 
 
-        virtual bool    IHandleCtrlCmd( plCtrlCmd *cmd )
+        bool    IHandleCtrlCmd(plCtrlCmd *cmd) override
         {
             if( cmd->fControlCode == B_SET_CONSOLE_MODE )
             {
@@ -137,14 +144,14 @@ class pfConsoleInputInterface : public plInputInterface
             // RestoreDefaultKeyMappings()!!!!
         }
 
-        virtual uint32_t  GetPriorityLevel() const          { return kConsolePriority; }
-        virtual uint32_t  GetCurrentCursorID() const        { return kCursorHidden; }
-        virtual bool    HasInterestingCursorID() const    { return false; }
+        uint32_t  GetPriorityLevel() const override { return kConsolePriority; }
+        uint32_t  GetCurrentCursorID() const override { return kCursorHidden; }
+        bool    HasInterestingCursorID() const override { return false; }
 
-        virtual bool    InterpretInputEvent( plInputEventMsg *pMsg )
+        bool    InterpretInputEvent(plInputEventMsg *pMsg) override
         {
             plKeyEventMsg   *keyMsg = plKeyEventMsg::ConvertNoRef( pMsg );
-            if( keyMsg != nil )
+            if (keyMsg != nullptr)
             {
                 if( fConsole->fMode )
                 {
@@ -156,13 +163,13 @@ class pfConsoleInputInterface : public plInputInterface
             return false;
         }
 
-        virtual void    RefreshKeyMap()
+        void    RefreshKeyMap() override
         {
         }
 
-        virtual void    RestoreDefaultKeyMappings()
+        void    RestoreDefaultKeyMappings() override
         {
-            if( fControlMap != nil )
+            if (fControlMap != nullptr)
             {
                 fControlMap->UnmapAllBindings();
 #ifndef PLASMA_EXTERNAL_RELEASE
@@ -176,32 +183,33 @@ class pfConsoleInputInterface : public plInputInterface
 //// Constructor & Destructor ////////////////////////////////////////////////
 
 pfConsole::pfConsole()
+    : fNumDisplayLines(32), fDisplayBuffer(), fFXEnabled(true), fEffectCounter(), fLastTime(),
+      fHelpTimer(), fMode(), fInited(), fHelpMode(), fCursorTicks(), fMsgTimeoutTimer(),
+      fPythonMode(), fPythonFirstTime(true), fPythonMultiLines(), fHistory(), fWorkingCursor(),
+      fInputInterface(), fEngine()
 {
-    fNumDisplayLines = 32;
-    fDisplayBuffer = nil;
     fTheConsole = this;
-    fFXEnabled = true;
 }
 
 pfConsole::~pfConsole()
 {
-    if( fInputInterface != nil )
+    if (fInputInterface != nullptr)
     {
         plInputIfaceMgrMsg *msg = new plInputIfaceMgrMsg( plInputIfaceMgrMsg::kRemoveInterface );
         msg->SetIFace( fInputInterface );
         plgDispatch::MsgSend( msg );
 
         hsRefCnt_SafeUnRef( fInputInterface );
-        fInputInterface = nil;
+        fInputInterface = nullptr;
     }
 
-    if( fDisplayBuffer != nil )
+    if (fDisplayBuffer != nullptr)
     {
         delete [] fDisplayBuffer;
-        fDisplayBuffer = nil;
+        fDisplayBuffer = nullptr;
     }
 
-    fTheConsole = nil;
+    fTheConsole = nullptr;
 
     plgDispatch::Dispatch()->UnRegisterForExactType( plConsoleMsg::Index(), GetKey() );
     plgDispatch::Dispatch()->UnRegisterForExactType( plControlEventMsg::Index(), GetKey() );
@@ -258,7 +266,6 @@ void    pfConsole::ISetMode( uint8_t mode )
 
 //// MsgReceive //////////////////////////////////////////////////////////////
 
-#include <algorithm>
 bool    pfConsole::MsgReceive( plMessage *msg )
 {
     // Handle screenshot saving...
@@ -272,12 +279,10 @@ bool    pfConsole::MsgReceive( plMessage *msg )
         ST::string pattern = ST::format("{}*.png", prefix);
         std::vector<plFileName> images = plFileSystem::ListDir(screenshots, pattern.c_str());
         std::set<uint32_t> indices;
-        std::for_each(images.begin(), images.end(),
-            [&] (const plFileName& fn) {
-                ST::string idx = fn.GetFileNameNoExt().substr(prefix.size());
-                indices.insert(idx.to_uint(10));
-            }
-        );
+        for (const auto& fn : images) {
+            ST::string idx = fn.GetFileNameNoExt().substr(prefix.size());
+            indices.insert(idx.to_uint(10));
+        }
 
         // Now that we have an ordered set of indices, save this screenshot to the first one we don't have.
         uint32_t num = 0;
@@ -295,9 +300,9 @@ bool    pfConsole::MsgReceive( plMessage *msg )
     }
 
     plControlEventMsg *ctrlMsg = plControlEventMsg::ConvertNoRef( msg );
-    if( ctrlMsg != nil )
+    if (ctrlMsg != nullptr)
     {
-        if( ctrlMsg->ControlActivated() && ctrlMsg->GetControlCode() == B_CONTROL_CONSOLE_COMMAND && plNetClientMgr::GetInstance()->GetFlagsBit(plNetClientMgr::kPlayingGame))
+        if( ctrlMsg->ControlActivated() && ctrlMsg->GetControlCode() == B_CONTROL_CONSOLE_COMMAND && plNetClientApp::GetInstance()->GetFlagsBit(plNetClientApp::kPlayingGame))
         {
             fEngine->RunCommand( ctrlMsg->GetCmdString(), IAddLineCallback );
             return true;
@@ -306,7 +311,7 @@ bool    pfConsole::MsgReceive( plMessage *msg )
     }
 
     plConsoleMsg *cmd = plConsoleMsg::ConvertNoRef( msg );
-    if( cmd != nil && cmd->GetString() != nil )
+    if (cmd != nullptr && !cmd->GetString().empty())
     {
         if( cmd->GetCmd() == plConsoleMsg::kExecuteFile )
         {
@@ -328,10 +333,12 @@ bool    pfConsole::MsgReceive( plMessage *msg )
             }
         }
         else if( cmd->GetCmd() == plConsoleMsg::kAddLine )
-            IAddParagraph( cmd->GetString() );
+            IAddParagraph( cmd->GetString().c_str() );
         else if( cmd->GetCmd() == plConsoleMsg::kExecuteLine )
         {
-            if( !fEngine->RunCommand( (char *)cmd->GetString(), IAddLineCallback ) )
+            ST::char_buffer cmdBuf;
+            cmd->GetString().to_buffer(cmdBuf);
+            if( !fEngine->RunCommand(cmdBuf.data(), IAddLineCallback))
             {
                 // Change the following line once we have a better way of reporting
                 // errors in the parsing
@@ -692,7 +699,8 @@ void    pfConsole::IHandleKey( plKeyEventMsg *msg )
             for( i = strlen( fWorkingLine ) + 1; i > fWorkingCursor; i-- )
                 fWorkingLine[ i ] = fWorkingLine[ i - 1 ];
 
-            fWorkingLine[ fWorkingCursor++ ] = key;
+            // TODO: What about keys outside of `char` range?
+            fWorkingLine[fWorkingCursor++] = char(key);
 
             findAgain = false;
             findCounter = 0;
@@ -753,7 +761,7 @@ void    pfConsole::IAddParagraph( const char *s, short margin )
         string += 2;
     }
 
-    for( ptr = string; ptr != nil && *ptr != 0; )
+    for (ptr = string; ptr != nullptr && *ptr != 0; )
     {
         // Go as far as possible
         if( strlen( ptr ) < kMaxCharsWide - margin - margin - 1 )
@@ -773,7 +781,7 @@ void    pfConsole::IAddParagraph( const char *s, short margin )
             ptr++;
             continue;
         }
-        if( ptr3 != nil && ptr3 < ptr2 )
+        if (ptr3 != nullptr && ptr3 < ptr2)
             ptr2 = ptr3;
 
         // Add this part
@@ -897,16 +905,16 @@ void    pfConsole::Draw( plPipeline *p )
             // Our concession to windows
 #ifdef HS_BUILD_FOR_WIN32
             #include "../../Apps/plClient/res/resource.h"
-            HRSRC rsrc = FindResource( nil, MAKEINTRESOURCE( IDR_CNSL1 ), "CNSL" );
-            if( rsrc != nil )
+            HRSRC rsrc = FindResource(nullptr, MAKEINTRESOURCE(IDR_CNSL1), "CNSL");
+            if (rsrc != nullptr)
             {
-                HGLOBAL hdl = LoadResource( nil, rsrc );
-                if( hdl != nil )
+                HGLOBAL hdl = LoadResource(nullptr, rsrc);
+                if (hdl != nullptr)
                 {
                     uint8_t *ptr = (uint8_t *)LockResource( hdl );
-                    if( ptr != nil )
+                    if (ptr != nullptr)
                     {
-                        for( i = 0; i < SizeofResource( nil, rsrc ); i++ )
+                        for (i = 0; i < SizeofResource(nullptr, rsrc); i++)
                             tmpSrc[ i ] = ptr[ i ] + 26;
                         UnlockResource( hdl );
                     }
@@ -987,7 +995,7 @@ void    pfConsole::IUpdateTooltip()
 
     strcpy( tmpStr, fWorkingLine );
     c = (char *)fEngine->GetCmdSignature( tmpStr );
-    if( c == nil || strcmp( c, fLastHelpMsg ) != 0 )
+    if (c == nullptr || strcmp(c, fLastHelpMsg) != 0)
     {
         /// Different--update timer to wait
         fHelpTimer = kHelpDelay;
@@ -1028,7 +1036,7 @@ void pfConsole::AddLineF(const char * fmt, ...) {
     char str[1024];
     va_list args;
     va_start(args, fmt);
-    hsVsnprintf(str, std::size(str), fmt, args);
+    vsnprintf(str, std::size(str), fmt, args);
     va_end(args);
     AddLine(str);
 }
@@ -1040,5 +1048,5 @@ void pfConsole::RunCommandAsync (const char cmd[]) {
     consoleMsg->SetCmd(plConsoleMsg::kExecuteLine);
     consoleMsg->SetString(cmd);
 //  consoleMsg->SetBreakBeforeDispatch(true);
-    consoleMsg->Send(nil, true);
+    consoleMsg->Send(nullptr, true);
 }

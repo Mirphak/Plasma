@@ -1,10 +1,9 @@
-add_definitions(-D_LIB)
+include_directories("${PLASMA_SOURCE_ROOT}/CoreLib")
+include_directories("${PLASMA_SOURCE_ROOT}/NucleusLib")
 
 add_subdirectory(inc)
 add_subdirectory(pnAsyncCore)
-if(WIN32)
-    add_subdirectory(pnAsyncCoreExe)
-endif()
+add_subdirectory(pnAsyncCoreExe)
 add_subdirectory(pnDispatch)
 add_subdirectory(pnEncryption)
 add_subdirectory(pnFactory)

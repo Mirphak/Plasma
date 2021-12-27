@@ -40,16 +40,17 @@ Mead, WA   99021
 
 *==LICENSE==*/
 
-#include "HeadSpin.h"
 #include "plClientLauncher.h"
+
+#include "HeadSpin.h"
+#include "plCmdParser.h"
 #include "plFileSystem.h"
 #include "plProduct.h"
 #include "hsThread.h"
 #include "hsTimer.h"
-#include "plCmdParser.h"
 
-#include "pnUtils/pnUtils.h"
 #include "pnAsyncCore/pnAsyncCore.h"
+
 #include "plNetGameLib/plNetGameLib.h"
 #include "plStatusLog/plStatusLog.h"
 
@@ -154,7 +155,7 @@ public:
     std::deque<plFileName> fRedistQueue;
 
     plRedistUpdater()
-        : fSuccess(true)
+        : fParent(), fSuccess(true)
     { }
 
     ~plRedistUpdater()
@@ -219,7 +220,7 @@ ST::string plClientLauncher::GetAppArgs() const
 {
     // If -Repair was specified, there are no args for the next call...
     if (hsCheckBits(fFlags, kRepairGame)) {
-        return ST::null;
+        return ST::string();
     }
 
     ST::string_stream ss;
@@ -233,6 +234,8 @@ ST::string plClientLauncher::GetAppArgs() const
         ss << " -PatchOnly";
     if (hsCheckBits(fFlags, kSkipLoginDialog))
         ss << " -SkipLoginDialog";
+    if (hsCheckBits(fFlags, kSkipIntroMovies))
+        ss << " -SkipIntroMovies";
 
     return ss.to_string();
 }
@@ -311,7 +314,7 @@ void plClientLauncher::PatchClient()
     patcher->Start();
 }
 
-bool plClientLauncher::CompleteSelfPatch(std::function<void()> waitProc) const
+bool plClientLauncher::CompleteSelfPatch(const std::function<void()>& waitProc) const
 {
     if (hsCheckBits(fFlags, kHaveSelfPatched))
         return false;
@@ -447,14 +450,15 @@ void plClientLauncher::ParseArguments()
         fFlags |= flag;
 
     enum { kArgServerIni, kArgNoSelfPatch, kArgImage, kArgRepairGame, kArgPatchOnly,
-           kArgSkipLoginDialog };
+           kArgSkipLoginDialog, kArgSkipIntroMovies };
     const plCmdArgDef cmdLineArgs[] = {
         { kCmdArgFlagged | kCmdTypeString, "ServerIni", kArgServerIni },
         { kCmdArgFlagged | kCmdTypeBool, "NoSelfPatch", kArgNoSelfPatch },
         { kCmdArgFlagged | kCmdTypeBool, "Image", kArgImage },
         { kCmdArgFlagged | kCmdTypeBool, "Repair", kArgRepairGame },
         { kCmdArgFlagged | kCmdTypeBool, "PatchOnly", kArgPatchOnly },
-        { kCmdArgFlagged | kCmdTypeBool, "SkipLoginDialog", kArgSkipLoginDialog }
+        { kCmdArgFlagged | kCmdTypeBool, "SkipLoginDialog", kArgSkipLoginDialog },
+        { kCmdArgFlagged | kCmdTypeBool, "SkipIntroMovies", kArgSkipIntroMovies }
     };
 
     std::vector<ST::string> args;
@@ -474,10 +478,11 @@ void plClientLauncher::ParseArguments()
     APPLY_FLAG(kArgRepairGame, kRepairGame);
     APPLY_FLAG(kArgPatchOnly, kPatchOnly);
     APPLY_FLAG(kArgSkipLoginDialog, kSkipLoginDialog);
+    APPLY_FLAG(kArgSkipIntroMovies, kSkipIntroMovies);
 
     // last chance setup
     if (hsCheckBits(fFlags, kPatchOnly))
-        fClientExecutable = ST::null;
+        fClientExecutable = plFileName();
     else if (hsCheckBits(fFlags, kRepairGame))
         fClientExecutable = plManifest::PatcherExecutable();
 
@@ -486,15 +491,15 @@ void plClientLauncher::ParseArguments()
 
 void plClientLauncher::SetErrorProc(ErrorFunc proc)
 {
-    s_errorProc = proc;
+    s_errorProc = std::move(proc);
 }
 
 void plClientLauncher::SetInstallerProc(InstallRedistFunc proc)
 {
-    fInstallerThread->fInstallProc = proc;
+    fInstallerThread->fInstallProc = std::move(proc);
 }
 
 void plClientLauncher::SetShardProc(StatusFunc proc)
 {
-    fStatusThread->fShardFunc = proc;
+    fStatusThread->fShardFunc = std::move(proc);
 }

@@ -42,12 +42,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "plPythonSDLModifier.h"
 #include "cyPythonInterface.h"
 
 #include "plPythonFileMod.h"
+#include "pyObjectRef.h"
 #include "cyMisc.h"
 
 #include "pnSceneObject/plSceneObject.h"
@@ -62,7 +62,7 @@ plStateDataRecord * GetAgeSDL()
     const plPythonSDLModifier * mod = plPythonSDLModifier::FindAgeSDL();
     if ( mod )
         return mod->GetStateCache();
-    return nil;
+    return nullptr;
 }
 
 
@@ -156,19 +156,22 @@ void plPythonSDLModifier::SetItem(const ST::string& key, PyObject* value)
 template<>
 void plPythonSDLModifier::SetItem(const ST::string& key, int index, bool value)
 {
-    SetItemIdx(key, index, PyBool_FromLong(value), true);
+    pyObjectRef pyValue = PyBool_FromLong(value ? 1 : 0);
+    SetItemIdx(key, index, pyValue.Get(), true);
 }
 
 template<>
 void plPythonSDLModifier::SetItem(const ST::string& key, int index, float value)
 {
-    SetItemIdx(key, index, PyFloat_FromDouble(value), true);
+    pyObjectRef pyValue = PyFloat_FromDouble(value);
+    SetItemIdx(key, index, pyValue.Get(), true);
 }
 
 template<>
 void plPythonSDLModifier::SetItem(const ST::string& key, int index, int value)
 {
-    SetItemIdx(key, index, PyLong_FromLong(value), true);
+    pyObjectRef pyValue = PyLong_FromLong(value);
+    SetItemIdx(key, index, pyValue.Get(), true);
 }
 
 void plPythonSDLModifier::SetDefault(const ST::string& key, PyObject* value)
@@ -504,7 +507,7 @@ PyObject* plPythonSDLModifier::ISDLVarToPython(plSimpleStateVariable* var)
 
 bool plPythonSDLModifier::HasSDL(const ST::string& pythonFile)
 {
-    return (plSDLMgr::GetInstance()->FindDescriptor(pythonFile, plSDL::kLatestVersion) != nil);
+    return (plSDLMgr::GetInstance()->FindDescriptor(pythonFile, plSDL::kLatestVersion) != nullptr);
 }
 
 const plSDLModifier* ExternFindAgeSDL()

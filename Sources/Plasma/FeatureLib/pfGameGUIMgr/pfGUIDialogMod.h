@@ -48,17 +48,19 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef _pfGUIDialogMod_h
 #define _pfGUIDialogMod_h
 
-
-#include "pnModifier/plSingleModifier.h"
-#include "pfGameGUIMgr.h"
 #include "hsMatrix44.h"
 
-class plMessage;
-class plPostEffectMod;
+#include "pfGameGUIMgr.h"
+
+#include "pnKeyedObject/plKey.h"
+#include "pnModifier/plSingleModifier.h"
+
+class pfGUIColorScheme;
 class pfGUIControlMod;
 class pfGUIDialogProc;
 class pfGUIListElement;
-class pfGUIColorScheme;
+class plMessage;
+class plPostEffectMod;
 
 class pfGUIDialogMod : public plSingleModifier
 {
@@ -73,8 +75,8 @@ class pfGUIDialogMod : public plSingleModifier
 
         plPostEffectMod             *fRenderMod;
         bool                        fEnabled;
-        char                        fName[ 128 ];
-        hsTArray<pfGUIControlMod *> fControls;
+        ST::string                  fName;
+        std::vector<pfGUIControlMod *> fControls;
         pfGUIControlMod             *fControlOfInterest;
         pfGUIControlMod             *fFocusCtrl;
         pfGUIControlMod             *fMousedCtrl;   // Which one is the mouse over?
@@ -83,7 +85,7 @@ class pfGUIDialogMod : public plSingleModifier
         pfGUIDialogProc             *fHandler;
         plKey                       fProcReceiver;      // Non-nil means we handle everything by creating notify messages and sending them to this key
 
-        hsTArray<pfGUIListElement *>    fDragElements;
+        std::vector<pfGUIListElement *> fDragElements;
         bool                            fDragMode, fDragReceptive;
         pfGUIControlMod                 *fDragTarget;
         pfGUIControlMod                 *fDragSource;
@@ -91,7 +93,7 @@ class pfGUIDialogMod : public plSingleModifier
         plKey           fSceneNodeKey;
 
 
-        virtual bool IEval( double secs, float del, uint32_t dirty ); // called only by owner object's Eval()
+        bool IEval(double secs, float del, uint32_t dirty) override; // called only by owner object's Eval()
 
         void    IHandleDrag( hsPoint3 &mousePt, pfGameGUIMgr::EventType event, uint8_t modifiers );
 
@@ -117,10 +119,10 @@ class pfGUIDialogMod : public plSingleModifier
         GETINTERFACE_ANY( pfGUIDialogMod, plSingleModifier );
 
 
-        virtual bool    MsgReceive( plMessage* pMsg );
+        bool    MsgReceive(plMessage* pMsg) override;
         
-        virtual void Read( hsStream* s, hsResMgr* mgr );
-        virtual void Write( hsStream* s, hsResMgr* mgr );
+        void Read(hsStream* s, hsResMgr* mgr) override;
+        void Write(hsStream* s, hsResMgr* mgr) override;
 
         void        SetSceneNodeKey( plKey &key ) { fSceneNodeKey = key; }
         plKey       GetSceneNodeKey();
@@ -128,7 +130,7 @@ class pfGUIDialogMod : public plSingleModifier
         virtual void    SetEnabled( bool e );
         bool            IsEnabled() { return fEnabled; }
 
-        const char  *GetName() { return fName; }
+        ST::string GetName() const { return fName; }
 
         void        ScreenToWorldPoint( float x, float y, float z, hsPoint3 &outPt );
         hsPoint3    WorldToScreenPoint( const hsPoint3 &inPt );
@@ -147,8 +149,8 @@ class pfGUIDialogMod : public plSingleModifier
         void        RefreshAllControls();
 
         void            AddControl( pfGUIControlMod *ctrl );
-        uint32_t          GetNumControls() { return fControls.GetCount(); }
-        pfGUIControlMod *GetControl( uint32_t idx ) { return fControls[ idx ]; }
+        size_t          GetNumControls() const { return fControls.size(); }
+        pfGUIControlMod *GetControl(size_t idx) { return fControls[idx]; }
 
         pfGUIColorScheme    *GetColorScheme() const { return fColorScheme; }
 
@@ -167,8 +169,8 @@ class pfGUIDialogMod : public plSingleModifier
                 fNext->fPrevPtr = fPrevPtr;
             *fPrevPtr = fNext;
 
-            fPrevPtr = nil;
-            fNext = nil;
+            fPrevPtr = nullptr;
+            fNext = nullptr;
         }
 
         void            SetFocus( pfGUIControlMod *ctrl );
@@ -180,8 +182,8 @@ class pfGUIDialogMod : public plSingleModifier
         pfGUIControlMod *GetFocus() { return fFocusCtrl; }
 
         pfGUIDialogMod  *GetNext() { return fNext; }
-        uint32_t          GetTagID() { return fTagID; }
-        pfGUIControlMod *GetControlFromTag( uint32_t tagID );
+        uint32_t          GetTagID() const { return fTagID; }
+        pfGUIControlMod *GetControlFromTag( uint32_t tagID ) const;
 
         void            SetHandler( pfGUIDialogProc *hdlr );
         pfGUIDialogProc *GetHandler() const { return fHandler; }
@@ -204,10 +206,10 @@ class pfGUIDialogMod : public plSingleModifier
 
         // Export only
         void        SetRenderMod( plPostEffectMod *mod ) { fRenderMod = mod; }
-        void        SetName( const char *name ) { hsStrncpy( fName, name, sizeof( fName ) - 1 ); }
+        void        SetName( ST::string name ) { fName = std::move(name); }
         void        AddControlOnExport( pfGUIControlMod *ctrl );
         void        SetTagID( uint32_t id ) { fTagID = id; }
-        void        SetProcReceiver( plKey key ) { fProcReceiver = key; }
+        void        SetProcReceiver( plKey key ) { fProcReceiver = std::move(key); }
         void        SetVersion( uint32_t version ) { fVersion = version; }
 };
 

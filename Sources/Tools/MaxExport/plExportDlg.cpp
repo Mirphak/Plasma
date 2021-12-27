@@ -41,17 +41,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include "HeadSpin.h"
-#include "hsWindows.h"
 #include "hsStream.h"
 
-#include <bitmap.h>
-#include <iparamb2.h>
-#include <max.h>
+#include "MaxMain/MaxAPI.h"
 
 #include <set>
 #include <string>
 #include <vector>
-#pragma hdrstop
 
 #include "plExportDlg.h"
 #include "MaxComponent/plComponentBase.h"
@@ -70,7 +66,7 @@ protected:
     bool fPreshade;
     bool fPhysicalsOnly;
     bool fLightMap;
-    char fExportPage[256];
+    TCHAR fExportPage[256];
     plFileName fExportSourceDir;
     bool fExporting;
     bool fAutoExporting;
@@ -80,12 +76,12 @@ protected:
 
     DWORD fLastExportTime;
 
-    static BOOL CALLBACK ForwardDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-    BOOL DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+    static INT_PTR CALLBACK ForwardDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+    INT_PTR DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
     void IDestroy();
 
-    void IExportCurrentFile(const char* exportPath);
+    void IExportCurrentFile(const TCHAR* exportPath);
     void IDoExport();
 
     void IInitDlg(HWND hDlg);
@@ -93,29 +89,30 @@ protected:
 
 public:
     plExportDlgImp();
-    ~plExportDlgImp();
 
-    virtual void Show();
+    void Show() override;
 
-    virtual bool IsExporting() { return fExporting; }
-    virtual bool IsAutoExporting() { return fAutoExporting; }
+    bool IsExporting() override { return fExporting; }
+    bool IsAutoExporting() override { return fAutoExporting; }
 
-    virtual bool GetDoPreshade() { return fPreshade; }
-    virtual bool GetPhysicalsOnly() { return fPhysicalsOnly; }
-    virtual bool GetDoLightMap() { return fLightMap; }
-    virtual const char* GetExportPage();
+    bool GetDoPreshade() override { return fPreshade; }
+    bool GetPhysicalsOnly() override { return fPhysicalsOnly; }
+    bool GetDoLightMap() override { return fLightMap; }
+    const TCHAR* GetExportPage() override;
 
-    virtual void StartAutoExport();
+    void StartAutoExport() override;
 };
 
-plExportDlgImp::plExportDlgImp() : fDlg(NULL), fPreshade(true), fPhysicalsOnly(false), fLightMap(true), fLastExportTime(0), fExporting(false), fAutoExporting(false)
+plExportDlgImp::plExportDlgImp()
+    : fDlg(), fPreshade(true), fPhysicalsOnly(false), fLightMap(true),
+      fLastExportTime(), fExporting(false), fAutoExporting(false)
 {
     plFileName path = plMaxConfig::GetPluginIni();
     fXPos = GetPrivateProfileIntW(L"Export", L"X", 0, path.WideString().data());
     fYPos = GetPrivateProfileIntW(L"Export", L"Y", 30, path.WideString().data());
 
     wchar_t buffer[MAX_PATH];
-    GetPrivateProfileStringW(L"Export", L"Dir", L"", buffer, sizeof(buffer),
+    GetPrivateProfileStringW(L"Export", L"Dir", L"", buffer, std::size(buffer),
                              path.WideString().data());
     fExportSourceDir = ST::string::from_wchar(buffer);
 
@@ -125,19 +122,9 @@ plExportDlgImp::plExportDlgImp() : fDlg(NULL), fPreshade(true), fPhysicalsOnly(f
 BOOL WritePrivateProfileIntW(LPCWSTR lpAppName, LPCWSTR lpKeyName, int val, LPCWSTR lpFileName)
 {
     wchar_t buf[12];
-    snwprintf(buf, 12, L"%d", val);
+    swprintf(buf, 12, L"%d", val);
 
     return WritePrivateProfileStringW(lpAppName, lpKeyName, buf, lpFileName);
-}
-
-plExportDlgImp::~plExportDlgImp()
-{
-    plFileName path = plMaxConfig::GetPluginIni();
-    WritePrivateProfileIntW(L"Export", L"X", fXPos, path.WideString().data());
-    WritePrivateProfileIntW(L"Export", L"Y", fYPos, path.WideString().data());
-
-    WritePrivateProfileStringW(L"Export", L"Dir", fExportSourceDir.WideString().data(),
-                               path.WideString().data());
 }
 
 plExportDlg& plExportDlg::Instance()
@@ -146,15 +133,15 @@ plExportDlg& plExportDlg::Instance()
     return theInstance;
 }
 
-BOOL plExportDlgImp::ForwardDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+INT_PTR plExportDlgImp::ForwardDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     return ((plExportDlgImp&)Instance()).DlgProc(hDlg, msg, wParam, lParam);
 }
 
-const char* plExportDlgImp::GetExportPage()
+const TCHAR* plExportDlgImp::GetExportPage()
 {
-    if (fExportPage[0] == '\0')
-        return nil;
+    if (fExportPage[0] == _T('\0'))
+        return nullptr;
     else
         return fExportPage;
 }
@@ -176,7 +163,7 @@ static void GetPagesRecur(plMaxNode* node, CompSet& comps)
         GetPagesRecur((plMaxNode*)node->GetChildNode(i), comps);
 }
 
-static const char* kAllPages = "(All Pages)";
+static const TCHAR* kAllPages = _T("(All Pages)");
 
 void plExportDlgImp::IGetRadio(HWND hDlg)
 {
@@ -192,18 +179,17 @@ void plExportDlgImp::IInitDlg(HWND hDlg)
 {
     // Set the client path
     plFileName path = plMaxConfig::GetClientPath(false, true);
-    SetDlgItemText(hDlg, IDC_CLIENT_PATH, path.AsString().c_str());
+    SetDlgItemTextW(hDlg, IDC_CLIENT_PATH, path.AsString().to_wchar().data());
 
     // Set the preshade button
     CheckDlgButton(hDlg, IDC_PRESHADE_CHECK, fPreshade ? BST_CHECKED : BST_UNCHECKED);
     CheckDlgButton(hDlg, IDC_PHYSICAL_CHECK, fPhysicalsOnly ? BST_CHECKED : BST_UNCHECKED);
     CheckDlgButton(hDlg, IDC_LIGHTMAP_CHECK, fLightMap ? BST_CHECKED : BST_UNCHECKED);
 
-    char buf[256];
-    sprintf(buf, "Last export took %d:%02d", fLastExportTime/60, fLastExportTime%60);
-    SetDlgItemText(hDlg, IDC_LAST_EXPORT, buf);
+    ST::string msg = ST::format("Last export took {d}:{02d}", fLastExportTime / 60, fLastExportTime % 60);
+    SetDlgItemTextW(hDlg, IDC_LAST_EXPORT, msg.to_wchar().data());
 
-    SetWindowPos(hDlg, NULL, fXPos, fYPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+    SetWindowPos(hDlg, nullptr, fXPos, fYPos, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 
     //
     // Get the names of all the pages in this scene and put them in the combo
@@ -217,11 +203,11 @@ void plExportDlgImp::IInitDlg(HWND hDlg)
     GetPagesRecur((plMaxNode*)GetCOREInterface()->GetRootNode(), comps);
     for (CompSet::iterator it = comps.begin(); it != comps.end(); it++)
     {
-        const char* page = LocCompGetPage(*it);
+        const TCHAR* page = LocCompGetPage(*it);
         if (page)
         {
             int idx = ComboBox_AddString(hPages, page);
-            if (!strcmp(page, fExportPage))
+            if (_tcscmp(page, fExportPage) == 0)
             {
                 foundPage = true;
                 ComboBox_SetCurSel(hPages, idx);
@@ -231,7 +217,7 @@ void plExportDlgImp::IInitDlg(HWND hDlg)
 
     if (!foundPage)
     {
-        fExportPage[0] = '\0';
+        fExportPage[0] = _T('\0');
         ComboBox_SetCurSel(hPages, 0);
     }
 
@@ -243,7 +229,7 @@ void plExportDlgImp::IInitDlg(HWND hDlg)
 
 #include "plFile/plBrowseFolder.h"
 
-BOOL plExportDlgImp::DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+INT_PTR plExportDlgImp::DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
     {
@@ -310,10 +296,10 @@ BOOL plExportDlgImp::DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
                 int sel = ComboBox_GetCurSel((HWND)lParam);
                 // If the user selected a page, save it
                 if (sel != 0 && sel != CB_ERR)
-                    ComboBox_GetText((HWND)lParam, fExportPage, sizeof(fExportPage));
+                    ComboBox_GetText((HWND)lParam, fExportPage, std::size(fExportPage));
                 // Else, clear it (export all pages)
                 else
-                    fExportPage[0] = '\0';
+                    fExportPage[0] = _T('\0');
                 return TRUE;
             }
         }
@@ -323,7 +309,7 @@ BOOL plExportDlgImp::DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
     return FALSE;
 }
 
-void plExportDlgImp::IExportCurrentFile(const char* exportPath)
+void plExportDlgImp::IExportCurrentFile(const TCHAR* exportPath)
 {
     // Delete the old prd so we don't get the stupid overwrite warning
     DeleteFile(exportPath);
@@ -347,14 +333,14 @@ void plExportDlgImp::IDoExport()
     DWORD exportTime = timeGetTime();
 
     if (fExportFile)
-        IExportCurrentFile(exportPath.AsString().c_str());
+        IExportCurrentFile(ST2T(exportPath.AsString()));
     else
     {
         std::vector<plFileName> sources = plFileSystem::ListDir(fExportSourceDir, "*.max");
         for (auto iter = sources.begin(); iter != sources.end(); ++iter)
         {
-            if (GetCOREInterface()->LoadFromFile(iter->AsString().c_str()))
-                IExportCurrentFile(exportPath.AsString().c_str());
+            if (GetCOREInterface()->LoadFromFile(ST2M(iter->AsString())))
+                IExportCurrentFile(ST2T(exportPath.AsString()));
         }
     }
 
@@ -376,7 +362,12 @@ void plExportDlgImp::IDestroy()
         fYPos = rect.top;
 
         DestroyWindow(fDlg);
-        fDlg = NULL;
+        fDlg = nullptr;
+
+        plFileName path = plMaxConfig::GetPluginIni();
+        WritePrivateProfileIntW(L"Export", L"X", fXPos, path.WideString().data());
+        WritePrivateProfileIntW(L"Export", L"Y", fYPos, path.WideString().data());
+        WritePrivateProfileStringW(L"Export", L"Dir", fExportSourceDir.WideString().data(), path.WideString().data());
     }
 }
 
@@ -397,19 +388,14 @@ static bool IsExcluded(const plFileName& fileName, std::vector<plFileName>& excl
     return false;
 }
 
-static bool AutoExportDir(const char* inputDir, const char* outputDir, const plFileName& groupFiles, std::vector<plFileName>& excludeFiles)
+static bool AutoExportDir(const plFileName& inputDir, const plFileName& outputDir, const plFileName& groupFiles, std::vector<plFileName>& excludeFiles)
 {
     bool exportedFile = false;
 
-    char outputFileName[MAX_PATH];
-    sprintf(outputFileName, "%s\\Export.prd", outputDir);
-
-    char outputLog[MAX_PATH];
-    sprintf(outputLog, "%s\\AutoExport.log", outputDir);
-    
-    char doneDir[MAX_PATH];
-    sprintf(doneDir, "%s\\Done\\", inputDir);
-    CreateDirectory(doneDir, NULL);
+    plFileName outputFileName = plFileName::Join(outputDir, "Export.prd");
+    plFileName outputLog = plFileName::Join(outputDir, ST_LITERAL("AutoExport.log"));
+    plFileName doneDir = plFileName::Join(inputDir, ST_LITERAL("Done"));
+    plFileSystem::CreateDir(doneDir);
 
     // Don't give missing bitmap warnings
     TheManager->SetSilentMode(TRUE);
@@ -431,11 +417,11 @@ static bool AutoExportDir(const char* inputDir, const char* outputDir, const plF
             log.Close();
         }
 
-        if (GetCOREInterface()->LoadFromFile(iter->AsString().c_str()))
+        if (GetCOREInterface()->LoadFromFile(ST2M(iter->AsString())))
         {
             plFileSystem::Move(*iter, plFileName::Join(inputDir, "Done", iter->GetFileName()));
 
-            GetCOREInterface()->ExportToFile(outputFileName, TRUE);
+            GetCOREInterface()->ExportToFile(ST2M(outputFileName.AsString()), TRUE);
             exportedFile = true;
 
             // If we're not doing grouped files, this is it, we exported our one file
@@ -463,34 +449,44 @@ static void ShutdownMax()
     PostMessage(GetCOREInterface()->GetMAXHWnd(), WM_CLOSE, 0, 0);
 }
 
-static void GetFileNameSection(const char* configFile, const char* keyName, std::vector<plFileName>& strings)
+static void GetFileNameSection(const wchar_t* configFile, const wchar_t* keyName, std::vector<plFileName>& strings)
 {
-    char source[256];
-    GetPrivateProfileString("Settings", keyName, "", source, sizeof(source), configFile);
+    wchar_t source[256];
+    GetPrivateProfileStringW(L"Settings", keyName, L"", source, std::size(source), configFile);
 
-    char* seps = ",";
-    char* token = strtok(source, seps);
-    while (token != NULL)
+    wchar_t* seps = L",";
+    wchar_t* state = nullptr;
+    wchar_t* token = wcstok(source, seps, &state);
+    while (token != nullptr)
     {
-        strings.push_back(token);
-        token = strtok(NULL, seps);
+        strings.emplace_back(ST::string::from_wchar(token));
+        token = wcstok(nullptr, seps, &state);
     }
 }
 
 void plExportDlgImp::StartAutoExport()
 {
-    char configFile[MAX_PATH];
-    strcpy(configFile, GetCOREInterface()->GetDir(APP_PLUGCFG_DIR));
-    strcat(configFile, "\\AutoExport.ini");
+    plFileName configFile = plFileName::Join(
+        M2ST(GetCOREInterface()->GetDir(APP_PLUGCFG_DIR)),
+        ST_LITERAL("AutoExport.ini")
+    );
+    auto configFileBuf = configFile.WideString();
 
-    char inputDir[MAX_PATH];
-    GetPrivateProfileString("Settings", "MaxInputDir", "", inputDir, sizeof(inputDir), configFile);
+    wchar_t inputDirBuf[MAX_PATH];
+    DWORD inputDirSz = GetPrivateProfileStringW(L"Settings", L"MaxInputDir", L"",
+        inputDirBuf, std::size(inputDirBuf), configFileBuf.data()
+    );
 
-    char outputDir[MAX_PATH];
-    GetPrivateProfileString("Settings", "MaxOutputDir", "", outputDir, sizeof(outputDir), configFile);
+    wchar_t outputDirBuf[MAX_PATH];
+    DWORD outputDirSz = GetPrivateProfileStringW(L"Settings", L"MaxOutputDir", L"",
+        outputDirBuf, std::size(outputDirBuf), configFileBuf.data()
+    );
 
-    if (inputDir[0] == '\0' || outputDir[0] == '\0')
+    if (inputDirBuf[0] == L'\0' || outputDirBuf[0] == L'\0')
         return;
+
+    plFileName inputDir = ST::string::from_wchar(inputDirBuf, inputDirSz);
+    plFileName outputDir = ST::string::from_wchar(outputDirBuf, outputDirSz);
 
     fAutoExporting = true;
 
@@ -499,13 +495,13 @@ void plExportDlgImp::StartAutoExport()
 
     // Files to ignore
     std::vector<plFileName> excludeFiles;
-    GetFileNameSection(configFile, "ExcludeFiles", excludeFiles);
+    GetFileNameSection(configFileBuf.data(), L"ExcludeFiles", excludeFiles);
 
     //
     // Get the file substrings to export in one session
     //
     std::vector<plFileName> groupedFiles;
-    GetFileNameSection(configFile, "GroupedFiles", groupedFiles);
+    GetFileNameSection(configFileBuf.data(), L"GroupedFiles", groupedFiles);
 
     for (int i = 0; i < groupedFiles.size(); i++)
     {
@@ -517,14 +513,14 @@ void plExportDlgImp::StartAutoExport()
         }
     }
 
-    if (AutoExportDir(inputDir, outputDir, "", excludeFiles))
+    if (AutoExportDir(inputDir, outputDir, {}, excludeFiles))
     {
         ShutdownMax();
         fAutoExporting = false;
         return;
     }
 
-    DeleteFile(configFile);
+    plFileSystem::Unlink(configFile);
 
     fAutoExporting = false;
     ShutdownMax();

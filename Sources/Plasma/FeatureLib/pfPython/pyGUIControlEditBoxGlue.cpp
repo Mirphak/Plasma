@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pyGUIControlEditBox.h"
 #include "pyColor.h"
@@ -55,7 +54,7 @@ PYTHON_DEFAULT_DEALLOC_DEFINITION(ptGUIControlEditBox)
 
 PYTHON_INIT_DEFINITION(ptGUIControlEditBox, args, keywords)
 {
-    PyObject *keyObject = NULL;
+    PyObject *keyObject = nullptr;
     if (!PyArg_ParseTuple(args, "O", &keyObject))
     {
         PyErr_SetString(PyExc_TypeError, "__init__ expects a ptKey");
@@ -120,12 +119,9 @@ PYTHON_METHOD_DEFINITION(ptGUIControlEditBox, setStringW, args)
     }
     if (PyUnicode_Check(textObj))
     {
-        int strLen = PyUnicode_GetSize(textObj);
-        wchar_t* text = new wchar_t[strLen + 1];
-        PyUnicode_AsWideChar(textObj, text, strLen);
-        text[strLen] = L'\0';
+        wchar_t* text = PyUnicode_AsWideCharString(textObj, nullptr);
         self->fThis->SetTextW(text);
-        delete [] text;
+        PyMem_Free(text);
         PYTHON_RETURN_NONE;
     }
     else
@@ -140,8 +136,8 @@ PYTHON_BASIC_METHOD_DEFINITION(ptGUIControlEditBox, end, SetCursorToEnd)
 
 PYTHON_METHOD_DEFINITION(ptGUIControlEditBox, setColor, args)
 {
-    PyObject* foreColorObj = NULL;
-    PyObject* backColorObj = NULL;
+    PyObject* foreColorObj = nullptr;
+    PyObject* backColorObj = nullptr;
     if (!PyArg_ParseTuple(args, "OO", &foreColorObj, &backColorObj))
     {
         PyErr_SetString(PyExc_TypeError, "setColor expects two ptColor objects");
@@ -160,8 +156,8 @@ PYTHON_METHOD_DEFINITION(ptGUIControlEditBox, setColor, args)
 
 PYTHON_METHOD_DEFINITION(ptGUIControlEditBox, setSelectionColor, args)
 {
-    PyObject* foreColorObj = NULL;
-    PyObject* backColorObj = NULL;
+    PyObject* foreColorObj = nullptr;
+    PyObject* backColorObj = nullptr;
     if (!PyArg_ParseTuple(args, "OO", &foreColorObj, &backColorObj))
     {
         PyErr_SetString(PyExc_TypeError, "setSelectionColor expects two ptColor objects");
@@ -255,15 +251,15 @@ PLASMA_DEFAULT_TYPE_WBASE(ptGUIControlEditBox, pyGUIControl, "Params: ctrlKey\nP
 // required functions for PyObject interoperability
 PyObject *pyGUIControlEditBox::New(pyKey& gckey)
 {
-    ptGUIControlEditBox *newObj = (ptGUIControlEditBox*)ptGUIControlEditBox_type.tp_new(&ptGUIControlEditBox_type, NULL, NULL);
+    ptGUIControlEditBox *newObj = (ptGUIControlEditBox*)ptGUIControlEditBox_type.tp_new(&ptGUIControlEditBox_type, nullptr, nullptr);
     newObj->fThis->fGCkey = gckey.getKey();
     return (PyObject*)newObj;
 }
 
 PyObject *pyGUIControlEditBox::New(plKey objkey)
 {
-    ptGUIControlEditBox *newObj = (ptGUIControlEditBox*)ptGUIControlEditBox_type.tp_new(&ptGUIControlEditBox_type, NULL, NULL);
-    newObj->fThis->fGCkey = objkey;
+    ptGUIControlEditBox *newObj = (ptGUIControlEditBox*)ptGUIControlEditBox_type.tp_new(&ptGUIControlEditBox_type, nullptr, nullptr);
+    newObj->fThis->fGCkey = std::move(objkey);
     return (PyObject*)newObj;
 }
 

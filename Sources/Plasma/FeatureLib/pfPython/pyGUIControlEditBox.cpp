@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pfGameGUIMgr/pfGUIEditBoxMod.h"
 
@@ -53,7 +52,7 @@ pyGUIControlEditBox::pyGUIControlEditBox(pyKey& gckey) : pyGUIControl(gckey)
 {
 }
 
-pyGUIControlEditBox::pyGUIControlEditBox(plKey objkey) : pyGUIControl(objkey)
+pyGUIControlEditBox::pyGUIControlEditBox(plKey objkey) : pyGUIControl(std::move(objkey))
 {
 }
 

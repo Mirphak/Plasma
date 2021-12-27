@@ -48,13 +48,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 // PURPOSE: Class wrapper to map animation functions to plasma2 message
 //
-#include <string>
-#include "hsTemplates.h"
 #include "plFileSystem.h"
+
 #include "pnKeyedObject/plKey.h"
 
 #include "pyGlueHelpers.h"
 
+#include <string>
 
 class pySceneObject;
 class pyColor;
@@ -67,18 +67,18 @@ class cyAvatar
 {
 protected:
     plKey           fSender;
-    hsTArray<plKey> fRecvr;
+    std::vector<plKey> fRecvr;
     bool          fNetForce;
 
-    virtual const plArmatureMod* IFindArmatureMod(plKey avObj);
-    virtual plKey IFindArmatureModKey(plKey avObj);
+    virtual const plArmatureMod* IFindArmatureMod(const plKey& avObj);
+    virtual plKey IFindArmatureModKey(const plKey& avObj);
     
 // XX   static bool IEnterGenericMode(const char *enterAnim, const char *idleAnim, const char *exitAnim, bool autoExit);
 // XX   static bool IExitTopmostGenericMode();
 
 protected:
-    cyAvatar() {}
-    cyAvatar(plKey sender,plKey recvr=nil);
+    cyAvatar() : fNetForce() { }
+    cyAvatar(plKey sender, plKey recvr=nullptr);
 
 public:
     virtual ~cyAvatar() { }
@@ -86,7 +86,7 @@ public:
     // required functions for PyObject interoperability
     PYTHON_CLASS_NEW_FRIEND(ptAvatar);
     PYTHON_CLASS_NEW_DEFINITION;
-    static PyObject* New(PyObject* sender, PyObject* recvr = nil);
+    static PyObject* New(PyObject* sender, PyObject* recvr = nullptr);
     PYTHON_CLASS_CHECK_DEFINITION; // returns true if the PyObject is a cyAvatar object
     PYTHON_CLASS_CONVERT_FROM_DEFINITION(cyAvatar); // converts a PyObject to a cyAvatar (throws error if not correct type)
 
@@ -95,8 +95,8 @@ public:
     static void AddPlasmaConstantsClasses(PyObject *m);
 
     // setters
-    void SetSender(plKey &sender);
-    void AddRecvr(plKey &recvr);
+    void SetSender(plKey sender);
+    void AddRecvr(plKey recvr);
     virtual void SetNetForce(bool state) { fNetForce = state; }
 
     // oneShot Avatar (must already be there)
@@ -119,7 +119,7 @@ public:
     // static behavior functions:
     static void SetLoopCount(pyKey &behKey, int32_t stage, int32_t loopCount, bool netForce);
 
-    virtual void SetSenderKey(pyKey &pKey);
+    virtual void SetSenderKey(const pyKey &pKey);
 
     // seek Avatar (must already be there)
     //virtual void Seek(pyKey &seekKey, float duration, bool usePhysics);

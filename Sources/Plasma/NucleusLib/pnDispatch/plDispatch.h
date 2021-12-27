@@ -45,24 +45,20 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <list>
 #include <mutex>
-#include "hsTemplates.h"
 #include "plgDispatch.h"
 #include "hsThread.h"
 #include "pnKeyedObject/hsKeyedObject.h"
-
-#pragma warning(disable: 4284)
 
 class hsResMgr;
 class plMessage;
 class plKey;
 
-class plTypeFilter
+struct plTypeFilter
 {
-public:
-    plTypeFilter() : fHClass(0) {}
+    plTypeFilter() : fHClass() { }
 
-    uint16_t              fHClass;
-    hsTArray<plKey>     fReceivers;
+    uint16_t            fHClass;
+    std::vector<plKey>  fReceivers;
 };
 
 class plMsgWrap;
@@ -83,19 +79,19 @@ protected:
     static plMsgWrap*               fMsgHead;
     static plMsgWrap*               fMsgTail;
     static bool                     fMsgActive;
-    static hsTArray<plMessage*>     fMsgWatch;
+    static std::vector<plMessage*>  fMsgWatch;
     static MsgRecieveCallback       fMsgRecieveCallback;
 
-    hsTArray<plTypeFilter*>         fRegisteredExactTypes;
+    std::vector<plTypeFilter*>      fRegisteredExactTypes;
     std::list<plMessage*>           fQueuedMsgList;
     std::mutex                      fQueuedMsgListMutex; // mutex for above
     bool                            fQueuedMsgOn;       // Turns on or off Queued Messages, Plugins need them off
 
     hsKeyedObject*                  IGetOwner() { return fOwner; }
-    plKey                           IGetOwnerKey() { return IGetOwner() ? IGetOwner()->GetKey() : nil; }
+    plKey                           IGetOwnerKey() { return IGetOwner() ? IGetOwner()->GetKey() : nullptr; }
     int                             IFindType(uint16_t hClass);
     int                             IFindSender(const plKey& sender);
-    bool                            IUnRegisterForExactType(int idx, const plKey& receiver);
+    bool                            IUnRegisterForExactType(uint16_t idx, const plKey& receiver);
 
     static plMsgWrap*               IInsertToQueue(plMsgWrap** back, plMsgWrap* isert);
     static plMsgWrap*               IDequeue(plMsgWrap** head, plMsgWrap** tail);

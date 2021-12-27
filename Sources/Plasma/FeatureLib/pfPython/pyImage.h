@@ -70,18 +70,18 @@ protected:
 
     pyImage() // for python glue only, do NOT call
     {
-        fMipMapKey = nil;
+        fMipMapKey = nullptr;
 #ifndef BUILDING_PYPLASMA
-        fMipmap = nil;
+        fMipmap = nullptr;
 #endif
     } 
 
     // Constructor from C++
     pyImage(plKey mipmapKey)
     {
-        fMipMapKey = mipmapKey;
+        fMipMapKey = std::move(mipmapKey);
 #ifndef BUILDING_PYPLASMA
-        fMipmap = nil;
+        fMipmap = nullptr;
 #endif
     }
 

@@ -143,9 +143,9 @@ void WritePythonFile(const plFileName &fileName, const plFileName &path, hsStrea
             //  - create instance of class
             PyObject* getID = PythonInterface::GetModuleItem("glue_getBlockID",fModule);
             bool foundID = false;
-            if ( getID!=nil && PyCallable_Check(getID) )
+            if (getID != nullptr && PyCallable_Check(getID))
             {
-                PyObject* id = PyObject_CallFunction(getID,nil);
+                PyObject* id = PyObject_CallFunction(getID, nullptr);
                 if ( id && PyLong_Check(id) )
                     foundID = true;
             }
@@ -190,7 +190,7 @@ void WritePythonFile(const plFileName &fileName, const plFileName &path, hsStrea
 
         ST::printf(out, "\n");
 
-        s->WriteLE32(size);
+        s->WriteLE32((int32_t)size);
         s->Write(size, pycode);
         delete[] pycode;
     }
@@ -233,7 +233,7 @@ void FindSubDirs(std::vector<plFileName> &dirnames, const plFileName &path)
     }
 }
 
-void FindPackages(std::vector<plFileName>& fileNames, std::vector<plFileName>& pathNames, const plFileName& path, const ST::string& parent_package=ST::null)
+void FindPackages(std::vector<plFileName>& fileNames, std::vector<plFileName>& pathNames, const plFileName& path, const ST::string& parent_package={})
 {
     std::vector<plFileName> packages;
     FindSubDirs(packages, path);
@@ -295,12 +295,10 @@ void PackDirectory(const plFileName& dir, const plFileName& rootPath, const plFi
     if (!s.Open(pakName, "wb"))
         return;
 
-    s.WriteLE32(fileNames.size());
-
-    int i;
-    for (i = 0; i < fileNames.size(); i++)
+    s.WriteLE32((uint32_t)fileNames.size());
+    for (const plFileName& fn : fileNames)
     {
-        s.WriteSafeString(fileNames[i].AsString());
+        s.WriteSafeString(fn.AsString());
         s.WriteLE32(0);
     }
 
@@ -309,19 +307,18 @@ void PackDirectory(const plFileName& dir, const plFileName& rootPath, const plFi
     std::vector<uint32_t> filePositions;
     filePositions.resize(fileNames.size());
 
-    for (i = 0; i < fileNames.size(); i++)
+    for (size_t i = 0; i < fileNames.size(); i++)
     {
         // strip '.py' from the file name
         plFileName properFileName = fileNames[i].StripFileExt();
         uint32_t initialPos = s.GetPosition();
         WritePythonFile(properFileName, pathNames[i], &s);
-        uint32_t endPos = s.GetPosition();
 
         filePositions[i] = initialPos;
     }
 
     s.SetPosition(sizeof(uint32_t));
-    for (i = 0; i < fileNames.size(); i++)
+    for (size_t i = 0; i < fileNames.size(); i++)
     {
         s.WriteSafeString(fileNames[i].AsString());
         s.WriteLE32(filePositions[i]);

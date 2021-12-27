@@ -56,7 +56,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //// pfLocalizationMgr Functions /////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-pfLocalizationMgr   *pfLocalizationMgr::fInstance = nil;
+pfLocalizationMgr   *pfLocalizationMgr::fInstance = nullptr;
 
 //// Constructor/Destructor //////////////////////////////////////////
 
@@ -68,7 +68,7 @@ pfLocalizationMgr::pfLocalizationMgr()
 
 pfLocalizationMgr::~pfLocalizationMgr()
 {
-    fInstance = nil;
+    fInstance = nullptr;
 }
 
 //// Initialize //////////////////////////////////////////////////////
@@ -95,12 +95,12 @@ void pfLocalizationMgr::Shutdown()
 
 //// GetString ///////////////////////////////////////////////////////
 
-ST::string pfLocalizationMgr::GetString(const ST::string & path, const std::vector<ST::string> & args)
+ST::string pfLocalizationMgr::GetString(const ST::string & path, const std::vector<ST::string> & args) const
 {
     return pfLocalizationDataMgr::Instance().GetElement(path) % args;
 }
 
-ST::string pfLocalizationMgr::GetString(const ST::string & path)
+ST::string pfLocalizationMgr::GetString(const ST::string & path) const
 {
     std::vector<ST::string> args; // blank args so that % signs are still handled correctly
     return pfLocalizationDataMgr::Instance().GetElement(path) % args;

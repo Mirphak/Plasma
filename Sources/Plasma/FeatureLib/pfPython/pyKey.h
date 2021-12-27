@@ -95,8 +95,8 @@ public:
     bool operator!=(const pyKey &key) const { return !(key == *this); }
 
     // getter and setters
-    virtual plKey getKey() { return fKey; }
-    virtual void setKey(plKey key) { fKey=key; }
+    virtual plKey getKey() const { return fKey; }
+    virtual void setKey(plKey key) { fKey = std::move(key); }
     virtual ST::string getName() const;
 #ifndef BUILDING_PYPLASMA
     PyObject* GetPySceneObject();
@@ -120,10 +120,10 @@ public:
     virtual bool IsAttachedToClone();
     // (old style - Used in pyNotify)
     // get the notify list count
-    virtual int32_t NotifyListCount();
+    virtual size_t NotifyListCount() const;
     // (old style - Used in pyNotify)
     // get a notify list item
-    virtual plKey GetNotifyListItem(int32_t i);
+    virtual plKey GetNotifyListItem(size_t i) const;
     // Set the dirty state on the PythonModifier
     virtual void DirtySynchState(const ST::string& SDLStateName, uint32_t sendFlags);
 

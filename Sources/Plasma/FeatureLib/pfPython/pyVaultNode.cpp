@@ -47,7 +47,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include <exception>
-#pragma hdrstop
 
 #include "pyVaultNode.h"
 
@@ -60,6 +59,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "pyImage.h"
 #include "pyDniCoordinates.h"
+#include "pyObjectRef.h"
+#include "plPythonCallable.h"
 #include "pyVaultNodeRef.h"
 #include "pyVaultFolderNode.h"
 #include "pyVaultPlayerInfoListNode.h"
@@ -81,38 +82,28 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 ///////////////////////////////////////////////////////////////////////////
 
-pyVaultNode::pyVaultNodeOperationCallback::pyVaultNodeOperationCallback(PyObject * cbObject)
-: fCbObject( cbObject )
-, fPyNodeRef(nil)
-, fContext(0)
-{
-    Py_XINCREF( fCbObject );
-}
+pyVaultNode::pyVaultNodeOperationCallback::pyVaultNodeOperationCallback()
+    : fContext()
+{ }
 
-pyVaultNode::pyVaultNodeOperationCallback::~pyVaultNodeOperationCallback()
-{
-    Py_XDECREF( fCbObject );
-}
+/** Constructs a new operation callback from a borrowed reference */
+pyVaultNode::pyVaultNodeOperationCallback::pyVaultNodeOperationCallback(PyObject* cbObject) noexcept
+    : fCbObject(cbObject, pyObjectNewRef), fContext()
+{ }
+
+pyVaultNode::pyVaultNodeOperationCallback::pyVaultNodeOperationCallback(pyObjectRef cbObject) noexcept
+    : fCbObject(std::move(cbObject)), fContext()
+{ }
 
 void pyVaultNode::pyVaultNodeOperationCallback::VaultOperationStarted( uint32_t context )
 {
     fContext = context;
-    if ( fCbObject )
-    {
+    if (fCbObject) {
         // Call the callback.
-        if (PyObject_HasAttrString( fCbObject, "vaultOperationStarted" ))
-        {
-            PyObject* func = nil;
-            func = PyObject_GetAttrString( fCbObject, "vaultOperationStarted" );
-            if ( func )
-            {
-                if ( PyCallable_Check(func)>0 )
-                {
-                    PyObject* retVal = PyObject_CallMethod(fCbObject,
-                                            _pycs("vaultOperationStarted"), _pycs("l"), context);
-                    Py_XDECREF(retVal);
-                }
-            }
+        if (PyObject_HasAttrString(fCbObject.Get(), "vaultOperationStarted")) {
+            pyObjectRef func = PyObject_GetAttrString(fCbObject.Get(), "vaultOperationStarted");
+            if (func && PyCallable_Check(func.Get()))
+                plPythonCallable::CallObject(func, context);
         }
     }
 }
@@ -120,27 +111,15 @@ void pyVaultNode::pyVaultNodeOperationCallback::VaultOperationStarted( uint32_t 
 
 void pyVaultNode::pyVaultNodeOperationCallback::VaultOperationComplete( uint32_t context, int resultCode )
 {
-    if ( fCbObject )
-    {
+    if (fCbObject) {
         // Call the callback.
-        if (PyObject_HasAttrString( fCbObject, "vaultOperationComplete" ))
-        {
-            PyObject* func = nil;
-            func = PyObject_GetAttrString( fCbObject, "vaultOperationComplete" );
-            if ( func )
-            {
-                if ( PyCallable_Check(func)>0 )
-                {
-                    PyObject * pyNode = pyVaultNode::New(fNode);
-                    PyObject* t = PyTuple_New(2);
-                    PyTuple_SetItem(t, 0, pyNode);
-                    PyTuple_SetItem(t, 1, fPyNodeRef);
-                    PyObject* retVal = PyObject_CallMethod(fCbObject,
-                                            _pycs("vaultOperationComplete"), _pycs("lOi"),
-                                            context, t, resultCode);
-                    Py_XDECREF(retVal);
-                    Py_DECREF(t);
-                }
+        if (PyObject_HasAttrString(fCbObject.Get(), "vaultOperationComplete")) {
+            pyObjectRef func = PyObject_GetAttrString(fCbObject.Get(), "vaultOperationComplete");
+            if (func && PyCallable_Check(func.Get())) {
+                pyObjectRef tup = PyTuple_New(2);
+                PyTuple_SET_ITEM(tup.Get(), 0, pyVaultNode::New(fNode));
+                PyTuple_SET_ITEM(tup.Get(), 1, fPyNodeRef.Release());
+                plPythonCallable::CallObject(func, context, tup, resultCode);
             }
         }
     }
@@ -148,8 +127,8 @@ void pyVaultNode::pyVaultNodeOperationCallback::VaultOperationComplete( uint32_t
     delete this;  // commit hara-kiri
 }
 
-void pyVaultNode::pyVaultNodeOperationCallback::SetNode (RelVaultNode * rvn) {
-    fNode = rvn;
+void pyVaultNode::pyVaultNodeOperationCallback::SetNode(hsRef<RelVaultNode> rvn) {
+    fNode = std::move(rvn);
 }
 
 hsRef<RelVaultNode> pyVaultNode::pyVaultNodeOperationCallback::GetNode() const {
@@ -157,7 +136,7 @@ hsRef<RelVaultNode> pyVaultNode::pyVaultNodeOperationCallback::GetNode() const {
 }
 
 pyVaultNode::pyVaultNode()
-    : fNode(new RelVaultNode)
+    : fNode(new RelVaultNode, hsStealRef)
 {
 }
 
@@ -179,13 +158,13 @@ bool pyVaultNode::operator==(const pyVaultNode &vaultNode) const
 {
     hsRef<RelVaultNode> ours = GetNode();
     hsRef<RelVaultNode> theirs = vaultNode.GetNode();
-    if (ours == nil && theirs == nil)
+    if (ours == nullptr && theirs == nullptr)
         return true;
-    if (ours == nil || theirs == nil)
+    if (ours == nullptr || theirs == nullptr)
         return false;
     if (ours->GetNodeId() == theirs->GetNodeId())
         return true;
-    return ours->Matches(theirs);
+    return ours->Matches(theirs.Get());
 }
 
 // public getters
@@ -275,7 +254,7 @@ ST::string pyVaultNode::GetCreateAgeName() const
 {
     if (fNode)
         return fNode->GetCreateAgeName();
-    return ST::null;
+    return ST::string();
 }
 
 plUUID pyVaultNode::GetCreateAgeGuid() const
@@ -291,7 +270,7 @@ PyObject* pyVaultNode::GetCreateAgeCoords () {
     if (!fNode)
         PYTHON_RETURN_NONE;
 
-    return pyDniCoordinates::New(nil);
+    return pyDniCoordinates::New(nullptr);
 }
 
 void pyVaultNode::SetID( uint32_t v )
@@ -362,7 +341,6 @@ PyObject* pyVaultNode::AddNode(pyVaultNode* pynode, PyObject* cbObject, uint32_t
         // Hack the callbacks until vault notification is in place
         cb->VaultOperationStarted(cbContext);
 
-        int hsResult = hsOK;
         if ( !pynode->GetID() )
         {
             // Block here until node is created and fetched =(
@@ -375,12 +353,10 @@ PyObject* pyVaultNode::AddNode(pyVaultNode* pynode, PyObject* cbObject, uint32_t
             
             if (newNode)
                 pynode->fNode = newNode;
-            else
-                hsResult = hsFail;
         }
 
-        PyObject* nodeRef = cb->fPyNodeRef = pyVaultNodeRef::New(fNode, pynode->fNode);
-        Py_INCREF(nodeRef); // The callback steals the ref, according to Eric...
+        pyObjectRef nodeRef = pyVaultNodeRef::New(fNode, pynode->fNode);
+        cb->fPyNodeRef = nodeRef;
         cb->SetNode(pynode->fNode);
 
         VaultAddChildNode(fNode->GetNodeId(),
@@ -390,9 +366,9 @@ PyObject* pyVaultNode::AddNode(pyVaultNode* pynode, PyObject* cbObject, uint32_t
                           cb
         );
 
-        // Evil undocumented functionality that some fool
-        // decided to use in xKI.py. Really???
-        return nodeRef;
+        // This return value is undocumented, but we maintain it for backwards compatibility.
+        // Be sure to NOT decrement the reference count.
+        return nodeRef.Release();
     }
     else
     {
@@ -445,7 +421,7 @@ bool pyVaultNode::RemoveNode( pyVaultNode& pynode, PyObject* cbObject, uint32_t 
         // Hack the callbacks until vault notification is in place
         cb->VaultOperationStarted( cbContext );
 
-        VaultRemoveChildNode(fNode->GetNodeId(), pynode.fNode->GetNodeId(), nil, nil);
+        VaultRemoveChildNode(fNode->GetNodeId(), pynode.fNode->GetNodeId(), nullptr, nullptr);
 
         cb->SetNode(pynode.fNode);
         cb->fPyNodeRef = pyVaultNodeRef::New(fNode, pynode.fNode);
@@ -468,10 +444,10 @@ void pyVaultNode::RemoveAllNodes()
     if (!fNode)
         return;
         
-    TArray<unsigned> nodeIds;
+    std::vector<unsigned> nodeIds;
     fNode->GetChildNodeIds(&nodeIds, 1);
-    for (unsigned i = 0; i < nodeIds.Count(); ++i)
-        VaultRemoveChildNode(fNode->GetNodeId(), nodeIds[i], nil, nil);
+    for (unsigned id : nodeIds)
+        VaultRemoveChildNode(fNode->GetNodeId(), id, nullptr, nullptr);
 }
 
 // Add/Save this node to vault
@@ -566,10 +542,10 @@ int pyVaultNode::GetChildNodeCount()
     if (!fNode)
         return 0;
         
-    TArray<unsigned> nodeIds;
+    std::vector<unsigned> nodeIds;
     fNode->GetChildNodeIds(&nodeIds, 1);
     
-    return nodeIds.Count();
+    return int(nodeIds.size());
 }
 
 // Get the client ID from my Vault client.
@@ -589,12 +565,12 @@ bool pyVaultNode::HasNode( uint32_t nodeID )
 
 PyObject * pyVaultNode::GetNode2( uint32_t nodeID ) const
 {
-    PyObject * result = nil;
+    PyObject * result = nullptr;
     if ( fNode )
     {
-        hsRef<RelVaultNode> templateNode = new RelVaultNode;
-        templateNode->SetNodeId(nodeID);
-        if (hsRef<RelVaultNode> rvn = fNode->GetChildNode(templateNode, 1))
+        RelVaultNode templateNode;
+        templateNode.SetNodeId(nodeID);
+        if (hsRef<RelVaultNode> rvn = fNode->GetChildNode(&templateNode, 1))
             result = pyVaultNodeRef::New(fNode, rvn);
     }
     
@@ -606,10 +582,11 @@ PyObject * pyVaultNode::GetNode2( uint32_t nodeID ) const
 
 PyObject* pyVaultNode::FindNode( pyVaultNode * templateNode )
 {
-    PyObject * result = nil;
+    PyObject * result = nullptr;
     if ( fNode && templateNode->fNode )
     {
-        if (hsRef<RelVaultNode> rvn = fNode->GetChildNode(templateNode->fNode, 1))
+        hsWeakRef<NetVaultNode> node(templateNode->fNode);
+        if (hsRef<RelVaultNode> rvn = fNode->GetChildNode(node, 1))
             result = pyVaultNode::New(rvn);
     }
     

@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pfGameGUIMgr/pfGUIClickMapCtrl.h"
 #include "pfGameGUIMgr/pfGUIDialogMod.h"
@@ -55,7 +54,7 @@ pyGUIControlClickMap::pyGUIControlClickMap(pyKey& gckey) : pyGUIControl(gckey)
 {
 }
 
-pyGUIControlClickMap::pyGUIControlClickMap(plKey objkey) : pyGUIControl(objkey)
+pyGUIControlClickMap::pyGUIControlClickMap(plKey objkey) : pyGUIControl(std::move(objkey))
 {
 }
 

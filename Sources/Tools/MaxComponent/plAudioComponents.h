@@ -51,13 +51,22 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #define SOUND_PHYS_COMP_ID  Class_ID(0x29415900, 0x1ade37a5)
 
 #include <map>
+#include <vector>
+
+#include <string_theory/format>
 
 #include "plComponent.h"
 #include "pnKeyedObject/plKey.h"
-#include "hsTemplates.h"
 
 #ifdef MAXASS_AVAILABLE
 #   include "../../AssetMan/PublicInterface/AssManBaseTypes.h"
+#   define plAudioId jvUniqueId
+#else
+    struct plAudioId {
+        uint32_t id;
+
+        plAudioId() : id() { }
+    };
 #endif
 
 class plComponentBase;
@@ -83,10 +92,10 @@ class plBaseSoundEmitterComponent : public plComponent
         plBaseSoundEmitterComponent();
         virtual ~plBaseSoundEmitterComponent();
 
-        RefTargetHandle Clone(RemapDir &remap);
+        RefTargetHandle Clone(RemapDir &remap) override;
 
-        IOResult Save(ISave* isave);
-        IOResult Load(ILoad* iload);
+        IOResult Save(ISave* isave) override;
+        IOResult Load(ILoad* iload) override;
 
         enum WhichSound
         {
@@ -94,22 +103,20 @@ class plBaseSoundEmitterComponent : public plComponent
             kCoverSound
         };
 
-#ifdef MAXASS_AVAILABLE
-        virtual void    SetSoundAssetId( WhichSound which, jvUniqueId assetId, const TCHAR *fileName );
-        virtual jvUniqueId GetSoundAssetID( WhichSound which );
-#endif
-        virtual const char* GetSoundFileName( WhichSound which );
+        virtual void    SetSoundAssetId( WhichSound which, plAudioId assetId, const MCHAR *fileName );
+        virtual plAudioId GetSoundAssetID( WhichSound which );
+        virtual const MCHAR* GetSoundFileName( WhichSound which );
 
         // Internal setup and write-only set properties on the MaxNode. No reading
         // of properties on the MaxNode, as it's still indeterminant.
-        bool SetupProperties(plMaxNode *node, plErrorMsg *pErrMsg);
+        bool SetupProperties(plMaxNode *node, plErrorMsg *pErrMsg) override;
 
-        bool PreConvert(plMaxNode *node, plErrorMsg *pErrMsg, Class_ID classToConvert );
-        bool Convert(plMaxNode *node, plErrorMsg *pErrMsg) = 0;
+        bool PreConvert(plMaxNode *node, plErrorMsg *pErrMsg, Class_ID classToConvert);
+        bool Convert(plMaxNode *node, plErrorMsg *pErrMsg) override = 0;
 
-        bool DeInit( plMaxNode *node, plErrorMsg *pErrMsg );
+        bool DeInit(plMaxNode *node, plErrorMsg *pErrMsg) override;
 
-        virtual bool    ConvertGrouped( plMaxNode *baseNode, hsTArray<plBaseSoundEmitterComponent *> &groupArray, plErrorMsg *pErrMsg ) { return false; }
+        virtual bool ConvertGrouped(plMaxNode *baseNode, std::vector<plBaseSoundEmitterComponent *> &groupArray, plErrorMsg *pErrMsg) { return false; }
 
         int GetSoundIdx(plMaxNode *node)
         {
@@ -130,8 +137,8 @@ class plBaseSoundEmitterComponent : public plComponent
         virtual bool    IsLocalOnly() const { return true; }
 
         // Virtuals for handling animated volumes
-        virtual bool    AddToAnim( plAGAnim *anim, plMaxNode *node );
-        virtual bool    AllowUnhide() { return fAllowUnhide; }
+        bool    AddToAnim(plAGAnim *anim, plMaxNode *node) override;
+        bool    AllowUnhide() override { return fAllowUnhide; }
 
         // Flags this component to create a grouped sound instead of a normal sound
         void            SetCreateGrouped( plMaxNode *baseNode, int commonSoundIdx );
@@ -140,10 +147,8 @@ class plBaseSoundEmitterComponent : public plComponent
         virtual float    GetSoundVolume() const;
 
     protected:
-#ifdef MAXASS_AVAILABLE
-        jvUniqueId  fSoundAssetId; // used for the AssMan
-        jvUniqueId  fCoverSoundAssetID;
-#endif
+        plAudioId   fSoundAssetId; // used for the AssMan
+        plAudioId   fCoverSoundAssetID;
         bool        fAssetsUpdated;
 
         friend class plAudioBaseComponentProc;
@@ -163,7 +168,13 @@ class plBaseSoundEmitterComponent : public plComponent
 
         void    IUpdateAssets();
 
-        static void     IShowError( uint32_t type, const char *errMsg, const char *nodeName, plErrorMsg *pErrMsg );
+        template<typename... _ArgsT>
+        static void IShowError(uint32_t type, plErrorMsg* pErrMsg, const char* fmt, _ArgsT&&... args)
+        {
+            IShowError(type, pErrMsg, ST::format(fmt, std::forward<_ArgsT>(args)...));
+        }
+
+        static void     IShowError( uint32_t type, plErrorMsg* pErrMsg, ST::string msg);
 
         std::map<plMaxNode*, int> fIndices;
         std::map<plMaxNode*, bool> fValidNodes;
@@ -188,7 +199,7 @@ class plBaseSoundEmitterComponent : public plComponent
 
         // Returns pointers to arrays defining the names and konstants for the supported categories
         // for this component. Name array should have an extra "" entry at the end. Returns false if none supported
-        virtual bool    IGetCategoryList( char **&catList, int *&catKonstantList ) { return false; }
+        virtual bool    IGetCategoryList( TCHAR **&catList, int *&catKonstantList ) { return false; }
 
         void    ISetBaseParameters( plSound *destSound, plErrorMsg *pErrMsg );
 };
@@ -204,14 +215,14 @@ public:
     std::map<plMaxNode*, plRandomSoundMod*> fSoundMods;
 
     plRandomSoundComponent();
-    void DeleteThis() { delete this; }
+    void DeleteThis() override { delete this; }
 
     // SetupProperties - Internal setup and write-only set properties on the MaxNode. No reading
     // of properties on the MaxNode, as it's still indeterminant.
-    bool SetupProperties(plMaxNode *pNode, plErrorMsg *pErrMsg);
+    bool SetupProperties(plMaxNode *pNode, plErrorMsg *pErrMsg) override;
 
-    bool PreConvert(plMaxNode *pNode, plErrorMsg *pErrMsg);
-    bool Convert(plMaxNode *node, plErrorMsg *pErrMsg);
+    bool PreConvert(plMaxNode *pNode, plErrorMsg *pErrMsg) override;
+    bool Convert(plMaxNode *node, plErrorMsg *pErrMsg) override;
 
     void RemoveSound(int index);
     void AddSelectedSound();

@@ -41,7 +41,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include <Python.h>
-#pragma hdrstop
 
 #include "pyVaultSDLNode.h"
 #include "pySDL.h"
@@ -95,7 +94,7 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptVaultSDLNode, getStateDataRecord)
 
 PYTHON_METHOD_DEFINITION(ptVaultSDLNode, setStateDataRecord, args)
 {
-    PyObject* recObj = NULL;
+    PyObject* recObj = nullptr;
     int writeOptions = 0;
     if (!PyArg_ParseTuple(args, "O|i", &recObj, &writeOptions))
     {

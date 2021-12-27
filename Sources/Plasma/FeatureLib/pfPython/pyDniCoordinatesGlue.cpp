@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyGeometry3.h"
-#pragma hdrstop
 
 #include "pyDniCoordinates.h"
 #include "plVault/plDniCoordinateInfo.h"
@@ -77,7 +76,7 @@ PYTHON_BASIC_METHOD_DEFINITION(ptDniCoordinates, update, UpdateCoordinates)
 
 PYTHON_METHOD_DEFINITION(ptDniCoordinates, fromPoint, args)
 {
-    PyObject* pointObj = NULL;
+    PyObject* pointObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &pointObj))
     {
         PyErr_SetString(PyExc_TypeError, "fromPoint expects a ptPoint3");
@@ -109,7 +108,7 @@ PYTHON_CLASS_NEW_IMPL(ptDniCoordinates, pyDniCoordinates)
 
 PyObject *pyDniCoordinates::New(plDniCoordinateInfo* coord)
 {
-    ptDniCoordinates *newObj = (ptDniCoordinates*)ptDniCoordinates_type.tp_new(&ptDniCoordinates_type, NULL, NULL);
+    ptDniCoordinates *newObj = (ptDniCoordinates*)ptDniCoordinates_type.tp_new(&ptDniCoordinates_type, nullptr, nullptr);
     if (coord) {
         newObj->fThis->fCoords->SetTorans(coord->GetTorans());
         newObj->fThis->fCoords->SetHSpans(coord->GetHSpans());

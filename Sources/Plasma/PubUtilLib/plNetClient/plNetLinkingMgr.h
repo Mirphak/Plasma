@@ -49,9 +49,11 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plMessage/plLinkToAgeMsg.h"
 
 class plMessage;
-class plVaultNotifyMsg;
 struct plNCAgeJoiner;
 struct plNCAgeLeaver;
+class plVaultNotifyMsg;
+
+namespace ST { class string; }
 
 class plNetLinkingMgr
 {
@@ -75,7 +77,9 @@ class plNetLinkingMgr
     static void ExecNextOp ();
 
 
-    plNetLinkingMgr();
+    plNetLinkingMgr()
+        : fLinkingEnabled(true), fLinkedIn(), fDeferredLink()
+    { }
     plNetLinkingMgr(const plNetLinkingMgr &) { }
     ~plNetLinkingMgr();
 
@@ -150,7 +154,7 @@ public:
     void LinkToPlayersAge( uint32_t playerID );
 
     // Offer a link to player.
-    void OfferLinkToPlayer( const plAgeLinkStruct * info, uint32_t playerID, plKey replyKey );
+    void OfferLinkToPlayer( const plAgeLinkStruct * info, uint32_t playerID, const plKey& replyKey );
     void OfferLinkToPlayer( const plAgeInfoStruct * info, uint32_t playerID );
     void OfferLinkToPlayer( const plAgeLinkStruct * info, uint32_t playerID );
 
@@ -160,11 +164,6 @@ public:
     // link info
     plAgeLinkStruct * GetAgeLink() { return &fAgeLink; }
     plAgeLinkStruct * GetPrevAgeLink() { return &fPrevAgeLink; }
-
-    // lobby info
-    void SetLobbyAddr( const char * ipaddr ) { fLobbyInfo.SetServerAddr( ipaddr );}
-    void SetLobbyPort( int port ) { fLobbyInfo.SetServerPort( port );}
-    const plNetServerSessionInfo * GetLobbyServerInfo() const { return &fLobbyInfo;}
 
     // helpers
     static ST::string GetProperAgeName( const ST::string & ageName );    // attempt to fix wrong case age name.
@@ -178,9 +177,6 @@ private:
 
     // The age we just left.
     plAgeLinkStruct     fPrevAgeLink;
-
-    // The lobby we want to talk to.
-    plNetServerSessionInfo  fLobbyInfo;
 };
 
 

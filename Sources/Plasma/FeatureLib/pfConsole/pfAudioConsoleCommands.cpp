@@ -49,21 +49,25 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #define LIMIT_CONSOLE_COMMANDS 1
 #endif
 
-#include "pfConsoleCore/pfConsoleCmd.h"
+#include <string_theory/format>
+#include <string_theory/string>
+
 #include "plgDispatch.h"
 #include "hsResMgr.h"
 
-#include "plAudio/plAudioSystem.h"
-#include "plAudio/plVoiceChat.h"
-#include "pfAudio/plListener.h"
 #include "pnKeyedObject/plFixedKey.h"
-#include "plNetClient/plNetClientMgr.h"
 #include "pnMessage/plAudioSysMsg.h"
 #include "pnMessage/plSoundMsg.h"
-#include "plMessage/plListenerMsg.h"
+#include "pnNetCommon/plNetApp.h"
 #include "pnSceneObject/plAudioInterface.h"
+
+#include "plAudio/plAudioSystem.h"
+#include "plAudio/plVoiceChat.h"
+#include "plMessage/plListenerMsg.h"
 #include "plStatusLog/plStatusLog.h"
 
+#include "pfAudio/plListener.h"
+#include "pfConsoleCore/pfConsoleCmd.h"
 
 #define PF_SANITY_CHECK( cond, msg ) { if( !( cond ) ) { PrintString( msg ); return; } }
 
@@ -324,15 +328,12 @@ PF_CONSOLE_CMD(Audio, SetTwoStageLOD, "bool on", "Enables or disables two-stage 
 PF_CONSOLE_CMD(Audio, SetVolume, "string obj, float vol", "Sets the volume on a given object. 1 is max volume, 0 is silence" )
 {
     plKey key = FindSceneObjectByName(ST::string::from_utf8(params[ 0 ]), "", nullptr);
-    if( key == nil )
+    if (key == nullptr)
         return;
 
     plSceneObject* obj = plSceneObject::ConvertNoRef(key->GetObjectPtr());
     if( !obj )
         return;
-
-    const plAudioInterface  *ai = obj->GetAudioInterface();
-    plKey   aiKey = ai->GetKey();
 
     plSoundMsg* cmd = new plSoundMsg;
     cmd->SetSender(hsgResMgr::ResMgr()->FindKey(kClient_KEY));
@@ -351,7 +352,7 @@ PF_CONSOLE_CMD(Audio, IsolateSound, "string soundComponentName", "Mutes all soun
     plAudioSysMsg   *asMsg;
 
     key = FindSceneObjectByName(ST::string::from_utf8(params[0]), "", nullptr);
-    if( key == nil )
+    if (key == nullptr)
     {
         pfConsolePrintF(PrintString, "Cannot find sound {}", (char *)params[0]);
         return;
@@ -365,7 +366,7 @@ PF_CONSOLE_CMD(Audio, IsolateSound, "string soundComponentName", "Mutes all soun
     }
 
     const plAudioInterface  *ai = obj->GetAudioInterface();
-    if( ai == nil )
+    if (ai == nullptr)
     {
         pfConsolePrintF(PrintString, "sceneObject {} has no audio interface", (char *)params[0]);
         return;
@@ -453,25 +454,25 @@ PF_CONSOLE_CMD(Listener, ShowDebugInfo, "bool show", "Shows or hides debugging i
 
 PF_CONSOLE_CMD(Listener, UseCameraOrientation, "", "Use the camera's orientation to orient the listener")
 {
-    plSetListenerMsg *set = new plSetListenerMsg( plSetListenerMsg::kVCam | plSetListenerMsg::kFacing, nil, true );
+    plSetListenerMsg *set = new plSetListenerMsg(plSetListenerMsg::kVCam | plSetListenerMsg::kFacing, nullptr, true);
     set->Send();
 }
 
 PF_CONSOLE_CMD(Listener, UseCameraPosition, "", "Use the canera's position to position the listener")
 {
-    plSetListenerMsg *set = new plSetListenerMsg( plSetListenerMsg::kVCam | plSetListenerMsg::kPosition, nil, true );
+    plSetListenerMsg *set = new plSetListenerMsg(plSetListenerMsg::kVCam | plSetListenerMsg::kPosition, nullptr, true);
     set->Send();
 }
 
 PF_CONSOLE_CMD(Listener, UseCameraVelocity, "", "Use the camera's velocity to set the listener velocity")
 {
-    plSetListenerMsg *set = new plSetListenerMsg( plSetListenerMsg::kVCam | plSetListenerMsg::kVelocity, nil, true );
+    plSetListenerMsg *set = new plSetListenerMsg(plSetListenerMsg::kVCam | plSetListenerMsg::kVelocity, nullptr, true);
     set->Send();
 }
 
 PF_CONSOLE_CMD(Listener, UsePlayerOrientation, "", "Use the player's orientation to orient the listener")
 {
-    plKey pKey = plNetClientMgr::GetInstance()->GetLocalPlayerKey();
+    plKey pKey = plNetClientApp::GetInstance()->GetLocalPlayerKey();
     if( pKey )
     {
         plSetListenerMsg *set = new plSetListenerMsg( plSetListenerMsg::kFacing, pKey, true );
@@ -481,7 +482,7 @@ PF_CONSOLE_CMD(Listener, UsePlayerOrientation, "", "Use the player's orientation
 
 PF_CONSOLE_CMD(Listener, UsePlayerPosition, "", "Use the player's position to position the listener")
 {
-    plKey pKey = plNetClientMgr::GetInstance()->GetLocalPlayerKey();
+    plKey pKey = plNetClientApp::GetInstance()->GetLocalPlayerKey();
     if (pKey)
     {
         plSetListenerMsg *set = new plSetListenerMsg( plSetListenerMsg::kPosition, pKey, true );
@@ -491,7 +492,7 @@ PF_CONSOLE_CMD(Listener, UsePlayerPosition, "", "Use the player's position to po
 
 PF_CONSOLE_CMD(Listener, UsePlayerVelocity, "", "Use the player's velocity to set the listener velocity")
 {
-    plKey pKey = plNetClientMgr::GetInstance()->GetLocalPlayerKey();
+    plKey pKey = plNetClientApp::GetInstance()->GetLocalPlayerKey();
     if (pKey)
     {
         plSetListenerMsg *set = new plSetListenerMsg( plSetListenerMsg::kVelocity, pKey, true );
@@ -503,8 +504,8 @@ PF_CONSOLE_CMD(Listener, XMode, "bool b", "Sets velocity and position to avatar,
 {
     static uint32_t oldPosType = 0, oldFacingType = 0, oldVelType = 0;
     
-    plSetListenerMsg *set = nil;
-    plKey pKey = plNetClientMgr::GetInstance()->GetLocalPlayerKey();
+    plSetListenerMsg *set = nullptr;
+    plKey pKey = plNetClientApp::GetInstance()->GetLocalPlayerKey();
     plListener* pListener = nullptr;
 
     if( (bool)params[ 0 ] )
@@ -527,7 +528,7 @@ PF_CONSOLE_CMD(Listener, XMode, "bool b", "Sets velocity and position to avatar,
         
         plStatusLog::AddLineS("audio.log", "XMode on");
         
-        plSetListenerMsg *set = new plSetListenerMsg( plSetListenerMsg::kVCam | plSetListenerMsg::kFacing, nil, true );
+        plSetListenerMsg *set = new plSetListenerMsg(plSetListenerMsg::kVCam | plSetListenerMsg::kFacing, nullptr, true);
         set->Send();
         if (pKey)
         {
@@ -541,7 +542,7 @@ PF_CONSOLE_CMD(Listener, XMode, "bool b", "Sets velocity and position to avatar,
     {
         if(oldPosType == plListener::kCamera)
         {
-            plSetListenerMsg *set = new plSetListenerMsg( plSetListenerMsg::kVCam | plSetListenerMsg::kPosition, nil, true );
+            plSetListenerMsg *set = new plSetListenerMsg(plSetListenerMsg::kVCam | plSetListenerMsg::kPosition, nullptr, true);
             set->Send();
         }
         else
@@ -551,7 +552,7 @@ PF_CONSOLE_CMD(Listener, XMode, "bool b", "Sets velocity and position to avatar,
         }
         if(oldFacingType == plListener::kCamera)
         {
-            set = new plSetListenerMsg( plSetListenerMsg::kVCam | plSetListenerMsg::kFacing, nil, true );
+            set = new plSetListenerMsg(plSetListenerMsg::kVCam | plSetListenerMsg::kFacing, nullptr, true);
             set->Send();
         }
         else
@@ -561,7 +562,7 @@ PF_CONSOLE_CMD(Listener, XMode, "bool b", "Sets velocity and position to avatar,
         }
         if(oldVelType == plListener::kCamera)
         {
-            set = new plSetListenerMsg( plSetListenerMsg::kVCam | plSetListenerMsg::kVelocity, nil, true );
+            set = new plSetListenerMsg(plSetListenerMsg::kVCam | plSetListenerMsg::kVelocity, nullptr, true);
             set->Send();
         }
         else

@@ -46,10 +46,11 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 
 #include "HeadSpin.h"
-#include "hsTemplates.h"
+#include <locale>
+#include <vector>
+
 #include "pnKeyedObject/hsKeyedObject.h"
 #include "pnInputCore/plInputMap.h"
-#include <locale>
 
 class plDInputMgr;
 class plInputDevice;
@@ -58,8 +59,6 @@ class plPipeline;
 
 class plInputManager :public hsKeyedObject
 {
-private:
-    static bool fUseDInput;
 public:
     plInputManager();
     plInputManager( hsWindowHndl hWnd );
@@ -70,13 +69,11 @@ public:
 
 
     void AddInputDevice(plInputDevice* pDev);
-    void InitDInput(hsWindowInst hInst, hsWindowHndl hWnd);
 
-    static void UseDInput(bool b) { fUseDInput = b; }
     void Update();
     static plInputManager*  GetInstance() { return fInstance; }
     static plInputManager*  fInstance;
-    virtual bool MsgReceive(plMessage* msg);
+    bool MsgReceive(plMessage* msg) override;
     static bool RecenterMouse() { return bRecenterMouse > 0; }
     static void SetRecenterMouse(bool b); 
     static void RecenterCursor();
@@ -93,8 +90,7 @@ public:
     
 protected:
     
-    hsTArray<plInputDevice*>    fInputDevices;
-    plDInputMgr*                fDInputMgr;
+    std::vector<plInputDevice*> fInputDevices;
     plInputInterfaceMgr         *fInterfaceMgr;
     bool                        fActive, fFirstActivated;       
 

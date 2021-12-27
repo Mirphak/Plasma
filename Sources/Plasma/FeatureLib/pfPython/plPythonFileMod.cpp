@@ -54,9 +54,9 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pyGeometry3.h"
 #include "pyKey.h"
 #include "pyObjectRef.h"
+#include "plPythonCallable.h"
 #include "hsResMgr.h"
 #include "hsStream.h"
-#pragma hdrstop
 
 #include "plPythonFileMod.h"
 
@@ -101,6 +101,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plMessage/plAccountUpdateMsg.h"
 #include "plAgeLoader/plAgeLoader.h"
 #include "plMessage/plAIMsg.h"
+#include "plAvatar/plArmatureMod.h"
 #include "plAvatar/plAvBrainCritter.h"
 #include "pfMessage/pfGameScoreMsg.h"
 
@@ -206,7 +207,8 @@ public:
     {
     }
 
-    void AddedChildNode(RelVaultNode* parentNode, RelVaultNode* childNode)
+    void AddedChildNode(const hsRef<RelVaultNode>& parentNode,
+                        const hsRef<RelVaultNode>& childNode) override
     {
         if (fPyFileMod && fPyFileMod->fPyFunctionInstances[fFunctionIdx]) {
             PyObject* ptuple = PyTuple_New(1);
@@ -215,7 +217,8 @@ public:
         }
     }
 
-    void RemovingChildNode(RelVaultNode* parentNode, RelVaultNode* childNode)
+    void RemovingChildNode(const hsRef<RelVaultNode>& parentNode,
+                           const hsRef<RelVaultNode>& childNode) override
     {
         if (fPyFileMod && fPyFileMod->fPyFunctionInstances[fFunctionIdx]) {
             PyObject* ptuple = PyTuple_New(1);
@@ -224,7 +227,7 @@ public:
         }
     }
 
-    void ChangedNode(RelVaultNode* changedNode)
+    void ChangedNode(const hsRef<RelVaultNode>& changedNode) override
     {
         if (fPyFileMod && fPyFileMod->fPyFunctionInstances[fFunctionIdx]) {
             PyObject* ptuple = PyTuple_New(1);
@@ -252,7 +255,7 @@ class pfPythonKeyCatcher : public plDefaultKeyCatcher
             : fMod(mod)
         { }
 
-        virtual void HandleKeyEvent(plKeyEventMsg* msg)
+        void HandleKeyEvent(plKeyEventMsg* msg) override
         {
             fMod->ICallScriptMethod(plPythonFileMod::kfunc_OnDefaultKeyCaught,
                                     msg->GetKeyChar(), msg->GetKeyDown(),
@@ -271,23 +274,15 @@ bool plPythonFileMod::fAtConvertTime = false;
 //  PURPOSE    : Constructor and destructor
 //
 plPythonFileMod::plPythonFileMod()
+    : fModule(), fLocalNotify(true), fIsFirstTimeEval(true),
+      fVaultCallback(), fSDLMod(), fSelfKey(), fInstance(), fKeyCatcher(),
+      fPipe(), fAmIAttachedToClone()
 {
-    fModule = nil;
-    fLocalNotify= true;
-    fIsFirstTimeEval = true;
-    fVaultCallback = nil;
-    fSDLMod = nil;
-    fSelfKey = nil;
-    fInstance = nil;
-    fKeyCatcher = nil;
-    fPipe = nil;
-    fAmIAttachedToClone = false;
-
     // assume that all the functions are not available
     // ...if the functions are defined in the module, then we'll call 'em
     int i;
     for (i=0 ; i<kfunc_lastone; i++)
-        fPyFunctionInstances[i] = nil;
+        fPyFunctionInstances[i] = nullptr;
 }
 
 plPythonFileMod::~plPythonFileMod()
@@ -355,98 +350,14 @@ T* plPythonFileMod::IScriptWantsMsg(func_num methodId, plMessage* msg) const
 //  PURPOSE    : Builds Python argument tuple for method calling.
 //
 
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, bool value)
+namespace plPythonCallable
 {
-    PyTuple_SET_ITEM(tuple, idx, PyBool_FromLong(value ? 1 : 0));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, char value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyUnicode_FromFormat("%c", (int)value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, ControlEventCode value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyLong_FromLong((long)value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, const char* value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyUnicode_FromString(value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, double value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyFloat_FromDouble(value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, float value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyFloat_FromDouble(value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, int8_t value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyLong_FromLong(value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, int16_t value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyLong_FromLong(value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, int32_t value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyLong_FromLong(value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, PyObject* value)
-{
-    PyTuple_SET_ITEM(tuple, idx, value);
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, pyObjectRef& value)
-{
-    PyTuple_SET_ITEM(tuple, idx, value.Release());
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, const ST::string& value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyUnicode_FromSTString(value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, uint8_t value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyLong_FromSize_t(value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, uint16_t value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyLong_FromSize_t(value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, uint32_t value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyLong_FromSize_t(value));
-}
-
-static inline void IBuildTupleArg(PyObject* tuple, size_t idx, wchar_t value)
-{
-    PyTuple_SET_ITEM(tuple, idx, PyUnicode_FromFormat("%c", (int)value));
-}
-
-template<size_t Size, typename Arg>
-static inline void IBuildTupleArgs(PyObject* tuple, Arg&& arg)
-{
-    IBuildTupleArg(tuple, (Size - 1), std::forward<Arg>(arg));
-}
-
-template<size_t Size, typename Arg0, typename... Args>
-static inline void IBuildTupleArgs(PyObject* tuple, Arg0&& arg0, Args&&... args)
-{
-    IBuildTupleArg(tuple, (Size - (sizeof...(args) + 1)), std::forward<Arg0>(arg0));
-    IBuildTupleArgs<Size>(tuple, std::forward<Args>(args)...);
-}
+    template<>
+    inline void IBuildTupleArg(PyObject* tuple, size_t idx, ControlEventCode value)
+    {
+        PyTuple_SET_ITEM(tuple, idx, PyLong_FromLong((long)value));
+    }
+};
 
 template<typename... Args>
 void plPythonFileMod::ICallScriptMethod(func_num methodId, Args&&... args)
@@ -456,7 +367,7 @@ void plPythonFileMod::ICallScriptMethod(func_num methodId, Args&&... args)
         return;
 
     pyObjectRef tuple = PyTuple_New(sizeof...(args));
-    IBuildTupleArgs<sizeof...(args)>(tuple.Get(), std::forward<Args>(args)...);
+    plPythonCallable::BuildTupleArgs<sizeof...(args)>(tuple.Get(), std::forward<Args>(args)...);
 
     plProfile_BeginTiming(PythonUpdate);
     pyObjectRef retVal = PyObject_CallObject(callable, tuple.Get());
@@ -496,18 +407,13 @@ bool plPythonFileMod::ILoadPythonCode()
         if (PythonInterface::RunFile(pyfile, fModule)) {
             // we've loaded the code into our module
             // now attach the glue python code to the end
-            if (!PythonInterface::RunFile(gluefile, fModule)) {
-                // display any output (NOTE: this would be disabled in production)
-                DisplayPythonOutput();
-                return false;
-            } else {
+            if (PythonInterface::RunFile(gluefile, fModule))
                 return true;
-            }
         }
-        DisplayPythonOutput();
 
         ST::string errMsg = ST::format("Python file {}.py had errors!!! Could not load.", fPythonFile);
         PythonInterface::WriteToLog(errMsg);
+        ReportError();
         return false;
     }
 #endif  //PLASMA_EXTERNAL_RELEASE
@@ -518,10 +424,10 @@ bool plPythonFileMod::ILoadPythonCode()
     if (pythonCode && PythonInterface::RunPYC(pythonCode, fModule))
         return true;
 
-    DisplayPythonOutput();
-
     ST::string errMsg = ST::format("Python file {}.py was not found.", fPythonFile);
     PythonInterface::WriteToLog(errMsg);
+    if (PyErr_Occurred())
+        ReportError();
     return false;
 }
 
@@ -1021,7 +927,7 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
         fLocalNotify = !pNtfyMsg->HasBCastFlag(plMessage::kNetNonLocal);
 
         PyObject* levents = PyTuple_New(pNtfyMsg->GetEventCount());
-        for (int i = 0; i < pNtfyMsg->GetEventCount(); i++) {
+        for (size_t i = 0; i < pNtfyMsg->GetEventCount(); i++) {
             proEventData* pED = pNtfyMsg->GetEventRecord(i);
             switch (pED->fEventType) {
                 case proEventData::kCollision:
@@ -1060,7 +966,7 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
                         PyTuple_SET_ITEM(event, 4, pyPoint3::New(eventData->fHitPoint));
 
                         // make it in the local space
-                        hsPoint3 tolocal{ 0.f, 0.f, 0.f };
+                        hsPoint3 tolocal;
                         if (eventData->fPicked){
                             plSceneObject* obj = plSceneObject::ConvertNoRef(eventData->fPicked->ObjectIsLoaded());
                             if (obj) {
@@ -1356,7 +1262,7 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
     auto pRLNMsg = IScriptWantsMsg<plRoomLoadNotifyMsg>(kfunc_PageLoad, msg);
     if (pRLNMsg) {
         ICallScriptMethod(kfunc_PageLoad, pRLNMsg->GetWhatHappen(),
-                          pRLNMsg->GetRoom() ? pRLNMsg->GetRoom()->GetName() : ST::null);
+                          pRLNMsg->GetRoom() ? pRLNMsg->GetRoom()->GetName() : ST::string());
         return true;
     }
 
@@ -1444,11 +1350,9 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
         PyObject* player = nullptr;
         if (pramsg->GetAvatarKey()) {
             // try to create the pyPlayer for where this message came from
-            int mbrIndex = plNetClientMgr::GetInstance()->TransportMgr().FindMember(pramsg->GetAvatarKey());
-            if (mbrIndex != -1) {
-                plNetTransportMember *mbr = plNetClientMgr::GetInstance()->TransportMgr().GetMember( mbrIndex );
+            plNetTransportMember *mbr = plNetClientMgr::GetInstance()->TransportMgr().GetMemberByKey(pramsg->GetAvatarKey());
+            if (mbr)
                 player = pyPlayer::New(mbr->GetAvatarKey(), mbr->GetPlayerName(), mbr->GetPlayerID(), mbr->GetDistSq());
-            }
         }
         if (!player)
             player = PyLong_FromLong(0);
@@ -1511,9 +1415,8 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
     if (pkimsg && pkimsg->GetCommand() == pfKIMsg::kHACKChatMsg) {
         if (!VaultAmIgnoringPlayer(pkimsg->GetPlayerID())) {
             PyObject* player;
-            int mbrIndex = plNetClientMgr::GetInstance()->TransportMgr().FindMember(pkimsg->GetPlayerID());
-            if (mbrIndex != -1) {
-                plNetTransportMember *mbr = plNetClientMgr::GetInstance()->TransportMgr().GetMember( mbrIndex );
+            plNetTransportMember *mbr = plNetClientMgr::GetInstance()->TransportMgr().GetMemberByID(pkimsg->GetPlayerID());
+            if (mbr) {
                 player = pyPlayer::New(mbr->GetAvatarKey(), pkimsg->GetUser(), mbr->GetPlayerID(), mbr->GetDistSq());
             } else {
                 // else if we could not find the player in our list, then just return a string of the user's name
@@ -1674,8 +1577,8 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
 
     auto pPubAgeMsg = IScriptWantsMsg<plNetCommPublicAgeListMsg>(kfunc_gotPublicAgeList, msg);
     if (pPubAgeMsg) {
-        PyObject* pyEL = PyTuple_New(pPubAgeMsg->ages.Count());
-        for (unsigned i = 0; i < pPubAgeMsg->ages.Count(); ++i) {
+        PyObject* pyEL = PyTuple_New(pPubAgeMsg->ages.size());
+        for (size_t i = 0; i < pPubAgeMsg->ages.size(); ++i) {
             plAgeInfoStruct ageInfo;
             ageInfo.CopyFrom(pPubAgeMsg->ages[i]);
             unsigned nPlayers = pPubAgeMsg->ages[i].currentPopulation;

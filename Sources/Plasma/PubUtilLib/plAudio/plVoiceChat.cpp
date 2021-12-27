@@ -50,6 +50,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plgDispatch.h"
 #include "plAudible/plWinAudible.h"
 #include "plNetMessage/plNetMessage.h"
+#include "pnNetCommon/plNetApp.h"
 #include "plPipeline/plPlates.h"
 #include "plAvatar/plAvatarMgr.h"
 #include "plAvatar/plArmatureMod.h"
@@ -89,14 +90,14 @@ plVoiceRecorder::plVoiceRecorder()
 {
     plPlateManager::Instance().CreatePlate(&fDisabledIcon);
     fDisabledIcon->CreateFromResource(MICROPHONE);
-    fDisabledIcon->SetPosition(-0.90, -0.90);
-    fDisabledIcon->SetSize(0.064, 0.064, true);
+    fDisabledIcon->SetPosition(-0.90f, -0.90f);
+    fDisabledIcon->SetSize(0.064f, 0.064f, true);
     fDisabledIcon->SetVisible(false);
 
     plPlateManager::Instance().CreatePlate(&fTalkIcon);
     fTalkIcon->CreateFromResource(TALKING);
-    fTalkIcon->SetPosition(-0.9,-0.9);
-    fTalkIcon->SetSize(0.064, 0.064, true);
+    fTalkIcon->SetPosition(-0.9f, -0.9f);
+    fTalkIcon->SetSize(0.064f, 0.064f, true);
     fTalkIcon->SetVisible(false);
 }
 
@@ -227,14 +228,14 @@ void plVoiceRecorder::DrawDisabledIcon(bool b)
         plPlateManager::Instance().CreatePlate(&fDisabledIcon);
         if (fDisabledIcon) {
             fDisabledIcon->CreateFromResource(MICROPHONE);
-            fDisabledIcon->SetPosition(-0.90, -0.90);
-            fDisabledIcon->SetSize(0.064, 0.064, true);
+            fDisabledIcon->SetPosition(-0.90f, -0.90f);
+            fDisabledIcon->SetSize(0.064f, 0.064f, true);
             fDisabledIcon->SetVisible(false);
         }
     }
 
     if (fDisabledIcon) {
-        fDisabledIcon->SetSize(0.064, 0.064, true);     // Re-compute plate size in case the aspect ratio has changed.
+        fDisabledIcon->SetSize(0.064f, 0.064f, true);     // Re-compute plate size in case the aspect ratio has changed.
         fDisabledIcon->SetVisible(b);
     }
 }
@@ -245,14 +246,14 @@ void plVoiceRecorder::DrawTalkIcon(bool b)
         plPlateManager::Instance().CreatePlate(&fTalkIcon);
         if (fTalkIcon) {
             fTalkIcon->CreateFromResource( TALKING );
-            fTalkIcon->SetPosition(-0.9,-0.9);
-            fTalkIcon->SetSize(0.064, 0.064, true);
+            fTalkIcon->SetPosition(-0.9f, -0.9f);
+            fTalkIcon->SetSize(0.064f, 0.064f, true);
             fTalkIcon->SetVisible(false);
         }
     }
 
     if (fTalkIcon) {
-        fTalkIcon->SetSize(0.064, 0.064, true);     // Re-compute plate size in case the aspect ratio has changed.
+        fTalkIcon->SetSize(0.064f, 0.064f, true);     // Re-compute plate size in case the aspect ratio has changed.
         fTalkIcon->SetVisible(b);
     }
 }
@@ -338,6 +339,7 @@ plVoicePlayer::plVoicePlayer()
 
 plVoicePlayer::~plVoicePlayer()
 {
+    delete fOpusDecoder;
 }
 
 void plVoicePlayer::PlaybackUncompressedVoiceMessage(const void* data, size_t size, uint32_t rate)
@@ -366,17 +368,17 @@ void plVoicePlayer::PlaybackVoiceMessage(const void* data, size_t size, int numF
     }
 }
 
-void plVoicePlayer::SetVelocity(const hsVector3 vel)
+void plVoicePlayer::SetVelocity(const hsVector3& vel)
 {
     fSound.SetVelocity(vel);
 }
 
-void plVoicePlayer::SetPosition(const hsPoint3 pos)
+void plVoicePlayer::SetPosition(const hsPoint3& pos)
 {
     fSound.SetPosition(pos);
 }
 
-void plVoicePlayer::SetOrientation(const hsPoint3 pos)
+void plVoicePlayer::SetOrientation(const hsPoint3& pos)
 {
     fSound.SetConeOrientation(pos.fX, pos.fY, pos.fZ);
 }

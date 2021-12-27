@@ -217,12 +217,6 @@ class xDialogStartUp(ptResponder):
             PtHideDialog("GUIDialog06a")
 
     ###########################
-    def OnNotify(self,state,id,events):
-        if id==(-1): ## callback from delete yes/no dialog (hopefully) ##
-            if state:
-                PtConsole("App.Quit")
-
-    ###########################
     def OnGUINotify(self,id,control,event):
         global gSelectedSlot
         global gPlayerList
@@ -245,7 +239,7 @@ class xDialogStartUp(ptResponder):
                     PtShowDialog("GUIDialog05")
 
                 elif  tagID == k4aQuitID: ## Quit ##
-                    PtYesNoDialog(self.key,"Are you sure you want to quit?")
+                    PtLocalizedYesNoDialog(None, "KI.Messages.LeaveGame", dialogType=PtConfirmationType.ConfirmQuit)
 
                 elif  tagID == k4aPlayer01: ## Click Event ##
                     if gPlayerList[0]:
@@ -280,7 +274,7 @@ class xDialogStartUp(ptResponder):
                     ## Or Else?? ##
 
                 elif  tagID == k4bQuitID: ## Quit ##
-                    PtYesNoDialog(self.key,"Are you sure you want to quit?")
+                    PtLocalizedYesNoDialog(None, "KI.Messages.LeaveGame", dialogType=PtConfirmationType.ConfirmQuit)
 
                 elif  tagID == k4bDeleteID: ## Delete Explorer ##
                     if gSelectedSlot:
@@ -322,7 +316,7 @@ class xDialogStartUp(ptResponder):
         elif id == GUIDiag6.id:
             if event == kAction or event == kValueChanged:
                 if  tagID == k6QuitID: ## Quit ##
-                    PtYesNoDialog(self.key,"Are you sure you want to quit?")
+                    PtLocalizedYesNoDialog(None, "KI.Messages.LeaveGame", dialogType=PtConfirmationType.ConfirmQuit)
 
                 elif  tagID == k6BackID: ## Back To Player Select ##
                     PtHideDialog("GUIDialog06")
@@ -347,7 +341,7 @@ class xDialogStartUp(ptResponder):
                     if ptGUIControlCheckBox(GUIDiag6.dialog.getControlFromTag(k6FemaleID)).isChecked():
                         playerGender = "female"
 
-                    if playerName == "" or playerName == "":
+                    if playerName == "" or playerName.isspace():
                         errorString = "Error, you must enter a Name."
                         ptGUIControlTextBox(GUIDiag4d.dialog.getControlFromTag(k4dTextID)).setString(errorString)
                         PtShowDialog("GUIDialog04d")
@@ -359,7 +353,7 @@ class xDialogStartUp(ptResponder):
                         self.ToggleColor(GUIDiag4b, k4bPlayer03)
                     else:
                         fixedPlayerName = playerName.strip()
-                        (fixedPlayerName, whitespacefixedcount) = re.subn("\s{2,}|[\t\n\r\f\v]", " ", fixedPlayerName)
+                        (fixedPlayerName, whitespacefixedcount) = re.subn(r"\s{2,}|[\t\n\r\f\v]", " ", fixedPlayerName)
                         
                         (fixedPlayerName, RogueCount,) = re.subn('[\x00-\x1f]', '', fixedPlayerName)
                         if RogueCount > 0 or whitespacefixedcount > 0:

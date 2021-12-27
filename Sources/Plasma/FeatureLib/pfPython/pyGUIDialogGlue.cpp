@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pyGUIDialog.h"
 
@@ -54,7 +53,7 @@ PYTHON_DEFAULT_DEALLOC_DEFINITION(ptGUIDialog)
 
 PYTHON_INIT_DEFINITION(ptGUIDialog, args, keywords)
 {
-    PyObject *keyObject = NULL;
+    PyObject *keyObject = nullptr;
     if (!PyArg_ParseTuple(args, "O", &keyObject))
     {
         PyErr_SetString(PyExc_TypeError, "__init__ expects a ptKey");
@@ -135,7 +134,7 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptGUIDialog, isEnabled)
 
 PYTHON_METHOD_DEFINITION_NOARGS(ptGUIDialog, getName)
 {
-    return PyUnicode_FromString(self->fThis->GetName());
+    return PyUnicode_FromSTString(self->fThis->GetName());
 }
 
 PYTHON_METHOD_DEFINITION_NOARGS(ptGUIDialog, getVersion)
@@ -161,7 +160,7 @@ PYTHON_METHOD_DEFINITION(ptGUIDialog, getControlFromIndex, args)
 
 PYTHON_METHOD_DEFINITION(ptGUIDialog, setFocus, args)
 {
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "setFocus expects a ptKey");
@@ -329,15 +328,15 @@ PYTHON_CLASS_NEW_IMPL(ptGUIDialog, pyGUIDialog)
 
 PyObject *pyGUIDialog::New(pyKey& gckey)
 {
-    ptGUIDialog *newObj = (ptGUIDialog*)ptGUIDialog_type.tp_new(&ptGUIDialog_type, NULL, NULL);
+    ptGUIDialog *newObj = (ptGUIDialog*)ptGUIDialog_type.tp_new(&ptGUIDialog_type, nullptr, nullptr);
     newObj->fThis->fGCkey = gckey.getKey();
     return (PyObject*)newObj;
 }
 
 PyObject *pyGUIDialog::New(plKey objkey)
 {
-    ptGUIDialog *newObj = (ptGUIDialog*)ptGUIDialog_type.tp_new(&ptGUIDialog_type, NULL, NULL);
-    newObj->fThis->fGCkey = objkey;
+    ptGUIDialog *newObj = (ptGUIDialog*)ptGUIDialog_type.tp_new(&ptGUIDialog_type, nullptr, nullptr);
+    newObj->fThis->fGCkey = std::move(objkey);
     return (PyObject*)newObj;
 }
 
@@ -357,7 +356,7 @@ void pyGUIDialog::AddPlasmaClasses(PyObject *m)
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtWhatGUIControlType, args, "Params: guiKey\nReturns the control type of the key passed in")
 {
-    PyObject* guiKeyObj = NULL;
+    PyObject* guiKeyObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &guiKeyObj))
     {
         PyErr_SetString(PyExc_TypeError, "PtWhatGUIControlType expects a ptKey");

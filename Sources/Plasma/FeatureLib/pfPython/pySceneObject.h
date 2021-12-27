@@ -51,7 +51,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "pyGlueHelpers.h"
 #include "pnKeyedObject/plKey.h"
-#include "hsTemplates.h"
 #include <vector>
 
 class pyMatrix44;
@@ -59,29 +58,29 @@ class pyMatrix44;
 class pySceneObject
 {
 private:
-    hsTArray<plKey>     fSceneObjects;
+    std::vector<plKey>  fSceneObjects;
     plKey               fSenderKey;     // the holder of the who (the modifier) we are
     plKey               fPyMod;         // pyKey that points to modifier
     bool                fNetForce;
 
-    virtual void IAddObjKeyToAll(plKey key);
+    virtual void IAddObjKeyToAll(const plKey& key);
     virtual void ISetAllSenderKeys();
 
 protected:
     pySceneObject();
-    pySceneObject(pyKey& objkey, pyKey& selfkey);
-    pySceneObject(plKey objkey,pyKey& selfkey);
-    pySceneObject(plKey objkey);
+    pySceneObject(const pyKey& objkey, const pyKey& selfkey);
+    pySceneObject(const plKey& objkey, const pyKey& selfkey);
+    pySceneObject(const plKey& objkey);
 
 public:
     virtual ~pySceneObject();
 
     // required functions for PyObject interoperability
     PYTHON_CLASS_NEW_FRIEND(ptSceneobject);
-    static PyObject *New(plKey objKey, PyObject *selfKeyObj);
-    static PyObject *New(plKey objKey, pyKey &selfKey);
-    static PyObject *New(plKey objKey, plKey selfkey);
-    static PyObject *New(plKey objKey);
+    static PyObject *New(const plKey& objKey, PyObject *selfKeyObj);
+    static PyObject *New(const plKey& objKey, pyKey &selfKey);
+    static PyObject *New(const plKey& objKey, const plKey& selfkey);
+    static PyObject *New(const plKey& objKey);
     PYTHON_CLASS_CHECK_DEFINITION; // returns true if the PyObject is a pySceneObject object
     PYTHON_CLASS_CONVERT_FROM_DEFINITION(pySceneObject); // converts a PyObject to a pySceneObject (throws error if not correct type)
 
@@ -97,13 +96,13 @@ public:
     PyObject*               fParticle; // cyParticleSys
 
     // getter and setters
-    virtual void addObjKey(plKey key);
-    virtual void addObjPyKey(pyKey& objkey);
-    virtual plKey getObjKey();
-    virtual PyObject* getObjPyKey(); // pyKey
+    virtual void addObjKey(const plKey& key);
+    virtual void addObjPyKey(const pyKey& objkey);
+    virtual plKey getObjKey() const;
+    virtual PyObject* getObjPyKey() const; // pyKey
 
     virtual void setSenderKey(plKey key);
-    virtual void setPyMod(pyKey& pymod) { fPyMod = pymod.getKey(); }
+    virtual void setPyMod(const pyKey& pymod) { fPyMod = pymod.getKey(); }
     virtual void setPyMod(const plKey& key) { fPyMod = key; }
 
     virtual void SetNetForce(bool state);

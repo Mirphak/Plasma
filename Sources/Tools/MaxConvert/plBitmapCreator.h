@@ -42,15 +42,16 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "plFileSystem.h"
 
+#include "MaxMain/MaxCompat.h"
+
 class BitmapInfo;
 class Bitmap;
 class plBitmap;
 class plErrorMsg;
 class plKey;
 class plLocation;
-class plMipmap;
 class hsMaxLayerBase;
-
+class plMipmap;
 
 class plBitmapData
 {
@@ -71,7 +72,7 @@ public:
     float sig;
     bool    isStaticCubicEnvMap;
     bool    invertAlpha;
-    const char  *faceNames[ 6 ];
+    const MCHAR  *faceNames[ 6 ];
     uint32_t  maxDimension;
     uint8_t   clampFlags;
     bool    usePNG;
@@ -85,7 +86,7 @@ public:
         sig = 0;
         isStaticCubicEnvMap = false;
         invertAlpha = false;
-        faceNames[ 0 ] = faceNames[ 1 ] = faceNames[ 2 ] = faceNames[ 3 ] = faceNames[ 4 ] = faceNames[ 5 ] = nil;
+        faceNames[0] = faceNames[1] = faceNames[2] = faceNames[3] = faceNames[4] = faceNames[5] = nullptr;
         maxDimension = 0;
         clampFlags = 0;
         usePNG = false;

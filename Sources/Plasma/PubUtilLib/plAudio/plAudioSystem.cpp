@@ -179,8 +179,8 @@ plAudioSystem::plAudioSystem()
       fEAXSupported(),
       fLastUpdateTimeMs()
 {
-    fCurrListenerPos.Set( -1.e30, -1.e30, -1.e30 );
-    fLastPos.Set(100, 100, 100);
+    fCurrListenerPos.Set(-1.e30f, -1.e30f, -1.e30f);
+    fLastPos.Set(100.f, 100.f, 100.f);
 }
 
 std::vector<ST::string> plAudioSystem::GetPlaybackDevices() const
@@ -221,7 +221,7 @@ ST::string plAudioSystem::GetDefaultPlaybackDevice() const
         return ST::string::from_utf8(alcGetString(nullptr, ALC_DEVICE_SPECIFIER));
     } else {
         plStatusLog::AddLineS("audio.log", plStatusLog::kRed, "ASYS: Unable to fetch the default playback device name.");
-        return ST::null;
+        return ST::string();
     }
 }
 
@@ -292,7 +292,7 @@ bool plAudioSystem::Init()
 
     plStatusLog::AddLineS("audio.log", plStatusLog::kGreen, "ASYS: Device Init Success!");
 
-    fContext = alcCreateContext(fPlaybackDevice, 0);
+    fContext = alcCreateContext(fPlaybackDevice, nullptr);
     alcMakeContextCurrent(fContext);
 
     if (alGetError() != AL_NO_ERROR) {
@@ -389,7 +389,7 @@ void plAudioSystem::Shutdown()
 
     fStartTime = 0;
     fUsingEAX = false;
-    fCurrListenerPos.Set( -1.e30, -1.e30, -1.e30 );
+    fCurrListenerPos.Set(-1.e30f, -1.e30f, -1.e30f);
 
     if (fRestartOnDestruct) {
         fRestartOnDestruct = false;
@@ -430,7 +430,6 @@ void plAudioSystem::SetDistanceModel(int i)
 // Set the number of active sounds the audio system is allowed to play, based on the priority cutoff
 void plAudioSystem::SetMaxNumberOfActiveSounds()
 {
-    uint16_t priorityCutoff = plgAudioSys::GetPriorityCutoff();
     int maxNumSounds = 24;
 
     // Keep this to a reasonable amount based on the users hardware, since we want the sounds to be played in hardware
@@ -683,6 +682,8 @@ void    plAudioSystem::IUpdateSoftSounds(const hsPoint3 &newPosition)
                 break;
             case plSound::kStreamCompressed:
                 color = plStatusLog::kRed;
+                break;
+            case plSound::kNoStream:
                 break;
         }
 
@@ -1119,7 +1120,7 @@ hsPoint3 plgAudioSys::GetCurrListenerPos()
 {
     if (fSys)
         return fSys->fCurrListenerPos;
-    return hsPoint3(0.f, 0.f, 0.f);
+    return {};
 }
 
 void plgAudioSys::SetListenerPos(const hsPoint3& pos)

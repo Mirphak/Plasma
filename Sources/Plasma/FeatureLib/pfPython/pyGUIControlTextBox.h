@@ -62,7 +62,7 @@ private:
     pfGUIColorScheme*       fOriginalColorScheme;
 
 protected:
-    pyGUIControlTextBox(): pyGUIControl() {} // for python glue only, do NOT call
+    pyGUIControlTextBox() : pyGUIControl(), fOriginalColorScheme() { } // for python glue only, do NOT call
     pyGUIControlTextBox(pyKey& gckey);
     pyGUIControlTextBox(plKey objkey);
 
@@ -79,7 +79,7 @@ public:
     static bool IsGUIControlTextBox(pyKey& gckey);
 
     virtual void    SetText( const char *text );
-    virtual void    SetTextW( std::wstring text );
+    virtual void    SetTextW( const std::wstring& text );
     virtual std::string GetText();
     virtual std::wstring GetTextW();
     virtual void    SetFontSize( uint8_t size );
@@ -88,7 +88,7 @@ public:
     virtual void    SetJustify( uint8_t justify );
     
     virtual uint8_t   GetJustify();
-    virtual PyObject* GetForeColor() const; // returns pyColor
+    PyObject* GetForeColor() const override; // returns pyColor
 };
 
 #endif // _pyGUIControlTextBox_h_

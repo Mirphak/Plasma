@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pyColor.h"
 #include "cyPythonInterface.h"
@@ -78,12 +77,11 @@ pyGUIDialog::pyGUIDialog(pyKey& gckey)
 
 pyGUIDialog::pyGUIDialog(plKey objkey)
 {
-    fGCkey = objkey;
+    fGCkey = std::move(objkey);
 }
 
 pyGUIDialog::pyGUIDialog()
 {
-    fGCkey = nil;
 }
 
 bool pyGUIDialog::IsGUIDialog(pyKey& gckey)
@@ -138,9 +136,9 @@ uint32_t pyGUIDialog::WhatControlType(pyKey& gckey)
 bool pyGUIDialog::operator==(const pyGUIDialog &gcobj) const
 {
     plKey theirs = ((pyGUIDialog&)gcobj).getObjKey();
-    if ( fGCkey == nil && theirs == nil )
+    if (fGCkey == nullptr && theirs == nullptr)
         return true;
-    else if ( fGCkey != nil && theirs != nil )
+    else if (fGCkey != nullptr && theirs != nullptr)
         return (fGCkey->GetUoid()==theirs->GetUoid());
     else
         return false;
@@ -195,7 +193,7 @@ bool pyGUIDialog::IsEnabled()
     return false;
 }
 
-const char* pyGUIDialog::GetName()
+ST::string pyGUIDialog::GetName() const
 {
     if ( fGCkey )
     {
@@ -203,7 +201,7 @@ const char* pyGUIDialog::GetName()
         if ( pdmod )
             return pdmod->GetName();
     }
-    return "";
+    return {};
 }
 
 
@@ -219,7 +217,7 @@ uint32_t pyGUIDialog::GetVersion()
 }
 
 
-uint32_t pyGUIDialog::GetNumControls()
+size_t pyGUIDialog::GetNumControls()
 {
     if ( fGCkey )
     {
@@ -244,9 +242,8 @@ PyObject* pyGUIDialog::GetControl( uint32_t idx )
     }
 
     // if we got here then there must have been an error
-    char errmsg[256];
-    sprintf(errmsg,"Index %d not found in GUIDialog %s",idx,GetName());
-    PyErr_SetString(PyExc_KeyError, errmsg);
+    ST::string errmsg = ST::format("Index {d} not found in GUIDialog {}", idx, GetName());
+    PyErr_SetObject(PyExc_KeyError, PyUnicode_FromSTString(errmsg));
     PYTHON_RETURN_ERROR;
 }
 
@@ -311,9 +308,8 @@ PyObject* pyGUIDialog::GetControlFromTag( uint32_t tagID )
     }
 
     // if we got here then there must have been an error
-    char errmsg[256];
-    sprintf(errmsg,"TagID %d not found in GUIDialog %s",tagID,GetName());
-    PyErr_SetString(PyExc_KeyError, errmsg);
+    ST::string errmsg = ST::format("TagID {d} not found in GUIDialog {}", tagID, GetName());
+    PyErr_SetObject(PyExc_KeyError, PyUnicode_FromSTString(errmsg));
     PYTHON_RETURN_ERROR;
 }
 
@@ -512,7 +508,7 @@ void pyGUIDialog::NoFocus( )
         pfGUIDialogMod* pdmod = pfGUIDialogMod::ConvertNoRef(fGCkey->ObjectIsLoaded());
         if ( pdmod )
         {
-            pdmod->SetFocus(nil);
+            pdmod->SetFocus(nullptr);
         }
     }
 }

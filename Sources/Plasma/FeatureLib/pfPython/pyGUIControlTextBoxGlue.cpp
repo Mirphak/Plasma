@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pyGUIControlTextBox.h"
 #include "pyColor.h"
@@ -55,7 +54,7 @@ PYTHON_DEFAULT_DEALLOC_DEFINITION(ptGUIControlTextBox)
 
 PYTHON_INIT_DEFINITION(ptGUIControlTextBox, args, keywords)
 {
-    PyObject *keyObject = NULL;
+    PyObject *keyObject = nullptr;
     if (!PyArg_ParseTuple(args, "O", &keyObject))
     {
         PyErr_SetString(PyExc_TypeError, "__init__ expects a ptKey");
@@ -95,12 +94,9 @@ PYTHON_METHOD_DEFINITION(ptGUIControlTextBox, setStringW, args)
     }
     if (PyUnicode_Check(textObj))
     {
-        int strLen = PyUnicode_GetSize(textObj);
-        wchar_t* temp = new wchar_t[strLen + 1];
-        PyUnicode_AsWideChar(textObj, temp, strLen);
-        temp[strLen] = L'\0';
+        wchar_t* temp = PyUnicode_AsWideCharString(textObj, nullptr);
         self->fThis->SetTextW(temp);
-        delete [] temp;
+        PyMem_Free(temp);
         PYTHON_RETURN_NONE;
     }
     else
@@ -135,7 +131,7 @@ PYTHON_METHOD_DEFINITION(ptGUIControlTextBox, setFontSize, args)
 
 PYTHON_METHOD_DEFINITION(ptGUIControlTextBox, setForeColor, args)
 {
-    PyObject* colorObj = NULL;
+    PyObject* colorObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &colorObj))
     {
         PyErr_SetString(PyExc_TypeError, "setForeColor expects a ptColor");
@@ -153,7 +149,7 @@ PYTHON_METHOD_DEFINITION(ptGUIControlTextBox, setForeColor, args)
 
 PYTHON_METHOD_DEFINITION(ptGUIControlTextBox, setBackColor, args)
 {
-    PyObject* colorObj = NULL;
+    PyObject* colorObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &colorObj))
     {
         PyErr_SetString(PyExc_TypeError, "setBackColor expects a ptColor");
@@ -212,15 +208,15 @@ PLASMA_DEFAULT_TYPE_WBASE(ptGUIControlTextBox, pyGUIControl, "Params: ctrlKey\nP
 // required functions for PyObject interoperability
 PyObject *pyGUIControlTextBox::New(pyKey& gckey)
 {
-    ptGUIControlTextBox *newObj = (ptGUIControlTextBox*)ptGUIControlTextBox_type.tp_new(&ptGUIControlTextBox_type, NULL, NULL);
+    ptGUIControlTextBox *newObj = (ptGUIControlTextBox*)ptGUIControlTextBox_type.tp_new(&ptGUIControlTextBox_type, nullptr, nullptr);
     newObj->fThis->fGCkey = gckey.getKey();
     return (PyObject*)newObj;
 }
 
 PyObject *pyGUIControlTextBox::New(plKey objkey)
 {
-    ptGUIControlTextBox *newObj = (ptGUIControlTextBox*)ptGUIControlTextBox_type.tp_new(&ptGUIControlTextBox_type, NULL, NULL);
-    newObj->fThis->fGCkey = objkey;
+    ptGUIControlTextBox *newObj = (ptGUIControlTextBox*)ptGUIControlTextBox_type.tp_new(&ptGUIControlTextBox_type, nullptr, nullptr);
+    newObj->fThis->fGCkey = std::move(objkey);
     return (PyObject*)newObj;
 }
 

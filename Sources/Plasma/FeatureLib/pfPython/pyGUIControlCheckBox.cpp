@@ -41,7 +41,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pfGameGUIMgr/pfGUICheckBoxCtrl.h"
 #include "pfGameGUIMgr/pfGUIDialogMod.h"
@@ -53,7 +52,7 @@ pyGUIControlCheckBox::pyGUIControlCheckBox(pyKey& gckey) : pyGUIControl(gckey)
 {
 }
 
-pyGUIControlCheckBox::pyGUIControlCheckBox(plKey objkey) : pyGUIControl(objkey)
+pyGUIControlCheckBox::pyGUIControlCheckBox(plKey objkey) : pyGUIControl(std::move(objkey))
 {
 }
 

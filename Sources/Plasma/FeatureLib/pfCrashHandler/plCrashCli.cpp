@@ -43,6 +43,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plCrashCli.h"
 #include "plCrash_Private.h"
 
+#include <string_theory/format>
+
 #ifdef HS_BUILD_FOR_WIN32
 
 #ifdef _MSC_VER
@@ -61,19 +63,17 @@ static void IPureVirtualCall()
 #endif // _MSC_VER
 
 plCrashCli::plCrashCli()
-    : fLink(nil), fLinkH(nil)
+    : fLink(), fLinkH()
 {
-    char mapname[128];
-    char cmdline[128];
-    snprintf(mapname, std::size(mapname), "Plasma20CrashHandler-%u", GetCurrentProcessId());
-    snprintf(cmdline, std::size(cmdline), "%s %s", CRASH_HANDLER_EXE, mapname);
+    ST::string mapname = ST::format("Plasma20CrashHandler-{}", GetCurrentProcessId());
+    ST::string cmdline = ST::format("{} {}", CRASH_HANDLER_EXE, mapname);
     memset(&fCrashSrv, 0, sizeof(PROCESS_INFORMATION));
 
     // Initialize the semas
     IInit(mapname);
 
     // Initialize the shared memory
-    fLinkH = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(plCrashMemLink), mapname);
+    fLinkH = CreateFileMappingW(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, sizeof(plCrashMemLink), mapname.to_wchar().data());
     hsAssert(fLinkH, "Failed to create plCrashHandler mapping");
     if (!fLinkH)
         return;
@@ -87,17 +87,17 @@ plCrashCli::plCrashCli()
     fLink->fClientProcessID = GetCurrentProcessId();
 
     // Start the plCrashHandler before a crash
-    STARTUPINFOA info; memset(&info, 0, sizeof(info));
-    info.cb = sizeof(STARTUPINFOA);
-    CreateProcessA(
-                   CRASH_HANDLER_EXE, // plCrashHandler.exe
-                   cmdline,           // plCrashHandler.exe Plasma20CrashHandler-%u
-                   NULL,
-                   NULL,
+    STARTUPINFOW info{};
+    info.cb = sizeof(info);
+    CreateProcessW(
+                   CRASH_HANDLER_EXE.data(),  // plCrashHandler.exe
+                   cmdline.to_wchar().data(), // plCrashHandler.exe Plasma20CrashHandler-%u
+                   nullptr,
+                   nullptr,
                    FALSE,
                    CREATE_NO_WINDOW, // Don't create any new windows or consoles
-                   NULL,
-                   NULL,             // Use the directory of the current plClient
+                   nullptr,
+                   nullptr,          // Use the directory of the current plClient
                    &info,
                    &fCrashSrv        // Save the CrashSrv handles
     );

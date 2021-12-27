@@ -41,7 +41,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include <Python.h>
-#pragma hdrstop
 
 #include "pyAgeLinkStruct.h"
 #include "pyAgeInfoStruct.h"
@@ -93,7 +92,7 @@ PYTHON_RICH_COMPARE_DEFINITION(ptAgeLinkStruct, obj1, obj2, compareType)
 
 PYTHON_METHOD_DEFINITION(ptAgeLinkStruct, copyFrom, args)
 {
-    PyObject* linkStructObj = NULL;
+    PyObject* linkStructObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &linkStructObj))
     {
         PyErr_SetString(PyExc_TypeError, "copyFrom expects a ptAgeLinkStruct or ptAgeLinkStructRef");
@@ -122,7 +121,7 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptAgeLinkStruct, getAgeInfo)
 
 PYTHON_METHOD_DEFINITION(ptAgeLinkStruct, setAgeInfo, args)
 {
-    PyObject* ageInfoObj = NULL;
+    PyObject* ageInfoObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &ageInfoObj))
     {
         PyErr_SetString(PyExc_TypeError, "setAgeInfo expects a ptAgeInfoStruct");
@@ -179,7 +178,7 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptAgeLinkStruct, getSpawnPoint)
 
 PYTHON_METHOD_DEFINITION(ptAgeLinkStruct, setSpawnPoint, args)
 {
-    PyObject* spawnPtInfoObj = NULL;
+    PyObject* spawnPtInfoObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &spawnPtInfoObj))
     {
         PyErr_SetString(PyExc_TypeError, "setSpawnPoint expects a ptSpawnPointInfo or a ptSpawnPointInfoRef");
@@ -230,7 +229,7 @@ PYTHON_CLASS_NEW_IMPL(ptAgeLinkStruct, pyAgeLinkStruct)
 
 PyObject *pyAgeLinkStruct::New(plAgeLinkStruct *link)
 {
-    ptAgeLinkStruct *newObj = (ptAgeLinkStruct*)ptAgeLinkStruct_type.tp_new(&ptAgeLinkStruct_type, NULL, NULL);
+    ptAgeLinkStruct *newObj = (ptAgeLinkStruct*)ptAgeLinkStruct_type.tp_new(&ptAgeLinkStruct_type, nullptr, nullptr);
     newObj->fThis->fAgeLink.CopyFrom(link);
     return (PyObject*)newObj;
 }
@@ -259,7 +258,7 @@ PYTHON_NO_INIT_DEFINITION(ptAgeLinkStructRef)
 
 PYTHON_METHOD_DEFINITION(ptAgeLinkStructRef, copyFrom, args)
 {
-    PyObject* linkStructObj = NULL;
+    PyObject* linkStructObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &linkStructObj))
     {
         PyErr_SetString(PyExc_TypeError, "copyFrom expects a ptAgeLinkStruct or ptAgeLinkStructRef");
@@ -288,7 +287,7 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptAgeLinkStructRef, getAgeInfo)
 
 PYTHON_METHOD_DEFINITION(ptAgeLinkStructRef, setAgeInfo, args)
 {
-    PyObject* ageInfoObj = NULL;
+    PyObject* ageInfoObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &ageInfoObj))
     {
         PyErr_SetString(PyExc_TypeError, "setAgeInfo expects a ptAgeInfoStruct");
@@ -328,7 +327,7 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptAgeLinkStructRef, getSpawnPoint)
 
 PYTHON_METHOD_DEFINITION(ptAgeLinkStructRef, setSpawnPoint, args)
 {
-    PyObject* spawnPtInfoObj = NULL;
+    PyObject* spawnPtInfoObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &spawnPtInfoObj))
     {
         PyErr_SetString(PyExc_TypeError, "setSpawnPoint expects a ptSpawnPointInfo or a ptSpawnPointInfoRef");
@@ -366,7 +365,7 @@ PLASMA_DEFAULT_TYPE(ptAgeLinkStructRef, "Class to hold the data of the AgeLink s
 // required functions for PyObject interoperability
 PyObject *pyAgeLinkStructRef::New(plAgeLinkStruct &link)
 {
-    ptAgeLinkStructRef *newObj = (ptAgeLinkStructRef*)ptAgeLinkStructRef_type.tp_new(&ptAgeLinkStructRef_type, NULL, NULL);
+    ptAgeLinkStructRef *newObj = (ptAgeLinkStructRef*)ptAgeLinkStructRef_type.tp_new(&ptAgeLinkStructRef_type, nullptr, nullptr);
     newObj->fThis->fAgeLink.CopyFrom(&link);
     return (PyObject*)newObj;
 }

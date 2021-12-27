@@ -79,7 +79,7 @@ void PythonInterface::initPython(const plFileName& rootDir, const std::vector<pl
         config.optimization_level = 2;
         config.write_bytecode = 0;
         config.user_site_directory = 0;
-        config.program_name = L"plasma";
+        PyConfig_SetString(&config, &config.program_name, L"plasma");
 
         // Explicit module search paths so no build-env specific stuff gets in.
         IAddWideString(config.module_search_paths, rootDir);
@@ -93,8 +93,10 @@ void PythonInterface::initPython(const plFileName& rootDir, const std::vector<pl
         status = Py_InitializeFromConfig(&config);
         if (PyStatus_Exception(status)) {
             ST::printf(stderr, "Python {} init failed: {}", PY_VERSION, status.err_msg);
+            PyConfig_Clear(&config);
             return;
         }
+        PyConfig_Clear(&config);
 
         if (stdOut)
             PySys_SetObject("stdout", stdOut);
@@ -139,7 +141,7 @@ bool PythonInterface::DumpObject(PyObject* pyobj, char** pickle, Py_ssize_t* siz
     // convert object to a marshalled string python object
     s = PyMarshal_WriteObjectToString(pyobj, Py_MARSHAL_VERSION);
     // did it actually do it?
-    if ( s != NULL )
+    if (s != nullptr)
     {
         // yes, then get the size and the string address
         *size = PyBytes_Size(s);
@@ -175,7 +177,7 @@ bool PythonInterface::RunPYC(PyObject* code, PyObject* module)
     {
         // if no module was given then use just use the main module
         module = PyImport_AddModule("__main__");
-        if (module == NULL)
+        if (module == nullptr)
             return false;
     }
     // get the dictionaries for this module
@@ -183,7 +185,7 @@ bool PythonInterface::RunPYC(PyObject* code, PyObject* module)
     // run the string
     v = PyEval_EvalCode(code, d, d);
     // check for errors and print them
-    if (v == NULL)
+    if (v == nullptr)
     {
         // Yikes! errors!
         PyErr_Print();

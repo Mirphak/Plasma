@@ -47,36 +47,37 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pyKey.h"
 #include "hsQuat.h"
 #include "pyMatrix44.h"
-#pragma hdrstop
 
 #include "cyPhysics.h"
 
-#include "pnMessage/plEnableMsg.h"
-#include "pnMessage/plWarpMsg.h"
-#include "plMessage/plSimStateMsg.h"
-#include "plMessage/plLinearVelocityMsg.h"
 #include "plMessage/plAngularVelocityMsg.h"
+#include "plMessage/plDampMsg.h"
+#include "pnMessage/plEnableMsg.h"
+#include "plMessage/plImpulseMsg.h"
+#include "plMessage/plLinearVelocityMsg.h"
+#include "plMessage/plSimStateMsg.h"
+#include "pnMessage/plWarpMsg.h"
 
 #include "pnSceneObject/plSceneObject.h"
 #include "pnSceneObject/plCoordinateInterface.h"
 
 cyPhysics::cyPhysics(plKey sender, plKey recvr)
 {
-    SetSender(sender);
-    AddRecvr(recvr);
+    SetSender(std::move(sender));
+    AddRecvr(std::move(recvr));
     fNetForce = false;
 }
 
 // setters
-void cyPhysics::SetSender(plKey &sender)
+void cyPhysics::SetSender(plKey sender)
 {
-    fSender = sender;
+    fSender = std::move(sender);
 }
 
-void cyPhysics::AddRecvr(plKey &recvr)
+void cyPhysics::AddRecvr(plKey recvr)
 {
-    if ( recvr != nil )
-        fRecvr.Append(recvr);
+    if (recvr != nullptr)
+        fRecvr.emplace_back(std::move(recvr));
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -89,7 +90,7 @@ void cyPhysics::AddRecvr(plKey &recvr)
 void cyPhysics::EnableT(bool state)
 {
     // must have a receiver!
-    if ( fRecvr.Count() > 0 )
+    if (!fRecvr.empty())
     {
         // create message
         plEnableMsg* pMsg = new plEnableMsg;
@@ -104,11 +105,9 @@ void cyPhysics::EnableT(bool state)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         // jump back to frame 0
         pMsg->SetCmd(plEnableMsg::kPhysical);
         // which way are we doin' it?
@@ -136,7 +135,7 @@ void  cyPhysics::EnableCollision()
     hsAssert(0, "Who uses this?");
     /*
     // must have a receiver!
-    if ( fRecvr.Count() > 0 )
+    if (!fRecvr.empty())
     {
         plEventGroupEnableMsg* pMsg = new plEventGroupEnableMsg;
         if (fNetForce )
@@ -149,11 +148,9 @@ void  cyPhysics::EnableCollision()
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         pMsg->SetFlags(plEventGroupEnableMsg::kCollideOn);  
         plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
     }
@@ -165,7 +162,7 @@ void  cyPhysics::DisableCollision()
     hsAssert(0, "Who uses this?");
     /*
     // must have a receiver!
-    if ( fRecvr.Count() > 0 )
+    if (!fRecvr.empty())
     {
         plEventGroupEnableMsg* pMsg = new plEventGroupEnableMsg;
         if (fNetForce )
@@ -178,11 +175,9 @@ void  cyPhysics::DisableCollision()
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         pMsg->SetFlags(plEventGroupEnableMsg::kCollideOff); 
         plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
     }
@@ -202,7 +197,6 @@ void cyPhysics::Warp(pyPoint3& pos)
     // create message
     PyObject* matObj = pyMatrix44::New();
     pyMatrix44* mat = pyMatrix44::ConvertFrom(matObj);
-    mat->fMatrix.IdentityMatrix();
     mat->fMatrix.SetTranslate(&pos.fPoint);
     WarpMat(*mat);
     Py_DECREF(matObj);
@@ -236,7 +230,7 @@ void cyPhysics::WarpObj(pyKey& obj)
 void cyPhysics::WarpMat(pyMatrix44& mat)
 {
     // must have a receiver!
-    if ( fRecvr.Count() > 0 )
+    if (!fRecvr.empty())
     {
         // create message
         plWarpMsg* pMsg = new plWarpMsg(mat.fMatrix);
@@ -252,11 +246,9 @@ void cyPhysics::WarpMat(pyMatrix44& mat)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
     }
 }
@@ -274,13 +266,12 @@ void cyPhysics::WarpMat(pyMatrix44& mat)
 void cyPhysics::Move(pyVector3& direction, float distance)
 {
     //move each receiver (object) separately
-    int i;
-    for ( i=0; i<fRecvr.Count(); i++ )
+    for (const plKey& rcKey : fRecvr)
     {
         // get the object pointer of just the first one in the list
         // (We really can't tell which one the user is thinking of if they are
         // referring to multiple objects, so the first one in the list will do.)
-        plSceneObject* obj = plSceneObject::ConvertNoRef(fRecvr[i]->GetObjectPtr());
+        plSceneObject* obj = plSceneObject::ConvertNoRef(rcKey->GetObjectPtr());
         if ( obj )
         {
             const plCoordinateInterface* ci = obj->GetCoordinateInterface();
@@ -309,7 +300,7 @@ void cyPhysics::Move(pyVector3& direction, float distance)
                     if ( fSender )
                         pMsg->SetSender(fSender);
                     // must have a receiver!
-                    pMsg->AddReceiver(fRecvr[i]);
+                    pMsg->AddReceiver(rcKey);
                     plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
                 }
                 else
@@ -343,13 +334,12 @@ void cyPhysics::Move(pyVector3& direction, float distance)
 void cyPhysics::Rotate(float rad, pyVector3& axis)
 {
     // rotate each receiver (object) separately
-    int i;
-    for ( i=0; i<fRecvr.Count(); i++ )
+    for (const plKey& rcKey : fRecvr)
     {
         // get the object pointer of just the first one in the list
         // (We really can't tell which one the user is thinking of if they are
         // referring to multiple objects, so the first one in the list will do.)
-        plSceneObject* obj = plSceneObject::ConvertNoRef(fRecvr[i]->GetObjectPtr());
+        plSceneObject* obj = plSceneObject::ConvertNoRef(rcKey->GetObjectPtr());
         if ( obj )
         {
             const plCoordinateInterface* ci = obj->GetCoordinateInterface();
@@ -379,7 +369,7 @@ void cyPhysics::Rotate(float rad, pyVector3& axis)
                     if ( fSender )
                         pMsg->SetSender(fSender);
                     // must have a receiver!
-                    pMsg->AddReceiver(fRecvr[i]);
+                    pMsg->AddReceiver(rcKey);
                     plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
                 }
                 else
@@ -412,7 +402,7 @@ void cyPhysics::Force(pyVector3& force)
 {
     hsAssert(0, "Who uses this?");
     // must have a receiver!
-/*  if ( fRecvr.Count() > 0 )
+/*  if (!fRecvr.empty())
     {
         // create message
         plForceMsg* pMsg = new plForceMsg;
@@ -427,11 +417,9 @@ void cyPhysics::Force(pyVector3& force)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         pMsg->SetForce(force.fVector);
         plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
     }
@@ -451,7 +439,7 @@ void cyPhysics::ForceWithOffset(pyVector3& force, pyPoint3& offset)
 {
     hsAssert(0, "Who uses this?");
     // must have a receiver!
-/*  if ( fRecvr.Count() > 0 )
+/*  if (!fRecvr.empty())
     {
         // create message
         plOffsetForceMsg* pMsg = new plOffsetForceMsg;
@@ -466,11 +454,9 @@ void cyPhysics::ForceWithOffset(pyVector3& force, pyPoint3& offset)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         pMsg->SetForce(force.fVector);
         pMsg->SetPoint(offset.fPoint);
         plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
@@ -491,7 +477,7 @@ void cyPhysics::Torque(pyVector3& torque)
 {
     hsAssert(0, "Who uses this?");
     // must have a receiver!
-/*  if ( fRecvr.Count() > 0 )
+/*  if (!fRecvr.empty())
     {
         // create message
         plTorqueMsg* pMsg = new plTorqueMsg;
@@ -506,11 +492,9 @@ void cyPhysics::Torque(pyVector3& torque)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         pMsg->SetTorque(torque.fVector);
         plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
     }
@@ -527,32 +511,27 @@ void cyPhysics::Torque(pyVector3& torque)
 //
 void cyPhysics::Impulse(pyVector3& impulse)
 {
-    hsAssert(0, "Who uses this?");
-    // must have a receiver!
-/*  if ( fRecvr.Count() > 0 )
+    if (!fRecvr.empty())
     {
         // create message
         plImpulseMsg* pMsg = new plImpulseMsg;
         // check if this needs to be network forced to all clients
-        if (fNetForce )
+        if (fNetForce)
         {
             // set the network propagate flag to make sure it gets to the other clients
             pMsg->SetBCastFlag(plMessage::kNetPropagate);
             pMsg->SetBCastFlag(plMessage::kNetForce);
         }
-        if ( fSender )
+        if (fSender)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         pMsg->SetImpulse(impulse.fVector);
-        plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
+        plgDispatch::MsgSend(pMsg);   // whoosh... off it goes
     }
-*/
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -568,7 +547,7 @@ void cyPhysics::ImpulseWithOffset(pyVector3& impulse, pyPoint3& offset)
 {
     hsAssert(0, "Who uses this?");
     // must have a receiver!
-/*  if ( fRecvr.Count() > 0 )
+/*  if (!fRecvr.empty())
     {
         // create message
         plOffsetImpulseMsg* pMsg = new plOffsetImpulseMsg;
@@ -583,11 +562,9 @@ void cyPhysics::ImpulseWithOffset(pyVector3& impulse, pyPoint3& offset)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         pMsg->SetImpulse(impulse.fVector);
         pMsg->SetPoint(offset.fPoint);
         plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
@@ -607,7 +584,7 @@ void cyPhysics::AngularImpulse(pyVector3& impulse)
 {
     hsAssert(0, "Who uses this?");
     // must have a receiver!
-/*  if ( fRecvr.Count() > 0 )
+/*  if (!fRecvr.empty())
     {
         // create message
         plAngularImpulseMsg* pMsg = new plAngularImpulseMsg;
@@ -622,11 +599,9 @@ void cyPhysics::AngularImpulse(pyVector3& impulse)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         pMsg->SetImpulse(impulse.fVector);
         plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
     }
@@ -645,32 +620,27 @@ void cyPhysics::AngularImpulse(pyVector3& impulse)
 //
 void cyPhysics::Damp(float damp)
 {
-    hsAssert(0, "Who uses this?");
-    // must have a receiver!
-/*  if ( fRecvr.Count() > 0 )
+    if (!fRecvr.empty())
     {
         // create message
-        plDampMsg* pMsg = new plDampMsg;
+        plDampMsg* pMsg = new plDampMsg();
         // check if this needs to be network forced to all clients
-        if (fNetForce )
+        if (fNetForce)
         {
             // set the network propagate flag to make sure it gets to the other clients
             pMsg->SetBCastFlag(plMessage::kNetPropagate);
             pMsg->SetBCastFlag(plMessage::kNetForce);
         }
-        if ( fSender )
+        if (fSender)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         pMsg->SetDamp(damp);
-        plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
+        plgDispatch::MsgSend(pMsg);   // whoosh... off it goes
     }
-*/
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -686,7 +656,7 @@ void cyPhysics::ShiftMass(pyVector3& offset)
 {
     hsAssert(0, "Who uses this?");
     // must have a receiver!
-/*  if ( fRecvr.Count() > 0 )
+/*  if (!fRecvr.empty())
     {
         // create message
         plShiftMassMsg* pMsg = new plShiftMassMsg;
@@ -701,11 +671,9 @@ void cyPhysics::ShiftMass(pyVector3& offset)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         pMsg->SetOffset(offset.fVector);
         plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
     }
@@ -737,7 +705,7 @@ void cyPhysics::Suppress(bool doSuppress)
 //
 void cyPhysics::SetLinearVelocity(pyVector3& velocity)
 {
-    if ( fRecvr.Count() > 0 )
+    if (!fRecvr.empty())
     {
         // create message
         plLinearVelocityMsg* pMsg = new plLinearVelocityMsg;
@@ -752,11 +720,8 @@ void cyPhysics::SetLinearVelocity(pyVector3& velocity)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
         
         pMsg->Velocity(velocity.fVector);
         plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
@@ -764,7 +729,7 @@ void cyPhysics::SetLinearVelocity(pyVector3& velocity)
 }
 void cyPhysics::SetAngularVelocity(pyVector3& angVel)
 {
-    if ( fRecvr.Count() > 0 )
+    if (!fRecvr.empty())
     {
         // create message
         plAngularVelocityMsg* pMsg = new plAngularVelocityMsg;
@@ -779,11 +744,9 @@ void cyPhysics::SetAngularVelocity(pyVector3& angVel)
             pMsg->SetSender(fSender);
 
         // add all our receivers to the message receiver list
-        int i;
-        for ( i=0; i<fRecvr.Count(); i++ )
-        {
-            pMsg->AddReceiver(fRecvr[i]);
-        }
+        for (const plKey& rcKey : fRecvr)
+            pMsg->AddReceiver(rcKey);
+
         pMsg->AngularVelocity(angVel.fVector);
         plgDispatch::MsgSend( pMsg );   // whoosh... off it goes
     }

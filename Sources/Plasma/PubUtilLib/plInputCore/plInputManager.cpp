@@ -58,17 +58,11 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pnMessage/plCmdIfaceModMsg.h"
 #include "pnMessage/plPlayerPageMsg.h"
 
-#ifdef HS_BUILD_FOR_WIN32
-#   include "plDInputManager.h"
-#endif
-
-bool plInputManager::fUseDInput = false;
 uint8_t plInputManager::bRecenterMouse = 0;
 hsWindowHndl plInputManager::fhWnd = nullptr;
 plInputManager* plInputManager::fInstance = nullptr;
 
 plInputManager::plInputManager(hsWindowHndl hWnd) :
-    fDInputMgr(nullptr),
     fInterfaceMgr(nullptr),
     localeC("C")
 {
@@ -80,7 +74,6 @@ plInputManager::plInputManager(hsWindowHndl hWnd) :
 }
 
 plInputManager::plInputManager() :
-    fDInputMgr(nullptr),
     fInterfaceMgr(nullptr)
 {
     fInstance = this;
@@ -94,16 +87,11 @@ plInputManager::~plInputManager()
     fInterfaceMgr->Shutdown();
     fInterfaceMgr = nullptr;
 
-    for (int i = 0; i < fInputDevices.Count(); i++)
+    for (plInputDevice* inputDevice : fInputDevices)
     {
-        fInputDevices[i]->Shutdown();
-        delete(fInputDevices[i]);
+        inputDevice->Shutdown();
+        delete inputDevice;
     }
-
-#ifdef HS_BUILD_FOR_WIN32
-    if (fDInputMgr)
-        delete fDInputMgr;
-#endif
 }
 
 //static
@@ -135,37 +123,17 @@ void plInputManager::CreateInterfaceMod(plPipeline* p)
     fInterfaceMgr->Init();
 }
 
-void plInputManager::InitDInput(hsWindowInst hInst, hsWindowHndl hWnd)
-{
-#ifdef HS_BUILD_FOR_WIN32
-    if (fUseDInput)
-    {
-        fDInputMgr = new plDInputMgr;
-        fDInputMgr->Init(hInst, hWnd);
-    }
-#endif
-}
-
 bool plInputManager::MsgReceive(plMessage* msg)
 {
-    for (int i=0; i<fInputDevices.Count(); i++)
-        if (fInputDevices[i]->MsgReceive(msg))
+    for (plInputDevice* inputDevice : fInputDevices)
+        if (inputDevice->MsgReceive(msg))
             return true;
-
-#ifdef HS_BUILD_FOR_WIN32
-    if (fDInputMgr)
-        return fDInputMgr->MsgReceive(msg);
-#endif
 
     return hsKeyedObject::MsgReceive(msg);
 }
 
 void plInputManager::Update()
 {
-#ifdef HS_BUILD_FOR_WIN32
-    if (fDInputMgr)
-        fDInputMgr->Update();
-#endif
 }
 
 void plInputManager::SetMouseScale(float s)
@@ -190,7 +158,7 @@ void plInputManager::SetMouseScale(float s)
     RECT rect2 = rect;
     rect2.right /= fMouseScale;
     rect2.bottom /= fMouseScale;
-    ::MapWindowPoints( fhWnd, NULL, (POINT *)&rect2, 2 );
+    ::MapWindowPoints(fhWnd, nullptr, (POINT *)&rect2, 2);
     BOOL ret = ::ClipCursor( &rect );
 
     // Now move the cursor to the right spot
@@ -225,9 +193,9 @@ plKeyDef plInputManager::UntranslateKey(plKeyDef key, bool extended)
 
 void plInputManager::HandleKeyEvent(plKeyDef key, bool bKeyDown, bool bKeyRepeat, wchar_t c)
 {
-    for (size_t i=0; i<fInputDevices.Count(); i++)
+    for (plInputDevice* inputDevice : fInputDevices)
     {
-        fInputDevices[i]->HandleKeyEvent(key, bKeyDown, bKeyRepeat, c);
+        inputDevice->HandleKeyEvent(key, bKeyDown, bKeyRepeat, c);
     }
 }
 
@@ -367,11 +335,11 @@ void plInputManager::HandleWin32ControlEvent(UINT message, WPARAM Wparam, LPARAM
             if( message == WM_RBUTTONDBLCLK )
                 pBMsg->fButton |= kRightButtonDblClk;
 
-            for (int i=0; i<fInputDevices.Count(); i++)
+            for (plInputDevice* inputDevice : fInputDevices)
             {
-                fInputDevices[i]->MsgReceive(pXMsg);
-                fInputDevices[i]->MsgReceive(pYMsg);
-                fInputDevices[i]->MsgReceive(pBMsg);
+                inputDevice->MsgReceive(pXMsg);
+                inputDevice->MsgReceive(pYMsg);
+                inputDevice->MsgReceive(pBMsg);
             }
             POINT pt;
             
@@ -382,8 +350,8 @@ void plInputManager::HandleWin32ControlEvent(UINT message, WPARAM Wparam, LPARAM
                 if (INeedsWin10CursorHack()) {
                     pXMsg->fWx = pt.x;
                     pXMsg->fX = pt.x / (float)rect.right;
-                    for (int i = 0; i < fInputDevices.Count(); i++)
-                        fInputDevices[i]->MsgReceive(pXMsg);
+                    for (plInputDevice* inputDevice : fInputDevices)
+                        inputDevice->MsgReceive(pXMsg);
                 }
                 ClientToScreen(hWnd, &pt);
                 SetCursorPos( pt.x, pt.y );
@@ -396,8 +364,8 @@ void plInputManager::HandleWin32ControlEvent(UINT message, WPARAM Wparam, LPARAM
                 if (INeedsWin10CursorHack()) {
                     pYMsg->fWy = pt.y;
                     pYMsg->fY = pYMsg->fWy / (float)rect.bottom;
-                    for (int i = 0; i < fInputDevices.Count(); i++)
-                        fInputDevices[i]->MsgReceive(pYMsg);
+                    for (plInputDevice* inputDevice : fInputDevices)
+                        inputDevice->MsgReceive(pYMsg);
                 }
                 ClientToScreen(hWnd, &pt);
                 SetCursorPos( pt.x, pt.y );
@@ -412,9 +380,9 @@ void plInputManager::HandleWin32ControlEvent(UINT message, WPARAM Wparam, LPARAM
                     pYMsg->fWy = pt.y;
                     pYMsg->fY = pYMsg->fWy / (float)rect.bottom;
 
-                    for (int i = 0; i < fInputDevices.Count(); i++) {
-                        fInputDevices[i]->MsgReceive(pXMsg);
-                        fInputDevices[i]->MsgReceive(pYMsg);
+                    for (plInputDevice* inputDevice : fInputDevices) {
+                        inputDevice->MsgReceive(pXMsg);
+                        inputDevice->MsgReceive(pYMsg);
                     }
                 }
                 ClientToScreen(hWnd, &pt);
@@ -442,8 +410,8 @@ void plInputManager::HandleWin32ControlEvent(UINT message, WPARAM Wparam, LPARAM
 
 void plInputManager::Activate(bool activating)
 {
-    for (size_t i = 0; i < fInputDevices.GetCount(); i++)
-        fInputDevices[i]->HandleWindowActivate(activating, fhWnd);
+    for (plInputDevice* inputDevice : fInputDevices)
+        inputDevice->HandleWindowActivate(activating, fhWnd);
 
     fActive = activating;
     fFirstActivated = true;
@@ -453,7 +421,7 @@ void plInputManager::Activate(bool activating)
 
 void plInputManager::AddInputDevice(plInputDevice* pDev)
 {
-    fInputDevices.Append(pDev);
+    fInputDevices.emplace_back(pDev);
 
     if (fFirstActivated)
         pDev->HandleWindowActivate(fActive, fhWnd);

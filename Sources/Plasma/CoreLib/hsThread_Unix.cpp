@@ -72,13 +72,14 @@ int clock_gettime(int clocktype, struct timespec* ts)
 
 /////////////////////////////////////////////////////////////////////////////
 
-hsGlobalSemaphore::hsGlobalSemaphore(int initialValue, const char* name)
+hsGlobalSemaphore::hsGlobalSemaphore(int initialValue, const ST::string& name)
 {
 #ifdef USE_SEMA
-    fPSema = nil;
-    if ((fNamed = (name != nil))) {
+    fPSema = nullptr;
+    fNamed = !name.empty();
+    if (fNamed) {
         /* Named semaphore shared between processes */
-        fPSema = sem_open(name, O_CREAT, 0666, initialValue);
+        fPSema = sem_open(name.c_str(), O_CREAT, 0666, initialValue);
         if (fPSema == SEM_FAILED)
         {
             hsAssert(0, "hsOSException");
@@ -92,10 +93,10 @@ hsGlobalSemaphore::hsGlobalSemaphore(int initialValue, const char* name)
         hsThrowIfOSErr(status);
     }
 #else
-    int status = ::pthread_mutex_init(&fPMutex, nil);
+    int status = ::pthread_mutex_init(&fPMutex, nullptr);
     hsThrowIfOSErr(status);
 
-    status = ::pthread_cond_init(&fPCond, nil);
+    status = ::pthread_cond_init(&fPCond, nullptr);
     hsThrowIfOSErr(status);
 
     fCounter = initialValue;

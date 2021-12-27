@@ -361,9 +361,9 @@ public:
     //  PURPOSE    : Loads the dialog by name
     //             : optionally sets the receiver key for the GUINotifyMsg
     //
-    static void LoadDialog(const char* name);
-    static void LoadDialogK(const char* name, pyKey& modKey);
-    static void LoadDialogKA(const char* name, pyKey& rKey, const char* ageName);
+    static void LoadDialog(const ST::string& name);
+    static void LoadDialogK(const ST::string& name, pyKey& modKey);
+    static void LoadDialogKA(const ST::string& name, pyKey& rKey, const char* ageName);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -403,7 +403,7 @@ public:
     //  PURPOSE    : Return the frame delta seconds
     //
     static PyObject* GetDialogFromTagID(uint32_t tag); // returns pyGUIDialog
-    static PyObject* GetDialogFromString(const char* name); // returns pyGUIDialog
+    static PyObject* GetDialogFromString(const ST::string& name); // returns pyGUIDialog
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -503,18 +503,6 @@ public:
     static void SendKIMessageI(uint32_t command, int32_t value);
     static void SendKIGZMarkerMsg(int32_t markerNumber, pyKey& sender);
     static void SendKIRegisterImagerMsg(const char* imagerName, pyKey& sender);
-
-    /////////////////////////////////////////////////////////////////////////////
-    //
-    //  Function   : YesNoDialog
-    //  PARAMETERS : sender    - sender's key (to get the reply)
-    //             : value     - extra value
-    //
-    //  PURPOSE    : Send message to the KI, to tell it things to do
-    //
-    //  RETURNS    : nothing
-    //
-    static void YesNoDialog(pyKey& sender, const ST::string& thestring);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -786,7 +774,7 @@ public:
     //
     // PURPOSE    : Get the list of public ages for the given age name.
     //
-    static void GetPublicAgeList( const char * ageName, PyObject * cbObject=nil );
+    static void GetPublicAgeList(const char * ageName, PyObject * cbObject = nullptr);
 
     //////////////////////////////////////////////////////////////////////////////
     //
@@ -795,7 +783,7 @@ public:
     //
     // PURPOSE    : Add a public age to the list of available ones.
     //
-    static void CreatePublicAge( pyAgeInfoStruct * ageInfo, PyObject * cbObject=nil );
+    static void CreatePublicAge(pyAgeInfoStruct * ageInfo, PyObject * cbObject = nullptr);
 
     //////////////////////////////////////////////////////////////////////////////
     //
@@ -804,7 +792,7 @@ public:
     //
     // PURPOSE    : Remove a public age from the list of available ones.
     //
-    static void RemovePublicAge( const char * ageInstanceGuid, PyObject * cbObject=nil );
+    static void RemovePublicAge(const char * ageInstanceGuid, PyObject * cbObject = nullptr);
 
     //////////////////////////////////////////////////////////////////////////////
     //
@@ -891,8 +879,8 @@ public:
     //
     static void WearMaintainerSuit(pyKey& key, bool wear);
     
-    static void WearDefaultClothing(pyKey& key);
-    static void WearDefaultClothingType(pyKey& key, uint32_t type);
+    static void WearDefaultClothing(pyKey& key, bool broadcast = false);
+    static void WearDefaultClothingType(pyKey& key, uint32_t type, bool broadcast = false);
 
     //////////////////////////////////////////////////////////////////////////////
     //

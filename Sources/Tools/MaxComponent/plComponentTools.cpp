@@ -73,12 +73,12 @@ ST::string plComponentTools::GetAnimCompAnimName(plComponentBase *comp)
     return fAnimName(comp);
 }
 
-int plComponentTools::GetMaterialAnimModKey(Mtl* mtl, plMaxNodeBase* node, const ST::string &segName, hsTArray<plKey>& keys)
+int plComponentTools::GetMaterialAnimModKey(Mtl* mtl, plMaxNodeBase* node, const ST::string &segName, std::vector<plKey>& keys)
 {
     return fMatMod(mtl, node, segName, keys);
 }
 
-int plComponentTools::GetSoundNameAndIndex(plComponentBase* comp, plMaxNodeBase* node, const char*& name)
+int plComponentTools::GetSoundNameAndIndex(plComponentBase* comp, plMaxNodeBase* node, const MCHAR*& name)
 {
     return fSndNameAndIdx(comp, node, name);
 }

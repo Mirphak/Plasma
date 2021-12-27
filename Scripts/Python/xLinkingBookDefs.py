@@ -74,35 +74,36 @@ xYeeshaBookBroke = '<font size=10><cover src="xYeeshaBookCover*1#0.hsm">\
 #  format: ( "SDLVarName", 'BookHtml')
 # ...and then added to the xYeeshaPages list in the order in the Yeesha book
 #
-xYeeshaPage1 = ( "YeeshaPage1",   '<pb><pb><img src="xYeeshaPageAlphaSketch01*1#0.hsm" align=center check=00ff18,00800c,%d link=3>' )
-xYeeshaPage2 = ( "YeeshaPage2",   '<pb><pb><img src="xYeeshaPageAlphaSketch02*1#0.hsm" align=center check=00ff18,00800c,%d link=4>' )
-xYeeshaPage3 = ( "YeeshaPage3",   '<pb><pb><img src="xYeeshaPageAlphaSketch03*1#0.hsm" align=center check=00ff18,00800c,%d link=5>' )
-xYeeshaPage4 = ( "YeeshaPage4",   '<pb><pb><img src="xYeeshaPageAlphaSketch04*1#0.hsm" align=center check=00ff18,00800c,%d link=6>' )
-xYeeshaPage5 = ( "YeeshaPage5",   '<pb><pb><img src="xYeeshaPageAlphaSketch07*1#0.hsm" align=center check=00ff18,00800c,%d link=7>' )
-xYeeshaPage6 = ( "YeeshaPage6",   '<pb><pb><img src="xYeeshaPageAlphaSketch06*1#0.hsm" align=center check=00ff18,00800c,%d link=8>' )
-xYeeshaPage7 = ( "YeeshaPage7",   '<pb><pb><img src="xYeeshaPageAlphaSketch05*1#0.hsm" align=center check=00ff18,00800c,%d link=9>' )
-xYeeshaPage8 = ( "YeeshaPage8",   '<pb><pb><img src="xYeeshaPageAlphaSketch12*1#0.hsm" align=center check=00ff18,00800c,%d link=10>' )
-xYeeshaPage9 = ( "YeeshaPage9",   '<pb><pb><img src="xYeeshaPageAlphaSketch09*1#0.hsm" align=center check=00ff18,00800c,%d link=11>' )
-xYeeshaPage10 = ( "YeeshaPage10", '<pb><pb><img src="xYeeshaPageAlphaSketch10*1#0.hsm" align=center check=00ff18,00800c,%d link=12>' )
-xYeeshaPage12 = ( "YeeshaPage12", '<pb><pb><img src="xYeeshaPageAlphaSketch08*1#0.hsm" align=center check=00ff18,00800c,%d link=13>' )
-xYeeshaPage13 = ( "YeeshaPage13", '<pb><pb><img src="xYeeshaPageAlphaSketch13*1#0.hsm" align=center check=00ff18,00800c,%d link=14>' )
-xYeeshaPage14 = ( "YeeshaPage14", '<pb><pb><img src="xYeeshaPageAlphaSketchFireplace*1#0.hsm" align=center check=00ff18,00800c,%d link=15>' )
-xYeeshaPage15 = ( "YeeshaPage15", '<pb><pb><img src="xYeeshaPageAlphaSketch15*1#0.hsm" align=center check=00ff18,00800c,%d link=16>' )
-xYeeshaPage16 = ( "YeeshaPage16", '<pb><pb><img src="xYeeshaPageAlphaSketchFiremarbles*1#0.hsm" align=center check=00ff18,00800c,%d link=17>' )
-xYeeshaPage17 = ( "YeeshaPage17", '<pb><pb><img src="xYeeshaPageAlphaSketchLushRelto*1#0.hsm" align=center check=00ff18,00800c,%d link=18>' )
-xYeeshaPage18 = ( "YeeshaPage18", '<pb><pb><img src="xYeeshaPageAlphaSketchClock*1#0.hsm" align=center check=00ff18,00800c,%d link=19>' )
-xYeeshaPage19 = ( "YeeshaPage19", '<pb><pb><img src="xYeeshaPageAlphaSketchBirds*1#0.hsm" align=center check=00ff18,00800c,%d link=20>' )
-xYeeshaPage20 = ( "YeeshaPage20", '<pb><pb><img src="xYeeshaPageAlphaSketchCalendar*1#0.hsm" align=center check=00ff18,00800c,%d link=21>' )
-xYeeshaPage21 = ( "YeeshaPage21", '<pb><pb><img src="xYeeshaPageAlphaSketchLeaf*1#0.hsm" align=center check=00ff18,00800c,%d link=22>' )
-xYeeshaPage22 = ( "YeeshaPage22", '<pb><pb><img src="xYeeshaPageAlphaSketchGrass*1#0.hsm" align=center check=00ff18,00800c,%d link=23>' )
-xYeeshaPage23 = ( "YeeshaPage23", '<pb><pb><img src="xYeeshaPageAlphaSketchErcaPlant*1#0.hsm" align=center check=00ff18,00800c,%d link=24>' )
-xYeeshaPage24 = ( "YeeshaPage24", '<pb><pb><img src="xYeeshaPageAlphaSketchStorm*1#0.hsm" align=center check=00ff18,00800c,%d link=25>' )
-xYeeshaPage25 = ( "YeeshaPage25", '<pb><pb><img src="xYeeshaPageAlphaSketch14*1#0.hsm" align=center check=00ff18,00800c,%d link=26>' )
+xYeeshaPage1 = ( "YeeshaPage1",   '<pb><img src="xYeeshaPageAlphaSketch01*1#0.hsm" align=center check=00ff18,00800c,%d link=3>' )
+xYeeshaPage2 = ( "YeeshaPage2",   '<pb><img src="xYeeshaPageAlphaSketch02*1#0.hsm" align=center check=00ff18,00800c,%d link=4>' )
+xYeeshaPage3 = ( "YeeshaPage3",   '<pb><img src="xYeeshaPageAlphaSketch03*1#0.hsm" align=center check=00ff18,00800c,%d link=5>' )
+xYeeshaPage4 = ( "YeeshaPage4",   '<pb><img src="xYeeshaPageAlphaSketch04*1#0.hsm" align=center check=00ff18,00800c,%d link=6>' )
+xYeeshaPage5 = ( "YeeshaPage5",   '<pb><img src="xYeeshaPageAlphaSketch07*1#0.hsm" align=center check=00ff18,00800c,%d link=7>' )
+xYeeshaPage6 = ( "YeeshaPage6",   '<pb><img src="xYeeshaPageAlphaSketch06*1#0.hsm" align=center check=00ff18,00800c,%d link=8>' )
+xYeeshaPage7 = ( "YeeshaPage7",   '<pb><img src="xYeeshaPageAlphaSketch05*1#0.hsm" align=center check=00ff18,00800c,%d link=9>' )
+xYeeshaPage8 = ( "YeeshaPage8",   '<pb><img src="xYeeshaPageAlphaSketch12*1#0.hsm" align=center check=00ff18,00800c,%d link=10>' )
+xYeeshaPage9 = ( "YeeshaPage9",   '<pb><img src="xYeeshaPageAlphaSketch09*1#0.hsm" align=center check=00ff18,00800c,%d link=11>' )
+xYeeshaPage10 = ( "YeeshaPage10", '<pb><img src="xYeeshaPageAlphaSketch10*1#0.hsm" align=center check=00ff18,00800c,%d link=12>' )
+xYeeshaPage12 = ( "YeeshaPage12", '<pb><img src="xYeeshaPageAlphaSketch08*1#0.hsm" align=center check=00ff18,00800c,%d link=13>' )
+xYeeshaPage13 = ( "YeeshaPage13", '<pb><img src="xYeeshaPageAlphaSketch13*1#0.hsm" align=center check=00ff18,00800c,%d link=14>' )
+xYeeshaPage14 = ( "YeeshaPage14", '<pb><img src="xYeeshaPageAlphaSketchFireplace*1#0.hsm" align=center check=00ff18,00800c,%d link=15>' )
+xYeeshaPage15 = ( "YeeshaPage15", '<pb><img src="xYeeshaPageAlphaSketch15*1#0.hsm" align=center check=00ff18,00800c,%d link=16>' )
+xYeeshaPage16 = ( "YeeshaPage16", '<pb><img src="xYeeshaPageAlphaSketchFiremarbles*1#0.hsm" align=center check=00ff18,00800c,%d link=17>' )
+xYeeshaPage17 = ( "YeeshaPage17", '<pb><img src="xYeeshaPageAlphaSketchLushRelto*1#0.hsm" align=center check=00ff18,00800c,%d link=18>' )
+xYeeshaPage18 = ( "YeeshaPage18", '<pb><img src="xYeeshaPageAlphaSketchClock*1#0.hsm" align=center check=00ff18,00800c,%d link=19>' )
+xYeeshaPage19 = ( "YeeshaPage19", '<pb><img src="xYeeshaPageAlphaSketchBirds*1#0.hsm" align=center check=00ff18,00800c,%d link=20>' )
+xYeeshaPage20 = ( "YeeshaPage20", '<pb><img src="xYeeshaPageAlphaSketchCalendar*1#0.hsm" align=center check=00ff18,00800c,%d link=21>' )
+xYeeshaPage21 = ( "YeeshaPage21", '<pb><img src="xYeeshaPageAlphaSketchLeaf*1#0.hsm" align=center check=00ff18,00800c,%d link=22>' )
+xYeeshaPage22 = ( "YeeshaPage22", '<pb><img src="xYeeshaPageAlphaSketchGrass*1#0.hsm" align=center check=00ff18,00800c,%d link=23>' )
+xYeeshaPage23 = ( "YeeshaPage23", '<pb><img src="xYeeshaPageAlphaSketchErcaPlant*1#0.hsm" align=center check=00ff18,00800c,%d link=24>' )
+xYeeshaPage24 = ( "YeeshaPage24", '<pb><img src="xYeeshaPageAlphaSketchStorm*1#0.hsm" align=center check=00ff18,00800c,%d link=25>' )
+xYeeshaPage25 = ( "YeeshaPage25", '<pb><img src="xYeeshaPageAlphaSketch14*1#0.hsm" align=center check=00ff18,00800c,%d link=26>' )
+xYeeshaPage26 = ( "YeeshaPage26", '<pb><img src="xYeeshaPageVeelay7.dds" align=center check=00ff18,00800c,%d link=27>' )
 
 
 xYeeshaPages = [ xYeeshaPage1, xYeeshaPage2, xYeeshaPage3, xYeeshaPage4, xYeeshaPage5, xYeeshaPage6, xYeeshaPage7,\
                 xYeeshaPage8, xYeeshaPage9, xYeeshaPage10, xYeeshaPage12, xYeeshaPage13, xYeeshaPage14, xYeeshaPage15,\
-                xYeeshaPage16, xYeeshaPage17, xYeeshaPage18, xYeeshaPage19, xYeeshaPage20, xYeeshaPage21, xYeeshaPage22, xYeeshaPage23, xYeeshaPage24, xYeeshaPage25 ]
+                xYeeshaPage16, xYeeshaPage17, xYeeshaPage18, xYeeshaPage19, xYeeshaPage20, xYeeshaPage21, xYeeshaPage22, xYeeshaPage23, xYeeshaPage24, xYeeshaPage25, xYeeshaPage26 ]
 
 
 
@@ -267,6 +268,8 @@ else:
         "Vothol":               ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpanelvothol' + LinkEnd ),
         "ChisoPreniv":          ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpanelchisopreniv' + LinkEnd ),
         "ChisoPrenivNote":      ( 0, 1.0, 1.0, FanAgeStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpanelchisopreniv' + LinkEnd ),
+        "Serene":               ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpanelserene' + LinkEnd ),
+        "Tiam":                 ( 1, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + ShareHolder + LinkStart + 'xlinkpaneltiam' + LinkEnd ),
 }
 
 # cross-references the book name with the age and spawn point it links to
@@ -341,6 +344,8 @@ xLinkDestinations = {\
     "VeeTsah":                ( "VeeTsah", "LinkInPointDefault" ),
     "Vothol":                 ( "Vothol", "LinkInPointDefault" ),
     "ChisoPreniv":            ( "ChisoPreniv", "LinkInPointDefault" ),
+    "Serene":                 ( "Serene", "LinkInPointDefault" ),
+    "Tiam":                   ( "Tiam", "LinkInPointDefault" ),
 }
 
 #

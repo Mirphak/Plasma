@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pyJournalBook.h"
 #include "pyEnum.h"
@@ -58,11 +57,11 @@ PYTHON_DEFAULT_DEALLOC_DEFINITION(ptBook)
 
 PYTHON_INIT_DEFINITION(ptBook, args, keywords)
 {
-    const char* kwlist[] = {"esHTMLSource", "coverImage", "callbackKey", "guiName", NULL};
-    PyObject* sourceObj = NULL;
-    PyObject* coverObj = NULL;
-    PyObject* callbackObj = NULL;
-    char* guiName = NULL;
+    const char* kwlist[] = {"esHTMLSource", "coverImage", "callbackKey", "guiName", nullptr};
+    PyObject* sourceObj = nullptr;
+    PyObject* coverObj = nullptr;
+    PyObject* callbackObj = nullptr;
+    char* guiName = nullptr;
     if (!PyArg_ParseTupleAndKeywords(args, keywords, "O|OOs", const_cast<char **>(kwlist),
                                      &sourceObj, &coverObj, &callbackObj, &guiName))
     {
@@ -71,7 +70,7 @@ PYTHON_INIT_DEFINITION(ptBook, args, keywords)
     }
 
     // convert all the optional arguments
-    plKey coverKey = nil;
+    plKey coverKey;
     if (coverObj)
     {
         if (pyKey::Check(coverObj))
@@ -83,7 +82,7 @@ PYTHON_INIT_DEFINITION(ptBook, args, keywords)
                 PYTHON_RETURN_INIT_ERROR;
             }
             callbackObj = coverObj;
-            coverObj = nil;
+            coverObj = nullptr;
         }
         else if (!pyImage::Check(coverObj))
         {
@@ -94,7 +93,7 @@ PYTHON_INIT_DEFINITION(ptBook, args, keywords)
             coverKey = pyImage::ConvertFrom(coverObj)->GetKey();
     }
 
-    plKey callbackKey = nil;
+    plKey callbackKey;
     if (callbackObj)
     {
         if (!pyKey::Check(callbackObj))
@@ -112,13 +111,9 @@ PYTHON_INIT_DEFINITION(ptBook, args, keywords)
     // convert the sourcecode object
     if (PyUnicode_Check(sourceObj))
     {
-        int len = PyUnicode_GetSize(sourceObj);
-        wchar_t* temp = new wchar_t[len + 1];
-        PyUnicode_AsWideChar(sourceObj, temp, len);
-        temp[len] = L'\0';
-
+        wchar_t* temp = PyUnicode_AsWideCharString(sourceObj, nullptr);
         std::wstring source = temp;
-        delete [] temp;
+        PyMem_Free(temp);
 
         self->fThis->MakeBook(source, coverKey, callbackKey, guiNameStr);
         PYTHON_RETURN_INIT_OK;
@@ -290,17 +285,17 @@ PYTHON_END_METHODS_TABLE;
 PLASMA_DEFAULT_TYPE(ptBook, "Params: esHTMLSource,coverImage=None,callbackKey=None,guiName=''\nCreates a new book");
 
 // required functions for PyObject interoperability
-PyObject *pyJournalBook::New(std::string htmlSource, plKey coverImageKey /* = nil */, plKey callbackKey /* = nil */, const ST::string &guiName /* = "" */)
+PyObject *pyJournalBook::New(const std::string& htmlSource, plKey coverImageKey /* = {} */, plKey callbackKey /* = {} */, const ST::string &guiName /* = "" */)
 {
-    ptBook *newObj = (ptBook*)ptBook_type.tp_new(&ptBook_type, NULL, NULL);
-    newObj->fThis->MakeBook(htmlSource, coverImageKey, callbackKey, guiName);
+    ptBook *newObj = (ptBook*)ptBook_type.tp_new(&ptBook_type, nullptr, nullptr);
+    newObj->fThis->MakeBook(htmlSource, std::move(coverImageKey), std::move(callbackKey), guiName);
     return (PyObject*)newObj;
 }
 
-PyObject *pyJournalBook::New(std::wstring htmlSource, plKey coverImageKey /* = nil */, plKey callbackKey /* = nil */, const ST::string &guiName /* = "" */)
+PyObject *pyJournalBook::New(const std::wstring& htmlSource, plKey coverImageKey /* = {} */, plKey callbackKey /* = {} */, const ST::string &guiName /* = "" */)
 {
-    ptBook *newObj = (ptBook*)ptBook_type.tp_new(&ptBook_type, NULL, NULL);
-    newObj->fThis->MakeBook(htmlSource, coverImageKey, callbackKey, guiName);
+    ptBook *newObj = (ptBook*)ptBook_type.tp_new(&ptBook_type, nullptr, nullptr);
+    newObj->fThis->MakeBook(htmlSource, std::move(coverImageKey), std::move(callbackKey), guiName);
     return (PyObject*)newObj;
 }
 
@@ -355,13 +350,13 @@ void pyJournalBook::AddPlasmaMethods(PyObject* m)
 
 void pyJournalBook::AddPlasmaConstantsClasses(PyObject *m)
 {
-    PYTHON_ENUM_START(PtBookEventTypes);
-    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyImageLink,         pfJournalBook::kNotifyImageLink);
-    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyShow,              pfJournalBook::kNotifyShow);
-    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyHide,              pfJournalBook::kNotifyHide);
-    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyNextPage,          pfJournalBook::kNotifyNextPage);
-    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyPreviousPage,      pfJournalBook::kNotifyPreviousPage);
-    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyCheckUnchecked,    pfJournalBook::kNotifyCheckUnchecked);
-    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyClose,             pfJournalBook::kNotifyClose);
-    PYTHON_ENUM_END(m, PtBookEventTypes);
+    PYTHON_ENUM_START(PtBookEventTypes)
+    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyImageLink,         pfJournalBook::kNotifyImageLink)
+    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyShow,              pfJournalBook::kNotifyShow)
+    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyHide,              pfJournalBook::kNotifyHide)
+    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyNextPage,          pfJournalBook::kNotifyNextPage)
+    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyPreviousPage,      pfJournalBook::kNotifyPreviousPage)
+    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyCheckUnchecked,    pfJournalBook::kNotifyCheckUnchecked)
+    PYTHON_ENUM_ELEMENT(PtBookEventTypes, kNotifyClose,             pfJournalBook::kNotifyClose)
+    PYTHON_ENUM_END(m, PtBookEventTypes)
 }

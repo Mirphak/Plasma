@@ -49,7 +49,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "hsTemplates.h"
 #include "pyGUIControl.h"
 #include "pyGlueHelpers.h"
 #include <string>
@@ -62,7 +61,7 @@ class pfGUIListTreeRoot;
 class pyGUIControlListBox : public pyGUIControl
 {
 private:
-    hsTArray<pfGUIListTreeRoot *>   fBuildRoots;
+    std::vector<pfGUIListTreeRoot *>   fBuildRoots;
 
 protected:
     pyGUIControlListBox(): pyGUIControl() {} // for python glue, do NOT call
@@ -87,7 +86,7 @@ public:
     virtual void    Unclickable();
     virtual int32_t   GetSelection();
     virtual void    SetSelection( int32_t item );
-    virtual void    Refresh();
+    void            Refresh() override;
     virtual void    SetElement( uint16_t idx, const ST::string& text );
     virtual void    RemoveElement( uint16_t index );
     virtual void    ClearAllElements();
@@ -103,11 +102,11 @@ public:
     virtual void    SetStringJustify( uint16_t idx, uint32_t justify);
     virtual int16_t   FindString( const ST::string &toCompareTo );
     virtual int16_t   AddTextWColor( const char *str, pyColor& textcolor, uint32_t inheritalpha);
-    virtual int16_t   AddTextWColorW( std::wstring str, pyColor& textcolor, uint32_t inheritalpha);
+    virtual int16_t   AddTextWColorW( const std::wstring& str, pyColor& textcolor, uint32_t inheritalpha);
     virtual int16_t   AddTextWColorWSize( const char *str, pyColor& textcolor, uint32_t inheritalpha, int32_t fontsize);
-    virtual int16_t   AddTextWColorWSizeW( std::wstring str, pyColor& textcolor, uint32_t inheritalpha, int32_t fontsize);
+    virtual int16_t   AddTextWColorWSizeW( const std::wstring& str, pyColor& textcolor, uint32_t inheritalpha, int32_t fontsize);
     virtual void    Add2TextWColor( const char *str1, pyColor& textcolor1,const char *str2, pyColor& textcolor2, uint32_t inheritalpha);
-    virtual void    Add2TextWColorW( std::wstring str1, pyColor& textcolor1, std::wstring str2, pyColor& textcolor2, uint32_t inheritalpha);
+    virtual void    Add2TextWColorW( const std::wstring& str1, pyColor& textcolor1, const std::wstring& str2, pyColor& textcolor2, uint32_t inheritalpha);
     virtual int16_t   AddStringInBox( const ST::string &string, uint32_t min_width, uint32_t min_height );
     virtual void    ScrollToBegin();
     virtual void    ScrollToEnd();

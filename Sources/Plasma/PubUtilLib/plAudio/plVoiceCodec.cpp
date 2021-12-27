@@ -46,6 +46,15 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plVoiceCodec.h"
 #include "plVoiceChat.h"
 
+#ifdef USE_OPUS
+#   include <opus.h>
+#endif
+
+#ifdef USE_SPEEX
+#   include <speex/speex.h>
+#   include <speex/speex_bits.h>
+#endif
+
 static const int kSpeexSampleRate = 8000;
 
 static const int kOpusEncoderSampleRate = 16000;
@@ -57,10 +66,7 @@ static const int kOpusDecoderSampleRate = 48000;
 *
 ***/
 
-#ifdef PLASMA_USE_SPEEX
-
-#include <speex/speex.h>
-#include <speex/speex_bits.h>
+#ifdef USE_SPEEX
 
 class plSpeex : public plVoiceDecoder, public plVoiceEncoder
 {
@@ -189,7 +195,7 @@ bool plSpeex::Encode(const short* data, int numFrames, int& packedLength, void* 
         frameLength = speex_bits_write(fBits.get(), frameData.get(), fFrameSize);
 
         // write data - length and bytes
-        stream.WriteLE(frameLength);
+        stream.WriteByte(frameLength);
         packedLength += sizeof(frameLength);   // add length of encoded frame
         stream.Write(frameLength, frameData.get());
         packedLength += frameLength;           // update length
@@ -222,7 +228,7 @@ bool plSpeex::Decode(const void* data, int size, int numFrames, int& numOutputBy
 
     // Decode data
     for (int i = 0; i < numFrames; i++) {
-        stream.ReadLE(&frameLen);                                       // read the length of the current frame to be decoded
+        stream.ReadByte(&frameLen);                                     // read the length of the current frame to be decoded
         stream.Read(frameLen, frameData.get());                         // read the data
 
         memset(speexOutput.get(), 0, fFrameSize * sizeof(float));
@@ -305,7 +311,7 @@ plVoiceEncoder* plVoiceEncoder::GetSpeex()
     return nullptr;
 }
 
-#endif // PLASMA_USE_SPEEX
+#endif // USE_SPEEX
 
 /*****************************************************************************
 *
@@ -313,9 +319,7 @@ plVoiceEncoder* plVoiceEncoder::GetSpeex()
 *
 ***/
 
-#ifdef PLASMA_USE_OPUS
-
-#include <opus.h>
+#ifdef USE_OPUS
 
 class plOpusDecoder : public plVoiceDecoder
 {
@@ -516,4 +520,4 @@ plVoiceEncoder* plVoiceEncoder::GetOpus()
     return nullptr;
 }
 
-#endif  // PLASMA_USE_OPUS
+#endif  // USE_OPUS

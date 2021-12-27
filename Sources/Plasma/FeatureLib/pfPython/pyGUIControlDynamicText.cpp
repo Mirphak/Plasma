@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pfGameGUIMgr/pfGUIDynDisplayCtrl.h"
 #include "plGImage/plDynamicTextMap.h"
@@ -54,7 +53,7 @@ pyGUIControlDynamicText::pyGUIControlDynamicText(pyKey& gckey) : pyGUIControl(gc
 {
 }
 
-pyGUIControlDynamicText::pyGUIControlDynamicText(plKey objkey) : pyGUIControl(objkey)
+pyGUIControlDynamicText::pyGUIControlDynamicText(plKey objkey) : pyGUIControl(std::move(objkey))
 {
 }
 

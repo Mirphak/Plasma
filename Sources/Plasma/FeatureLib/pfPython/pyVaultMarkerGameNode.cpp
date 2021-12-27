@@ -47,7 +47,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyGeometry3.h"
-#pragma hdrstop
 
 #include "pyVaultMarkerGameNode.h"
 #include "plVault/plVault.h"
@@ -66,7 +65,7 @@ ST::string pyVaultMarkerGameNode::GetGameName () const
         VaultMarkerGameNode access(fNode);
         return access.GetGameName();
     }
-    return ST::null;
+    return ST::string();
 }
 
 void pyVaultMarkerGameNode::SetGameName (const ST::string& name)
@@ -83,7 +82,7 @@ ST::string pyVaultMarkerGameNode::GetReward() const
         VaultMarkerGameNode access(fNode);
         return access.GetReward();
     }
-    return ST::null;
+    return ST::string();
 }
 
 void pyVaultMarkerGameNode::SetReward(const ST::string& value)

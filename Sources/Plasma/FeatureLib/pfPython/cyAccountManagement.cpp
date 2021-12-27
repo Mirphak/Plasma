@@ -47,7 +47,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 
 #include <Python.h>
-#pragma hdrstop
 
 #include "pyGlueHelpers.h"
 #include "cyAccountManagement.h"
@@ -58,7 +57,7 @@ PyObject* cyAccountManagement::GetPlayerList()
     const std::vector<NetCommPlayer>& playerList = NetCommGetPlayerList();
     PyObject* pList = PyList_New(0);
 
-    PyObject* visitor = nil;
+    PyObject* visitor = nullptr;
 
     for (Py_ssize_t i = 0; i < playerList.size(); ++i)
     {
@@ -96,22 +95,22 @@ ST::string cyAccountManagement::GetAccountName()
     if (acct)
         return acct->accountName;
     else
-        return ST::null;
+        return ST::string();
 }
 
 void cyAccountManagement::CreatePlayer(const ST::string& playerName, const ST::string& avatar, const ST::string& invitationCode)
 {
-    NetCommCreatePlayer(playerName, avatar, invitationCode, 0, nil);
+    NetCommCreatePlayer(playerName, avatar, invitationCode, 0, nullptr);
 }
 
 void cyAccountManagement::DeletePlayer(unsigned playerId)
 {
-    NetCommDeletePlayer(playerId, nil);
+    NetCommDeletePlayer(playerId, nullptr);
 }
 
 void cyAccountManagement::SetActivePlayer(unsigned playerId)
 {
-    NetCommSetActivePlayer(playerId, nil);
+    NetCommSetActivePlayer(playerId, nullptr);
 }
 
 bool cyAccountManagement::IsActivePlayerSet()

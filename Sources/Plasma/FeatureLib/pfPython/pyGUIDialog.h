@@ -80,7 +80,7 @@ public:
 
     static bool IsGUIDialog(pyKey& gckey);
 
-    void setKey(plKey key) {fGCkey = key;} // used by python glue, do NOT call
+    void setKey(plKey key) { fGCkey = std::move(key); } // used by python glue, do NOT call
 
     enum            // these enums are used in Python so they have to match PlasmaTypes.py
     {
@@ -120,10 +120,10 @@ public:
     virtual void    Enable() { SetEnabled(true); }
     virtual void    Disable() { SetEnabled(false); }
     virtual bool        IsEnabled();
-    virtual const char  *GetName();
+    virtual ST::string GetName() const;
     virtual uint32_t      GetVersion();
 
-    virtual uint32_t      GetNumControls();
+    virtual size_t      GetNumControls();
     virtual PyObject*   GetControl( uint32_t idx ); // returns pyKey
     virtual void        SetFocus( pyKey& gcKey );
     virtual void        NoFocus( );

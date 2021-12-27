@@ -41,7 +41,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include <Python.h>
-#pragma hdrstop
 
 #include "pyStream.h"
 #include "plFileSystem.h"
@@ -82,7 +81,7 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptStream, readlines)
 
 PYTHON_METHOD_DEFINITION(ptStream, writelines, args)
 {
-    PyObject* stringList = NULL;
+    PyObject* stringList = nullptr;
     if (!PyArg_ParseTuple(args, "O", &stringList))
     {
         PyErr_SetString(PyExc_TypeError, "writelines expects a list of strings");

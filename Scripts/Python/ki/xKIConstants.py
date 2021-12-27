@@ -208,9 +208,11 @@ class kColors:
     DniYellowLt = ptColor(1.0, 1.0, 0.6, 1.0)
     DniCyan     = ptColor(0.576, 0.867, 0.851, 1.0)
     DniBlue     = ptColor(0.780, 0.706, 0.870, 1.0)
+    DniBlueDk   = ptColor(0.388, 0.577, 0.676, 1.0)
     DniRed      = ptColor(1.0, 0.216, 0.380, 1.0)
     DniGreen    = ptColor(0.698, 0.878, 0.761, 1.0)
     DniGreenDk  = ptColor(0.0, 0.596, 0.211, 1.0)
+    DniLilac    = ptColor(0.6, 0.6, 1.0, 1.0)
     DniPurple   = ptColor(0.878, 0.698, 0.819, 1.0)
     DniWhite    = ptColor().white()
 
@@ -219,10 +221,13 @@ class kColors:
     
     DniShowBtn     = DniShowRed
     DniGhostBtn    = DniHideBlue
-    
+
+    TextNoteURL = DniLilac
+
     # Chat colors (messages and headers).
     ChatMessage             = DniWhite
     ChatMessageMention      = DniYellowLt
+    ChatMessageURL          = DniLilac
     ChatHeaderBroadcast     = DniBlue
     ChatHeaderPrivate       = DniYellow
     ChatHeaderAdmin         = DniCyan
@@ -566,23 +571,7 @@ class kGUI:
     BKEditFieldJRNTitle = 0
     BKEditFieldJRNNote = 1
     BKEditFieldPICTitle = 2
-    
-    # Yes/No dialog.
-    YesNoTextID=12
-    YesButtonID = 10
-    NoButtonID = 11
-    YesButtonTextID = 60
-    NoButtonTextID = 61
-    YesNoLogoutButtonID = 62
-    YesNoLogoutTextID = 63
-    YNQuit = 0
-    YNDelete = 1
-    YNOfferLink = 2
-    YNOutside = 3
-    YNKIFull = 4
-    YNWanaPlay = 5
-    YNNoReason = 6
-    
+
     # Question note dialog.
     QNTitle = 100
     QNMessage = 101

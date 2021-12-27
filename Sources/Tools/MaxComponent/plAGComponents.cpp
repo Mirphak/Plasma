@@ -50,7 +50,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "MaxMain/plMaxNode.h"
 #include "MaxMain/plMaxNodeData.h"
-#pragma hdrstop
 
 //Messages related
 #include "pnMessage/plObjRefMsg.h"
@@ -105,9 +104,9 @@ class plAnimAvatarComponent : public plComponent
 //  static plAGAnimMgr *fManager;
 public:
         plAnimAvatarComponent();
-        virtual bool SetupProperties(plMaxNode* node, plErrorMsg *pErrMsg);
+        bool SetupProperties(plMaxNode* node, plErrorMsg *pErrMsg) override;
 
-        virtual bool Convert(plMaxNode* node, plErrorMsg *pErrMsg);
+        bool Convert(plMaxNode* node, plErrorMsg *pErrMsg) override;
 
         virtual plATCAnim * NewAnimation(const ST::string &name, double begin, double end);
 
@@ -115,12 +114,12 @@ public:
         bool ConvertNodeSegmentBranch(plMaxNode *node, plAGAnim *mod, plErrorMsg *pErrMsg);
         bool MakePersistent(plMaxNode *node, plAGAnim *anim, const ST::string &animName, plErrorMsg *pErrMsg);
 
-        virtual void CollectNonDrawables(INodeTab& nonDrawables) { AddTargetsToList(nonDrawables); }
+        void CollectNonDrawables(INodeTab& nonDrawables) override { AddTargetsToList(nonDrawables); }
 
-        void DeleteThis() { delete this; }
+        void DeleteThis() override { delete this; }
 };
 
-//plAGAnimMgr * plAnimAvatarComponent::fManager = nil;
+//plAGAnimMgr * plAnimAvatarComponent::fManager = nullptr;
 
 CLASS_DESC(plAnimAvatarComponent, gAnimAvatarDesc, "Compound Animation",  "Compound Animation", COMP_TYPE_AVATAR, Class_ID(0x3192253d, 0x60c4178c))
 
@@ -133,24 +132,24 @@ ParamBlockDesc2 gAnimAvatarBk
     plComponent::kBlkComp, _T("CompoundAnim"), 0, &gAnimAvatarDesc, P_AUTO_CONSTRUCT + P_AUTO_UI, plComponent::kRefComp,
 
     //Roll out
-    IDD_COMP_ANIM_AVATAR, IDS_COMP_ANIM_AVATARS, 0, 0, NULL,
+    IDD_COMP_ANIM_AVATAR, IDS_COMP_ANIM_AVATARS, 0, 0, nullptr,
 
     // params
     kShareableBool, _T("ShareableBool"), TYPE_BOOL, 0, 0,   
         p_default, FALSE,
         p_ui,   TYPE_SINGLECHEKBOX, IDC_COMP_ANIM_AVATAR_SHAREBOOL,
-        end,
+        p_end,
 
     kGlobalBool, _T("ShareableBool"), TYPE_BOOL, 0, 0,  
         p_default, FALSE,
         p_ui,   TYPE_SINGLECHEKBOX, IDC_COMP_ANIM_AVATAR_GLOBALBOOL,
-        end,
+        p_end,
 
     //kBoundCondRadio, _T("BoundingConditions"),        TYPE_INT,       0, 0,
     //  p_ui,       TYPE_RADIO, 2, IDC_COMP_PHYS_DETECTOR_RAD1, IDC_COMP_PHYS_DETECTOR_RAD2,
     //  end,
 
-    end
+    p_end
 );
 
 
@@ -270,7 +269,7 @@ bool plAnimAvatarComponent::ConvertNodeSegmentBranch(plMaxNode *node, plAGAnim *
 {
     // Check for a suppression marker
     plNotetrackAnim noteAnim(node, pErrMsg);
-    plAnimInfo info = noteAnim.GetAnimInfo(ST::null);
+    plAnimInfo info = noteAnim.GetAnimInfo(ST::string());
     bool suppressed = info.IsSuppressed(mod->GetName());
 
     // Get the affine parts and the TM Controller
@@ -292,7 +291,7 @@ bool plAnimAvatarComponent::ConvertNodeSegmentBranch(plMaxNode *node, plAGAnim *
             {
                 channel = new plMatrixConstant(constSetting);
                 delete tmc;
-                tmc = nil;
+                tmc = nullptr;
             }
             else
             {
@@ -328,7 +327,7 @@ plKey FindSceneNode(plMaxNode *node)
         {
             return FindSceneNode(parent);
         } else {
-            return nil;
+            return nullptr;
         }
     }
 }
@@ -380,8 +379,8 @@ public:
     };
 
     plEmoteComponent();
-    virtual bool Convert(plMaxNode *node, plErrorMsg *pErrMsg);
-    virtual plATCAnim * NewAnimation(const ST::string &name, double begin, double end);
+    bool Convert(plMaxNode *node, plErrorMsg *pErrMsg) override;
+    plATCAnim * NewAnimation(const ST::string &name, double begin, double end) override;
 
 protected:
     float fFadeIn;
@@ -402,30 +401,29 @@ ParamBlockDesc2 gEmoteBk
     plComponent::kBlkComp, _T("EmoteAnim"), 0, &gEmoteDesc, P_AUTO_CONSTRUCT + P_AUTO_UI, plComponent::kRefComp,
 
     //Roll out
-    IDD_COMP_EMOTE, IDS_COMP_EMOTE, 0, 0, NULL,
+    IDD_COMP_EMOTE, IDS_COMP_EMOTE, 0, 0, nullptr,
 
     plEmoteComponent::kBodyUsage, _T("Blend"),      TYPE_INT,       0, 0,
         p_ui,       TYPE_RADIO, 3,  IDC_BODY_UNKNOWN, IDC_BODY_UPPER, IDC_BODY_FULL,
         p_vals, plEmoteComponent::kBodyUnknown, plEmoteComponent::kBodyUpper, plEmoteComponent::kBodyFull,
         p_default, plEmoteComponent::kBodyUnknown,
-        end,
+        p_end,
 
     plEmoteComponent::kFadeIn, _T("Length"), TYPE_FLOAT,    0, 0,   
         p_default, 2.0,
         p_range, 0.1, 10.0,
         p_ui,   TYPE_SPINNER,   EDITTYPE_POS_FLOAT, 
         IDC_EMO_FADEIN, IDC_EMO_FADEIN_SPIN, 0.1,
-        end,    
+        p_end,    
 
     plEmoteComponent::kFadeOut, _T("Length"), TYPE_FLOAT,   0, 0,   
         p_default, 2.0,
         p_range, 0.1, 10.0,
         p_ui,   TYPE_SPINNER,   EDITTYPE_POS_FLOAT, 
         IDC_EMO_FADEOUT, IDC_EMO_FADEOUT_SPIN, 0.1,
-        end,    
+        p_end,    
 
-
-    end
+    p_end
 );
 
 

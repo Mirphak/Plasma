@@ -46,7 +46,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 // camera message class
 //
-#include "pnMessage/plMessage.h"
+#include "plMessage.h"
 #include "hsBitVector.h"
 #include "hsGeometry3.h"
 
@@ -59,18 +59,21 @@ class plCameraConfig
 {
 public:
 
-    plCameraConfig() : 
-    fAccel(0),fDecel(0),
-    fVel(0),fFPAccel(0),
-    fFPDecel(0),fFPVel(0),
-    fFOVw(0),fFOVh(0),fType(0),fWorldspace(false){fOffset.Set(0,0,0);}
-    
-    plCameraConfig(int flags) : 
-    fAccel(0),fDecel(0),
-    fVel(0),fFPAccel(0),
-    fFPDecel(0),fFPVel(0),
-    fFOVw(0),fFOVh(0),fType(0),fWorldspace(false) { fType |= flags;fOffset.Set(0,0,0);}
+    plCameraConfig()
+        : fAccel(),fDecel(),
+          fVel(), fFPAccel(),
+          fFPDecel(), fFPVel(),
+          fFOVw(), fFOVh(),
+          fType(), fWorldspace()
+    { }
 
+    plCameraConfig(int flags)
+        : fAccel(), fDecel(),
+        fVel(), fFPAccel(),
+        fFPDecel(), fFPVel(),
+        fFOVw(), fFOVh(),
+        fType(flags), fWorldspace()
+    { }
 
     enum
     {

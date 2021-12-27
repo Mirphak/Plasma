@@ -46,46 +46,11 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 ***/
 
 #include "Pch.h"
-#pragma hdrstop
 
-
-/*****************************************************************************
-*
-*   Private data
-*
-***/
-
-
-
-/*****************************************************************************
-*
-*   Internal functions
-*
-***/
-
-//===========================================================================
-static unsigned CALLBACK CreateThreadProc (LPVOID param) {
-
-#ifdef USE_VLD
-    VLDEnable();
+#if defined(HAVE_PTHREAD_TIMEDJOIN_NP)
+#include <pthread.h>
+#include <time.h>
 #endif
-
-    PerfAddCounter(kAsyncPerfThreadsTotal, 1);
-    PerfAddCounter(kAsyncPerfThreadsCurr, 1);
-
-    // Initialize thread
-    AsyncThread * thread = (AsyncThread *) param;
-
-    // Call thread procedure
-    unsigned result = thread->proc(thread);
-
-    // Cleanup thread
-    delete thread;
-
-    PerfSubCounter(kAsyncPerfThreadsCurr, 1);
-    return result;
-}
-
 
 /*****************************************************************************
 *
@@ -98,44 +63,34 @@ void ThreadDestroy (unsigned exitThreadWaitMs) {
 
     unsigned bailAt = TimeGetMs() + exitThreadWaitMs;
     while (AsyncPerfGetCounter(kAsyncPerfThreadsCurr) && signed(bailAt - TimeGetMs()) > 0)
-        AsyncSleep(10);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
 }
 
-
-/*****************************************************************************
-*
-*   Public exports
-*
-***/
-
-//===========================================================================
-void * AsyncThreadCreate (
-    FAsyncThreadProc    threadProc,
-    void *              argument,
-    const wchar_t         name[]
-) {
-    AsyncThread * thread    = new AsyncThread;
-    thread->proc            = threadProc;
-    thread->handle          = nil;
-    thread->argument        = argument;
-    thread->workTimeMs      = kAsyncTimeInfinite;
-    StrCopy(thread->name, name, std::size(thread->name));
-    
-    // Create thread suspended
-    unsigned threadId;
-    HANDLE handle = (HANDLE) _beginthreadex(
-        (LPSECURITY_ATTRIBUTES) 0,
-        0,          // stack size
-        CreateThreadProc,
-        thread,     // argument
-        0,          // initFlag
-        &threadId
-    );
-    if (!handle) {
-        LogMsg(kLogFatal, "{} ({})", __FILE__, GetLastError());
-        ErrorAssert(__LINE__, __FILE__, "_beginthreadex failed");
+//============================================================================
+void AsyncThreadTimedJoin(std::thread& thread, unsigned timeoutMs)
+{
+    // HACK: No cross-platform way to perform a timed join :(
+#if defined(HS_BUILD_FOR_WIN32)
+    DWORD rc = WaitForSingleObject(thread.native_handle(), timeoutMs);
+    if (rc == WAIT_TIMEOUT)
+        LogMsg(kLogDebug, "Thread did not terminate after {} ms", timeoutMs);
+    thread.detach();
+#elif defined(HAVE_PTHREAD_TIMEDJOIN_NP)
+    struct timespec deadline;
+    if (clock_gettime(CLOCK_REALTIME, &deadline) < 0)
+        hsAssert(false, "Could not get the realtime clock");
+    deadline.tv_sec += timeoutMs / 1000;
+    deadline.tv_nsec += (timeoutMs % 1000) * 1'000'000;
+    if (deadline.tv_nsec > 1'000'000'000) {
+        deadline.tv_nsec -= 1'000'000'000;
+        deadline.tv_sec += 1;
     }
-
-    thread->handle = handle;
-    return handle;
+    if (pthread_timedjoin_np(thread.native_handle(), nullptr, &deadline) != 0)
+        LogMsg(kLogDebug, "Thread did not terminate after {} ms", timeoutMs);
+    thread.detach();
+#else
+    LogMsg(kLogDebug, "No timed thread join support for this system... "
+                      "Performing a blocking join instead.");
+    thread.join();
+#endif
 }

@@ -42,7 +42,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <Python.h>
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pyGameScore.h"
 #include "pyEnum.h"
@@ -85,7 +84,7 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptGameScore, remove)
 PYTHON_METHOD_DEFINITION(ptGameScore, addPoints, args)
 {
     int32_t numPoints = 0;
-    PyObject* keyObj = nil;
+    PyObject* keyObj = nullptr;
     if (!PyArg_ParseTuple(args, "i|O", &numPoints, &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "addPoints expects an int and an optional key");
@@ -104,10 +103,10 @@ PYTHON_METHOD_DEFINITION(ptGameScore, addPoints, args)
 
 PYTHON_METHOD_DEFINITION_WKEY(ptGameScore, transferPoints, args, kwargs)
 {
-    const char* kwlist[] = { "dest", "points", "key", nil };
-    PyObject* destObj = nil;
+    const char* kwlist[] = { "dest", "points", "key", nullptr };
+    PyObject* destObj = nullptr;
     int32_t   points  = 0; // Hmmm... Evil?
-    PyObject* keyObj  = nil;
+    PyObject* keyObj  = nullptr;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|iO", const_cast<char **>(kwlist),
                                      &destObj, &points, &keyObj))
     {
@@ -132,7 +131,7 @@ PYTHON_METHOD_DEFINITION_WKEY(ptGameScore, transferPoints, args, kwargs)
 PYTHON_METHOD_DEFINITION(ptGameScore, setPoints, args)
 {
     int32_t numPoints = 0;
-    PyObject* keyObj  = nil;
+    PyObject* keyObj  = nullptr;
     if (!PyArg_ParseTuple(args, "i|O", &numPoints, &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "setPoints expects an int and an optional ptKey");
@@ -151,11 +150,11 @@ PYTHON_METHOD_DEFINITION(ptGameScore, setPoints, args)
 
 PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createAgeScore, args, kwargs)
 {
-    const char* kwlist[] = { "scoreName", "type", "points", "key", nil };
+    const char* kwlist[] = { "scoreName", "type", "points", "key", nullptr };
     ST::string name;
     uint32_t type     = 0;
     int32_t points    = 0;
-    PyObject* keyObj  = nil;
+    PyObject* keyObj  = nullptr;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O&I|iO", const_cast<char **>(kwlist),
                                      PyUnicode_STStringConverter, &name, &type, &points, &keyObj))
     {
@@ -175,11 +174,11 @@ PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createAgeScore, args, kwargs)
 
 PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createGlobalScore, args, kwargs)
 {
-    const char* kwlist[] = { "scoreName", "type", "points", "key", nil };
+    const char* kwlist[] = { "scoreName", "type", "points", "key", nullptr };
     ST::string name;
     uint32_t type     = 0;
     int32_t points    = 0;
-    PyObject* keyObj  = nil;
+    PyObject* keyObj  = nullptr;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O&I|iO", const_cast<char **>(kwlist),
                                      PyUnicode_STStringConverter, &name, &type, &points, &keyObj))
     {
@@ -199,11 +198,11 @@ PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createGlobalScore, args, kwarg
 
 PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createPlayerScore, args, kwargs)
 {
-    const char* kwlist[] = { "scoreName", "type", "points", "key", nil };
+    const char* kwlist[] = { "scoreName", "type", "points", "key", nullptr };
     ST::string name;
     uint32_t type     = 0;
     int32_t points    = 0;
-    PyObject* keyObj  = nil;
+    PyObject* keyObj  = nullptr;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O&I|iO", const_cast<char **>(kwlist),
                                      PyUnicode_STStringConverter, &name, &type, &points, &keyObj))
     {
@@ -223,12 +222,12 @@ PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createPlayerScore, args, kwarg
 
 PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createScore, args, kwargs)
 {
-    const char* kwlist[] = { "ownerID", "scoreName", "type", "points", "key", nil };
+    const char* kwlist[] = { "ownerID", "scoreName", "type", "points", "key", nullptr };
     uint32_t ownerID  = 0;
     ST::string name;
     uint32_t type     = 0;
     int32_t points    = 0;
-    PyObject* keyObj  = nil;
+    PyObject* keyObj  = nullptr;
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "IO&I|iO", const_cast<char **>(kwlist),
                                      &ownerID, PyUnicode_STStringConverter, &name, &type, &points,
                                      &keyObj))
@@ -250,7 +249,7 @@ PYTHON_METHOD_DEFINITION_STATIC_WKEY(ptGameScore, createScore, args, kwargs)
 PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findAgeScores, args)
 {
     ST::string name;
-    PyObject* keyObj  = nil;
+    PyObject* keyObj  = nullptr;
     if (!PyArg_ParseTuple(args, "O&O", PyUnicode_STStringConverter, &name, &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "findAgeScores expects a string and a ptKey");
@@ -270,7 +269,7 @@ PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findAgeScores, args)
 PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findGlobalScores, args)
 {
     ST::string name;
-    PyObject* keyObj  = nil;
+    PyObject* keyObj  = nullptr;
     if (!PyArg_ParseTuple(args, "O&O", PyUnicode_STStringConverter, &name, &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "findGlobalScores expects a string and a ptKey");
@@ -290,7 +289,7 @@ PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findGlobalScores, args)
 PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findPlayerScores, args)
 {
     ST::string name;
-    PyObject* keyObj  = nil;
+    PyObject* keyObj  = nullptr;
     if (!PyArg_ParseTuple(args, "O&O", PyUnicode_STStringConverter, &name, &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "findPlayerScores expects a string and a ptKey");
@@ -311,7 +310,7 @@ PYTHON_METHOD_DEFINITION_STATIC(ptGameScore, findScores, args)
 {
     uint32_t ownerId  = 0;
     ST::string name;
-    PyObject* keyObj  = nil;
+    PyObject* keyObj  = nullptr;
     if (!PyArg_ParseTuple(args, "IO&O", &ownerId, PyUnicode_STStringConverter, &name, &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "findScore expects an int, a string, and a ptKey");
@@ -387,7 +386,7 @@ PLASMA_DEFAULT_TYPE(ptGameScore, "Plasma Game Score");
 // required functions for PyObject interoperability
 PyObject* pyGameScore::New(pfGameScore* score)
 {
-    ptGameScore* newObj = (ptGameScore*)ptGameScore_type.tp_new(&ptGameScore_type, NULL, NULL);
+    ptGameScore* newObj = (ptGameScore*)ptGameScore_type.tp_new(&ptGameScore_type, nullptr, nullptr);
     hsRefCnt_SafeUnRef(newObj->fThis->fScore);
     newObj->fThis->fScore = score;
     hsRefCnt_SafeRef(newObj->fThis->fScore);
@@ -410,21 +409,21 @@ void pyGameScore::AddPlasmaClasses(PyObject *m)
 
 void pyGameScore::AddPlasmaConstantsClasses(PyObject *m)
 {
-    PYTHON_ENUM_START(PtGameScoreTypes);
-    PYTHON_ENUM_ELEMENT(PtGameScoreTypes, kFixed, kScoreTypeFixed);
-    PYTHON_ENUM_ELEMENT(PtGameScoreTypes, kAccumulative, kScoreTypeAccumulative);
-    PYTHON_ENUM_ELEMENT(PtGameScoreTypes, kAccumAllowNegative, kScoreTypeAccumAllowNegative);
-    PYTHON_ENUM_END(m, PtGameScoreTypes);
+    PYTHON_ENUM_START(PtGameScoreTypes)
+    PYTHON_ENUM_ELEMENT(PtGameScoreTypes, kFixed, kScoreTypeFixed)
+    PYTHON_ENUM_ELEMENT(PtGameScoreTypes, kAccumulative, kScoreTypeAccumulative)
+    PYTHON_ENUM_ELEMENT(PtGameScoreTypes, kAccumAllowNegative, kScoreTypeAccumAllowNegative)
+    PYTHON_ENUM_END(m, PtGameScoreTypes)
 
-    PYTHON_ENUM_START(PtScoreRankGroups);
-    PYTHON_ENUM_ELEMENT(PtScoreRankGroups, kIndividual, kScoreRankGroupIndividual);
-    PYTHON_ENUM_ELEMENT(PtScoreRankGroups, kNeighborhood, kScoreRankGroupNeighborhood);
-    PYTHON_ENUM_END(m, PtScoreRankGroups);
+    PYTHON_ENUM_START(PtScoreRankGroups)
+    PYTHON_ENUM_ELEMENT(PtScoreRankGroups, kIndividual, kScoreRankGroupIndividual)
+    PYTHON_ENUM_ELEMENT(PtScoreRankGroups, kNeighborhood, kScoreRankGroupNeighborhood)
+    PYTHON_ENUM_END(m, PtScoreRankGroups)
 
-    PYTHON_ENUM_START(PtScoreTimePeriods);
-    PYTHON_ENUM_ELEMENT(PtScoreTimePeriods, kOverall, kScoreTimePeriodOverall);
-    PYTHON_ENUM_ELEMENT(PtScoreTimePeriods, kYear, kScoreTimePeriodYear);
-    PYTHON_ENUM_ELEMENT(PtScoreTimePeriods, kMonth, kScoreTimePeriodMonth);
-    PYTHON_ENUM_ELEMENT(PtScoreTimePeriods, kDay, kScoreTimePeriodDay);
-    PYTHON_ENUM_END(m, PtScoreTimePeriods);
+    PYTHON_ENUM_START(PtScoreTimePeriods)
+    PYTHON_ENUM_ELEMENT(PtScoreTimePeriods, kOverall, kScoreTimePeriodOverall)
+    PYTHON_ENUM_ELEMENT(PtScoreTimePeriods, kYear, kScoreTimePeriodYear)
+    PYTHON_ENUM_ELEMENT(PtScoreTimePeriods, kMonth, kScoreTimePeriodMonth)
+    PYTHON_ENUM_ELEMENT(PtScoreTimePeriods, kDay, kScoreTimePeriodDay)
+    PYTHON_ENUM_END(m, PtScoreTimePeriods)
 }

@@ -65,7 +65,7 @@ public:
     CLASSNAME_REGISTER(plNetClientMgrMsg);
     GETINTERFACE_ANY(plNetClientMgrMsg, plMessage);
 
-    plNetClientMgrMsg(unsigned _type = 0, bool _yes = false, const char * _str = nil)
+    plNetClientMgrMsg(unsigned _type = 0, bool _yes = false, const char * _str = nullptr)
         : type(_type), yes(_yes)
     {
         if (_str) {
@@ -76,8 +76,8 @@ public:
         }
     }
 
-    void Read (hsStream *, hsResMgr *) { FATAL("plNetClientMgrMsg::Read"); }
-    void Write (hsStream *, hsResMgr *) { FATAL("plNetClientMgrMsg::Write"); }
+    void Read (hsStream *, hsResMgr *) override { FATAL("plNetClientMgrMsg::Read"); }
+    void Write (hsStream *, hsResMgr *) override { FATAL("plNetClientMgrMsg::Write"); }
 };
 
 

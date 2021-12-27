@@ -45,7 +45,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 ///////////////////////////////////////////////
 
 #include "pyKey.h"
-#pragma hdrstop
 
 #include "pfGameGUIMgr/pfGUIDragBarCtrl.h"
 #include "pyGUIControlDragBar.h"
@@ -54,7 +53,7 @@ pyGUIControlDragBar::pyGUIControlDragBar(pyKey& gckey) : pyGUIControl(gckey)
 {
 }
 
-pyGUIControlDragBar::pyGUIControlDragBar(plKey objkey) : pyGUIControl(objkey)
+pyGUIControlDragBar::pyGUIControlDragBar(plKey objkey) : pyGUIControl(std::move(objkey))
 {
 }
 
