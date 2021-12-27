@@ -44,6 +44,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 import re
 import time
 import random
+#import traceback
 
 # Plasma Engine.
 from Plasma import *
@@ -61,12 +62,18 @@ from . import xKIExtChatCommands
 from .xKIConstants import *
 from .xKIHelpers import *
 
+# Robot commands
+import xKiBot
+
+# Other new commands
+from . import xReadWritePosition
+from . import xMystitech
 
 ## A class to process all the RT Chat functions of the KI.
 class xKIChat(object):
 
     ## Set up the chat manager's default state.
-    def __init__(self, StartFadeTimer, ResetFadeState, FadeCompletely, GetCensorLevel):
+    def __init__(self, StartFadeTimer, ResetFadeState, FadeCompletely, GetCensorLevel, xKI):
 
         # Set the default properties.
         self.chatLogFile = None
@@ -103,6 +110,8 @@ class xKIChat(object):
         # Message History
         self.MessageHistoryIs = -1 # Current position in message history (up/down key)
         self.MessageHistoryList = [] # Contains our message history
+
+        self.xKI = xKI
 
     #######
     # GUI #
@@ -852,6 +861,27 @@ class CommandsProcessor:
                 self.chatMgr.AddChatLine(None, text, 0)
                 return None
 
+        # Mirphak : Is it a robot command?
+        for command, function in kCommands.Robot.items():
+            if msg.startswith(command):
+                theMessage = message[len(command):].strip()
+                if len(theMessage) > 0:
+                    params = theMessage
+                else:
+                    params = None
+                getattr(self, function)(params)
+                return None
+
+        # Mirphak : Is it a Mystitech command?
+        for command, function in kCommands.Mystitech.items():
+            if msg.startswith(command):
+                params = message[len(command):].strip()
+                if len(params) > 0:
+                    getattr(xMystitech, function)(params)
+                else:
+                    getattr(xMystitech, function)()
+                return None
+
         # Is it another text-based easter-egg command?
         if msg.startswith("/get "):
             v = "is"
@@ -869,6 +899,18 @@ class CommandsProcessor:
             fldr = xLocTools.FolderIDToFolderName(PtVaultStandardNodes.kAllPlayersFolder)
             self.chatMgr.AddChatLine(ptPlayer(fldr, 0), send, cFlags)
             return None
+
+        #--------------------------#
+        # Mirphak : Robot commands #
+        #--------------------------#
+        if message.startswith(xKiBot.startChar):
+            try:
+                command = message[1:]
+                xKiBot.SetCommand(self, command)
+                return None
+            except Exception as ex:
+                PtDebugPrint(u"xKIChat.commandsProcessor(): Robot command function did not run.", command, level=kErrorLevel)
+                #traceback.print_exc()
 
         # Is it an emote, a "/me" or invalid command?
         if message.startswith("/"):
@@ -1505,3 +1547,30 @@ class CommandsProcessor:
             PtSendKIMessage(kKIChatStatusMsg, "{} rolled a single {}-sided die with a result of {}.".format(PtGetLocalPlayer().getPlayerName(), num_face, roll[0]))
         else:
             PtSendKIMessage(kKIChatStatusMsg, "{} rolled {}d{} with a result of {} for a total of {}.".format(PtGetLocalPlayer().getPlayerName(), num_dice, num_face, roll, sum(roll)))        
+
+    ## Save your position in a file
+    def SavePosition(self, strIndex):
+        if not strIndex:
+            strIndex = "0"
+        xReadWritePosition.WriteMatrix44(self, strIndex)
+        self.chatMgr.AddChatLine(None, "Your position is saved. Use \"/ws {}\" to return to this position.".format(strIndex), 0)
+
+    ## Warp you to your saved position
+    def ReturnToPosition(self, strIndex):
+        if not strIndex:
+            strIndex = "0"
+        ret = xReadWritePosition.WarpToSaved(self, strIndex)
+        if ret:
+            self.chatMgr.AddChatLine(None, "You are at your saved position {}.".format(strIndex), 0)
+        else:
+            self.chatMgr.AddChatLine(None, "No saved position found. Did you use \"/save <number>\" before?", kChat.SystemMessage)
+    
+    ## Execute a robot command
+    def ExecuteRobotCommand(self, params):
+        cFlags = ChatFlags(0)
+        cFlags.toSelf = True
+        cFlags.status = True
+        if params:
+            xKiBot.Do(self.chatMgr.xKI, PtGetLocalPlayer(), params, cFlags)
+        else:
+            self.chatMgr.DisplayStatusMessage("No command given.")

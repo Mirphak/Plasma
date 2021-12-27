@@ -53,6 +53,7 @@ from PlasmaVaultConstants import *
 from PlasmaNetConstants import *
 
 import time
+#import string
 import xCensor
 import xLinkingBookDefs
 import xBookGUIs
@@ -78,6 +79,11 @@ from .xKIHelpers import *
 
 # Marker Game thingies
 from . import xMarkerMgr
+
+# Robot commands
+import xKiBot
+# traceback
+import traceback
 
 # Define the attributes that will be entered in Max.
 KIBlackbar = ptAttribGUIDialog(1, "The Blackbar dialog")
@@ -271,7 +277,7 @@ class xKI(ptModifier):
         self.autocompleteState = AutocompleteState()
 
         ## The chatting manager.
-        self.chatMgr = xKIChat.xKIChat(self.StartFadeTimer, self.ResetFadeState, self.FadeCompletely, self.GetCensorLevel)
+        self.chatMgr = xKIChat.xKIChat(self.StartFadeTimer, self.ResetFadeState, self.FadeCompletely, self.GetCensorLevel, self)
 
     ## Unloads any loaded dialogs upon exit.
     def __del__(self):
@@ -454,12 +460,14 @@ class xKI(ptModifier):
 
     ## Get any leftover, unwanted keystrokes.
     def OnDefaultKeyCaught(self, ch, isDown, isRepeat, isShift, isCtrl, keycode):
-
-        if ord(ch) != 0:
-            if not ord(ch) in kDefaultKeyIgnoreList:
-                if isDown and not isCtrl and not isRepeat:
-                    if not self.KIDisabled and not PtIsEnterChatModeKeyBound():
-                        self.chatMgr.ToggleChatMode(1, firstChar=ch)
+        try:
+            if ord(ch) != 0:
+                if not ord(ch) in kDefaultKeyIgnoreList:
+                    if isDown and not isCtrl and not isRepeat:
+                        if not self.KIDisabled and not PtIsEnterChatModeKeyBound():
+                            self.chatMgr.ToggleChatMode(1, firstChar=ch)
+        except SystemError:
+            PtDebugPrint("xKI.OnDefaultKeyCaught(ch={}, ...): <built-in function ord> returned a result with an error set.".format(ch))
 
     ## Called by Plasma on receipt of a plNotifyMsg.
     # This big function deals with the various responses sent upon a triggered
@@ -1036,14 +1044,47 @@ class xKI(ptModifier):
             if cFlags.broadcast and cFlags.channel != self.chatMgr.privateChatChannel:
                 return
 
-            # Is the message from an ignored plaer?
+            # Is the message from an ignored player?
             vault = ptVault()
             ignores = vault.getIgnoreListFolder()
+            
+            #Trying to prevent TypeError: playerlistHasPlayer expects an unsigned long
+            if not isinstance(player, ptPlayer):
+                return
+            if not isinstance(player.getPlayerID(), int):
+                return
+            if player.getPlayerID() <= 0:
+                return
             if ignores is not None and ignores.playerlistHasPlayer(player.getPlayerID()):
                 return
-
+            
             # Display the message if it passed all the above checks.
             self.chatMgr.AddChatLine(player, message, cFlags, forceKI=not self.sawTheKIAtLeastOnce)
+
+            # Mirphak : Robot chat fonctionnalities (see xKiBot.py)
+            # Ask xKiBot to do the command contained in a private message
+            if cFlags.private: 
+                if xKiBot.amIRobot:
+                    #xKiBot.Do(self, player, message, cFlags)
+                    #"""
+                    try:
+                        xKiBot.Do(self, player, message, cFlags)
+                    except Exception as ex:
+                        PtDebugPrint(u"xKI.OnRTChat(): ERROR IN xKiBot.Do(\"{}\").".format(message))
+                        #traceback.print_exc()
+                        #print(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+                        tb = repr(traceback.format_exception(exc_type, exc_value, exc_traceback))
+                        PtDebugPrint(u"StackTrace :\n{}".format(tb))
+                        self.chatMgr.AddChatLine(None, u"StackTrace :\n{}".format(tb), kChat.SystemMessage)
+                    #"""
+                else:
+                    try:
+                        xKiBot.Info(self, player, message, cFlags)
+                    except:
+                        PtDebugPrint("xKI.OnRTChat(): ERROR IN xKiBot.Info(\"{}\").".format(message))
+                        tb = repr(traceback.format_exception(exc_type, exc_value, exc_traceback))
+                        PtDebugPrint(u"StackTrace :\n{}".format(tb))
+                        self.chatMgr.AddChatLine(None, u"StackTrace :\n{}".format(tb), kChat.SystemMessage)
 
             # If they are AFK and the message was directly to them, send back their state to sender.
             try:
@@ -1197,6 +1238,7 @@ class xKI(ptModifier):
             "Age Name" : xKIHelpers.GetAgeName()
             }
         image.saveAsPNG(tryName, metadata)
+        PtDebugPrint("xKI.OnScreenCaptureDone(): Image saved in \"{}\".".format(tryName), level=kWarningLevel)
 
     ## Called by Plasma when the player list has been updated.
     # This makes sure that everything is updated and refreshed.
@@ -2027,8 +2069,12 @@ class xKI(ptModifier):
                 if self.CanMakeMarker():
                     markerName = "{} marker".format(self.markerGameManager.game_name)
                     avaCoord = PtGetLocalAvatar().position()
-                    self.markerGameManager.AddMarker(PtGetAgeName(), avaCoord, markerName)
-                    PtDebugPrint("xKI.CreateAMarker(): Creating marker at: ({}, {}, {}).".format(avaCoord.getX(), avaCoord.getY(), avaCoord.getZ()))
+                    PtDebugPrint("xKI.CreateAMarker(): Game : {} => Trying to create a marker in {} at: ({}, {}, {}).".format(markerName, PtGetAgeName(), avaCoord.getX(), avaCoord.getY(), avaCoord.getZ()))
+                    try :
+                        self.markerGameManager.AddMarker(PtGetAgeName(), avaCoord, markerName)
+                        PtDebugPrint("xKI.CreateAMarker(): Creating marker at: ({}, {}, {}).".format(avaCoord.getX(), avaCoord.getY(), avaCoord.getZ()))
+                    except :
+                        self.ShowKIFullErrorMsg("Error while creating a new marker!")
                 else:
                     self.ShowKIFullErrorMsg(PtGetLocalizedString("KI.Messages.FullMarkers"))
 
@@ -2402,6 +2448,11 @@ class xKI(ptModifier):
     # By default, it's set at PG, but it fetches the real value from the
     # chronicle. If it is not found in the chronicle, it will set it to PG.
     def DetermineCensorLevel(self):
+        # try:
+            # PtChangeAvatar("Male")
+            # print "xKi.__Init__.DetermineCensorLevel => Turn avatar into male."
+        # except:
+            # print "xKi.__Init__.DetermineCensorLevel => Can't change avatar here!"
 
         self.censorLevel = xCensor.xRatedPG
         vault = ptVault()
