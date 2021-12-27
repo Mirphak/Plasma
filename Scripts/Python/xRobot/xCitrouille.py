@@ -1,8 +1,8 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 
 from Plasma import *
 import math
-import xClonage
+from . import xClonage
 
 # Objet auquel on va attacher les clones de bille
 # (tu peux en choisir un autre)
@@ -161,18 +161,18 @@ class AlarmInit():
         
     def onAlarm(self, param):
         if param == 1:
-            print "AlarmInit onAlarm 1"
+            print("AlarmInit onAlarm 1")
             #self._so = PtFindSceneobject("MarblePhy01", "Neighborhood")
             self._so = PtFindSceneobject("GPSGreatZero", "Neighborhood")
             # Attendre que self._so soit charge
             if (self._so is None and self._nbFois < 20):
                 self._nbFois += 1
-                print ">>> Attente nb: %i" % self._nbFois
+                print(">>> Attente nb: %i" % self._nbFois)
                 PtSetAlarm(1, self, 1)
             else:
                 PtSetAlarm(1, self, 2)
         elif param == 2:
-            print "AlarmInit onAlarm 2"
+            print("AlarmInit onAlarm 2")
             #initialiser les dictionnaires de clonage
             xClonage.InitDicts()
             #
@@ -189,7 +189,7 @@ class AlarmInit():
             else:
                 pass
         else:
-            print "AlarmInit onAlarm mauvais param"
+            print("AlarmInit onAlarm mauvais param")
 
 #Permet de creer un element de clones de FireMarbles
 def AfficherElement(dist, hauteur, couleur = None, nb = None, av = None):
@@ -204,14 +204,14 @@ def AfficherElement(dist, hauteur, couleur = None, nb = None, av = None):
         nb = len(tuplePositions)
     # combien de clones a-t-on deja a disposition?
     nbClones = len(xClonage.dicClonesPhy[couleur])
-    print "nb de clones %s %i" % (couleur, nbClones)
+    print("nb de clones %s %i" % (couleur, nbClones))
 
     #Ajouter des clones si besoin
     if nbClones < nb:
         xClonage.Cloner(nb - nbClones)
-    print "> AfficherElement : appel a Dessiner..."
+    print("> AfficherElement : appel a Dessiner...")
     PtSetAlarm(1, Dessiner(av, nb, couleur, dist, hauteur), 1)
-    print "> AfficherElement : FIN"
+    print("> AfficherElement : FIN")
 
 
 # Dessine-moi une citrouille...
@@ -227,33 +227,33 @@ class Dessiner():
     _nbFois = 0
     
     def __init__(self, so, nbClones, couleur, dist, hauteur):
-        print "> Dessiner : INIT"
+        print("> Dessiner : INIT")
         self._so = so
         self._nbClones = nbClones
         self._couleur = couleur
         self._dist = dist
         self._hauteur = hauteur
-        print "> Dessiner : INIT ok"
+        print("> Dessiner : INIT ok")
     
     def onAlarm(self, param):
-        print "> Dessiner : onAlarm"
+        print("> Dessiner : onAlarm")
         if param == 1:
             nbClonesFound = len(xClonage.dicClonesPhy[self._couleur])
-            print "> Dessiner : nb de clones %s %i" % (self._couleur, nbClonesFound)
+            print("> Dessiner : nb de clones %s %i" % (self._couleur, nbClonesFound))
             # Attendre que tous les clones soient crees, mais pas indefiniment
             if (nbClonesFound < self._nbClones and self._nbFois < 20):
                 self._nbFois += 1
-                print ">>> Attente nb: %i" % self._nbFois
+                print(">>> Attente nb: %i" % self._nbFois)
                 PtSetAlarm(1, self, 1)
             else:
                 PtSetAlarm(1, self, 2)
         elif param == 2:
-            print "> Dessiner : nb de clones %s %i" % (self._couleur, self._nbClones)
+            print("> Dessiner : nb de clones %s %i" % (self._couleur, self._nbClones))
             ## J'ai fixe l'espacement a 2, peut etre mis en parametre
             #element = CreerElement(2)
             
             for i in range(len(tuplePositions)):
-                print "> Dessiner : i = {}".format(i)
+                print("> Dessiner : i = {}".format(i))
                 sop = xClonage.dicClonesPhy[self._couleur][i].getSceneObject()
                 sod = xClonage.dicClonesDra[self._couleur][i].getSceneObject()
                 #dx = tuplePositions[i][0][3] + self._dist
@@ -269,6 +269,6 @@ class Dessiner():
                 sop.physics.disable()
         else:
             pass
-        print "> Dessiner : FIN"
+        print("> Dessiner : FIN")
 
 #

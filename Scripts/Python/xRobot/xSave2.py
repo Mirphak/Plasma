@@ -1,19 +1,25 @@
+# -*- coding: utf-8 -*-
 #xSave module
 
 from Plasma import *
 import os
 
-def SetFileName(self, playerID, ageFileName = None, prefix = None):
+def SetFileName(self, playerID, ageFileName=None, prefix=None, aliasName=None):
     #self.chatMgr.AddChatLine(None, "> SetFileName", 3)
-    if ageFileName == None:
+    self.chatMgr.AddChatLine(None, "> SetFileName({},{},{},{})".format(playerID, ageFileName, prefix, aliasName), 3)
+    if ageFileName is None:
         ageFileName = PtGetAgeInfo().getAgeFilename()
     if not os.path.exists("Save"):
         os.mkdir("Save")
-    fileName = "Save/" + str(playerID) + "_" + ageFileName
-    if prefix != None and str(prefix) != "":
-        fileName += "_" + str(prefix)
+    fileName = "Save/"
+    if aliasName is None or aliasName == "":
+        fileName = "{}{}_{}".format(fileName, playerID, ageFileName)
+    else:
+        fileName = "{}{}_{}".format(fileName, aliasName, ageFileName)
+    if prefix is not None and str(prefix) != "":
+        fileName = "{}_{}".format(fileName, prefix)
     fileName += ".txt"
-    #self.chatMgr.AddChatLine(None, "==> " + fileName, 3)
+    self.chatMgr.AddChatLine(None, "==> " + fileName, 3)
     return fileName
 
 # Reads the file and returns a list of strings representing the saved positions
@@ -73,9 +79,9 @@ def GetPosition(positions, n = None):
     else:
         return None
 
-def WriteMatrix44(self, n = None, player = None, ageFileName = None, prefix = None):
+def WriteMatrix44(self, n=None, player=None, ageFileName=None, prefix=None, aliasName=None):
     #self.chatMgr.AddChatLine(None, "> WriteMatrix44", 3)
-    if n == None:
+    if n is None:
         #n = len(positions)
         n = 0
     try:
@@ -89,7 +95,7 @@ def WriteMatrix44(self, n = None, player = None, ageFileName = None, prefix = No
         player = PtGetLocalPlayer()
     playerID = player.getPlayerID()
     # Get the already known positions for this player and age (if none, it'll return an empty list)
-    fileName = SetFileName(self, playerID, ageFileName, prefix)
+    fileName = SetFileName(self, playerID, ageFileName, prefix, aliasName)
     positions = ReadFile(fileName)
     #self.chatMgr.AddChatLine(None, "==> " + str(len(positions)) + " position(s) found", 3)
     """
@@ -135,16 +141,16 @@ def WriteMatrix44(self, n = None, player = None, ageFileName = None, prefix = No
     else:
         self.chatMgr.AddChatLine(None, player.getPlayerName() + " - Error while saving position!", 3)
 
-def WarpToSaved(self, n = None, player = None, ageFileName = None, prefix = None):
+def WarpToSaved(self, n=None, player=None, ageFileName=None, prefix=None, aliasName=None):
     #self.chatMgr.AddChatLine(None, "> WarpToSaved(n='"+str(n)+"', ...)", 3)
-    if player == None:
+    if player is None:
         player = PtGetLocalPlayer()
     playerID = player.getPlayerID()
     soAvatar = PtGetAvatarKeyFromClientID(playerID).getSceneObject()
     #self.chatMgr.AddChatLine(None, "=> " + player.getPlayerName(), 3)
     try:
         # Get the already known positions for this player and age (if none, it'll return an empty list)
-        fileName = SetFileName(self, playerID, ageFileName, prefix)
+        fileName = SetFileName(self, playerID, ageFileName, prefix, aliasName)
         positions = ReadFile(fileName)
         tuplePos = GetPosition(positions, n)
         matPos = ptMatrix44()

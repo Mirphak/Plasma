@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 #xSave module
 
+import os
 from Plasma import *
 
 
@@ -9,6 +11,8 @@ def WriteMatrix44(self, player = None, ageFileName = None, prefix = None):
     playerID = player.getPlayerID()
     if ageFileName == None:
         ageFileName = PtGetAgeInfo().getAgeFilename()
+    if not os.path.exists("Save"):
+        os.makedirs("Save")
     fileName = "Save/" + str(playerID) + "_" + ageFileName
     if prefix != None and str(prefix) != "":
         fileName += "_" + str(prefix)

@@ -4,7 +4,7 @@
 
 from Plasma import *
 #import math
-import CloneFactory
+from . import CloneFactory
 
 #nombre = 1
 
@@ -104,12 +104,12 @@ def ToggleObject(name, age, bOn=True):
 #=========================================
 #
 def PutAndShow(params=[]):
-    print "PutAndShow begin"
+    print("PutAndShow begin")
     
     #Verifions les parametres
     # au moins 3 parametres
     if len(params) > 3:
-        print "PutAndShow params 3"
+        print("PutAndShow params 3")
         if isinstance(params[3], int):
             h = params[3]
         else:
@@ -120,7 +120,7 @@ def PutAndShow(params=[]):
         h = 10
     # au moins 2 parametres
     if len(params) > 2:
-        print "PutAndShow params 2"
+        print("PutAndShow params 2")
         if isinstance(params[2], ptMatrix44):
             pos = params[2]
         else:
@@ -139,20 +139,20 @@ def PutAndShow(params=[]):
     if len(params) > 0:
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "PutAndShow: first paremeter must be a ptKey"
+            print("PutAndShow: first paremeter must be a ptKey")
             return 0
     if len(params) == 0:
-        print "PutAndShow: needs 1 or 2 paremeters"
+        print("PutAndShow: needs 1 or 2 paremeters")
         return 0
     
-    print "PutAndShow params ok"
+    print("PutAndShow params ok")
     soMaster = masterKey.getSceneObject()
-    print "PutAndShow({}, {})".format(soMaster.getName(), bShow)
+    print("PutAndShow({}, {})".format(soMaster.getName(), bShow))
     
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
     if len(cloneKeys) < 1:
-        print "PutAndShow no clone found!"
+        print("PutAndShow no clone found!")
     #h = 100
     for ck in cloneKeys:
         so = ck.getSceneObject()
@@ -168,7 +168,7 @@ def PutAndShow(params=[]):
         so.physics.enable(1)
         h = h + 5
 
-    print "PutAndShow done"
+    print("PutAndShow done")
     return 1
 
 
@@ -183,29 +183,29 @@ def CloneObjectList(lstObj, age, nb, bShow=True, bLoad=True, matPos=None):
         try:
             masterkey = PtFindSceneobject(obj, age).getKey()
         except:
-            print "{} not found in {}".format(obj, age)
+            print("{} not found in {}".format(obj, age))
             msg += "{} not found in {}\n".format(obj, age)
         if isinstance(masterkey, ptKey):
             if bLoad:
                 # Combien de clones a-t-on deja?
                 nbClones = len(PtFindClones(masterkey))
-                print "Test : nb de clones de {} ==> {}".format(obj, nbClones)
+                print("Test : nb de clones de {} ==> {}".format(obj, nbClones))
                 # Ajouter des clones si besoin
                 if nbClones < nb:
                     CloneFactory.CloneObject(obj, age, nb - nbClones)
                 # Attendre que les clones soient prets et les manipuler
                 PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(obj, age, nb, PutAndShow, [masterkey, bShow, matPos, h]), 1)
                 h = h + (nb * 5)
-                print "Clone of {} loaded".format(obj)
+                print("Clone of {} loaded".format(obj))
                 msg += "Clone of {} loaded\n".format(obj)
             else:
                 # Retour a la normale
                 CloneFactory.DechargerClones(masterkey)
                 #DayTime()
-                print "Clone of {} unloaded".format(obj)
+                print("Clone of {} unloaded".format(obj))
                 msg += "Clone of {} unloaded\n".format(obj)
         else:
-            print "not a ptKey!"
+            print("not a ptKey!")
             msg += "not a ptKey\n"
 
     return msg
@@ -233,7 +233,7 @@ def Drop(position=None, bOn=True):
         py=pos.getY()
         pz=pos.getZ()
     else:
-        print "Drop Error: position must be an int or a ptPoint3 or a ptMatrix44"
+        print("Drop Error: position must be an int or a ptPoint3 or a ptMatrix44")
         return
 
     # parameters are set, we can continue
@@ -252,7 +252,7 @@ def Drop(position=None, bOn=True):
 
     CloneObjectList(lstObj=objects, age="Neighborhood", nb=3, bShow=bOn, bLoad=bOn, matPos=mPos)
     
-    # Attention les KickBoulder font partie de la YeeshaPage #5, dépend de l'etat de la SDL
+    # Attention les KickBoulder font partie de la YeeshaPage #5, dÃ©pend de l'etat de la SDL
     # dans psnlYeeshaPageChanges.EnableDisable(self, val) l'attribut self.enabledStateList peut ne pas exister!!
     #objects = ["KickBoulder", "KickBoulder01", "KickBoulder02", "StLog23"]
     #CloneObjectList(lstObj=objects, age="Personal", nb=5, bShow=bOn, bLoad=bOn, matPos=mPos)
@@ -298,7 +298,7 @@ def Soccer(position=None, bOn=True):
         py=pos.getY()
         pz=pos.getZ()
     else:
-        print "Drop Error: position must be an int or a ptPoint3 or a ptMatrix44"
+        print("Drop Error: position must be an int or a ptPoint3 or a ptMatrix44")
         return
 
     # parameters are set, we can continue

@@ -2,27 +2,27 @@
 
 from Plasma import *
 
-import Ride
-import Platform
+from . import Ride
+from . import Platform
 import math
-import CloneFactory
-import xBotAge
+from . import CloneFactory
+from . import xBotAge
 
 """    week 2 (14/11/2015)
     Relto 
     Phil's Relto 
-    Sky Room (Sharper’s Spyroom)
+    Sky Room (Sharperâ€™s Spyroom)
 
-    There isn’t much to be done with the Reltos. 
-    We just need to get to the bot’s Relto, and then warp to Phil’s. 
+    There isnâ€™t much to be done with the Reltos. 
+    We just need to get to the botâ€™s Relto, and then warp to Philâ€™s. 
     The spyroom is another matter, though.
      
     For the spyroom, the goal is to import as much of tokotah as possible, and allow the guests to walk between them. 
-    During the CavCon party, we did a little of it, but didn’t have the spyroom there. 
+    During the CavCon party, we did a little of it, but didnâ€™t have the spyroom there. 
     The idea is to start in the spyroom, and then allow them to walk out of it over to the DRC conference room and down into Tokotah Courtyard. 
     That allows them to see the exact locations of both rooms. 
     A platform of Jalak pillars and a ramp made from one of them usually does the job. 
-    Just how much of Ae’gura Island you import is up to you; we just need the parts that surround the spyroom and conference room for the tour, including the alley.
+    Just how much of Aeâ€™gura Island you import is up to you; we just need the parts that surround the spyroom and conference room for the tour, including the alley.
 """
 
 """
@@ -236,7 +236,7 @@ def ride(soName="oiseaut1", t=60.0):
 
 #attacher so1 a so2 : attacher(obj, av) ou l'inverse    
 def Attacher(so1, so2, bPhys=False):
-    """attacher so1 à so2 : attacher(obj, av) ou l'inverse"""
+    """attacher so1 Ã  so2 : attacher(obj, av) ou l'inverse"""
     so1.physics.netForce(1)
     so1.draw.netForce(1)
     PtAttachObject(so1, so2, 1)
@@ -258,7 +258,7 @@ def LinkPlayerTo(age, playerID = None, spawnPointNumber = None):
         playerID = PtGetLocalPlayer().getPlayerID()
     else:
         try:
-            playerID = long(playerID)
+            playerID = int(playerID)
         except:
             return "incorrect playerID"
             #pass

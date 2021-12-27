@@ -4,9 +4,9 @@
 
 from Plasma import *
 import math
-import CloneFactory
-import xBotAge
-import Objects
+from . import CloneFactory
+from . import xBotAge
+from . import Objects
 
 #objectName = "FissureStarField"
 #ageFileName = "Personal"
@@ -31,20 +31,20 @@ def ToggleObject(name, age, bOn=True):
 def SetFog(style = "default", start = 0, end = 0, density = 0, r = 0.4, g = 0.4, b = 0.5, cr = 0.4, cg = 0.4, cb = 0.5):
     #default (see fni settings)
     if style == "default":
-        print "default"
+        print("default")
         fy = "Graphics.Renderer.Setyon 10000"
         fd = "Graphics.Renderer.Fog.SetDefLinear 1 900 2"
         fc = "Graphics.Renderer.Fog.SetDefColor .4 .4 .5"
         cc = "Graphics.Renderer.SetClearColor .4 .4 .5"
     elif style == "nofog":
-        print "nofog"
+        print("nofog")
         fy = "Graphics.Renderer.Setyon 10000"
         fd = "Graphics.Renderer.Fog.SetDefLinear 0 0 0"
         fc = "Graphics.Renderer.Fog.SetDefColor .4 .4 .5"
         cc = "Graphics.Renderer.SetClearColor .1 .1 .3"
     #personalized style
     else:
-        print "personalized"
+        print("personalized")
         try:
             yon = int(style)
             fy = "Graphics.Renderer.Setyon %i" % (yon)
@@ -61,7 +61,7 @@ def SetFog(style = "default", start = 0, end = 0, density = 0, r = 0.4, g = 0.4,
 #=========================================
 #
 def NightTime(params=[]):
-    print "NightTime begin"
+    print("NightTime begin")
     
     #Verifions les parametres
     if len(params) > 1:
@@ -71,15 +71,15 @@ def NightTime(params=[]):
     if len(params) > 0:
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "NightTime: first paremeter must be a ptKey"
+            print("NightTime: first paremeter must be a ptKey")
             return 1
     if len(params) == 0:
-        print "NightTime: needs 1 or 2 paremeters"
+        print("NightTime: needs 1 or 2 paremeters")
         return 1
     
-    print "NightTime params ok"
+    print("NightTime params ok")
     soMaster = masterKey.getSceneObject()
-    print "NightTime({}, {})".format(soMaster.getName(), scale)
+    print("NightTime({}, {})".format(soMaster.getName(), scale))
     
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
@@ -117,20 +117,20 @@ def NightTime(params=[]):
     """
     
     ageFileName = PtGetAgeInfo().getAgeFilename()
-    print ">> NightTime: ageFileName = '{}'".format(ageFileName)
+    print(">> NightTime: ageFileName = '{}'".format(ageFileName))
     #xBotAge.SetRenderer(style = "Personal")
     xBotAge.SetRenderer(style = "100000", start = 0, end = 0, density = 0, r = 0.2, g = 0.2, b = 0.4, cr = 0.4, cg = 0.4, cb = 0.5)
     for objName in Objects.dicObjectsShowHide[ageFileName]["SingleHide"]:
-        print ">> NightTime: ToggleObject({}, {}, False)".format(objName, ageFileName)
+        print(">> NightTime: ToggleObject({}, {}, False)".format(objName, ageFileName))
         try:
             ToggleObject(objName, ageFileName, False)
         except NameError: 
-            print ">> NightTime: SceneObject {} not found in {}".format(objName, ageFileName)
+            print(">> NightTime: SceneObject {} not found in {}".format(objName, ageFileName))
     for objName in Objects.dicObjectsShowHide[ageFileName]["GroupHide"]:
-        print ">> NightTime: ToggleObjects({}, False)".format(objName)
+        print(">> NightTime: ToggleObjects({}, False)".format(objName))
         ToggleObjects(objName, False)
 
-    print "NightTime done"
+    print("NightTime done")
     return 0
 
 
@@ -152,7 +152,7 @@ dicStyles = {
 
 #
 def NightTime2(params=[]):
-    print "NightTime2 begin"
+    print("NightTime2 begin")
     
     #Verifions les parametres
     if len(params) > 2:
@@ -166,15 +166,15 @@ def NightTime2(params=[]):
     if len(params) > 0:
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "NightTime2: first paremeter must be a ptKey"
+            print("NightTime2: first paremeter must be a ptKey")
             return 1
     if len(params) == 0:
-        print "NightTime2: needs 1 or 2 paremeters"
+        print("NightTime2: needs 1 or 2 paremeters")
         return 1
     
-    print "NightTime2 params ok"
+    print("NightTime2 params ok")
     soMaster = masterKey.getSceneObject()
-    print "NightTime2({}, {}, {})".format(soMaster.getName(), scale, style)
+    print("NightTime2({}, {}, {})".format(soMaster.getName(), scale, style))
     
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
@@ -201,11 +201,11 @@ def NightTime2(params=[]):
     # Arrangeons le Relto pour profiter de la nuit etoilee
     
     ageFileName = PtGetAgeInfo().getAgeFilename()
-    print ">> NightTime2: ageFileName = '{}'".format(ageFileName)
+    print(">> NightTime2: ageFileName = '{}'".format(ageFileName))
 
     #xBotAge.SetRenderer(style = "100000", start = 0, end = 0, density = 0, r = 0.2, g = 0.2, b = 0.4, cr = 0.4, cg = 0.4, cb = 0.5)
     # Changeons le fond ciel et le brouillard ici
-    print ">> NightTime2: style=\"{}\"".format(style)
+    print(">> NightTime2: style=\"{}\"".format(style))
     dicParamsStyle = {"style":"100000", "start":0, "end":0, "density":0, "r":0.2, "g":0.2, "b":0.4, "cr":0.4, "cg":0.4, "cb":0.5}
     if style in dicStyles:
         dicParamsStyle = dicStyles[style]
@@ -225,16 +225,16 @@ def NightTime2(params=[]):
         )
 
     for objName in Objects.dicObjectsShowHide[ageFileName]["SingleHide"]:
-        print ">> NightTime: ToggleObject({}, {}, False)".format(objName, ageFileName)
+        print(">> NightTime: ToggleObject({}, {}, False)".format(objName, ageFileName))
         try:
             ToggleObject(objName, ageFileName, False)
         except NameError: 
-            print ">> NightTime: SceneObject {} not found in {}".format(objName, ageFileName)
+            print(">> NightTime: SceneObject {} not found in {}".format(objName, ageFileName))
     for objName in Objects.dicObjectsShowHide[ageFileName]["GroupHide"]:
-        print ">> NightTime: ToggleObjects({}, False)".format(objName)
+        print(">> NightTime: ToggleObjects({}, False)".format(objName))
         ToggleObjects(objName, False)
 
-    print "NightTime done"
+    print("NightTime done")
     return 0
 
 #=========================================
@@ -254,86 +254,86 @@ def DayTime_v1():
         ToggleObjects("Sky", True)
         #Couche de brouillard superieure
         ToggleObjects("CameraClouds", True)
-        print ">> DayTime: {} is restored.".format(ageFilename)
+        print(">> DayTime: {} is restored.".format(ageFilename))
     elif ageFilename == "Ahnonay":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "AhnonayCathedral":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "BahroCave":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "BaronCityOffice":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "city":
         #CityBackDrop et CloudLayer
         ToggleObject("CityBackDrop", ageFileName, True)
         ToggleObject("CloudLayer", ageFileName, True)
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Cleft":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Dereno":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Descent":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "EderDelin":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "EderTsogal":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Ercana":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "ErcanaCitySilo":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Garden":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Garrison":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Gira":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "GreatTreePub":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "GreatZero":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "GuildPub-Cartographers":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "GuildPub-Greeters":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "GuildPub-Maintainers":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "GuildPub-Messengers":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "GuildPub-Writers":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Jalak":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Kadish":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Kveer":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "LiveBahroCaves":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Minkata":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Myst":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Negilahn":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Neighborhood":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Neighborhood02":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Payiferen":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "PelletBahroCave":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "philRelto":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "spyroom":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Teledahn":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     elif ageFilename == "Tetsonot":
-        print "{} is restored.".format(ageFilename)
+        print("{} is restored.".format(ageFilename))
     else:
-        print "Unknown age"
+        print("Unknown age")
     return 0
 
 # Pour remettre le Relto dans sont etat d'origine.
@@ -347,13 +347,13 @@ def DayTime():
     #for objName in Objects.dicObjectsShowHide[ageFilename]["GroupShow"]:
     #    ToggleObjects(objName, True)
     for objName in Objects.dicObjectsShowHide[ageFileName]["SingleShow"]:
-        print ">> DayTime: ToggleObject({}, {}, True)".format(objName, ageFileName)
+        print(">> DayTime: ToggleObject({}, {}, True)".format(objName, ageFileName))
         try:
             ToggleObject(objName, ageFileName, True)
         except NameError: 
-            print ">> DayTime: SceneObject {} not found in {}".format(objName, ageFileName)
+            print(">> DayTime: SceneObject {} not found in {}".format(objName, ageFileName))
     for objName in Objects.dicObjectsShowHide[ageFileName]["GroupShow"]:
-        print ">> DayTime: ToggleObjects({}, True)".format(objName)
+        print(">> DayTime: ToggleObjects({}, True)".format(objName))
         ToggleObjects(objName, True)
 
 #=========================================
@@ -366,7 +366,7 @@ def CreateNightSky(scale=7.5, bOn=True):
     if bOn:
         # Combien de clones a-t-on deja?
         nbClones = len(PtFindClones(masterKey))
-        print "Test : nb de clones de {} ==> {}".format(objectName, nbClones)
+        print("Test : nb de clones de {} ==> {}".format(objectName, nbClones))
         # Ajouter des clones si besoin
         if nbClones < nombre:
             CloneFactory.CloneObject(objectName, ageFileName, nombre - nbClones)
@@ -396,7 +396,7 @@ def CreateNightSky2(scale=400, bOn=True, style="default"):
         
         # Combien de clones a-t-on deja?
         nbClones = len(PtFindClones(masterKey))
-        print "Test : nb de clones de {} ==> {}".format(objectName, nbClones)
+        print("Test : nb de clones de {} ==> {}".format(objectName, nbClones))
         # Ajouter des clones si besoin
         if nbClones < nombre:
             CloneFactory.CloneObject(objectName, ageFileName, nombre - nbClones)

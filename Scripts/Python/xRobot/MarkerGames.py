@@ -1,4 +1,4 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 
 # ============ V 0 =============
 import os
@@ -11,8 +11,8 @@ import pickle
 from Plasma import *
 from PlasmaVaultConstants import *
 
-# List of known borked game ids
-borkedGameIdList = [2630615L]
+# List of known borked game ids (updated 2019-07-20)
+borkedGameIdList = [2630615, 114361, 6430535, 6376815, 7962098, 7442358, 2706501, 7136536]
 
 # Sauvegarde les quetes mise dans un dictionnaire dans un fichier (exple: games.yaml)
 def SaveGamesDic(obj, fileName="games"):
@@ -45,11 +45,11 @@ def SaveGameList(gamesDic, fileName="BotGameList"):
         gamesDic = LoadGamesDic()
     # dict => sorted list
     gameNameList = []
-    for val in gamesDic.values():
+    for val in list(gamesDic.values()):
         gameNameList.append(val[0])
     gameNameList = sorted(gameNameList) # tri aphabetique des jeux
     for name in gameNameList:
-        for key, val in gamesDic.items():
+        for key, val in list(gamesDic.items()):
             if val[0] == name:
                 message += key + ": " + val[0] + " " + val[1] + "\n"
                 break
@@ -73,10 +73,10 @@ def GetNewInboxGames():
     # Remove known borked games
     for gameId in borkedGameIdList:
         strGameId = str(gameId)
-        if strGameId in gamesDic.keys():
+        if strGameId in list(gamesDic.keys()):
             del gamesDic[strGameId]
             nbRemovedGames += 1
-            print "The borked game #{0} is removed.".format(strGameId)
+            print("The borked game #{0} is removed.".format(strGameId))
     
     inbox = ptVault().getInbox()
     if inbox is not None:
@@ -88,17 +88,17 @@ def GetNewInboxGames():
                     game = sub.upcastToMarkerGameNode()
                     if game is not None:
                         strGameId = str(game.getID())
-                        if strGameId not in gamesDic.keys():
+                        if strGameId not in list(gamesDic.keys()):
                             if game.getID() not in borkedGameIdList:
                                 tupTime = time.gmtime(game.getModifyTime())
                                 #formatTime = PtGetLocalizedString("Global.Formats.Date")
-                                formatTime = u'%m/%d/%y'
+                                formatTime = '%m/%d/%y'
                                 modifyTime = time.strftime(formatTime, tupTime)
                                 gamesDic.update({strGameId: [game.getGameName(), modifyTime, game.getGameGuid()]})
                                 nbNewGames += 1
-                                print "New game added : #{}, {}, {}, {}".format(strGameId, game.getGameName(), game.getModifyTime(), game.getGameGuid())
+                                print("New game added : #{}, {}, {}, {}".format(strGameId, game.getGameName(), game.getModifyTime(), game.getGameGuid()))
                             else:
-                                print "The game #{0} is borked and not added.".format(strGameId)
+                                print("The game #{0} is borked and not added.".format(strGameId))
                         """
                         else:
                             if game.getID() in borkedGameIdList:
@@ -106,14 +106,14 @@ def GetNewInboxGames():
                                 nbRemovedGames += 1
                                 print "The borked game #{0} is removed.".format(strGameId)
                         """
-            print "=> {0} new games added and {1} borked games removed.".format(nbNewGames, nbRemovedGames)
+            print("=> {0} new games added and {1} borked games removed.".format(nbNewGames, nbRemovedGames))
             if nbNewGames > 0 or nbRemovedGames > 0:
                 SaveGamesDic(gamesDic)
                 SaveGameList(gamesDic)
         else:
-            print "inbox is not a folder node!"
+            print("inbox is not a folder node!")
     else:
-        print "your vault indox was not found!"
+        print("your vault indox was not found!")
     return gamesDic
 
 # Recherche un jeu de marqueur par son Guid
@@ -125,13 +125,13 @@ def GetGameByGuid(gameGuid):
         node = ptVault().findNode(tempNode)
         if node.getType() == PtVaultNodeTypes.kMarkerGameNode:
             game = node.upcastToMarkerGameNode()
-            print "game found"
+            print("game found")
             return game
         else:
-            print "game not found"
+            print("game not found")
             return None
     except:
-        print "error in GetGameByGuid"
+        print("error in GetGameByGuid")
         return None
 
 # variable globale pour le test => faire une classe
@@ -163,32 +163,32 @@ def GetGameFromGamesDic(gamesDic, gameId=0):
     # en fait quand je recupere gameId deduis la chaine de caracteres contenant les arguments de la fonction, je me retrouve avec de l'unicode.
     # les tests commentes ne riment donc a rien, faisons plus simple.
     try:
-        strGameId = str(long(gameId))
+        strGameId = str(int(gameId))
     except:
-        print "Error in GetGameFromGamesDic: gameId must be an integer or a long"
+        print("Error in GetGameFromGamesDic: gameId must be an integer or a long")
         return None
 
     strGameId.lstrip("0")
-    if strGameId in gamesDic.keys():
+    if strGameId in list(gamesDic.keys()):
         gameGuid = gamesDic[strGameId][2]
         game = GetGameByGuid(gameGuid)
         if game is not None:
-            print "GetGameFromGamesDic: Game found => #{}".format(game.getID())
-            print "> Name:{}".format(game.getGameName())
+            print("GetGameFromGamesDic: Game found => #{}".format(game.getID()))
+            print("> Name:{}".format(game.getGameName()))
             #print "> CreateDate:{}".format(game.getCreateTime())
             tupTime = time.gmtime(game.getModifyTime())
             #formatTime = PtGetLocalizedString("Global.Formats.Date")
-            formatTime = u'%m/%d/%y'
+            formatTime = '%m/%d/%y'
             modifyTime = time.strftime(formatTime, tupTime)
-            print "> ModifyDate:{}".format(modifyTime)
-            print "> Guid:{}".format(game.getGameGuid())
-            print "> CreatorID:{}".format(game.getCreatorNodeID())
+            print("> ModifyDate:{}".format(modifyTime))
+            print("> Guid:{}".format(game.getGameGuid()))
+            print("> CreatorID:{}".format(game.getCreatorNodeID()))
             #print "> Age:{}".format(game.getCreateAgeName())
         else:
-            print "GetGameFromGamesDic: Game #{} not found in the vault!".format(strGameId)
+            print("GetGameFromGamesDic: Game #{} not found in the vault!".format(strGameId))
         return game
     else:
-        print "Error in GetGameFromGamesDic: gameId {} not found".format(strGameId)
+        print("Error in GetGameFromGamesDic: gameId {} not found".format(strGameId))
         return None
 
 # variable globale pour le test
@@ -197,20 +197,20 @@ iNextGame = 0
 def GetNextGame():
     global iNextGame
     gamesDic = GetNewInboxGames()
-    iLastGame = len(gamesDic.keys()) - 1
+    iLastGame = len(list(gamesDic.keys())) - 1
     if iNextGame >= 0 and iNextGame <= iLastGame:
-        gameId = gamesDic.keys()[iNextGame]
+        gameId = list(gamesDic.keys())[iNextGame]
         game = GetGameFromGamesDic(gameId)
         iNextGame = iNextGame + 1
     else:
-        print "no more games"
+        print("no more games")
 
 # Envoie une quete a un joueur
 def SendGame(gameId, playerId=None):
     if playerId is None:
         playerId = PtGetLocalPlayer().getPlayerID()
-    elif not isinstance(playerId, int) and not isinstance(playerId, long):
-        print "Error in SendGame : playerId must be an integer"
+    elif not isinstance(playerId, int) and not isinstance(playerId, int):
+        print("Error in SendGame : playerId must be an integer")
         return [0, ""]
     gamesDic = GetNewInboxGames()
     game = GetGameFromGamesDic(gamesDic, gameId)
@@ -218,11 +218,11 @@ def SendGame(gameId, playerId=None):
         # Envoyer la quete
         try:
             game.sendTo(playerId)
-            msgGame = "{} ({})".format(game.getGameName(), time.strftime(u'%m/%d/%y', time.gmtime(game.getModifyTime())))
-            print "SendGame : game #{} [{}] sent to #{}".format(game.getID(), msgGame, playerId)
+            msgGame = "{} ({})".format(game.getGameName(), time.strftime('%m/%d/%y', time.gmtime(game.getModifyTime())))
+            print("SendGame : game #{} [{}] sent to #{}".format(game.getID(), msgGame, playerId))
             return [1, msgGame]
         except:
-            print "SendGame : Error while sending game"
+            print("SendGame : Error while sending game")
             return [0, "Error while sending game"]
     else:
         return [0, "Game not found"]
@@ -241,21 +241,21 @@ class Games:
     # Test d'envoi de quete
     def SendNextGameTo(playerId):
         global iSendNextGame
-        iLastGame = len(gamesDic.keys()) - 1
+        iLastGame = len(list(gamesDic.keys())) - 1
         if iSendNextGame >= 0 and iSendNextGame <= iLastGame:
-            gameId = gamesDic.keys()[iSendNextGame]
+            gameId = list(gamesDic.keys())[iSendNextGame]
             SendGame(gameId, playerId)
             iSendNextGame = iSendNextGame + 1
         else:
-            print "no more games"
+            print("no more games")
 
 # Envoie la liste des quetes a un joueur
 # Titre = "%s Markersgames"%(nomrobot)
 def SendGameList(title, playerId=None):
     if playerId is None:
         playerId = PtGetLocalPlayer().getPlayerID()
-    elif not isinstance(playerId, int) and not isinstance(playerId, long):
-        print "Error in SendGameList : playerId must be an integer"
+    elif not isinstance(playerId, int) and not isinstance(playerId, int):
+        print("Error in SendGameList : playerId must be an integer")
         return 0
     GetNewInboxGames()
     message = LoadGameList()
@@ -265,10 +265,10 @@ def SendGameList(title, playerId=None):
         note.noteSetText(message)
         note.noteSetTitle(title) 
         note.sendTo(playerId)
-        print "SendGameList : game list sent to #{}".format(playerId)
+        print("SendGameList : game list sent to #{}".format(playerId))
         return 1
     except:
-        print "SendGameList : Error while sending game"
+        print("SendGameList : Error while sending game")
         return 0
 
 #

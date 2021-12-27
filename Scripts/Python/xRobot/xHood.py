@@ -1,4 +1,4 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 
 from Plasma import *
 import math
@@ -93,7 +93,7 @@ def ResetDicClones():
 # reset the clones
 def ResetClones():
     global dicBadClones
-    for couleur in dicMarbles.keys():
+    for couleur in list(dicMarbles.keys()):
         key = dicMarbles[couleur]
         dicBadClones[couleur] = PtFindClones(key)
     ResetDicClones()
@@ -133,7 +133,7 @@ class ClonageBilles:
     def __init__(self, nombre):
         self._nombre = nombre
         self._delais = int(nombre/5) + 1
-        print "init ClonageBilles(%i)" % self._nombre
+        print("init ClonageBilles(%i)" % self._nombre)
 
     def ClonerBilles(self, nombre):
         #self._masterKey
@@ -158,12 +158,12 @@ class ClonageBilles:
     def sauver(self):
         global dicMarbles
         global dicClones
-        for couleur in dicMarbles.keys():
+        for couleur in list(dicMarbles.keys()):
             key = dicMarbles[couleur]
-            print couleur + " " + str(len(PtFindClones(key)))
+            print(couleur + " " + str(len(PtFindClones(key))))
             #dicClones[couleur] = PtFindClones(key)
-            dicClones[couleur] = filter(lambda k: k not in dicBadClones[couleur], PtFindClones(key))
-            print couleur + " " + str(len(dicClones[couleur])) + " " + str(len(dicBadClones[couleur]))
+            dicClones[couleur] = [k for k in PtFindClones(key) if k not in dicBadClones[couleur]]
+            print(couleur + " " + str(len(dicClones[couleur])) + " " + str(len(dicBadClones[couleur])))
 
 #
 def Cloner(nombre):
@@ -196,7 +196,7 @@ def Deplacer(so1, so2, dx = 0, dy = 0, dz = 0, bPhys = True):
 
 #attacher so1 a so2 : attacher(obj, av) ou l'inverse    
 def Attacher(so1, so2, dx = 0, dy = 0, dz = 0, bPhys = False):
-    """attacher so1 à so2 : attacher(obj, av) ou l'inverse"""
+    """attacher so1 Ã  so2 : attacher(obj, av) ou l'inverse"""
     so1.physics.netForce(1)
     so1.draw.netForce(1)
     Deplacer(so1, so2, dx, dy, dz, bPhys)
@@ -230,14 +230,33 @@ def Detacher2(so1, so2, dz):
     #so1.physics.netForce(1)
     #so1.draw.netForce(1)
 
+# Detach the clones
+def DetachClones(av=None):
+    #global dicClones
+    #print "DetachClones(av={})".format(av)
+    if av is None:
+        #print "DetachClones 1"
+        av = PtGetLocalAvatar()
+    #print "DetachClones 2"
+    #print "dicClones = {}".format(dicClones)
+    for color in dicClones:
+        #print "DetachClones 3"
+        #print "color = {}".format(color)
+        for k in dicClones[color]:
+            #print "DetachClones 4.1 ({})".format(k)
+            so = k.getSceneObject()
+            #print "DetachClones 4.2 ({})".format(k)
+            Detacher(so, av)
+    #print "DetachClones fin"
+
 #return map(lambda k:k.getsceneobjcet(), PtFindClones(PtFindSceneobjects(oname, age).getKey()))
 
 #Permet de faire un cercle de clones de FireMarbles qui suit un avatar
-def Entourer(dist, hauteur, couleur = None, nb = None, av = None, bOn = True):
+def Entourer(dist, hauteur, couleur=None, nb=None, av=None, bOn=True, bAttach=True):
     global dicMarbles
     #global lstClones
     global dicClones
-    if av == None:
+    if av is None:
         av = PtGetLocalAvatar()
     if couleur == None:
         couleur = 'yellow'
@@ -273,9 +292,9 @@ def Entourer(dist, hauteur, couleur = None, nb = None, av = None, bOn = True):
         #    so.physics.netForce(1)
         #    so.draw.netForce(1)
         #    Attacher(so, av, dx, dy, hauteur, False)
-        print "> Entourer : I will draw..."
+        print("> Entourer : I will draw...")
         PtSetAlarm(int(nb/5) + 2, Draw(av, nb, couleur, dist, hauteur), 1)
-        print "> Entourer : FIN"
+        print("> Entourer : FIN")
     else:
         #self.running = False
         #for i in range(nb):
@@ -285,7 +304,10 @@ def Entourer(dist, hauteur, couleur = None, nb = None, av = None, bOn = True):
         #    Detacher2(so, av, 5)
         for k in dicClones[couleur]:
             so = k.getSceneObject()
-            Detacher2(so, av, 5)
+            if bAttach:
+                Detacher2(so, av, 5)
+            else:
+                Detacher(so, av)
 
 #
 class Draw():
@@ -298,7 +320,7 @@ class Draw():
     _hauteur = 4
     
     def __init__(self, avatar, nbClones, couleur, dist, hauteur):
-        print "> Draw : INIT"
+        print("> Draw : INIT")
         self._avatar = avatar
         self._nbClones = nbClones
         self._couleur = couleur
@@ -317,12 +339,12 @@ class Draw():
         #
         #print "> Draw : onAlarm"
         nbClonesFound = len(dicClones[self._couleur])
-        print "> Draw : nb de clones %s %i" % (self._couleur, nbClonesFound)
+        print("> Draw : nb de clones %s %i" % (self._couleur, nbClonesFound))
         if nbClonesFound < self._nbClones:
             self._nbClones = nbClonesFound
-        print "> Draw : nb de clones %s %i" % (self._couleur, self._nbClones)
+        print("> Draw : nb de clones %s %i" % (self._couleur, self._nbClones))
         for i in range(self._nbClones):
-            print "> Draw : i = %i" % (i)
+            print("> Draw : i = %i" % (i))
             try:
                 so = dicClones[self._couleur][i].getSceneObject()
                 angle = (float(i)*2.0*math.pi)/float(self._nbClones)
@@ -333,8 +355,8 @@ class Draw():
                 so.draw.enable(1)
                 Attacher(so, self._avatar, dx, dy, self._hauteur, False)
             except AttributeError:
-                print "> Draw : AttributeError : {}, {}".format(dicClones[self._couleur][i], type(dicClones[self._couleur][i]))
-        print "> Draw : FIN"
+                print("> Draw : AttributeError : {}, {}".format(dicClones[self._couleur][i], type(dicClones[self._couleur][i])))
+        print("> Draw : FIN")
         # recharger les clones dans certains cas ils ne sont plus visibles
         RechargerClonesBilles()
 

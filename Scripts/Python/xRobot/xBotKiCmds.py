@@ -8,16 +8,16 @@ from PlasmaVaultConstants import *
 
 import re
 
-import xBotAge
-import xCleft
-import xHood
-import xRelto
-import xDelin
-import xTsogal
-import Columns2
+from . import xBotAge
+from . import xCleft
+from . import xHood
+from . import xRelto
+from . import xDelin
+from . import xTsogal
+from . import Columns2
 
 #Ages de Mirphak et de Mir-o-Bot (d'autres viendront peut-etre)
-import ages
+from . import ages
 
 # liste des instances disponibles pour moi
 linkDic = ages.linkDic
@@ -33,7 +33,7 @@ def LinkToAge(self, linkName):
     #ageNames = map(lambda key: key.lower().replace(" ", "").replace("'", ""), ages.MirphakAgeDict)
     #plist = [myself]
     RemovePrpToLocal(self)
-    if (linkName in linkDic.keys()):
+    if (linkName in list(linkDic.keys())):
         link = linkDic[linkName]
         #PtConsole("Net.LinkToAgeInstance " + link[1] + " " + link[2])
         #xBotAge.ChangerNomAge(link[0])
@@ -46,14 +46,14 @@ def LinkToAge(self, linkName):
 #        link = ages.MirphakAgeDict[linkName]
 #        xBotAge.currentBotAge = link
 #        xBotAge.LinkPlayerTo(self, link)
-    elif (linkName in ages.MirobotAgeDict.keys()):
+    elif (linkName in list(ages.MirobotAgeDict.keys())):
         link = ages.MirobotAgeDict[linkName]
         xBotAge.currentBotAge = list(link)
         if len(link) > 4:
             xBotAge.SetBotAgeSP(link[4])
             self.chatMgr.AddChatLine(None, ",".join(xBotAge.currentBotAge), 3)
         xBotAge.LinkPlayerTo(self, link)
-    elif (linkName in ages.MagicbotAgeDict.keys()):
+    elif (linkName in list(ages.MagicbotAgeDict.keys())):
         link = ages.MagicbotAgeDict[linkName]
         xBotAge.currentBotAge = list(link)
         if len(link) > 4:
@@ -62,7 +62,7 @@ def LinkToAge(self, linkName):
         xBotAge.LinkPlayerTo(self, link)
     else:
         #pass
-        msg = "Available links: " + str(linkDic.keys()) + " ** " + str(age.MirobotAgeDict.keys())
+        msg = "Available links: " + str(list(linkDic.keys())) + " ** " + str(list(age.MirobotAgeDict.keys()))
         #self.chatMgr.DisplayStatusMessage(msg)
         self.chatMgr.AddChatLine(None, msg, 3)
 
@@ -126,7 +126,7 @@ def SearchAvatarNameLike(name):
     pat = "^" + pat.replace("*", ".*") + ".*$"
     pattern = re.compile(pat)
     
-    players = filter(lambda player: pattern.match(player.getPlayerName().lower()), PtGetPlayerList())
+    players = [player for player in PtGetPlayerList() if pattern.match(player.getPlayerName().lower())]
     return players
 
 #
@@ -194,7 +194,7 @@ def AddRelto(self):
 
 #Test du module d'Annabelle newdesert.py
 def LoadNewDesert(self):
-    import newdesert
+    from . import newdesert
     newdesert.load()
 
 #
@@ -360,7 +360,7 @@ def SetRendererClearColor(self, vcr=None, vcg=None, vcb=None):
             numero = int(items[1])
             self.chatMgr.AddChatLine(None, ">SetRendererClearColor match: strCol = {}, numero = {}".format(strCol, numero), 3)
         # nom de couleur connu?
-        if strCol in dicColors.keys():
+        if strCol in list(dicColors.keys()):
             #vcr = float(dicColors[strCol][0]) * (6. - float(numero)) / 5.
             #vcg = float(dicColors[strCol][1]) * (6. - float(numero)) / 5.
             #vcb = float(dicColors[strCol][2]) * (6. - float(numero)) / 5

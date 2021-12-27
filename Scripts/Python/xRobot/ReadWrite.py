@@ -1,4 +1,4 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 """
 import pickle
 
@@ -80,7 +80,7 @@ output = dump(data, Dumper=Dumper)
 test = {
     "1":["a", "b", "c"], 
     "2":["l'aube?", "h", "i"],
-    "3":["à l'aube?", "h", "i"],
+    "3":["Ã  l'aube?", "h", "i"],
     "2189761": ["Art's Teledahn Inn", "01/12/15", "df8de6a9-3b43-4ddc-94c9-9d4ed248e3f0"], 
     "2195841": ["Hide and Marker? ", "01/13/15", "c4d08ed0-1d53-461d-be65-084e79650810"], 
     }
@@ -111,13 +111,13 @@ import os
 import sys
 import datetime
 
-# pour les tests en dehors du jeu:
-#os.chdir('J:\\MOULa_CWE\\Python\\xRobot')
-#sys.path.append('J:\\MOULa_CWE\\Python\\xRobot')
-sys.path.append('J:\\MOULa_CWE\\Python\\system')
-sys.path.append('J:\\MOULa_CWE\\Python\\plasma')
-#import xRobot.ReadWrite as rw
-#import system.yaml as yaml
+## pour les tests en dehors du jeu:
+##os.chdir('J:\\MOULa_CWE\\Python\\xRobot')
+##sys.path.append('J:\\MOULa_CWE\\Python\\xRobot')
+#sys.path.append('J:\\MOULa_CWE\\Python\\system')
+#sys.path.append('J:\\MOULa_CWE\\Python\\plasma')
+##import xRobot.ReadWrite as rw
+##import system.yaml as yaml
 import yaml
 
 from Plasma import *
@@ -150,13 +150,13 @@ def GetGameByGuid(gameGuid):
         node = ptVault().findNode(tempNode)
         if node.getType() == PtVaultNodeTypes.kMarkerGameNode:
             game = node.upcastToMarkerGameNode()
-            print "game found"
+            print("game found")
             return game
         else:
-            print "game not found"
+            print("game not found")
             return None
     except:
-        print "error in GetGameByGuid"
+        print("error in GetGameByGuid")
         return None
 
 """
@@ -177,7 +177,7 @@ Et je fais comme toi pour l'envoyer:
     else :
         return 0
 
-Voila, en principe ça devrait marcher.
+Voila, en principe Ã§a devrait marcher.
 """
 #
 def GetGameFromGamesDic(gameId=0):
@@ -188,24 +188,24 @@ def GetGameFromGamesDic(gameId=0):
     if isinstance(gameId, str):
         strGameId = gameId
     else:
-        print "Error in GetGameFromGamesDic: gameId must be an integer or a string"
+        print("Error in GetGameFromGamesDic: gameId must be an integer or a string")
         return None
     strGameId.lstrip("0")
     if strGameId in gamesDic.Keys:
         gameGuid = gamesDic[strGameId][1]
         game = GetGameByGuid(gameGuid)
         if game is not None:
-            print "GetGameFromGamesDic: Game found => #{}".format(game.getID())
-            print "> Name:{}".format(game.getGameName())
-            print "> Date:{}".format(game.getCreateTime())
-            print "> Guid:{}".format(game.getGameGuid())
-            print "> CreatorID:{}".format(game.getCreatorNodeID())
-            print "> Age:{}".format(game.getCreateAgeName())
+            print("GetGameFromGamesDic: Game found => #{}".format(game.getID()))
+            print("> Name:{}".format(game.getGameName()))
+            print("> Date:{}".format(game.getCreateTime()))
+            print("> Guid:{}".format(game.getGameGuid()))
+            print("> CreatorID:{}".format(game.getCreatorNodeID()))
+            print("> Age:{}".format(game.getCreateAgeName()))
         else:
-            print "GetGameFromGamesDic: Game #{} not found in the vault!".format(strGameId)
+            print("GetGameFromGamesDic: Game #{} not found in the vault!".format(strGameId))
         return game
     else:
-        print "Error in GetGameFromGamesDic: gameId {} not found".format(strGameId)
+        print("Error in GetGameFromGamesDic: gameId {} not found".format(strGameId))
         return None
 
 #
@@ -213,17 +213,17 @@ def SendGame(gameId, playerId=None):
     if playerId is None:
         playerId = PtGetLocalPlayer().getPlayerID()
     elif not isinstance(playerId, int):
-        print "Error in SendGame : playerId must be an integer"
+        print("Error in SendGame : playerId must be an integer")
         return 0
     game = GetGameFromGamesDic(gameId=0)
     if game is not None:
         # Envoyer la quete
         try:
             game.sendTo(playerId)
-            print "SendGame : game #{} sent to #{}".format(game.getID, playerId)
+            print("SendGame : game #{} sent to #{}".format(game.getID, playerId))
             return 1
         except:
-            print "SendGame : Error while sending game"
+            print("SendGame : Error while sending game")
             return 0
 
 #
@@ -252,11 +252,11 @@ def GetNewInboxGames():
                         if strGameId not in gamesDic.Keys:
                             gamesDic.update({strGameId: [game.getGameName(), game.getModifyTime(), game.getGameGuid()]})
                             nbNewGames = nbNewGames + 1
-                            print "New game added : #{}, {}, {}, {}".format(strGameId, game.getGameName(), game.getModifyTime(), game.getGameGuid())
-            print "=> {} new games added".format(nbNewGames)
+                            print("New game added : #{}, {}, {}, {}".format(strGameId, game.getGameName(), game.getModifyTime(), game.getGameGuid()))
+            print("=> {} new games added".format(nbNewGames))
             if nbNewGames > 0:
                 SaveGamesDic(gamesDic)
         else:
-            print "inbox is not a folder node!"
+            print("inbox is not a folder node!")
     else:
-        print "your vault indox was not found!"
+        print("your vault indox was not found!")

@@ -4,7 +4,7 @@
 
 from Plasma import *
 import math
-import CloneFactory
+from . import CloneFactory
 
 
 #
@@ -24,7 +24,7 @@ def ToggleObject(name, age, bOn=True):
 #=========================================
 #
 def PutAndShow4(params=[]):
-    print "PutAndShow4 begin"
+    print("PutAndShow4 begin")
     
     #Verifions les parametres
     # au moins 5 parametres
@@ -67,30 +67,30 @@ def PutAndShow4(params=[]):
     if len(params) > 0:
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "PutAndShow: first paremeter must be a ptKey"
+            print("PutAndShow: first paremeter must be a ptKey")
             return 1
     # pas de parametre
     if len(params) == 0:
-        print "PutAndShow4: needs 1, 2, 3 or 4 paremeters"
+        print("PutAndShow4: needs 1, 2, 3 or 4 paremeters")
         return 1
     
-    print "PutAndShow4 params ok"
+    print("PutAndShow4 params ok")
     soMaster = masterKey.getSceneObject()
-    print "PutAndShow4 master"
+    print("PutAndShow4 master")
     #print "PutAndShow4({}, {}, {}, matPos, {}, {})".format(soMaster.getName(), bShow, bAttach, av.getName())
-    print "PutAndShow4({})".format(soMaster.getName())
-    print "PutAndShow4({})".format(bShow)
-    print "PutAndShow4({})".format(bAttach)
-    print "PutAndShow4({})".format(av.getName())
+    print("PutAndShow4({})".format(soMaster.getName()))
+    print("PutAndShow4({})".format(bShow))
+    print("PutAndShow4({})".format(bAttach))
+    print("PutAndShow4({})".format(av.getName()))
     
-    print "PutAndShow4 manip"
+    print("PutAndShow4 manip")
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
-    print "PutAndShow4 clones"
+    print("PutAndShow4 clones")
     if len(cloneKeys) < 1:
-        print "PutAndShow4 no clone found!"
+        print("PutAndShow4 no clone found!")
     else:
-        print "PutAndShow4 ready"
+        print("PutAndShow4 ready")
         ck = cloneKeys[len(cloneKeys) - 1]
         #for ck in cloneKeys:
         so = ck.getSceneObject()
@@ -106,14 +106,14 @@ def PutAndShow4(params=[]):
         else:
             Detacher(so, av)
 
-    print "PutAndShow4 done"
+    print("PutAndShow4 done")
     return 0
 
 
 #=========================================
 # Cree un clone a la position desiree
 def Clone2(objName, age, bShow=True, bLoad=True, matPos=None, bAttach=False, soAvatar=None):
-    print "          ** Clone2 ** 1 begin"
+    print("          ** Clone2 ** 1 begin")
     msg = "CloneObject.Clone2(): "
     nb = 1
     masterkey = None
@@ -121,30 +121,30 @@ def Clone2(objName, age, bShow=True, bLoad=True, matPos=None, bAttach=False, soA
     try:
         masterkey = PtFindSceneobject(objName, age).getKey()
     except:
-        print "{} not found in {}".format(objName, age)
+        print("{} not found in {}".format(objName, age))
         msg += "{} not found in {}\n".format(objName, age)
-    print "          ** Clone2 ** 2"
+    print("          ** Clone2 ** 2")
     if isinstance(masterkey, ptKey):
         if bLoad:
-            print "          ** Clone2 ** 3 loading"
+            print("          ** Clone2 ** 3 loading")
             # Combien de clones a-t-on deja?
             nbClones = len(PtFindClones(masterkey))
-            print "Test : nb de clones de {} ==> {}".format(objName, nbClones)
+            print("Test : nb de clones de {} ==> {}".format(objName, nbClones))
             # Ajouter des clones si besoin
             if nbClones < nb:
                 CloneFactory.CloneObject(objName, age, nb - nbClones)
             # Attendre que les clones soient prets et les manipuler
             PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(objName, age, nb, PutAndShow4, [masterkey, bShow, matPos, bAttach, soAvatar]), 1)
-            print "Clone of {} loaded".format(objName)
+            print("Clone of {} loaded".format(objName))
             msg += "Clone of {} loaded\n".format(objName)
         else:
             # Retour a la normale
             CloneFactory.DechargerClones(masterkey)
             #DayTime()
-            print "Clone of {} unloaded".format(objName)
+            print("Clone of {} unloaded".format(objName))
             msg += "Clone of {} unloaded\n".format(objName)
     else:
-        print "not a ptKey!"
+        print("not a ptKey!")
         msg += "not a ptKey\n"
     return msg
 
@@ -174,7 +174,7 @@ def Bugs(bOn=True, position=None, bTie=False, soPlayer=None):
         py=pos.getY()
         pz=pos.getZ()
     else:
-        print "Bugs Error: position must be an int or a ptVector3 or a ptMatrix44"
+        print("Bugs Error: position must be an int or a ptVector3 or a ptMatrix44")
         return
 
     # parameters are set, we can continue
@@ -186,7 +186,7 @@ def Bugs(bOn=True, position=None, bTie=False, soPlayer=None):
 
 #attacher so1 a so2 : attacher(obj, av) ou l'inverse    
 def Attacher(so1, so2, bPhys=False):
-    """attacher so1 à so2 : attacher(obj, av) ou l'inverse"""
+    """attacher so1 Ã  so2 : attacher(obj, av) ou l'inverse"""
     so1.physics.netForce(1)
     so1.draw.netForce(1)
     PtAttachObject(so1, so2, 1)

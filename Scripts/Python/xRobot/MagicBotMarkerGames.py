@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from Plasma import *
 import datetime
@@ -591,13 +592,13 @@ def GetGameByGuid(gameGuid):
         node = ptVault().findNode(tempNode)
         if node.getType() == PtVaultNodeTypes.kMarkerGameNode:
             game = node.upcastToMarkerGameNode()
-            print "game found"
+            print("game found")
             return game
         else:
-            print "game not found"
+            print("game not found")
             return None
     except:
-        print "error in GetGameByGuid"
+        print("error in GetGameByGuid")
         return None
 
 # Recherche un jeu de marqueur par son nom
@@ -609,13 +610,13 @@ def GetGameByName(gameName):
         node = ptVault().findNode(tempNode)
         if node.getType() == PtVaultNodeTypes.kMarkerGameNode:
             game = node.upcastToMarkerGameNode()
-            print "game found"
+            print("game found")
             return game
         else:
-            print "game not found"
+            print("game not found")
             return None
     except:
-        print "error in GetGameByGuid"
+        print("error in GetGameByGuid")
         return None
 
 # Recherche un jeu de marqueur par son ID dans dicQuests
@@ -628,12 +629,12 @@ def GetGameInDic(gameId):
     else:
         return "gameID incorrect"
     
-    if key not in dicQuests.keys():
+    if key not in list(dicQuests.keys()):
         return "key incorrect"
     
     gameName = dicQuests[key][0]
     gameDate = dicQuests[key][1]
-    print "Game : {0} {1} {2}".format(key, gameName, gameDate)
+    print("Game : {0} {1} {2}".format(key, gameName, gameDate))
     
     tempNode = ptVaultMarkerGameNode()
     tempNode.setGameName(gameName)
@@ -642,14 +643,14 @@ def GetGameInDic(gameId):
         node = ptVault().findNode(tempNode)
         if node.getType() == PtVaultNodeTypes.kMarkerGameNode:
             game = node.upcastToMarkerGameNode()
-            print "game found"
-            print "=> GUID = {0}".format(game.getGameGuid())
+            print("game found")
+            print("=> GUID = {0}".format(game.getGameGuid()))
             return game
         else:
-            print "game not found"
+            print("game not found")
             return None
     except:
-        print "error in GetGameByGuid"
+        print("error in GetGameByGuid")
         return None
 
 #
@@ -657,20 +658,20 @@ def GetGameInDic(gameId):
 def AllGamesFromDic():
     player = PtGetLocalPlayer()
     playerId = player.getPlayerID()
-    for k, v in dicQuests.iteritems():
-        print "Game #{0}: name=\"{1}\", date={2}".format(k, v[0], v[1])
+    for k, v in dicQuests.items():
+        print("Game #{0}: name=\"{1}\", date={2}".format(k, v[0], v[1]))
         tempNode = ptVaultMarkerGameNode()
         tempNode.setGameName(v[0])
         node = None
         try:
             node = ptVault().findNode(tempNode)
         except:
-            print "Error in ptVault().findNode(tempNode)"
+            print("Error in ptVault().findNode(tempNode)")
         if node is not None:
             try:
                 if node.getType() == PtVaultNodeTypes.kMarkerGameNode:
                     game = node.upcastToMarkerGameNode()
-                    print "Game found => GUID = {0}".format(game.getGameGuid())
+                    print("Game found => GUID = {0}".format(game.getGameGuid()))
                     # Envoyer la quete
                     #try:
                     #    game.sendTo(playerId)
@@ -678,14 +679,14 @@ def AllGamesFromDic():
                     #    print "Error while sending game"
                     #return game
                 else:
-                    print "Game not found"
+                    print("Game not found")
                     #return None
             except:
-                print "Error in node.getType(), PtVaultNodeTypes.kMarkerGameNode, node.upcastToMarkerGameNode() or game.getGameGuid()"
+                print("Error in node.getType(), PtVaultNodeTypes.kMarkerGameNode, node.upcastToMarkerGameNode() or game.getGameGuid()")
         else:
-            print "node is None => game not found."
+            print("node is None => game not found.")
             #return None
-    print "END"
+    print("END")
     return
 
 #
@@ -697,24 +698,24 @@ def NextGame():
     #playerId = player.getPlayerID()
     global n
     n = n + 1
-    nbGamesInDic = len(dicQuests.keys())
+    nbGamesInDic = len(list(dicQuests.keys()))
     if n < 0 or n > nbGamesInDic - 1:
-        print "END : index out of bounds."
+        print("END : index out of bounds.")
         n = -1
         return
-    k = dicQuests.keys()[n]
+    k = list(dicQuests.keys())[n]
     v = dicQuests[k]
-    print "Game {0} => #{1}: name=\"{2}\", date={3}".format(n, k, v[0], v[1])
+    print("Game {0} => #{1}: name=\"{2}\", date={3}".format(n, k, v[0], v[1]))
     tempNode = ptVaultMarkerGameNode()
     tempNode.setGameName(v[0])
     try:
         node = ptVault().findNode(tempNode)
         if node is None:
-            print "Game not found (node is None)"
+            print("Game not found (node is None)")
             return
         if node.getType() == PtVaultNodeTypes.kMarkerGameNode:
             game = node.upcastToMarkerGameNode()
-            print "Game found => GUID = {0}".format(game.getGameGuid())
+            print("Game found => GUID = {0}".format(game.getGameGuid()))
             # Envoyer la quete
             #try:
             #    game.sendTo(playerId)
@@ -722,12 +723,12 @@ def NextGame():
             #    print "Error while sending game"
             #return game
         else:
-            print "Game not found (not a marker game)"
+            print("Game not found (not a marker game)")
             #return None
     except:
-        print "Error in SendMeGame"
+        print("Error in SendMeGame")
         #return None
-    print "END"
+    print("END")
     return
 
 

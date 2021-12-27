@@ -1,31 +1,31 @@
-import xPlayerKiCmds
-import xBotKiCmds
+from . import xPlayerKiCmds
+from . import xBotKiCmds
 
 #script de Michel
 #import note
 
-import xPlayers
-import xBotAge
-import ages
-import SpawnPoints
-import xAnim
-import xCleft
-import xSave
-import xSave2
-import xHood
-import xDelin
-import xTsogal
+from . import xPlayers
+from . import xBotAge
+from . import ages
+from . import SpawnPoints
+from . import xAnim
+from . import xCleft
+from . import xSave
+from . import xSave2
+from . import xHood
+from . import xDelin
+from . import xTsogal
 
 #Test pour Anna
-import newdesert
+from . import newdesert
 
 #Pour Score polo Michel
-import xScore
+from . import xScore
 
-import Find
+from . import Find
 
 #TEST
-import xTest
+from . import xTest
 
 #Sauvegarde des structures de Jalak (Michel fecit)
-import jalak_michel
+from . import jalak_michel

@@ -101,7 +101,7 @@
 """
 
 from Plasma import *
-import Ride
+from . import Ride
 import math
 
 #
@@ -110,7 +110,7 @@ def LinkPlayerTo(age, playerID=None, spawnPointNumber=None):
         playerID = PtGetLocalPlayer().getPlayerID()
     else:
         try:
-            playerID = long(playerID)
+            playerID = int(playerID)
         except:
             return "incorrect playerID"
             #pass
@@ -163,7 +163,7 @@ def LinkAll(ageName="dereno"):
     }
     
     ageName = ageName.lower()
-    if (ageName in ages.keys()):
+    if (ageName in list(ages.keys())):
         age = ages[ageName]
     else:
         return
@@ -206,7 +206,7 @@ def wa(where=None):
     #recuperer tous les joueurs
     playerList = PtGetPlayerList()
     playerList.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)
@@ -233,17 +233,17 @@ def Cercle(coef=5.0, h=10.0, avCentre=None):
         avCentre = PtGetLocalAvatar()
     #agePlayers = GetAllAgePlayers()
     # ne pas tenir compte des robots
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in dicBot.keys()), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
     i = 0
     n = len(agePlayers)
-    print "nb de joueurs: %s" % (n)
+    print("nb de joueurs: %s" % (n))
     dist = float(coef * n) / (2.0 * math.pi)
-    print "distance: %s" % (dist)
+    print("distance: %s" % (dist))
     for i in range(n):
         player = agePlayers[i]
         avatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
         angle = (float(i) * 2.0 * math.pi) / float(n)
-        print "angle(%s): %s" % (i, angle)
+        print("angle(%s): %s" % (i, angle))
         dx = float(dist)*math.cos(angle)
         dy = float(dist)*math.sin(angle)
         matrix = avCentre.getLocalToWorld()
@@ -257,17 +257,17 @@ def CercleV(coef=2.0, avCentre=None):
         avCentre = PtGetLocalAvatar()
     #agePlayers = GetAllAgePlayers()
     # ne pas tenir compte des robots
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in dicBot.keys()), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
     i = 0
     n = len(agePlayers)
-    print "nb de joueurs: %s" % (n)
+    print("nb de joueurs: %s" % (n))
     dist = float(coef * n) / (2.0 * math.pi)
-    print "distance: %s" % (dist)
+    print("distance: %s" % (dist))
     for i in range(n):
         player = agePlayers[i]
         avatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
         angle = (float(i) * 2.0 * math.pi) / float(n)
-        print "angle(%s): %s" % (i, angle)
+        print("angle(%s): %s" % (i, angle))
         dx = float(dist)*math.cos(angle)
         #dy = float(dist)*math.sin(angle)
         dy = 0

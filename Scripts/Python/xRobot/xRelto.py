@@ -121,20 +121,20 @@ def EnableAll(bOn = True):
 def SetFog(style = "default", start = 0, end = 0, density = 0, r = 0.4, g = 0.4, b = 0.5, cr = 0.4, cg = 0.4, cb = 0.5):
     #default (see fni settings)
     if style == "default":
-        print "default"
+        print("default")
         fy = "Graphics.Renderer.Setyon 10000"
         fd = "Graphics.Renderer.Fog.SetDefLinear 1 900 2"
         fc = "Graphics.Renderer.Fog.SetDefColor .4 .4 .5"
         cc = "Graphics.Renderer.SetClearColor .4 .4 .5"
     elif style == "nofog":
-        print "nofog"
+        print("nofog")
         fy = "Graphics.Renderer.Setyon 10000"
         fd = "Graphics.Renderer.Fog.SetDefLinear 0 0 0"
         fc = "Graphics.Renderer.Fog.SetDefColor .4 .4 .5"
         cc = "Graphics.Renderer.SetClearColor .1 .1 .3"
     #personalized style
     else:
-        print "personalized"
+        print("personalized")
         try:
             yon = int(style)
             fy = "Graphics.Renderer.Setyon %i" % (yon)
@@ -192,7 +192,7 @@ class AlarmCloneFissureStarField:
         self._nombre = nombre
         self._delais = 1
         self._attempts = 1
-        print "init AlarmCloneFissureStarField(%i)" % self._nombre
+        print("init AlarmCloneFissureStarField(%i)" % self._nombre)
 
     # Clonage general (n clones)
     def Cloner(self, nombre):
@@ -203,7 +203,7 @@ class AlarmCloneFissureStarField:
     def onAlarm(self, param):
         if param == 1:
             # partie 1 : clonage
-            print "clonage en cours..."
+            print("clonage en cours...")
             # Existe-t-il deja des clones?
             n = len(PtFindClones(self._masterKey))
             if n < self._nombre:
@@ -215,27 +215,27 @@ class AlarmCloneFissureStarField:
             n = len(PtFindClones(self._masterKey))
             # attendre que tous les clones soient crees
             if n < self._nombre:
-                print "%i clones trouves sur les %i demandes! (attempt #%i)" % (n, self._nombre, self._attempts)
+                print("%i clones trouves sur les %i demandes! (attempt #%i)" % (n, self._nombre, self._attempts))
                 if self._attempts < self._maxAttempts:
                     self._attempts = self._attempts + 1
                     PtSetAlarm(self._delais, self, 2)
                 else:
-                    print "Le clonage met trop de temps!!"
+                    print("Le clonage met trop de temps!!")
             else:
-                print "sauvegarde des %i clones..." % n
+                print("sauvegarde des %i clones..." % n)
                 self.saveClones()
         else:
-            print "AlarmCloneFissureStarField.onAlarm : param incorrect"
+            print("AlarmCloneFissureStarField.onAlarm : param incorrect")
 
     # Sauvons les clones!
     def saveClones(self):
         global dicClones
         dicClones["FissureStarField"] = PtFindClones(self._masterKey)
-        print "nb clones: " + str(len(dicClones["FissureStarField"]))
+        print("nb clones: " + str(len(dicClones["FissureStarField"])))
 
 #
 def CloneFissureStarField(nombre):
-    print "CloneFissureStarField()"
+    print("CloneFissureStarField()")
     PtSetAlarm(1, AlarmCloneFissureStarField(nombre), 1)
 
 #
@@ -250,22 +250,22 @@ class AlarmWaittingForClones:
         self._scale = scale
     
     def onAlarm(self, param):
-        print "> AlarmWaitting.onAlarm"
+        print("> AlarmWaitting.onAlarm")
         if param == 1:
             nbClonesFound = len(dicClones["FissureStarField"])
-            print ">> nb de clones de %s %i" % ("FissureStarField", nbClonesFound)
+            print(">> nb de clones de %s %i" % ("FissureStarField", nbClonesFound))
             # Attendre que tous les clones soient crees, mais pas indefiniment au cas ou
             if (nbClonesFound < self._nbClones and self._nbFois < 20):
                 self._nbFois += 1
-                print ">>> Attente nb: %i" % self._nbFois
+                print(">>> Attente nb: %i" % self._nbFois)
                 PtSetAlarm(1, self, 1)
             else:
                 PtSetAlarm(1, self, 2)
         elif param == 2:
             nbClonesFound = len(dicClones["FissureStarField"])
-            print ">> nb de clones de %s %i" % ("FissureStarField", nbClonesFound)
+            print(">> nb de clones de %s %i" % ("FissureStarField", nbClonesFound))
             if (self._nbFois < 20):
-                print ">> Les clones sont prets."
+                print(">> Les clones sont prets.")
                 soMaster = PtFindSceneobject("FissureStarField", age)
                 # Masquons les clones surnumeraires s'il y en a
                 for i in range(0,nbClonesFound - 2):
@@ -297,9 +297,9 @@ class AlarmWaittingForClones:
                 ToggleObjects("Surface", False)
                 ToggleObjects("Sky", False)
                 ToggleObjects("CameraClouds", False)
-                print ">> Fin."
+                print(">> Fin.")
             else:
-                print ">> Le clonage prend trop de temps!!"
+                print(">> Le clonage prend trop de temps!!")
             self._nbFois = 0
 
 # Cree une sphere etoilee complete a partir de 2 clones tete-beche de "FissureStarField" agrandis
@@ -309,7 +309,7 @@ def CreateNightSky(scale=7.5, bOn=True):
     if bOn:
         # Combien de clones a-t-on deja?
         nbClones = len(dicClones["FissureStarField"])
-        print "CreateNightSky : nb de clones de %s ==> %i" % ("FissureStarField", nbClones)
+        print("CreateNightSky : nb de clones de %s ==> %i" % ("FissureStarField", nbClones))
         # Ajouter des clones si besoin
         if nbClones < nb:
             CloneFissureStarField(nb - nbClones)

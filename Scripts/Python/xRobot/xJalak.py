@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 from Plasma import *
-import jalak_michel as jalak
+from . import jalak_michel as jalak
 import math
 
 # 
@@ -243,7 +244,7 @@ class AlarmCloneColumnPhys:
         self._masterKey = dicColumnPhys["columnphys{}".format(self._numero)]
         self._delais = 1
         self._attempts = 1
-        print "init AlarmCloneColumnPhys {}".format(self._nombre)
+        print("init AlarmCloneColumnPhys {}".format(self._nombre))
 
     # Clonage general (n clones)
     def Cloner(self, nombre):
@@ -254,7 +255,7 @@ class AlarmCloneColumnPhys:
     def onAlarm(self, param):
         if param == 1:
             # partie 1 : clonage
-            print "clonage en cours..."
+            print("clonage en cours...")
             # Existe-t-il deja des clones?
             n = len(PtFindClones(self._masterKey))
             if n < self._nombre:
@@ -266,17 +267,17 @@ class AlarmCloneColumnPhys:
             n = len(PtFindClones(self._masterKey))
             # attendre que tous les clones soient crees
             if n < self._nombre:
-                print "{} clones trouves sur les {} demandes! (attempt #{})".format(n, self._nombre, self._attempts)
+                print("{} clones trouves sur les {} demandes! (attempt #{})".format(n, self._nombre, self._attempts))
                 if self._attempts < self._maxAttempts:
                     self._attempts = self._attempts + 1
                     PtSetAlarm(self._delais, self, 2)
                 else:
-                    print "Le clonage met trop de temps!!"
+                    print("Le clonage met trop de temps!!")
             else:
-                print "sauvegarde des {} clones...".format(n)
+                print("sauvegarde des {} clones...".format(n))
                 self.saveClones()
         else:
-            print "AlarmCloneColumnPhys.onAlarm : param incorrect"
+            print("AlarmCloneColumnPhys.onAlarm : param incorrect")
 
     # Sauvons les clones!
     def saveClones(self):
@@ -284,11 +285,11 @@ class AlarmCloneColumnPhys:
         #dicClones["columnphys"] = PtFindClones(self._masterKey)
         for i in range(len(lstColumnPhys)):
             dicClones["columnphys{}".format(i)] = PtFindClones(dicColumnPhys["columnphys{}".format(i)])
-            print "nb clones de {}: {}".format(lstColumnPhys[i].getName(), len(dicClones["columnphys{}".format(i)]))
+            print("nb clones de {}: {}".format(lstColumnPhys[i].getName(), len(dicClones["columnphys{}".format(i)])))
 
 #
 def CloneColumnPhys(nombre, numero=0):
-    print "CloneColumnPhys()"
+    print("CloneColumnPhys()")
     PtSetAlarm(1, AlarmCloneColumnPhys(nombre, numero), 1)
 
 #

@@ -3,21 +3,21 @@
 from Plasma import *
 
 """
-Voilà. Cela fonctionne parfaitement.
-J'utilise un fichier Divers.ListeGUID qui reprend les GUID des âges qui m'intéressent. 
-Tous mes âges magiques commencent par MB et tous mes âges du Tresor magique, par T
+VoilÃ . Cela fonctionne parfaitement.
+J'utilise un fichier Divers.ListeGUID qui reprend les GUID des Ã¢ges qui m'intÃ©ressent. 
+Tous mes Ã¢ges magiques commencent par MB et tous mes Ã¢ges du Tresor magique, par T
 
-L'idée est la suivante: 
-Je regarde toutes les 15 secondes où se trouve le bot.
-S'il n'est pas dans un âge magique, alors je l'envoie automatiquement vers MBCity.
+L'idÃ©e est la suivante: 
+Je regarde toutes les 15 secondes oÃ¹ se trouve le bot.
+S'il n'est pas dans un Ã¢ge magique, alors je l'envoie automatiquement vers MBCity.
 Avec 15 secondes c'est suffisant car, 
-si on envoie le bot dans un âge interdit, 
-il va juste avoir le temps d'aérriver la mais va être directement renvoyé à MBCIty. 
+si on envoie le bot dans un Ã¢ge interdit, 
+il va juste avoir le temps d'aÃ©rriver la mais va Ãªtre directement renvoyÃ© Ã  MBCIty. 
 
-Tu peux aussi essayer de réduire ce temps, en fonction de la vitesse de ton PC.
+Tu peux aussi essayer de rÃ©duire ce temps, en fonction de la vitesse de ton PC.
 
-La commande Sendbotto est une routine qui envoie le bot dans un âge de GUID déterminé. 
-Tu possèdes certainement un équivalent à cette routine.
+La commande Sendbotto est une routine qui envoie le bot dans un Ã¢ge de GUID dÃ©terminÃ©. 
+Tu possÃ¨des certainement un Ã©quivalent Ã  cette routine.
 """
 
 class SurveyBotAge:
@@ -41,7 +41,7 @@ class SurveyBotAge:
         except:
             ageGUID = ""
         if ageGUID != "":
-            for cle, valeur in Divers.ListeGUID.items():
+            for cle, valeur in list(Divers.ListeGUID.items()):
                 if ageGUID == valeur[2] and cle.startswith('MB'):
                     return # le bot est bien dans un age magique
         #le bot n'est pas dans un age magique, on l'envoie a MBHood

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Fait varier la couleur du autoRotation.
 
 from Plasma import *
@@ -33,7 +34,7 @@ class AutoRotation:
             return
         if not isinstance(self.so, ptSceneobject):
             self.running = False
-            print "AutoRotation stoped: self.so is not a ptSceneobject!"
+            print("AutoRotation stoped: self.so is not a ptSceneobject!")
             return
 
         # tournez manege!

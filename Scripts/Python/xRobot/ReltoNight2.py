@@ -4,11 +4,11 @@
 
 from Plasma import *
 import math
-import CloneFactory
-import xBotAge
-import Objects2
-import Fog
-import Rotation
+from . import CloneFactory
+from . import xBotAge
+from . import Objects2
+from . import Fog
+from . import Rotation
 
 #init autoRotationTop and autoRotationBottom
 autoRotationTop = None
@@ -35,7 +35,7 @@ def ToggleObject(name, age, bOn=True):
 #=========================================
 #
 def NightTime(params=[]):
-    print "NightTime begin"
+    print("NightTime begin")
     global autoRotationTop
     global autoRotationBottom
     
@@ -47,15 +47,15 @@ def NightTime(params=[]):
     if len(params) > 0:
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "NightTime: first paremeter must be a ptKey"
+            print("NightTime: first paremeter must be a ptKey")
             return 1
     if len(params) == 0:
-        print "NightTime: needs 1 or 2 paremeters"
+        print("NightTime: needs 1 or 2 paremeters")
         return 1
     
-    print "NightTime params ok"
+    print("NightTime params ok")
     soMaster = masterKey.getSceneObject()
-    print "NightTime({}, {})".format(soMaster.getName(), scale)
+    print("NightTime({}, {})".format(soMaster.getName(), scale))
     
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
@@ -81,28 +81,28 @@ def NightTime(params=[]):
     
     # Arrangeons l'age pour profiter de la nuit etoilee
     ageFileName = PtGetAgeInfo().getAgeFilename()
-    print ">> NightTime: ageFileName = '{}'".format(ageFileName)
+    print(">> NightTime: ageFileName = '{}'".format(ageFileName))
     # le style de rendu
     xBotAge.SetRenderer(style = "100000", start = 0, end = 0, density = 0, r = 0.2, g = 0.2, b = 0.4, cr = 0.4, cg = 0.4, cb = 0.5)
     # les objets a cacher
     for objName in Objects2.dicObjectsShowHide[ageFileName]["SingleHide"]["Night"]:
-        print ">> NightTime: ToggleObject({}, {}, False)".format(objName, ageFileName)
+        print(">> NightTime: ToggleObject({}, {}, False)".format(objName, ageFileName))
         try:
             ToggleObject(objName, ageFileName, False)
         except NameError: 
-            print ">> NightTime: SceneObject {} not found in {}".format(objName, ageFileName)
+            print(">> NightTime: SceneObject {} not found in {}".format(objName, ageFileName))
     for objName in Objects2.dicObjectsShowHide[ageFileName]["GroupHide"]["Night"]:
-        print ">> NightTime: ToggleObjects({}, False)".format(objName)
+        print(">> NightTime: ToggleObjects({}, False)".format(objName))
         ToggleObjects(objName, False)
     # les objets a montrer
     for objName in Objects2.dicObjectsShowHide[ageFileName]["SingleShow"]["Night"]:
-        print ">> NightTime: ToggleObject({}, {}, True)".format(objName, ageFileName)
+        print(">> NightTime: ToggleObject({}, {}, True)".format(objName, ageFileName))
         try:
             ToggleObject(objName, ageFileName, True)
         except NameError: 
-            print ">> NightTime: SceneObject {} not found in {}".format(objName, ageFileName)
+            print(">> NightTime: SceneObject {} not found in {}".format(objName, ageFileName))
     for objName in Objects2.dicObjectsShowHide[ageFileName]["GroupShow"]["Night"]:
-        print ">> NightTime: ToggleObjects({}, True)".format(objName)
+        print(">> NightTime: ToggleObjects({}, True)".format(objName))
         ToggleObjects(objName, True)
 
     # Ajoutons le fog a couleur changeante
@@ -121,22 +121,22 @@ def NightTime(params=[]):
     soBottom.physics.warp(posBottom * m)
     #init autoRotationTop and autoRotationBottom
     if autoRotationTop is None:
-        print "autoRotationTop is None"
+        print("autoRotationTop is None")
         autoRotationTop = Rotation.AutoRotation(delay=1., so=soTop, stepZ=.05)
         #autoRotationTop = Rotation.AutoRotation(delay=4., so=soTop, stepZ=.4)
     if autoRotationBottom is None:
-        print "autoRotationBottom is None"
+        print("autoRotationBottom is None")
         autoRotationBottom = Rotation.AutoRotation(delay=1., so=soBottom, stepZ=-.05)
         #autoRotationBottom = Rotation.AutoRotation(delay=4., so=soBottom, stepZ=-.4)
     # start rotations
     if autoRotationTop is not None:
-        print "start rot top"
+        print("start rot top")
         autoRotationTop.Start()
     if autoRotationBottom is not None:
-        print "start rot bottom"
+        print("start rot bottom")
         autoRotationBottom.Start()
     
-    print "NightTime done"
+    print("NightTime done")
     return 0
 
 #=========================================
@@ -149,7 +149,7 @@ dicStyles = {
 
 #
 def NightTime2(params=[]):
-    print "NightTime2 begin"
+    print("NightTime2 begin")
     
     #Verifions les parametres
     #if len(params) > 3:
@@ -167,15 +167,15 @@ def NightTime2(params=[]):
     if len(params) > 0:
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "NightTime2: first paremeter must be a ptKey"
+            print("NightTime2: first paremeter must be a ptKey")
             return 1
     if len(params) == 0:
-        print "NightTime2: needs 1 or 2 paremeters"
+        print("NightTime2: needs 1 or 2 paremeters")
         return 1
     
-    print "NightTime2 params ok"
+    print("NightTime2 params ok")
     soMaster = masterKey.getSceneObject()
-    print "NightTime2({}, {}, {})".format(soMaster.getName(), scale, style)
+    print("NightTime2({}, {}, {})".format(soMaster.getName(), scale, style))
     
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
@@ -201,10 +201,10 @@ def NightTime2(params=[]):
     
     # Arrangeons l'age pour profiter de la nuit etoilee
     ageFileName = PtGetAgeInfo().getAgeFilename()
-    print ">> NightTime2: ageFileName = '{}'".format(ageFileName)
+    print(">> NightTime2: ageFileName = '{}'".format(ageFileName))
 
     # Changeons le fond ciel et le brouillard ici
-    print ">> NightTime2: style=\"{}\"".format(style)
+    print(">> NightTime2: style=\"{}\"".format(style))
     dicParamsStyle = {"style":"100000", "start":0, "end":0, "density":0, "r":0.2, "g":0.2, "b":0.4, "cr":0.4, "cg":0.4, "cb":0.5}
     if style in dicStyles:
         dicParamsStyle = dicStyles[style]
@@ -225,26 +225,26 @@ def NightTime2(params=[]):
 
     # les objets a cacher
     for objName in Objects2.dicObjectsShowHide[ageFileName]["SingleHide"]["Night"]:
-        print ">> NightTime2: ToggleObject({}, {}, False)".format(objName, ageFileName)
+        print(">> NightTime2: ToggleObject({}, {}, False)".format(objName, ageFileName))
         try:
             ToggleObject(objName, ageFileName, False)
         except NameError: 
-            print ">> NightTime2: SceneObject {} not found in {}".format(objName, ageFileName)
+            print(">> NightTime2: SceneObject {} not found in {}".format(objName, ageFileName))
     for objName in Objects2.dicObjectsShowHide[ageFileName]["GroupHide"]["Night"]:
-        print ">> NightTime2: ToggleObjects({}, False)".format(objName)
+        print(">> NightTime2: ToggleObjects({}, False)".format(objName))
         ToggleObjects(objName, False)
     # les objets a montrer
     for objName in Objects2.dicObjectsShowHide[ageFileName]["SingleShow"]["Night"]:
-        print ">> NightTime2: ToggleObject({}, {}, True)".format(objName, ageFileName)
+        print(">> NightTime2: ToggleObject({}, {}, True)".format(objName, ageFileName))
         try:
             ToggleObject(objName, ageFileName, True)
         except NameError: 
-            print ">> NightTime2: SceneObject {} not found in {}".format(objName, ageFileName)
+            print(">> NightTime2: SceneObject {} not found in {}".format(objName, ageFileName))
     for objName in Objects2.dicObjectsShowHide[ageFileName]["GroupShow"]["Night"]:
-        print ">> NightTime2: ToggleObjects({}, True)".format(objName)
+        print(">> NightTime2: ToggleObjects({}, True)".format(objName))
         ToggleObjects(objName, True)
 
-    print "NightTime2 done"
+    print("NightTime2 done")
     #PtSetAlarm(duration, AlarmDayTime(masterKey), 1)
     return 0
 
@@ -256,10 +256,10 @@ def DayTime(masterKey):
     Fog.Stop()
     # arretons les rotations
     if autoRotationTop is not None:
-        print "stop rot top"
+        print("stop rot top")
         autoRotationTop.Stop()
     if autoRotationBottom is not None:
-        print "stop rot bottom"
+        print("stop rot bottom")
         autoRotationBottom.Stop()
 
     CloneFactory.DechargerClones(masterKey)
@@ -271,40 +271,40 @@ def DayTime(masterKey):
 
     # les objets a cacher
     for objName in Objects2.dicObjectsShowHide[ageFileName]["SingleShow"]["Day"]:
-        print ">> DayTime: ToggleObject({}, {}, True)".format(objName, ageFileName)
+        print(">> DayTime: ToggleObject({}, {}, True)".format(objName, ageFileName))
         try:
             ToggleObject(objName, ageFileName, True)
         except NameError: 
-            print ">> DayTime: SceneObject {} not found in {}".format(objName, ageFileName)
+            print(">> DayTime: SceneObject {} not found in {}".format(objName, ageFileName))
     for objName in Objects2.dicObjectsShowHide[ageFileName]["GroupShow"]["Day"]:
-        print ">> DayTime: ToggleObjects({}, True)".format(objName)
+        print(">> DayTime: ToggleObjects({}, True)".format(objName))
         ToggleObjects(objName, True)
     # les objets a montrer
     for objName in Objects2.dicObjectsShowHide[ageFileName]["SingleHide"]["Day"]:
-        print ">> DayTime: ToggleObject({}, {}, False)".format(objName, ageFileName)
+        print(">> DayTime: ToggleObject({}, {}, False)".format(objName, ageFileName))
         try:
             ToggleObject(objName, ageFileName, False)
         except NameError: 
-            print ">> DayTime: SceneObject {} not found in {}".format(objName, ageFileName)
+            print(">> DayTime: SceneObject {} not found in {}".format(objName, ageFileName))
     for objName in Objects2.dicObjectsShowHide[ageFileName]["GroupHide"]["Day"]:
-        print ">> DayTime: ToggleObjects({}, False)".format(objName)
+        print(">> DayTime: ToggleObjects({}, False)".format(objName))
         ToggleObjects(objName, False)
 
 #
 class AlarmDayTime:
     _masterKey = None
     def __init__(self, masterKey=None):
-        print "> AlarmDayTime.__init__({})".format(masterKey)
+        print("> AlarmDayTime.__init__({})".format(masterKey))
         self._masterKey = masterKey
     
     def onAlarm(self, param):
-        print "> AlarmDayTime.onAlarm({})".format(param)
+        print("> AlarmDayTime.onAlarm({})".format(param))
         if param == 0:
             if len(PtGetPlayerList()) == 0:
                 try:
                     DayTime(self._masterKey)
                 except:
-                    print "> Error in AlarmDayTime.onAlarm (0)"
+                    print("> Error in AlarmDayTime.onAlarm (0)")
             else:
                 #PtSetAlarm(300, self(self._masterKey), 1)
                 PtSetAlarm(300, self, 1)
@@ -312,7 +312,7 @@ class AlarmDayTime:
             try:
                 DayTime(self._masterKey)
             except:
-                print "> Error in AlarmDayTime.onAlarm (1)"
+                print("> Error in AlarmDayTime.onAlarm (1)")
 
 #=========================================
 ### myCurrentAgeInstanceGuid = None
@@ -327,7 +327,7 @@ def CreateNightSky(scale=7.5, bOn=True):
     if bOn:
         # Combien de clones a-t-on deja?
         nbClones = len(PtFindClones(masterKey))
-        print "Test : nb de clones de {} ==> {}".format(objectName, nbClones)
+        print("Test : nb de clones de {} ==> {}".format(objectName, nbClones))
         # Ajouter des clones si besoin
         if nbClones < nombre:
             CloneFactory.CloneObject(objectName, ageFileName, nombre - nbClones)
@@ -369,7 +369,7 @@ def CreateNightSky2(scale=400, bOn=True, style="default"):
     if bOn:
         # Combien de clones a-t-on deja?
         nbClones = len(PtFindClones(masterKey))
-        print "Test : nb de clones de {} ==> {}".format(objectName, nbClones)
+        print("Test : nb de clones de {} ==> {}".format(objectName, nbClones))
         # Ajouter des clones si besoin
         if nbClones < nombre:
             CloneFactory.CloneObject(objectName, ageFileName, nombre - nbClones)

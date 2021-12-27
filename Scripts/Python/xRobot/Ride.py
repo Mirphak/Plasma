@@ -1,4 +1,4 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 
 """
 Scripts pour animation d'objets animables Uru Live
@@ -28,7 +28,7 @@ def SCOJoueur(nom):
 def SCOListAvatars():    
     """Retourne la liste des avatars presents dans l'age courant sous forme de SceneObjects"""
     Listejoueurs = PtGetPlayerList()
-    Liste = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), Listejoueurs)
+    Liste = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in Listejoueurs]
     Liste.append(PtGetLocalAvatar())
     return Liste
     
@@ -107,27 +107,6 @@ def Suivre(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
         sdl=PtGetAgeSDL()
         sdl["clftSceneBahroUnseen"]=(1,)
 
-    elif (objet.lower()) == 'oiseaut1' :
-    # oiseau 1 de Teledahn    
-        defobjet = ("Teledahn,tldnHarvest,BBHead,0,0,-90")
-    elif (objet.lower()) == 'oiseaut2' :
-    # oiseau 2 de Teledahn    
-        defobjet = ("Teledahn,tldnHarvest,BBHead01,0,0,-90")
-    elif (objet.lower()) == 'shooter1' :
-    # Shooter 1 de Teledahn    
-        defobjet = ("Teledahn,tldnHarvest,ShooterB-Master,0,0,0")
-    elif (objet.lower()) == 'shooter2' :
-    # Shooter 2 de Teledahn    
-        defobjet = ("Teledahn,tldnHarvest,ShooterC-Master,0,0,90")
-    elif (objet.lower()) == 'shooter3' :
-    # Shooter 3 de Teledahn     
-        defobjet = ("Teledahn,tldnHarvest,ShooterD-Master,0,0,0")
-    elif (objet.lower()) == 'shooter4' :
-    # Shooter 4 de Teledahn    
-        defobjet = ("Teledahn,tldnHarvest,ShooterF-Master,0,0,0")
-    elif (objet.lower()) == 'shooter5' :
-    # Shooter 5 de Teledahn    
-        defobjet = ("Teledahn,tldnHarvest,ShooterH-Master,0,0,0")
     elif (objet.lower()) == 'raie1' :
     # Raie 1 de Dereno
         defobjet = ("Dereno,DrnoExterior,C01_Body,0,0,0")
@@ -156,8 +135,33 @@ def Suivre(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
     # Sandscrit de Payiferen    
         defobjet = ("Payiferen,Pod,BoneSSHead,0,-90,180")        
     elif (objet.lower()) == 'shroomie' :
-    # Shroomie de Teledahn    
+        # Shroomie de Teledahn    
         defobjet = ("Teledahn,tldnHarvest,Sniff_SB_Spine01,0,0,0")
+    #---------------------------------------------------------------
+    # Buggaros de Teledahn    
+    elif (objet.lower()) == 'buggaro1' :
+        # oiseau 1 de Teledahn    
+        defobjet = ("Teledahn,tldnHarvest,BBHead,0,0,-90")
+    elif (objet.lower()) == 'buggaro2' :
+        # oiseau 2 de Teledahn    
+        defobjet = ("Teledahn,tldnHarvest,BBHead01,0,0,-90")
+    # Flappers de Teledahn    
+    elif (objet.lower()) == 'shooter1' :
+        # Shooter 1 de Teledahn    
+        defobjet = ("Teledahn,tldnHarvest,ShooterB-Master,0,0,0")
+    elif (objet.lower()) == 'shooter2' :
+        # Shooter 2 de Teledahn    
+        defobjet = ("Teledahn,tldnHarvest,ShooterC-Master,0,0,90")
+    elif (objet.lower()) == 'shooter3' :
+        # Shooter 3 de Teledahn     
+        defobjet = ("Teledahn,tldnHarvest,ShooterD-Master,0,0,0")
+    elif (objet.lower()) == 'shooter4' :
+        # Shooter 4 de Teledahn    
+        defobjet = ("Teledahn,tldnHarvest,ShooterF-Master,0,0,0")
+    elif (objet.lower()) == 'shooter5' :
+        # Shooter 5 de Teledahn    
+        defobjet = ("Teledahn,tldnHarvest,ShooterH-Master,0,0,0")
+    #---------------------------------------------------------------
     elif (objet.lower()) == 'bird1' :
     # Oiseau 1 Eder Gira
         defobjet = ("Gira,giraCanyon,Bird01,0,0,180")
@@ -217,7 +221,7 @@ def Suivre(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
         sdl["islmS1FinaleBahro"]=(1,)
         sdl['islmS1FinaleBahroCity6']=(1,)        
     else:
-            print "{} inconnu".format(objet)
+            print("{} inconnu".format(objet))
             return
     animal = defobjet.split(',')
     Age = animal[0]
@@ -245,20 +249,38 @@ class Lier:
         self._anglex = anglex
         self._angley = angley
         self._anglez = anglez
+        
     def onAlarm (self, param):
-        Aobj = PtFindSceneobject(self._obj, self._age)
-        Aobj.netForce(1)
-        Aobj.draw.enable(1)
-        centreobj = Aobj.getLocalToWorld()
-        rotx = ptMatrix44()
-        rotx.makeRotateMat(0, -math.pi * self._anglex/180)
-        roty = ptMatrix44()
-        roty.makeRotateMat(1, -math.pi * self._angley/180)
-        rotz = ptMatrix44()
-        rotz.makeRotateMat(2, -math.pi * self._anglez/180)
-        self._joueur.physics.warp(centreobj * rotx * roty * rotz)
-        PtAttachObject(self._joueur, Aobj,1)
-        PtSetAlarm(self._duree, Delier(self._age, self._joueur, Aobj), 1)
+        if param == 1:
+            self._Aobj = PtFindSceneobject(self._obj, self._age)
+            self._Aobj.netForce(1)
+            self._Aobj.draw.enable(1)
+            centreobj = self._Aobj.getLocalToWorld()
+            rotx = ptMatrix44()
+            rotx.makeRotateMat(0, -math.pi * self._anglex/180)
+            roty = ptMatrix44()
+            roty.makeRotateMat(1, -math.pi * self._angley/180)
+            rotz = ptMatrix44()
+            rotz.makeRotateMat(2, -math.pi * self._anglez/180)
+            self._joueur.physics.warp(centreobj * rotx * roty * rotz)
+            PtAttachObject(self._joueur, self._Aobj,1)
+            print("Lier auto call onalarm 2")
+            #PtSetAlarm(2, Lier(Age,Joueur,Objet,duree,Anglex,Angley,Anglez), 2)
+            if self._age == 'Teledahn':
+                print("Lier onalarm 2, shroomie visible")
+                Action(animal='shroomie', action='visible')
+            PtSetAlarm(3, self, 2)
+            #PtSetAlarm(self._duree, Delier(self._age, self._joueur, self._Aobj), 1)
+        else:
+            print("Lier onalarm 2, age = ", self._age)
+            if self._age == 'Teledahn':
+                #print("Lier onalarm 2, shroomie visible")
+                #Action(animal='shroomie', action='visible')
+                #print("Lier onalarm 2, shroomie surface")
+                #Action(animal='shroomie', action='surface')
+                print("Lier onalarm 2, shroomie avance")
+                Action(animal='shroomie', action='avance')
+            PtSetAlarm(self._duree, Delier(self._age, self._joueur, self._Aobj), 1)
         
 class Delier:
     def __init__(self, age, joueur, obj):
@@ -299,7 +321,7 @@ class Delier:
 import sys
     
         
-#Cette fonction ne s'utilise pas seule, elle est appelée par Action()
+#Cette fonction ne s'utilise pas seule, elle est appelÃ©e par Action()
 def runResp(key, resp, stateidx = None, netForce = 1, netPropagate = 1, fastforward = 0):
     nt = ptNotify(key)
     nt.addReceiver(resp)
@@ -362,6 +384,10 @@ def Action (animal='singe',action='grimper'):
             runResp(obj.getKey(), responders[6], 0) #mouvement de tete
             anim = sys.modules['Dummy04cPythUrwinBird'].UrwinMasterAnim.animation
             anim.stop()
+        elif (action.lower()) == 'crie':
+            runResp(obj.getKey(), responders[1], 5) #cri
+        elif (action.lower()) == 'bouge':
+            runResp(obj.getKey(), responders[6], 0) #mouvement de tete
         elif (action.lower()) == 'sur moi':
             obj.physics.warp(surmoi)            
         else :
@@ -440,9 +466,9 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) != None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) != None]
     return nameList
 
 # Find scene objects with name like soName in all loaded districts (Warning, it includes GUI)

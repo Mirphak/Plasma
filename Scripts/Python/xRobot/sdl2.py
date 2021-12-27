@@ -28,10 +28,10 @@ def ToggleBoolSDL(name, bOn):
     try:
         sdlValue = GetSDL(name)
     except:
-        print "sdl not found"
+        print("sdl not found")
         return 0
     sdlValue = bOn
-    print "sdlValue={}".format(sdlValue)
+    print("sdlValue={}".format(sdlValue))
     try:
         SetSDL(name, sdlValue)
     except:
@@ -91,16 +91,16 @@ def HoodBoolSDL(bOn):
     ToggleBoolSDL("nb01BlueLightOn", bOn)
     ToggleBoolSDL("nb01GreenLightOn", bOn)
     ToggleBoolSDL("nb01OrangeLightOn", bOn)
-    ToggleBoolSDL("nb01LinkRoomDoor01Closed", bOn)
-    ToggleBoolSDL("nb01LinkRoomDoor02Closed", bOn)
-    ToggleBoolSDL("nb01ClassroomDoorClosed", bOn)
-    ToggleBoolSDL("nb01PrivateRoomsOuterDoorClosed", bOn)
+    ToggleBoolSDL("nb01LinkRoomDoor01Closed", not bOn)
+    ToggleBoolSDL("nb01LinkRoomDoor02Closed", not bOn)
+    ToggleBoolSDL("nb01ClassroomDoorClosed", not bOn)
+    ToggleBoolSDL("nb01PrivateRoomsOuterDoorClosed", not bOn)
     ToggleBoolSDL("nb01PrivateRoomsOuterDoorEnabled", bOn)
-    ToggleBoolSDL("nb01PrivateRoom01Closed", bOn)
-    ToggleBoolSDL("nb01PrivateRoom02Closed", bOn)
-    ToggleBoolSDL("nb01PrivateRoom03Closed", bOn)
-    ToggleBoolSDL("nb01PrivateRoom04Closed", bOn)
-    ToggleBoolSDL("nb01PrivateRoom05Closed", bOn)
+    ToggleBoolSDL("nb01PrivateRoom01Closed", not bOn)
+    ToggleBoolSDL("nb01PrivateRoom02Closed", not bOn)
+    ToggleBoolSDL("nb01PrivateRoom03Closed", not bOn)
+    ToggleBoolSDL("nb01PrivateRoom04Closed", not bOn)
+    ToggleBoolSDL("nb01PrivateRoom05Closed", not bOn)
     ToggleBoolSDL("nb01FireworksOnBalcony", bOn)
     ToggleBoolSDL("nb01FireworksOnBanner", bOn)
     ToggleBoolSDL("nb01FireworksOnFountain", bOn)

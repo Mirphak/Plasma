@@ -23,7 +23,7 @@ def SCOJoueur(nom):
 def SCOListAvatars ():    
     """Retourne la liste des avatars presents dans l'age courant sous forme de SceneObjects"""
     Listejoueurs = PtGetPlayerList()
-    Liste = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), Listejoueurs)
+    Liste = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in Listejoueurs]
     Liste.append(PtGetLocalAvatar())
     return Liste
     
@@ -125,7 +125,7 @@ def Suivre(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
     # Shroomie de Teledahn    
         defobjet = ("Teledahn,tldnHarvest,Sniff_SB_Spine01,0,0,0")
     else:
-            print "{} inconnu".format(objet)
+            print("{} inconnu".format(objet))
             return
     animal = defobjet.split(',')
     Age = animal[0]

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Plasma import *
 
 pageBugs = "ItinerantBugCloud"

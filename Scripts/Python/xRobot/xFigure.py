@@ -1,8 +1,8 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 
 from Plasma import *
 import math
-import xClonage
+from . import xClonage
 
 # Objet auquel on va attacher les clones de bille
 # (tu peux en choisir un autre)
@@ -355,7 +355,7 @@ def CreerElement(espacement = 10):
     for row in range(5):
         x = 0
         for col in range(3):
-            print str(row) + ", " +str(col)
+            print(str(row) + ", " +str(col))
             element[row][col][0] = x
             element[row][col][1] = y
             element[row][col][2] = z
@@ -376,35 +376,35 @@ class Dessiner():
     _nbFois = 0
     
     def __init__(self, so, nbClones, couleur, dist, hauteur):
-        print "> Dessiner : INIT"
+        print("> Dessiner : INIT")
         self._so = so
         self._nbClones = nbClones
         self._couleur = couleur
         self._dist = dist
         self._hauteur = hauteur
-        print "> Dessiner : INIT ok"
+        print("> Dessiner : INIT ok")
     
     def onAlarm(self, param):
-        print "> Dessiner : onAlarm"
+        print("> Dessiner : onAlarm")
         if param == 1:
             nbClonesFound = len(xClonage.dicClonesPhy[self._couleur])
-            print "> Dessiner : nb de clones %s %i" % (self._couleur, nbClonesFound)
+            print("> Dessiner : nb de clones %s %i" % (self._couleur, nbClonesFound))
             # Attendre que tous les clones soient crees, mais pas indefiniment au cas ou
             if (nbClonesFound < self._nbClones and self._nbFois < 20):
                 self._nbFois += 1
-                print ">>> Attente nb: %i" % self._nbFois
+                print(">>> Attente nb: %i" % self._nbFois)
                 PtSetAlarm(1, self, 1)
             else:
                 PtSetAlarm(1, self, 2)
         elif param == 2:
-            print "> Dessiner : nb de clones %s %i" % (self._couleur, self._nbClones)
+            print("> Dessiner : nb de clones %s %i" % (self._couleur, self._nbClones))
             # J'ai fixe l'espacement a 2, peut etre mis en parametre
             element = CreerElement(2)
             
             for row in range(5):
                 for col in range(3):
                     i = (row * 3) + col
-                    print "> Dessiner : r = %i, c = %i ==> i = %i" % (row, col, i)
+                    print("> Dessiner : r = %i, c = %i ==> i = %i" % (row, col, i))
                     sop = xClonage.dicClonesPhy[self._couleur][i].getSceneObject()
                     sod = xClonage.dicClonesDra[self._couleur][i].getSceneObject()
                     dx = element[row][col][0] + self._dist
@@ -415,7 +415,7 @@ class Dessiner():
                     xClonage.Attacher(sop, self._so, dx, dy, dz, False)
         else:
             pass
-        print "> Dessiner : FIN"
+        print("> Dessiner : FIN")
 
 #Permet de creer un element de clones de FireMarbles
 def AfficherElement(dist, hauteur, couleur = None, nb = None, av = None):
@@ -431,14 +431,14 @@ def AfficherElement(dist, hauteur, couleur = None, nb = None, av = None):
         nb = 15
 
     nbClones = len(xClonage.dicClonesPhy[couleur])
-    print "nb de clones %s %i" % (couleur, nbClones)
+    print("nb de clones %s %i" % (couleur, nbClones))
 
     #Ajouter des clones si besoin
     if nbClones < nb:
         xClonage.Cloner(nb - nbClones)
-    print "> AfficherElement : appel a Dessiner..."
+    print("> AfficherElement : appel a Dessiner...")
     PtSetAlarm(1, Dessiner(av, nb, couleur, dist, hauteur), 1)
-    print "> AfficherElement : FIN"
+    print("> AfficherElement : FIN")
 
 #
 class AlarmAffichage():
@@ -452,20 +452,20 @@ class AlarmAffichage():
 
     def onAlarm(self, param):
         if param == 1:
-            print "AlarmAffichage onAlarm 1"
+            print("AlarmAffichage onAlarm 1")
             nbClonesFound = len(xClonage.dicClonesPhy[self._couleur])
             # Attendre que tous les clones soient crees, mais pas indefiniment au cas ou
             if (nbClonesFound < self._nbClones and self._nbFois < 20):
                 self._nbFois += 1
-                print ">>> Attente nb: %i" % self._nbFois
+                print(">>> Attente nb: %i" % self._nbFois)
                 PtSetAlarm(1, self, 1)
             else:
                 PtSetAlarm(1, self, 2)
         elif param == 2:
-            print "AlarmAffichage onAlarm 2"
+            print("AlarmAffichage onAlarm 2")
             AfficherElement(self._dist, self._hauteur, self._couleur, self._nbClones, self._so)
         else:
-            print "AlarmAffichage onAlarm mauvais param"
+            print("AlarmAffichage onAlarm mauvais param")
 
 # Initialise le panneau de score
 def InitScore():
@@ -497,18 +497,18 @@ class AlarmInit():
         
     def onAlarm(self, param):
         if param == 1:
-            print "AlarmInit onAlarm 1"
+            print("AlarmInit onAlarm 1")
             #self._so = PtFindSceneobject("MarblePhy01", "Neighborhood")
             self._so = PtFindSceneobject("GPSGreatZero", "Neighborhood")
             # Attendre que 
             if (self._so == None and self._nbFois < 20):
                 self._nbFois += 1
-                print ">>> Attente nb: %i" % self._nbFois
+                print(">>> Attente nb: %i" % self._nbFois)
                 PtSetAlarm(1, self, 1)
             else:
                 PtSetAlarm(1, self, 2)
         elif param == 2:
-            print "AlarmInit onAlarm 2"
+            print("AlarmInit onAlarm 2")
             #initialiser les dictionnaires de clonage
             xClonage.InitDicts()
             #
@@ -523,7 +523,7 @@ class AlarmInit():
             else:
                 pass
         else:
-            print "AlarmInit onAlarm mauvais param"
+            print("AlarmInit onAlarm mauvais param")
 
 
 # Pour positionner l'afficheur de score
@@ -598,19 +598,19 @@ def SetScore(score1 = 0, score2 = 0):
             estVisible = dicChiffres[str(sScore1)][row][col]
             so.draw.netForce(1)
             so.draw.enable(estVisible)
-            print "> Score: row=%i, col=%i, i=%i, cou=%s, vis=%i" % (row, col, i, couleur, estVisible)
+            print("> Score: row=%i, col=%i, i=%i, cou=%s, vis=%i" % (row, col, i, couleur, estVisible))
             couleur = "white"
             so = xClonage.dicClonesDra[couleur][i].getSceneObject()
             estVisible = dicChiffres[str(separateur)][row][col]
             so.draw.netForce(1)
             so.draw.enable(estVisible)
-            print "> Score: row=%i, col=%i, i=%i, cou=%s, vis=%i" % (row, col, i, couleur, estVisible)
+            print("> Score: row=%i, col=%i, i=%i, cou=%s, vis=%i" % (row, col, i, couleur, estVisible))
             couleur = "blue"
             so = xClonage.dicClonesDra[couleur][i].getSceneObject()
             estVisible = dicChiffres[str(sScore2)][row][col]
             so.draw.netForce(1)
             so.draw.enable(estVisible)
-            print "> Score: row=%i, col=%i, i=%i, cou=%s, vis=%i" % (row, col, i, couleur, estVisible)
+            print("> Score: row=%i, col=%i, i=%i, cou=%s, vis=%i" % (row, col, i, couleur, estVisible))
 
 #Reprise du script de Michel MBAhnonay.py
 
@@ -619,7 +619,7 @@ class Board:
         self._n1 = n1
         self._n2 = n2
     def onAlarm(self, param = 1):
-        print ">> Board onAlarm"
+        print(">> Board onAlarm")
         SetScore(self._n1, self._n2)
         
 class AffichageTournant():
@@ -634,7 +634,7 @@ class AffichageTournant():
 
     def onAlarm(self, param = 1):
         if self._running == True:
-            print ">> AffichageTournant onAlarm running (tour=%i) [%i, %i, %i, %i]" % (self._tour, self._positions[self._tour][0], self._positions[self._tour][1], self._positions[self._tour][2], self._positions[self._tour][3])
+            print(">> AffichageTournant onAlarm running (tour=%i) [%i, %i, %i, %i]" % (self._tour, self._positions[self._tour][0], self._positions[self._tour][1], self._positions[self._tour][2], self._positions[self._tour][3]))
             SetPosScore(self._positions[self._tour][0], self._positions[self._tour][1], self._positions[self._tour][2], self._positions[self._tour][3])
             self._tour = (self._tour + 1) % len(self._positions)
             PtSetAlarm(self._vitesse,self,1)
@@ -642,14 +642,14 @@ class AffichageTournant():
             return
     
     def start(self, vitesse):
-        print ">> AffichageTournant start"
+        print(">> AffichageTournant start")
         self._running = True
         self._vitesse = vitesse
         self._tour = 3
         PtSetAlarm(7, self, 1)
     
     def stop(self):
-        print ">> AffichageTournant stop"
+        print(">> AffichageTournant stop")
         self._running = False
         PtSetAlarm(0, self, 1)
 

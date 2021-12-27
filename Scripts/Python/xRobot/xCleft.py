@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 # == Commandes specifiques a Cleft ==
 
 """
     V1 - 27/12/2014
     V2 - 12/02/2016 : Ajouts pour le Cavern Tour 2015-2016
     V3 - 12/11/2016 : Ajouts pour le Cavern Tour 2016-2017
+    V4 - 05/01/2020 : Ajouts pour le Cavern Tour 2020-2021
 """
 
 from Plasma import *
@@ -210,7 +212,7 @@ def wa(where=None):
     #recuperer tous les joueurs
     playerList = PtGetPlayerList()
     playerList.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)
@@ -301,9 +303,9 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) != None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) != None]
     return nameList
 
 # Find scene objects with name like soName in all loaded districts (Warning, it includes GUI)
@@ -342,6 +344,14 @@ def Remove():
         so.netForce(1)
         so.physics.disable()
 
+# Remove the Zandi Mobile Region.
+def DisableZMB():
+    sol = []
+    sol = sol.append(FindSOLike("ZandiMobileRegion"))
+    for so in sol:
+        so.netForce(1)
+        so.physics.disable()
+
 #Cette fonction ne s'utilise pas seule
 def RunResp(key, resp, stateidx = None, netForce = 1, netPropagate = 1, fastforward = 0):
     nt = ptNotify(key)
@@ -367,6 +377,8 @@ def Zandoni(action = 0):
 
 # Attach so1 to so2
 def Attach(so1, so2, bOn=True):
+    so1.netForce(1)
+    so2.netForce(1)
     so1.physics.enable(bOn)
     if (bOn):
         PtAttachObject(so1, so2)
@@ -394,7 +406,7 @@ def Ride(bOn=True):
     so.physics.netForce(1)
     #recuperer tous les joueurs
     playerList = PtGetPlayerList()
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
     for soavatar in soAvatarList:
         #cacher tout le monde
         #soavatar.draw.enable(0)

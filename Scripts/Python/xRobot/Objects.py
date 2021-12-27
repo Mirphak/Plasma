@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 dicObjectsShowHide = {
 	"Personal":{
 		"SingleShow":["FogLayerBill", "CameraClouds", "SunGlow"],
@@ -232,5 +233,25 @@ dicObjectsShowHide = {
 		"SingleHide":["Pod"],
 		"GroupShow":[],
 		"GroupHide":[]
+	},
+	"ChisoPreniv":{
+		"SingleShow":[],
+		"SingleHide":[],
+		"GroupShow":[],
+		"GroupHide":[]
+	},
+	"VeeTsah":{
+		"SingleShow":[],
+		"SingleHide":[],
+		"GroupShow":[],
+		"GroupHide":[]
+	},
+	"GoMePubNew":{
+		"SingleShow":[],
+		"SingleHide":[],
+		"GroupShow":[],
+		"GroupHide":[]
 	}
+
+    
 }

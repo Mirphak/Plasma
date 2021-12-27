@@ -67,6 +67,117 @@
             But I seem to recall you both saying that you couldn't. 
             And the second week, I have no ideas at all. 
             Does anyone else?     
+
+    Version 3 : 12/09/2020 - 10/10/2020
+        ** Gahreesen # 1 : 12/09/2020 **
+            So. Next tour is the first half of Gahreesen. 
+            The schedule didn’t mention where we should fit Gahreesen II’s prison level, 
+            but we ought to have time in the second half so we can do 
+            the entire building in one tour. 
+            For that one, 
+            we’ll want to start on the prison level and then go down to the main floor, 
+            then the Wall chamber, 
+            then the Maintainer’s Nexus.
+
+            But that’s next month. 
+            This time we’re doing Gahreesen I and Gahreesen III, the outdoors.
+
+            Gahreesen I’s interior will need the normal cat-herding tricks. 
+            Once we’re done with the first floor, 
+            teleport up to the second floor in the room with the sniper’s window. 
+            We want the gear room to already  be running, 
+            although it’d be simple to start it up since we’d have no lack of help.
+
+            Next is the usual headache – teleporting everyone up to the roof without lots of 
+            skydiving involved.
+
+            Outside, we want to go to the rock pillar with the maintainer marker on it, 
+            and set up some Jalak pillar viewing platforms in scenic spots. 
+            If possible, at least one platform down near the lake surface so that Gahreesen II 
+            really towers over us.
+
+            I assume we will all have to manually jump over to the central rock spire before 
+            you can warp us around? Or would it work if I jump and everyone uses “find larry”?
+
+            I’ll have one or two still pictures to show, and some sound effects.
+
+        ** Gahreesen # 2 : 10/10/2020 **
+            Susa'n : 
+                Do the “usual warps” include The Wall and the chamber the Gahreesen trainees visit after they’ve climbed The Wall?
+            Larry :
+                Mirphak, I’m wondering if you can set up some warp points in advance to speed moving the group around. 
+                In the prison, we always end up spending a lot of time finding and moving the group to areas of interest.
+
+                What I’d like to do is have preset points you can warp us to instead. Specifically,
+
+                1- the two places in the lower prison level where the bones are
+                2- the middle prison level next to the manhole and ladder so we don’t have to climb up
+                3- the upper prison level near the center so we don’t have to climb that ladder
+
+                Other than that, the usual warps will be fine.
+            Larry :
+                The tour starts in the prison cell, and moves through the rest of the prison floors. 
+                Then we warp down to the main level and walk around the rooms on one side.
+
+                It’d be nice if Mirphak could get the dressing machine to work so we could show it in operation, 
+                but I’ve never asked him to. 
+                We wouldn’t want to have tour guest use it anyway since it’s both a choke-point and something whose 
+                reliability is unknown. 
+                It might crash the game if he could turn it on.
+
+                Something I’ve forgotten to ask up until now was to change someone’s clothing to the special sealed 
+                suit used in the wall chamber. 
+                That’s something I’d like to do this time around.
+
+                We warp the group into the Wall chamber and do the bit there. 
+                If Mirphak can use an invisible Jalak pillar or some other method to block off the ladder up to the wall, 
+                that would be nice since all too often people give in to the temptation to climb on it even though we 
+                tell them not to.
+
+                From there, we warp to the Maintainer’s Nexus, which is where the tour ends.
+
+                The Nexus is tricky since there’s an invisible wall around the arrival point that only gets removed if 
+                you link there using the 
+                link points in the wall chamber and ride the elevator platform up. 
+                But that removes all your avatar’s custom clothing and appearance settings, leaving you with generic 
+                default clothing and appearance. 
+                The mechanism is there to remove the sealed Maintainer suit one gets by using the dressing machine to 
+                enter the wall chamber. 
+                Since we can’t use that, the mechanism doesn’t have anything to restore and strips the player 
+                customizations instead.
+
+                So one has to warp to an avatar or save-point that’s already in the Nexus and outside the elevator platform 
+                (using the bot commands to walk through the invisible wall works) 
+                to avoid triggering the mechanism that strips the avatars.
+            ---------------
+            - Preparation -
+            ---------------
+                - 1 - Arrivee a la cellule de la prison : (= !sp 19)
+                    !to prison, !check noladder (mis en route a chaque link/meet), link/meet
+                - 2 - Les couloirs de la prison :
+                    //event 26 (phare) 
+                    //ws 10 ct (1ers os) + !warpall
+                    //ws 11 ct (2emes os) + !warpall
+                    //ws 12 ct (echelle bas) + !warpall 
+                - 3 - Niveau principal de la prison = Veranda :
+                    //event 26 off
+                    //ws 13 ct (echelle haut, main level) + !warpall
+                    //ws 14 ct (entrance door, main level) = !sp 20 + !warpall
+                    //ws 15 ct (center of the chamber, main level) + !warpall
+                - 3 - Niveau haut de la prison :
+                    //ws 16 ct (center, upper level) or !sp 22 + !warpall
+                - 4 - Etage "entrainement" :
+                    Je ne sais pas dans quel ordre Larry veut faire la visite
+                    En fonction de ses choix, voir quels SpawnPoints utiliser
+                    Je n'ai pas encore trouver comment faire fonctionner la machine
+                    pour revetir la MaintainerSuit, mais on peut utiliser :
+                        * //saveme <name>, //restoree fmaint ou mmaint, et //restoreme <name>
+                    - !sp 24 : Salle d'observation sans pierre
+                    - !sp 25 : Salle d'observation avec pierre
+                    - !sp 26 : Salle de controle 1
+                    - !sp 27 : Salle de controle 2 (ou !sp 28, ou !sp 35)
+                    - //ws 17 ct : Au pied du mur
+                    - //ws 18 ct : un des wall nexus (prenons !sp 30 + //walk) + //event 26
 """
 
 from Plasma import *
@@ -136,17 +247,17 @@ def LinkAll():
 
 #
 dicBot = {
-    32319L:"Mir-o-Bot", 
-    27527L:"Magic Bot", 
-    71459L:"Mimi Bot", 
+    32319:"Mir-o-Bot", 
+    27527:"Magic Bot", 
+    71459:"Mimi Bot", 
     #L:"Stone5", 
-    64145L:"Annabot",
+    64145:"Annabot",
     #L:"SkydiverBot",
-    3975L:"OHBot",
-    24891L:"Magic-Treasure",
-    26224L:"Magic Treasure",
-    21190L:"Mimi Treasure",
-    2332508L:"mob",
+    3975:"OHBot",
+    24891:"Magic-Treasure",
+    26224:"Magic Treasure",
+    21190:"Mimi Treasure",
+    2332508:"mob",
     }
 
 # Larry LeDeay [KI: 11308]
@@ -164,9 +275,9 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
     
     #agePlayers = GetAllAgePlayers()
     # ne pas tenir compte des robots
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in dicBot.keys()), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
     agePlayers.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), agePlayers)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in agePlayers]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)
@@ -176,9 +287,9 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
 
     i = 0
     n = len(agePlayers)
-    print "nb de joueurs: %s" % (n)
+    print("nb de joueurs: %s" % (n))
     dist = float(coef * n) / (2.0 * math.pi)
-    print "distance: %s" % (dist)
+    print("distance: %s" % (dist))
     nbCercles = dist // maxdist
     if nbCercles > 0:
         dist = dist / nbCercles
@@ -203,7 +314,7 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
         avatar = soAvatarList[i]
         angle = (float(i%maxdist) * float(nbCercles) * 2.0 * math.pi) / float(n)
         dist = dist + (n // maxdist)
-        print "angle(%s): %s" % (i, angle)
+        print("angle(%s): %s" % (i, angle))
         dx = float(dist)*math.cos(angle)
         dy = float(dist)*math.sin(angle)
         #matrix = avCentre.getLocalToWorld()
@@ -294,7 +405,7 @@ def wa(n=0, bCircle=False):
                 soavatar.physics.enable(1)
                 soavatar.netForce(1)
         """
-        soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+        soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
         for soavatar in soAvatarList:
             #faire flotter tout le monde
             soavatar.netForce(1)
@@ -323,9 +434,9 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) != None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) != None]
     return nameList
 
 # Find scene objects with name like soName in all loaded districts (Warning, it includes GUI)
@@ -389,7 +500,7 @@ def LinkPlayerTo(age, playerID=None, spawnPointNumber=None):
         playerID = PtGetLocalPlayer().getPlayerID()
     else:
         try:
-            playerID = long(playerID)
+            playerID = int(playerID)
         except:
             return "incorrect playerID"
             #pass
@@ -436,9 +547,9 @@ playerIdList = []
 #
 def SavePlayers():
     global playerIdList
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in dicBot.keys()), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
     agePlayers.append(PtGetLocalPlayer())
-    playerIdList = map(lambda player: player.getPlayerID(), agePlayers)
+    playerIdList = [player.getPlayerID() for player in agePlayers]
 
 """
     "aegura":["city", "city", "9511bed4-d2cb-40a6-9983-6025cdb68d8b", "Mir-o-Bot's", "LinkInPointBahro-PalaceBalcony"],

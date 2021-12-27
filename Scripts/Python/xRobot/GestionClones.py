@@ -75,14 +75,14 @@ def DechargerClones(masterKey):#     devalide  tout les clones de l objet   mast
     et tout autre joueur dans certains cas
     
     """
-    print ">> DechargerClones() <<"
+    print(">> DechargerClones() <<")
     cloneKeys = PtFindClones(masterKey)
     for ck in cloneKeys:
         PtCloneKey(ck, 0)
 
 
 def RechargerClones(masterKey):#   revalide  tous les clones de l objet   masterKey
-    print ">> RechargerClones() <<"
+    print(">> RechargerClones() <<")
     cloneKeys = PtFindClones(masterKey)
     for ck in cloneKeys:
         PtCloneKey(ck, 1)#   ?????????
@@ -90,7 +90,7 @@ def RechargerClones(masterKey):#   revalide  tous les clones de l objet   master
 # Clonage d"un object (nom de l"objet, nom fichier age et nombre de clones en parametre)
 def CloneObject(objectName, ageFileName, nombre):
     PtSendKIMessage(26,"CloneObject ")
-    print "CloneObject({}, {}, {})".format(objectName, ageFileName, nombre)
+    print("CloneObject({}, {}, {})".format(objectName, ageFileName, nombre))
     PtSetAlarm(0.0, AlarmCloneObject(objectName, ageFileName, nombre), 0)#----------------------APPEL 1er  PASSAGE
 
 class AlarmCloneObject:
@@ -110,7 +110,7 @@ class AlarmCloneObject:
         self._nombre = nombre
         self._delais = 1
         self._attempts = 1
-        print "init AlarmCloneObject(%i)" % self._nombre
+        print("init AlarmCloneObject(%i)" % self._nombre)
 
     # Prenons notre temps...
     def onAlarm(self, param):
@@ -125,7 +125,7 @@ class AlarmCloneObject:
                 PtSetAlarm(self._delais, self, 1)#----------------------APPEL 2em  PASSAGE
             elif param == 1:
                 #                                                                                                                                        partie 1 : clonage
-                print "clonage en cours..."
+                print("clonage en cours...")
                 # Existe-t-il deja des clones?
                 n = len(PtFindClones(self._masterKey))
                 if n < self._nombre:
@@ -137,25 +137,25 @@ class AlarmCloneObject:
                 #                                                                                                                                       partie 2 : attendre que tous les clones soient crees    on regarde Nbr avec  len(PtFindClones(self._masterKey))
                 n = len(PtFindClones(self._masterKey))
                 if n < self._nombre:
-                    print "%i clones trouves sur les %i demandes! (attempt #%i)" % (n, self._nombre, self._attempts)
+                    print("%i clones trouves sur les %i demandes! (attempt #%i)" % (n, self._nombre, self._attempts))
                     if self._attempts < self._maxAttempts:
                         self._attempts = self._attempts + 1
                         PtSetAlarm(self._delais, self, 2)#----------------------APPEL 4em  PASSAGE                       si  n < self._nombre   on recommence     dans 1s
                     else:
-                        print "Le clonage met trop de temps!!"
+                        print("Le clonage met trop de temps!!")
                 else:
                     #                                                                                                                                   attendre avant de recharger les clones
                     PtSetAlarm(self._delais, self, 3)#----------------------APPEL 5em  PASSAGE
             elif param == 3:
                 # partie 3 : rechargeons les clones crees
                 cloneKeys = PtFindClones(self._masterKey)
-                print "rechargement des {} clones...".format(len(cloneKeys))
+                print("rechargement des {} clones...".format(len(cloneKeys)))
                 for ck in cloneKeys:
                     PtCloneKey(ck, 1)
             else:
-                print "AlarmCloneObject.onAlarm : param incorrect"
+                print("AlarmCloneObject.onAlarm : param incorrect")
         else:
-            print "self._masterKey is not a ptKey (object not found)"
+            print("self._masterKey is not a ptKey (object not found)")
 
 
 

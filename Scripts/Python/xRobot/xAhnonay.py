@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 """
 V1 : 20/12/2014
@@ -40,8 +41,8 @@ from xPsnlVaultSDL import *
 import time
 
 import math
-import sdl
-import Platform
+from . import sdl
+from . import Platform
 
 
 #------------
@@ -84,14 +85,14 @@ class ahnyIslandHut(ptResponder):
     def Courant(self, boolCurrent=0):
         if boolCurrent:
             RespCurrentChange.run(self.key,state='on',fastforward=1)
-            print "OnInit, will now enable current"
+            print("OnInit, will now enable current")
             WaterCurrent1.current.enable()
             WaterCurrent2.current.enable()
             WaterCurrent3.current.enable()
             WaterCurrent4.current.enable()
         else:
             RespCurrentChange.run(self.key,state='off',fastforward=1)
-            print "OnInit, will now disable current"
+            print("OnInit, will now disable current")
             WaterCurrent1.current.disable()
             WaterCurrent2.current.disable()
             WaterCurrent3.current.disable()
@@ -148,12 +149,12 @@ def Courant(action=0):
 def QSphere():
     ageName = PtGetAgeName ()
     if ageName != 'Ahnonay' :
-        print "Vous n'etes pas a Ahnonay"
+        print("Vous n'etes pas a Ahnonay")
         return 0
     else:
         ageSDL = PtGetAgeSDL ()
         sphere = ageSDL ["ahnyCurrentSphere"] [0]
-        print "Vous etes dans la sphere {}".format(sphere)
+        print("Vous etes dans la sphere {}".format(sphere))
         return sphere
 
 # faire tourner a la sphere suivante
@@ -171,7 +172,7 @@ def LinkPlayerTo(age, playerID=None, spawnPointNumber=None):
         playerID = PtGetLocalPlayer().getPlayerID()
     else:
         try:
-            playerID = long(playerID)
+            playerID = int(playerID)
         except:
             return "incorrect playerID"
             #pass
@@ -224,7 +225,7 @@ def LinkAll(ageName="ahnonay"):
     }
     
     ageName = ageName.lower()
-    if (ageName in ages.keys()):
+    if (ageName in list(ages.keys())):
         age = ages[ageName]
     else:
         return
@@ -240,7 +241,7 @@ def wa(where=None):
     #avCentre = PtGetLocalAvatar()
     #mat = avCentre.getLocalToWorld()
     mat = None
-    if where is None or where not in range(1, 5):
+    if where is None or where not in list(range(1, 5)):
         mat = PtGetLocalAvatar().getLocalToWorld()
     else:
         if where == 1:
@@ -259,7 +260,7 @@ def wa(where=None):
     #recuperer tous les joueurs
     playerList = PtGetPlayerList()
     playerList.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)
@@ -287,9 +288,9 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) != None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) != None]
     return nameList
 
 # Find scene objects with name like soName in all loaded districts (Warning, it includes GUI)
@@ -319,7 +320,7 @@ def togglesdl(name):
         "wings":"ercaHrvstrWingsOk", 
         "wd":"ercaHrvstrWingLeverDown", 
     }
-    if (name in dicNames.keys()):
+    if (name in list(dicNames.keys())):
         sdl.ToggleBoolSDL(dicNames[name])
     else:
         print("wrong sdl name")
@@ -327,7 +328,7 @@ def togglesdl(name):
 # platform(name="spy")
 def platform(where=None):
     matPos = None
-    if where is None or where not in range(1, 5):
+    if where is None or where not in list(range(1, 5)):
         matPos = PtGetLocalAvatar().getLocalToWorld()
     else:
         if where == 1:
@@ -367,13 +368,13 @@ def pellet(respnum=0):
 
 #
 def testresp():
-    print "testresp - Ercana City Silo : Pellets - (MachineCamRespDummy)"
+    print("testresp - Ercana City Silo : Pellets - (MachineCamRespDummy)")
     soName = "MachineCamRespDummy"
     so = PtFindSceneobject(soName, ageName)
-    print "so {} found".format(soName)
+    print("so {} found".format(soName))
     sok = so.getKey()
     for resp in so.getResponders():
-        print "testresp => resp name = '{}'".format(resp.getName())
+        print("testresp => resp name = '{}'".format(resp.getName()))
 
 #
 liwp = {"MachineCamRespDummy":[
@@ -392,21 +393,21 @@ liwp = {"MachineCamRespDummy":[
 
 #
 def machine(n=0):
-    if n not in range(0, 10):
+    if n not in list(range(0, 10)):
         n = 0
     soName = "MachineCamRespDummy"
     so = PtFindSceneobject(soName, ageName)
-    print "so {} found".format(soName)
+    print("so {} found".format(soName))
     sok = so.getKey()
     RunResp(sok, so.getResponders()[n])
 
 #
 def launch(n=0):
-    if n not in range(0, 10):
+    if n not in list(range(0, 10)):
         n = 0
     soName = "MachineCamRespDummy"
     so = PtFindSceneobject(soName, ageName)
-    print "so {} found".format(soName)
+    print("so {} found".format(soName))
     sok = so.getKey()
     # ajouter des tempos entre les animations...
     RunResp(sok, so.getResponders()[9])

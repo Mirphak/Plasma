@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from Plasma import *
-import CloneObject
+from . import CloneObject
 import math
 
 #

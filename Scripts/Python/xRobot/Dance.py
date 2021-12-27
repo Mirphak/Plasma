@@ -1,4 +1,5 @@
-#xSave module
+# -*- coding: utf-8 -*-
+#Dance module
 
 from Plasma import *
 import os
@@ -223,7 +224,7 @@ def ReadDanceFile(danceFileName):
                 actions.append(strAct.strip())
     except:
         # The file does not exist, send an error message.
-        print "The {} file does not exist.".format(fileName)
+        print("The {} file does not exist.".format(fileName))
     return actions
 
 # Converts an action string line into a command line.
@@ -254,11 +255,11 @@ def ConvertActionToCommand(strAct):
             #    cmdArgs = " " + arg.strip()
             cmdArgs = " ".join(map(str.strip, actLine))
         else:
-            print "Bad action line!"
+            print("Bad action line!")
     else:
-        print "Empty action line!"
+        print("Empty action line!")
     cmdLine = [cmdName, cmdArgs, waitArg]
-    print "ConvertActionToCommand : {}".format(cmdLine)
+    print("ConvertActionToCommand : {}".format(cmdLine))
     return cmdLine
 
 #
@@ -267,22 +268,76 @@ def ConvertActionToCommand(strAct):
 # Changes the players the bot has to execute the command for. 
 # group|137998,254640,5667000,132492,133403,2975513,4884667,4082721
 def GetIdDancerList(strAct):
-    global lstIdDancers
-    print "SetIdDancerList('{}')".format(strAct)
+    #global lstIdDancers
+    print("SetIdDancerList('{}')".format(strAct))
     grpLine = strAct.split("|")
     lstIdPlayers = []
     if len(grpLine) > 1:
         lstStrIds = grpLine[1].split(",")
+        # Case for all players in age : group|all
+        if len(lstStrIds) == 1:
+            if lstStrIds[0].lower().strip() == "all":
+                return lstIdPlayers, True
+        # Normal case with a liste of player ids
         for strId in lstStrIds:
             strId = strId.strip()
             try:
-                id = long(strId)
+                id = int(strId)
                 try:
                     lstIdPlayers.append(id)
                 except:
-                    print "Error in SetIdDancerList : lstIdPlayers.append({})".format(id)
+                    print("Error in SetIdDancerList : lstIdPlayers.append({})".format(id))
             except:
-                print "SetIdDancerList : '{}' is not a player id, skip it.".format(strId)
+                print("SetIdDancerList : '{}' is not a player id, skip it.".format(strId))
+    #lstIdDancers = lstIdPlayers
+    return lstIdPlayers, False
+
+# Define the group of dancers
+# This is dictionary of alais names and ids
+# definegroup|alias1:254640,alias2:132492,alias3:2975513,alias4:4082721
+def DefineGroup(strAct):
+    print("DefineGroup('{}')".format(strAct))
+    grpLine = strAct.split("|")
+    dictDancers = dict()
+    if len(grpLine) > 1:
+        lstStr = grpLine[1].split(",")
+        for strDancer in lstStr:
+            strDancer = strDancer.strip()
+            strAliasId = strDancer.split(":")
+            if len(strAliasId) == 2:
+                alias = strAliasId[0]
+                strId = strAliasId[1]
+                try:
+                    id = int(strId)
+                    try:
+                        dictDancers.update({alias:id})
+                    except:
+                        print("Error in DefineGroup : dictDancers.update(\"{}\":{})".format(alias, id))
+                except:
+                    print("DefineGroup : '{}' is not a player id, skip it.".format(strId))
+    return dictDancers
+
+# Changes the players the bot has to execute the command for. 
+# group|alias1,alias2,alias3,alias4
+def GetIdDancerListFromAlias(strAct, dictDancers=dict()):
+    print("GetIdDancerListFromAlias('{}')".format(strAct))
+    grpLine = strAct.split("|")
+    lstAlias = []
+    lstIdPlayers = []
+    if len(grpLine) > 1:
+        lstAlias = grpLine[1].split(",")
+        for alias in lstAlias:
+            #alias = alias.strip()
+            try:
+                id = int(dictDancers[alias])
+                try:
+                    lstIdPlayers.append(id)
+                except:
+                    print("Error in GetIdDancerListFromAlias : lstIdPlayers.append({})".format(id))
+            except KeyError:
+                print("GetIdDancerListFromAlias - KeyError: unknown alias '{}', skip it.".format(alias))
+            except:
+                print("GetIdDancerListFromAlias : '{}' is not a player id, skip it.".format(dictDancers[alias]))
     #lstIdDancers = lstIdPlayers
     return lstIdPlayers
 

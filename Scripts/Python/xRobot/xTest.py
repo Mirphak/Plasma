@@ -1,4 +1,4 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 
 from Plasma import *
     
@@ -92,7 +92,7 @@ def Deplacer(so1, so2, dx = 0, dy = 0, dz = 0, bPhys = True):
 
 #attacher so1 a so2 : attacher(obj, av) ou l'inverse    
 def Attacher(so1, so2, dx = 0, dy = 0, dz = 0, bPhys = False):
-    """attacher so1 à so2 : attacher(obj, av) ou l'inverse"""
+    """attacher so1 Ã  so2 : attacher(obj, av) ou l'inverse"""
     so1.physics.netForce(1)
     so1.draw.netForce(1)
     Deplacer(so1, so2, dx, dy, dz, bPhys)
@@ -114,7 +114,7 @@ def AddPrp(nomAge = "Minkata"):
         pages = ["minkCameras"]
         for page in pages:
             PtConsoleNet("Nav.PageInNode %s" % (page) , 1)
-    
+
 #
 def Soccer(av = None):
     if av is None:
@@ -129,4 +129,25 @@ def Soccer(av = None):
     dz = 8
     bPhys = True
     Deplacer(so, av, dx, dy, dz, bPhys)
-    
+
+#
+def BahroStone(av=None, dx=0.0, dy=0.0, dz=0.0):
+    if av is None:
+        av = PtGetLocalAvatar()
+    #nomAgeCourrant = PtGetAgeName()
+    nomAge = "Neighborhood"
+    nomObjet = "LinkInPointBevinBalcony02"
+    so = PtFindSceneobject(nomObjet, nomAge)
+    #dx = 136 + 129
+    #dy = 782 + 11
+    #dz = -91 - 66
+    bPhys = True
+    #Deplacer(so, av, dx, dy, dz, bPhys)
+    mpos = av.getLocalToWorld()
+    try:
+        m = SetMat(mpos, dx, dy, dz)
+        so.netForce(1)
+        so.physics.disable()
+        so.physics.warp(m)
+    except:
+        pass

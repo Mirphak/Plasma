@@ -4,7 +4,7 @@
 
 from Plasma import *
 import math
-import CloneFactory
+from . import CloneFactory
 
 # Default
 #objectName = "FissureStarField"
@@ -110,7 +110,7 @@ def ToggleObject(name, age, bOn=True):
 #=========================================
 #
 def PutAndShow(params=[]):
-    print "PutAndShow begin"
+    print("PutAndShow begin")
     
     #Verifions les parametres
     if len(params) > 1:
@@ -123,20 +123,20 @@ def PutAndShow(params=[]):
     if len(params) > 0:
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "PutAndShow: first paremeter must be a ptKey"
+            print("PutAndShow: first paremeter must be a ptKey")
             return 1
     if len(params) == 0:
-        print "PutAndShow: needs 1 or 2 paremeters"
+        print("PutAndShow: needs 1 or 2 paremeters")
         return 1
     
-    print "PutAndShow params ok"
+    print("PutAndShow params ok")
     soMaster = masterKey.getSceneObject()
-    print "PutAndShow({}, {})".format(soMaster.getName(), bShow)
+    print("PutAndShow({}, {})".format(soMaster.getName(), bShow))
     
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
     if len(cloneKeys) < 1:
-        print "PutAndShow no clone found!"
+        print("PutAndShow no clone found!")
     h = 8
     for ck in cloneKeys:
         soTop = ck.getSceneObject()
@@ -151,13 +151,13 @@ def PutAndShow(params=[]):
         else:
             soTop.draw.enable(0)
 
-    print "PutAndShow done"
+    print("PutAndShow done")
     return 0
 
 #=========================================
 #
 def PutAndShow2(params=[]):
-    print "PutAndShow2 begin"
+    print("PutAndShow2 begin")
     
     #Verifions les parametres
     # au moins 4 parametres
@@ -190,21 +190,21 @@ def PutAndShow2(params=[]):
     if len(params) > 0:
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "PutAndShow2: first paremeter must be a ptKey"
+            print("PutAndShow2: first paremeter must be a ptKey")
             return 1
     # pas de parametre
     if len(params) == 0:
-        print "PutAndShow2: needs 1, 2, 3 or 4 paremeters"
+        print("PutAndShow2: needs 1, 2, 3 or 4 paremeters")
         return 1
     
-    print "PutAndShow2 params ok"
+    print("PutAndShow2 params ok")
     soMaster = masterKey.getSceneObject()
-    print "PutAndShow2({}, {}, {}, matPos)".format(soMaster.getName(), bShow, scale)
+    print("PutAndShow2({}, {}, {}, matPos)".format(soMaster.getName(), bShow, scale))
     
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
     if len(cloneKeys) < 1:
-        print "PutAndShow2 no clone found!"
+        print("PutAndShow2 no clone found!")
     
     ck = cloneKeys[len(cloneKeys) - 1]
     #for ck in cloneKeys:
@@ -228,13 +228,13 @@ def PutAndShow2(params=[]):
         except:
             pass
 
-    print "PutAndShow2 done"
+    print("PutAndShow2 done")
     return 0
 
 #=========================================
 #
 def PutAndShow3(params=[]):
-    print "PutAndShow3 begin"
+    print("PutAndShow3 begin")
     
     #Verifions les parametres
     # au moins 4 parametres
@@ -267,21 +267,21 @@ def PutAndShow3(params=[]):
     if len(params) > 0:
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "PutAndShow: first paremeter must be a ptKey"
+            print("PutAndShow: first paremeter must be a ptKey")
             return 1
     # pas de parametre
     if len(params) == 0:
-        print "PutAndShow3: needs 1, 2, 3 or 4 paremeters"
+        print("PutAndShow3: needs 1, 2, 3 or 4 paremeters")
         return 1
     
-    print "PutAndShow3 params ok"
+    print("PutAndShow3 params ok")
     soMaster = masterKey.getSceneObject()
-    print "PutAndShow3({}, {}, {}, matPos)".format(soMaster.getName(), bShow, scale)
+    print("PutAndShow3({}, {}, {}, matPos)".format(soMaster.getName(), bShow, scale))
     
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
     if len(cloneKeys) < 1:
-        print "PutAndShow3 no clone found!"
+        print("PutAndShow3 no clone found!")
     
     ck = cloneKeys[len(cloneKeys) - 1]
     #for ck in cloneKeys:
@@ -297,13 +297,13 @@ def PutAndShow3(params=[]):
     else:
         soTop.draw.enable(0)
 
-    print "PutAndShow3 done"
+    print("PutAndShow3 done")
     return 0
 
 #=========================================
 #
 def PutAndShow4(params=[]):
-    print "PutAndShow4 begin"
+    print("PutAndShow4 begin")
     
     #Verifions les parametres
     # au moins 5 parametres
@@ -346,30 +346,30 @@ def PutAndShow4(params=[]):
     if len(params) > 0:
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "PutAndShow: first paremeter must be a ptKey"
+            print("PutAndShow: first paremeter must be a ptKey")
             return 1
     # pas de parametre
     if len(params) == 0:
-        print "PutAndShow4: needs 1, 2, 3 or 4 paremeters"
+        print("PutAndShow4: needs 1, 2, 3 or 4 paremeters")
         return 1
     
-    print "PutAndShow4 params ok"
+    print("PutAndShow4 params ok")
     soMaster = masterKey.getSceneObject()
-    print "PutAndShow4 master"
+    print("PutAndShow4 master")
     #print "PutAndShow4({}, {}, {}, matPos, {}, {})".format(soMaster.getName(), bShow, bAttach, av.getName())
-    print "PutAndShow4({})".format(soMaster.getName())
-    print "PutAndShow4({})".format(bShow)
-    print "PutAndShow4({})".format(bAttach)
-    print "PutAndShow4({})".format(av.getName())
+    print("PutAndShow4({})".format(soMaster.getName()))
+    print("PutAndShow4({})".format(bShow))
+    print("PutAndShow4({})".format(bAttach))
+    print("PutAndShow4({})".format(av.getName()))
     
-    print "PutAndShow4 manip"
+    print("PutAndShow4 manip")
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
-    print "PutAndShow4 clones"
+    print("PutAndShow4 clones")
     if len(cloneKeys) < 1:
-        print "PutAndShow4 no clone found!"
+        print("PutAndShow4 no clone found!")
     else:
-        print "PutAndShow4 ready"
+        print("PutAndShow4 ready")
         ck = cloneKeys[len(cloneKeys) - 1]
         #for ck in cloneKeys:
         so = ck.getSceneObject()
@@ -385,14 +385,14 @@ def PutAndShow4(params=[]):
         else:
             Detacher(so, av)
 
-    print "PutAndShow4 done"
+    print("PutAndShow4 done")
     return 0
 
 #=========================================
 # Pour remettre dans l'etat d'origine.
 def DayTime():
     ageSDL = PtGetAgeSDL()
-    ageSDL["islmExplosionRun"] = (0L,)
+    ageSDL["islmExplosionRun"] = (0,)
     return 0
 
 #=========================================
@@ -401,12 +401,12 @@ def Create(bShow=True, bLoad=True):
     masterKey = PtFindSceneobject(objectName, ageFileName).getKey()
     
     ageSDL = PtGetAgeSDL()
-    ageSDL["islmExplosionRun"] = (1L,)
+    ageSDL["islmExplosionRun"] = (1,)
 
     if bLoad:
         # Combien de clones a-t-on deja?
         nbClones = len(PtFindClones(masterKey))
-        print "Test : nb de clones de {} ==> {}".format(objectName, nbClones)
+        print("Test : nb de clones de {} ==> {}".format(objectName, nbClones))
         # Ajouter des clones si besoin
         if nbClones < nombre:
             CloneFactory.CloneObject(objectName, ageFileName, nombre - nbClones)
@@ -422,21 +422,21 @@ def Create(bShow=True, bLoad=True):
 #*****************************************
 #
 def TestDesert(params=[]):
-    print "TestDesert begin"
+    print("TestDesert begin")
     
     #Verifions les parametres
     if len(params) > 3:
         mPosAvatar = params[3]
         if mPosAvatar is not None and not isinstance(mPosAvatar, ptMatrix44):
-            print "TestDesert: forth paremeter mPosAvatar must be a ptMatrix44"
+            print("TestDesert: forth paremeter mPosAvatar must be a ptMatrix44")
             return 1
     else:
         mPosAvatar = None
-        print "TestDesert: forth paremeter mPosAvatar is none"
+        print("TestDesert: forth paremeter mPosAvatar is none")
     if len(params) > 2:
         soAvatar = params[2]
         if soAvatar is not None and not isinstance(soAvatar, ptSceneobject):
-            print "TestDesert: third paremeter must be a ptSceneobject"
+            print("TestDesert: third paremeter must be a ptSceneobject")
             return 1
     else:
         soAvatar = PtGetLocalAvatar()
@@ -450,20 +450,20 @@ def TestDesert(params=[]):
     if len(params) > 0:
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "TestDesert: first paremeter must be a ptKey"
+            print("TestDesert: first paremeter must be a ptKey")
             return 1
     if len(params) == 0:
-        print "TestDesert: needs 1, 2 or 3 paremeters"
+        print("TestDesert: needs 1, 2 or 3 paremeters")
         return 1
     
-    print "TestDesert params ok"
+    print("TestDesert params ok")
     soMaster = masterKey.getSceneObject()
-    print "TestDesert({}, {})".format(soMaster.getName(), bShow)
+    print("TestDesert({}, {})".format(soMaster.getName(), bShow))
     
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
     if len(cloneKeys) < 1:
-        print "TestDesert no clone found!"
+        print("TestDesert no clone found!")
     
     soTop = cloneKeys[0].getSceneObject()
 
@@ -487,7 +487,7 @@ def TestDesert(params=[]):
         except:
             pass
 
-    print "TestDesert done"
+    print("TestDesert done")
     return 0
 
 #=========================================
@@ -509,28 +509,28 @@ def Desert(bShow=True, bLoad=True):
         try:
             masterkey = PtFindSceneobject(obj, age).getKey()
         except:
-            print "{} not found in {}".format(obj, age)
+            print("{} not found in {}".format(obj, age))
             msg += "{} not found in {}\n".format(obj, age)
         if isinstance(masterkey, ptKey):
             if bLoad:
                 # Combien de clones a-t-on deja?
                 nbClones = len(PtFindClones(masterkey))
-                print "Test : nb de clones de {} ==> {}".format(obj, nbClones)
+                print("Test : nb de clones de {} ==> {}".format(obj, nbClones))
                 # Ajouter des clones si besoin
                 if nbClones < nb:
                     CloneFactory.CloneObject(obj, age, nb - nbClones)
                 # Attendre que les clones soient prets et les manipuler
                 PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(obj, age, nb, TestDesert, [masterkey, bShow]), 1)
-                print "Clone of {} loaded".format(obj)
+                print("Clone of {} loaded".format(obj))
                 msg += "Clone of {} loaded\n".format(obj)
             else:
                 # Retour a la normale
                 CloneFactory.DechargerClones(masterkey)
                 #DayTime()
-                print "Clone of {} unloaded".format(obj)
+                print("Clone of {} unloaded".format(obj))
                 msg += "Clone of {} unloaded\n".format(obj)
         else:
-            print "not a ptKey!"
+            print("not a ptKey!")
             msg += "not a ptKey\n"
 
     return msg
@@ -548,28 +548,28 @@ def Minkata(bShow=True, bLoad=True, vPosAvatar=None, soPlayer=None, matPos=None)
         try:
             masterkey = PtFindSceneobject(obj, age).getKey()
         except:
-            print "{} not found in {}".format(obj, age)
+            print("{} not found in {}".format(obj, age))
             msg += "{} not found in {}\n".format(obj, age)
         if isinstance(masterkey, ptKey):
             if bLoad:
                 # Combien de clones a-t-on deja?
                 nbClones = len(PtFindClones(masterkey))
-                print "Test : nb de clones de {} ==> {}".format(obj, nbClones)
+                print("Test : nb de clones de {} ==> {}".format(obj, nbClones))
                 # Ajouter des clones si besoin
                 if nbClones < nb:
                     CloneFactory.CloneObject(obj, age, nb - nbClones)
                 # Attendre que les clones soient prets et les manipuler
                 PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(obj, age, nb, TestDesert, [masterkey, bShow, soPlayer, matPos]), 1)
-                print "Clone of {} loaded".format(obj)
+                print("Clone of {} loaded".format(obj))
                 msg += "Clone of {} loaded\n".format(obj)
             else:
                 # Retour a la normale
                 CloneFactory.DechargerClones(masterkey)
                 #DayTime()
-                print "Clone of {} unloaded".format(obj)
+                print("Clone of {} unloaded".format(obj))
                 msg += "Clone of {} unloaded\n".format(obj)
         else:
-            print "not a ptKey!"
+            print("not a ptKey!")
             msg += "not a ptKey\n"
 
     return msg
@@ -587,28 +587,28 @@ def HoodEvent(bShow=True, bLoad=True):
         try:
             masterkey = PtFindSceneobject(obj, age).getKey()
         except:
-            print "{} not found in {}".format(obj, age)
+            print("{} not found in {}".format(obj, age))
             msg += "{} not found in {}\n".format(obj, age)
         if isinstance(masterkey, ptKey):
             if bLoad:
                 # Combien de clones a-t-on deja?
                 nbClones = len(PtFindClones(masterkey))
-                print "Test : nb de clones de {} ==> {}".format(obj, nbClones)
+                print("Test : nb de clones de {} ==> {}".format(obj, nbClones))
                 # Ajouter des clones si besoin
                 if nbClones < nb:
                     CloneFactory.CloneObject(obj, age, nb - nbClones)
                 # Attendre que les clones soient prets et les manipuler
                 PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(obj, age, nb, TestDesert, [masterkey, bShow]), 1)
-                print "Clone of {} loaded".format(obj)
+                print("Clone of {} loaded".format(obj))
                 msg += "Clone of {} loaded\n".format(obj)
             else:
                 # Retour a la normale
                 CloneFactory.DechargerClones(masterkey)
                 #DayTime()
-                print "Clone of {} unloaded".format(obj)
+                print("Clone of {} unloaded".format(obj))
                 msg += "Clone of {} unloaded\n".format(obj)
         else:
-            print "not a ptKey!"
+            print("not a ptKey!")
             msg += "not a ptKey\n"
 
     return msg
@@ -626,74 +626,81 @@ def co(lstObj, age, nb, bShow=True, bLoad=True):
         try:
             masterkey = PtFindSceneobject(obj, age).getKey()
         except:
-            print "{} not found in {}".format(obj, age)
+            print("{} not found in {}".format(obj, age))
             msg += "{} not found in {}\n".format(obj, age)
         if isinstance(masterkey, ptKey):
             if bLoad:
                 # Combien de clones a-t-on deja?
                 nbClones = len(PtFindClones(masterkey))
-                print "Test : nb de clones de {} ==> {}".format(obj, nbClones)
+                print("Test : nb de clones de {} ==> {}".format(obj, nbClones))
                 # Ajouter des clones si besoin
                 if nbClones < nb:
                     CloneFactory.CloneObject(obj, age, nb - nbClones)
                 # Attendre que les clones soient prets et les manipuler
                 PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(obj, age, nb, PutAndShow, [masterkey, bShow]), 1)
-                print "Clone of {} loaded".format(obj)
+                print("Clone of {} loaded".format(obj))
                 msg += "Clone of {} loaded\n".format(obj)
             else:
                 # Retour a la normale
                 CloneFactory.DechargerClones(masterkey)
                 #DayTime()
-                print "Clone of {} unloaded".format(obj)
+                print("Clone of {} unloaded".format(obj))
                 msg += "Clone of {} unloaded\n".format(obj)
         else:
-            print "not a ptKey!"
+            print("not a ptKey!")
             msg += "not a ptKey\n"
 
     return msg
 
 #=========================================
 # Cree des clones V2
-def co2(lstObj, age, nb, bShow=True, bLoad=True, scale=1, height=8):
+def co2(lstObj, age, nb, bShow=True, bLoad=True, scale=1, height=8.0):
     
     #nb = 1
     #age = "Cleft"
     #lstObj = ["DesertPlane", "DesertPlane1", "DesertPlane2", "DesertPlane3", "DesertPlane4"]
     msg = "CloneObject.co(): "
+    
+    pos = PtGetLocalAvatar().getLocalToWorld()
+    mtransUp = ptMatrix44()
+    mtransUp.translate(ptVector3(.0, .0, height))
+    objPos = pos * mtransUp
+
     masterkey = None
     for obj in lstObj:
         try:
             masterkey = PtFindSceneobject(obj, age).getKey()
         except:
-            print "{} not found in {}".format(obj, age)
+            print("{} not found in {}".format(obj, age))
             msg += "{} not found in {}\n".format(obj, age)
         if isinstance(masterkey, ptKey):
             if bLoad:
                 # Combien de clones a-t-on deja?
                 nbClones = len(PtFindClones(masterkey))
-                print "Test : nb de clones de {} ==> {}".format(obj, nbClones)
+                print("Test : nb de clones de {} ==> {}".format(obj, nbClones))
                 # Ajouter des clones si besoin
                 if nbClones < nb:
                     CloneFactory.CloneObject(obj, age, nb - nbClones)
                 # Attendre que les clones soient prets et les manipuler
-                PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(obj, age, nb, PutAndShow2, [masterkey, bShow, scale, height]), 1)
-                print "Clone of {} loaded".format(obj)
+                #PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(obj, age, nb, PutAndShow2, [masterkey, bShow, scale, height]), 1)
+                PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(obj, age, nb, PutAndShow2, [masterkey, bShow, scale, objPos]), 1)
+                print("Clone of {} loaded".format(obj))
                 msg += "Clone of {} loaded\n".format(obj)
             else:
                 # Retour a la normale
                 CloneFactory.DechargerClones(masterkey)
                 #DayTime()
-                print "Clone of {} unloaded".format(obj)
+                print("Clone of {} unloaded".format(obj))
                 msg += "Clone of {} unloaded\n".format(obj)
         else:
-            print "not a ptKey!"
+            print("not a ptKey!")
             msg += "not a ptKey\n"
     return msg
 
 #=========================================
 # Cree un clone a la position desiree
 def co3(objName, age, bShow=True, bLoad=True, scale=1, matPos=None):
-    print "          ** co3 ** 1 begin"
+    print("          ** co3 ** 1 begin")
     msg = "CloneObject.co3(): "
     nb = 1
     masterkey = None
@@ -701,30 +708,30 @@ def co3(objName, age, bShow=True, bLoad=True, scale=1, matPos=None):
     try:
         masterkey = PtFindSceneobject(objName, age).getKey()
     except:
-        print "{} not found in {}".format(objName, age)
+        print("{} not found in {}".format(objName, age))
         msg += "{} not found in {}\n".format(objName, age)
-    print "          ** co3 ** 2"
+    print("          ** co3 ** 2")
     if isinstance(masterkey, ptKey):
         if bLoad:
-            print "          ** co3 ** 3 loading"
+            print("          ** co3 ** 3 loading")
             # Combien de clones a-t-on deja?
             nbClones = len(PtFindClones(masterkey))
-            print "Test : nb de clones de {} ==> {}".format(objName, nbClones)
+            print("Test : nb de clones de {} ==> {}".format(objName, nbClones))
             # Ajouter des clones si besoin
             if nbClones < nb:
                 CloneFactory.CloneObject(objName, age, nb - nbClones)
             # Attendre que les clones soient prets et les manipuler
             PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(objName, age, nb, PutAndShow3, [masterkey, bShow, scale, matPos]), 1)
-            print "Clone of {} loaded".format(objName)
+            print("Clone of {} loaded".format(objName))
             msg += "Clone of {} loaded\n".format(objName)
         else:
             # Retour a la normale
             CloneFactory.DechargerClones(masterkey)
             #DayTime()
-            print "Clone of {} unloaded".format(objName)
+            print("Clone of {} unloaded".format(objName))
             msg += "Clone of {} unloaded\n".format(objName)
     else:
-        print "not a ptKey!"
+        print("not a ptKey!")
         msg += "not a ptKey\n"
     return msg
 
@@ -746,7 +753,7 @@ def AddClone(lstObj, age=None, matPos=None):
         try:
             masterkey = PtFindSceneobject(obj, age).getKey()
         except:
-            print "{} not found in {}".format(obj, age)
+            print("{} not found in {}".format(obj, age))
             msg += "{} not found in {}\n".format(obj, age)
         if isinstance(masterkey, ptKey):
             if bLoad:
@@ -756,16 +763,16 @@ def AddClone(lstObj, age=None, matPos=None):
                 CloneFactory.CloneObject(obj, age, 1)
                 # Attendre que les clones soient prets et les manipuler
                 PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(obj, age, 1, PutAndShow2, [masterkey, bShow, scale, matPos]), 1)
-                print "Clone of {} loaded".format(obj)
+                print("Clone of {} loaded".format(obj))
                 msg += "Clone of {} loaded\n".format(obj)
             else:
                 # Retour a la normale
                 CloneFactory.DechargerClones(masterkey)
                 #DayTime()
-                print "Clone of {} unloaded".format(obj)
+                print("Clone of {} unloaded".format(obj))
                 msg += "Clone of {} unloaded\n".format(obj)
         else:
-            print "not a ptKey!"
+            print("not a ptKey!")
             msg += "not a ptKey\n"
     return msg
 
@@ -787,31 +794,31 @@ def AddCloneHere(lstObj, age=None):
 #
 class WaitAndChangeScale:
     def __init__(self, so=None, scale=ptVector3(1, 1, 1)):
-        print "WaitAndChangeScale: init"
+        print("WaitAndChangeScale: init")
         self._scale = scale
         self._so = so
     
     def onAlarm(self, param):
-        print "WaitAndChangeScale: onAlarm"
+        print("WaitAndChangeScale: onAlarm")
         if isinstance(self._so, ptSceneobject):
             pos = self._so.getLocalToWorld()
             mscale = ptMatrix44()
             mscale.makeScaleMat(self._scale)
             self._so.physics.warp(pos * mscale)
-            print "WaitAndChangeScale: done"
+            print("WaitAndChangeScale: done")
         else:
-            print "WaitAndChangeScale: not a ptSceneobject"
+            print("WaitAndChangeScale: not a ptSceneobject")
 
 
 #=========================================
 #
 def DoStuff(params=[]):
-    print "DoStuff begin"
+    print("DoStuff begin")
     
     #Verifions les parametres
     # au moins 5 parametres
     if len(params) > 1:
-        print "DoStuff params 4"
+        print("DoStuff params 4")
         try:
             bAttach = bool(params[4])
         except:
@@ -820,7 +827,7 @@ def DoStuff(params=[]):
         bAttach = True
     # au moins 4 parametres
     if len(params) > 3:
-        print "DoStuff params 3"
+        print("DoStuff params 3")
         if isinstance(params[3], ptMatrix44):
             pos = params[3]
         else:
@@ -831,17 +838,17 @@ def DoStuff(params=[]):
         pos = PtGetLocalAvatar().getLocalToWorld()
     # au moins 3 parametres
     if len(params) > 2:
-        print "DoStuff params 2"
+        print("DoStuff params 2")
         if isinstance(params[2], ptVector3):
             scale = params[2]
         else:
-            print "DoStuff scale is not a ptVector3!"
+            print("DoStuff scale is not a ptVector3!")
             scale = ptVector3(1, 1, 1)
     else:
         scale = ptVector3(1, 1, 1)
     # au moins 2 parametres
     if len(params) > 1:
-        print "DoStuff params 1"
+        print("DoStuff params 1")
         try:
             bShow = bool(params[1])
         except:
@@ -850,26 +857,26 @@ def DoStuff(params=[]):
         bShow = True
     # au moins 1 parametre
     if len(params) > 0:
-        print "DoStuff params 0"
+        print("DoStuff params 0")
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "DoStuff: first paremeter must be a ptKey"
+            print("DoStuff: first paremeter must be a ptKey")
             return 1
     # pas de parametre
     if len(params) == 0:
-        print "DoStuff: needs 1, 2, 3 or 4 paremeters"
+        print("DoStuff: needs 1, 2, 3 or 4 paremeters")
         return 1
     
-    print "DoStuff params ok"
+    print("DoStuff params ok")
     soMaster = masterKey.getSceneObject()
-    print "DoStuff({}, {}, {}, matPos)".format(soMaster.getName(), bShow, scale)
+    print("DoStuff({}, {}, {}, matPos)".format(soMaster.getName(), bShow, scale))
     
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
     if len(cloneKeys) < 1:
-        print "DoStuff no clone found!"
+        print("DoStuff no clone found!")
     else:
-        print "DoStuff : the stuff" 
+        print("DoStuff : the stuff") 
         ck = cloneKeys[len(cloneKeys) - 1]
         #for ck in cloneKeys:
         soTop = ck.getSceneObject()
@@ -881,7 +888,7 @@ def DoStuff(params=[]):
         soTop.physics.disable()
         soTop.physics.warp(pos)
         #soTop.physics.warp(pos * mscale)
-        print "DoStuff : call WaitAndChangeScale" 
+        print("DoStuff : call WaitAndChangeScale") 
         PtSetAlarm(1, WaitAndChangeScale(soTop, scale), 1)
         if bShow:
             soTop.draw.enable(1)
@@ -892,13 +899,13 @@ def DoStuff(params=[]):
         else:
             Detacher(soTop, PtGetLocalAvatar())
 
-    print "DoStuff done"
+    print("DoStuff done")
     return 0
 
 #=========================================
 # Cree un clone a la position desiree
 def clone1(objName, age, bShow=True, bLoad=True, color="red", scale=ptVector3(1, 1, 1), matPos=None, bAttach=False, fct=DoStuff):
-    print "          ** clone1 ** 1 begin"
+    print("          ** clone1 ** 1 begin")
     msg = "CloneObject.clone1(): "
     nb = 1
     masterkey = None
@@ -906,9 +913,9 @@ def clone1(objName, age, bShow=True, bLoad=True, color="red", scale=ptVector3(1,
     try:
         masterkey = PtFindSceneobject(objName, age).getKey()
     except:
-        print "{} not found in {}".format(objName, age)
+        print("{} not found in {}".format(objName, age))
         msg += "{} not found in {}\n".format(objName, age)
-    print "          ** clone1 ** 2"
+    print("          ** clone1 ** 2")
     if isinstance(masterkey, ptKey):
         marbles = PtFindSceneobjects('MarblePhy')
         marblePhysKey = None
@@ -922,33 +929,33 @@ def clone1(objName, age, bShow=True, bLoad=True, color="red", scale=ptVector3(1,
             marblePhysKey = marbles[3].getKey()
 
         if bLoad:
-            print "          ** clone1 ** 3 loading"
+            print("          ** clone1 ** 3 loading")
             # Combien de clones a-t-on deja?
             nbClones = len(PtFindClones(masterkey))
-            print "Test : nb de clones de {} ==> {}".format(objName, nbClones)
+            print("Test : nb de clones de {} ==> {}".format(objName, nbClones))
             # Ajouter des clones si besoin
             if nbClones < nb:
                 CloneFactory.CloneObject(objName, age, nb - nbClones)
             # Attendre que les clones soient prets et les manipuler
             #PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(objName, age, nb, fct, [masterkey, bShow, scale, matPos]), 1)
             PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(objName, age, nb, fct, [marblePhysKey, bShow, scale, matPos, bAttach]), 1)
-            print "Clone of {} loaded".format(objName)
+            print("Clone of {} loaded".format(objName))
             msg += "Clone of {} loaded\n".format(objName)
         else:
             # Retour a la normale
             CloneFactory.DechargerClones(masterkey)
             #DayTime()
-            print "Clone of {} unloaded".format(objName)
+            print("Clone of {} unloaded".format(objName))
             msg += "Clone of {} unloaded\n".format(objName)
     else:
-        print "not a ptKey!"
+        print("not a ptKey!")
         msg += "not a ptKey\n"
     return msg
 
 #=========================================
 # Cree un clone a la position desiree
 def Clone2(objName, age, bShow=True, bLoad=True, matPos=None, bAttach=False, soAvatar=None):
-    print "          ** Clone2 ** 1 begin"
+    print("          ** Clone2 ** 1 begin")
     msg = "CloneObject.Clone2(): "
     nb = 1
     masterkey = None
@@ -956,30 +963,30 @@ def Clone2(objName, age, bShow=True, bLoad=True, matPos=None, bAttach=False, soA
     try:
         masterkey = PtFindSceneobject(objName, age).getKey()
     except:
-        print "{} not found in {}".format(objName, age)
+        print("{} not found in {}".format(objName, age))
         msg += "{} not found in {}\n".format(objName, age)
-    print "          ** Clone2 ** 2"
+    print("          ** Clone2 ** 2")
     if isinstance(masterkey, ptKey):
         if bLoad:
-            print "          ** Clone2 ** 3 loading"
+            print("          ** Clone2 ** 3 loading")
             # Combien de clones a-t-on deja?
             nbClones = len(PtFindClones(masterkey))
-            print "Test : nb de clones de {} ==> {}".format(objName, nbClones)
+            print("Test : nb de clones de {} ==> {}".format(objName, nbClones))
             # Ajouter des clones si besoin
             if nbClones < nb:
                 CloneFactory.CloneObject(objName, age, nb - nbClones)
             # Attendre que les clones soient prets et les manipuler
             PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(objName, age, nb, PutAndShow4, [masterkey, bShow, matPos, bAttach, soAvatar]), 1)
-            print "Clone of {} loaded".format(objName)
+            print("Clone of {} loaded".format(objName))
             msg += "Clone of {} loaded\n".format(objName)
         else:
             # Retour a la normale
             CloneFactory.DechargerClones(masterkey)
             #DayTime()
-            print "Clone of {} unloaded".format(objName)
+            print("Clone of {} unloaded".format(objName))
             msg += "Clone of {} unloaded\n".format(objName)
     else:
-        print "not a ptKey!"
+        print("not a ptKey!")
         msg += "not a ptKey\n"
     return msg
 
@@ -1052,7 +1059,7 @@ def Beam(bOn=True, sColor="red", position=None, vScale=ptVector3(10, 10, 200), s
     if not isinstance(bOn, bool):
         bOn = True
     # sColor
-    if not isinstance(sColor, basestring):
+    if not isinstance(sColor, str):
         sColor = "red"
     sColor = sColor.lower()
     if not sColor in ("red", "blue", "yellow", "white"):
@@ -1100,11 +1107,11 @@ def Beam(bOn=True, sColor="red", position=None, vScale=ptVector3(10, 10, 200), s
         py=pos.getY()
         pz=pos.getZ()
     else:
-        print "Beam Error: position must be an int or a ptVector3 or a ptMatrix44"
+        print("Beam Error: position must be an int or a ptVector3 or a ptMatrix44")
         return
     # rotation:
     # sAxis
-    if isinstance(sAxis, basestring):
+    if isinstance(sAxis, str):
         sAxis = sAxis.lower()
         if not sAxis in ("x", "y", "z"):
             sAxis = "x"
@@ -1158,7 +1165,7 @@ def Bugs(bOn=True, position=None, bTie=False, soPlayer=None):
         py=pos.getY()
         pz=pos.getZ()
     else:
-        print "Bugs Error: position must be an int or a ptVector3 or a ptMatrix44"
+        print("Bugs Error: position must be an int or a ptVector3 or a ptMatrix44")
         return
 
     # parameters are set, we can continue
@@ -1170,7 +1177,7 @@ def Bugs(bOn=True, position=None, bTie=False, soPlayer=None):
 
 #attacher so1 a so2 : attacher(obj, av) ou l'inverse    
 def Attacher(so1, so2, bPhys=False):
-    """attacher so1 à so2 : attacher(obj, av) ou l'inverse"""
+    """attacher so1 Ã  so2 : attacher(obj, av) ou l'inverse"""
     so1.physics.netForce(1)
     so1.draw.netForce(1)
     PtAttachObject(so1, so2, 1)
@@ -1193,28 +1200,28 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) != None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) != None]
     return nameList
 
 # Retourne la position du premier clone trouve ayant des coordonnees
 def GetFirstClonePosition(name):
     nameList = FindSOName(name)
     for soName in nameList:
-        print "nom: {}".format(soName)
+        print("nom: {}".format(soName))
         try:
             sol = PtFindSceneobjects(soName)
             for mso in sol:
-                print "mso: {}".format(mso.getName())
+                print("mso: {}".format(mso.getName()))
                 cloneKeys = PtFindClones(mso.getKey())
-                print "cloneKeys: {}".format(len(cloneKeys))
+                print("cloneKeys: {}".format(len(cloneKeys)))
                 for k in cloneKeys:
                     so = k.getSceneObject()
-                    print "so: {}".format(so.getName())
+                    print("so: {}".format(so.getName()))
                     pos = so.position()
                     if pos.getX() != 0.0 or pos.getY() != 0.0 or pos.getZ() != 0.0:
-                        print "clone trouve"
+                        print("clone trouve")
                         return so
         except:
             continue

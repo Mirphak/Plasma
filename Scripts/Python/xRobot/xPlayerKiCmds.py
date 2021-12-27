@@ -6,37 +6,47 @@ import math
 import datetime
 import re
 
-import xPlayers
-import xBotAge
-import xAnim
-import xSave
-import xSave2
-import xJalak
+from . import xPlayers
+from . import xBotAge
+from . import xAnim
+from . import xSave
+from . import xSave2
+from . import xJalak
 
-import CloneObject
-import sdl
-import Columns2
+from . import CloneObject
+from . import sdl
+from . import Columns2
 
 #Ages de Mirphak, Mir-o-Bot, MagicBot, ages publics
-import ages
+from . import ages
 
-import MarkerGames
+# With old client
+#import MarkerGames
+# With new client
+from . import MarkerGames2
+from . import Ride
+from . import Ahnonay
 
-import Ride
-import Ahnonay
+from . import CloneBugs
+from . import DropObjects
+from . import ReltoNight
+from . import ReltoNight2
+from . import xCleft
+from . import xDelin
+from . import xHood
+from . import xRelto
+from . import xScore
+from . import xTsogal
 
-import CloneBugs
-import DropObjects
-import ReltoNight
-import ReltoNight2
-import xCleft
-import xDelin
-import xHood
-import xRelto
-import xScore
-import xTsogal
+from . import Dance
+from . import clothing
 
-import Dance
+from . import AnimationList
+
+from . import Pellet
+from . import Light
+
+import xFireCamp
 
 #----------------------------------------------------------------------------#
 #   Attributs globaux
@@ -44,9 +54,55 @@ import Dance
 debugInfo = ""
 bJalakAdded = False
 bBlockCmds = False
-adminList = [32319L, 31420L, 2332508L]
+# My avatars
+adminList = [32319, 31420, 2332508]  # Mir-o-Bot, Mirphak, mob
+# For the dance events
 adminList += [
+    11243,   # Luluberlu
+    11896,   # MagicYoda
+    #115763,  # Willy
+    127131,  # tsuno
+    #133403,  # sendlinger
+    137998,  # Mabe
+    254640,  # Eternal Seeker
+    254930, # Kamikatze
+    #966183, # y e e s h a
+    2975513, # Didi
+    #1261291, # Y E E R K
+    #1474572, # Fog_man
+    5667000, # Minasunda
+    #5710565, # Salirama
+    6362551, # vony
+    6495949, # Lu*
+    6551797, # ondine
+    #6559861, # Kawliga
+    #6583813, # Roland (Mav Hungary)
+    #6670690, # Billy the Cat
+    6682907, # LaDeeDah
+    #6725908, # Raymondo
+    #6833983, # malcg
+    6961947, # Calisia (= Terry L. Britton)
+    7060111, # Aeonihya
+    7132841, # Mina Sunda
+    #7172637, # Baeda
+    #7227499, # Lidia (Mav Hungary)
+    #7327507, # artopia
+    #7517653, # ladylora
+    #7731330, # My.St'ro
+    #7796072, # Klaide
+    #7881034, # Yakoso
+    7939982, # Claidi Song
+    #7965725, # Z A N D l
+    8068100, # NDG Eternal Seeker
+    #8315178, # Roland (Mav Hungary)
+    #9843955, # CatYoh
+    9995228, # NDGSeeker
+    #10287894, # Thallan
+    #10360615, # Thallane
 ]
+
+# For the Cavern Tours : Larry Ledeay and CT Hostess Susa'n
+#adminList += [11308, 9122427]
 
 # liste des instances disponibles pour moi
 #linkDic = xBotKiCmds.linkDic
@@ -65,10 +121,11 @@ lastLinkTime = datetime.datetime.now()
 
 ### Display a message to the player (or players).
 def SendChatMessage(self, fromPlayer, plyrList, message, flags):
-    plyrNameList = map(lambda pl: pl.getPlayerName(), plyrList)
-    plyrList = filter(lambda pl: pl.getPlayerID() != PtGetLocalPlayer().getPlayerID(), plyrList)
+    plyrNameList = [pl.getPlayerName() for pl in plyrList]
+    plyrList = [pl for pl in plyrList if pl.getPlayerID() != PtGetLocalPlayer().getPlayerID()]
     if message is None:
         message = "Oops, I forgot what I had to tell you!"
+    
     if len(plyrList) > 0:
         # Don't take care of flags nor bots, always send message as buddies inter-age
         PtSendRTChat(fromPlayer, plyrList, message, 24)
@@ -80,7 +137,7 @@ def isPlayerInAge(player):
     if player.getPlayerID() == PtGetLocalPlayer().getPlayerID():
         return True
     agePlayers = PtGetPlayerList()
-    ids = map(lambda player: player.getPlayerID(), agePlayers)
+    ids = [player.getPlayerID() for player in agePlayers]
     try:
         if player.getPlayerID() in ids:
             return True
@@ -103,9 +160,9 @@ def SearchAvatarNameLike(name):
     pattern = re.compile(pat)
     agePlayers = PtGetPlayerList()
     agePlayers.append(PtGetLocalPlayer())
-    players = filter(lambda player: pattern.match(player.getPlayerName().lower()), agePlayers)
+    players = [player for player in agePlayers if pattern.match(player.getPlayerName().lower())]
     if len(players) == 0:
-        players = filter(lambda player: player.getPlayerName().lower().replace(" ", "") == name.replace(" ", ""), agePlayers)
+        players = [player for player in agePlayers if player.getPlayerName().lower().replace(" ", "") == name.replace(" ", "")]
     return players
 
 
@@ -482,7 +539,7 @@ def GetPeople(kind = "buddy", listedPlayers = []):
                         player = ptPlayer(ebud.playerGetName(),ebud.playerGetID())
                         if player not in listedPlayers:
                             selPlyrList.append(player)
-        selPlyrList = filter(lambda pl: not(pl.getPlayerID() in xPlayers.dicBot.keys()), selPlyrList)
+        selPlyrList = [pl for pl in selPlyrList if not(pl.getPlayerID() in list(xPlayers.dicBot.keys()))]
     return selPlyrList
 
 #
@@ -523,7 +580,7 @@ def LinkBotTo(self, cFlags, args = []):
             availableLinks.append(lk + " : " +linkDic[lk][0])
     msg += ", ".join(availableLinks)
     """
-    for lk  in ages.MirobotAgeDict.keys():
+    for lk  in list(ages.MirobotAgeDict.keys()):
         availableLinks.append("{0} : {1} {2}".format(lk, ages.MirobotAgeDict[lk][3], ages.MirobotAgeDict[lk][0]))
     msg += ", ".join(availableLinks)
     
@@ -537,8 +594,13 @@ def LinkBotTo(self, cFlags, args = []):
     # Trying Mir-o-Bot ages
     elif (linkName in ages.MirobotAgeDict.keys()):
     """
+    if linkName == "ahnonay":
+        msg = "Sorry, I can't go to Ahnonay. I'm crashing too often there!"
+        SendChatMessage(self, myself, [player], msg, cFlags.flags)
+        return 0
     # Trying Mir-o-Bot ages
-    if (linkName in ages.MirobotAgeDict.keys()):
+    #if (linkName in list(ages.MirobotAgeDict.keys())):
+    elif (linkName in list(ages.MirobotAgeDict.keys())):
         link = ages.MirobotAgeDict[linkName]
 #        xBotAge.currentBotAge = list(link)
 #        if len(link) > 4:
@@ -546,14 +608,14 @@ def LinkBotTo(self, cFlags, args = []):
 #            #self.chatMgr.AddChatLine(None, ",".join(xBotAge.currentBotAge), 3)
 #        xBotAge.LinkPlayerTo(self, link)
     # Trying MagicBot ages
-    elif (linkName in ages.MagicbotAgeDict.keys()):
+    elif (linkName in list(ages.MagicbotAgeDict.keys())):
         link = ages.MagicbotAgeDict[linkName]
 #        xBotAge.currentBotAge = list(link)
 #        if len(link) > 4:
 #            xBotAge.SetBotAgeSP(link[4])
 #            #self.chatMgr.AddChatLine(None, ",".join(xBotAge.currentBotAge), 3)
 #        xBotAge.LinkPlayerTo(self, link)
-    elif (linkName in ages.PublicAgeDict.keys()):
+    elif (linkName in list(ages.PublicAgeDict.keys())):
         msg = "Sorry, I can't go to a public age."
         SendChatMessage(self, myself, [player], msg, cFlags.flags)
         return 0
@@ -572,7 +634,7 @@ def LinkBotTo(self, cFlags, args = []):
         if (now - lastLinkTime).total_seconds() > minDiff:
             #agePlayers = PtGetPlayerList()
             # ne pas tenir compte des robots
-            agePlayers = filter(lambda pl: not(pl.getPlayerID() in xPlayers.dicBot.keys()), PtGetPlayerList())
+            agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(xPlayers.dicBot.keys()))]
             #for pl in agePlayers:
             #    if (pl.getPlayerID() in xPlayers.dicBot.keys()):
 
@@ -774,15 +836,15 @@ def AutoWarp(self, player):
 #
 def AbsoluteDniGoto(self, cFlags, args = []):
     #self.chatMgr.AddChatLine(None, "> AbsoluteDniGoto", 3)
-    print "AbsoluteDniGoto"
+    print("AbsoluteDniGoto")
     if len(args) < 2:
-        print "AbsoluteDniGoto: {0} arguments given.".format(len(args))
+        print("AbsoluteDniGoto: {0} arguments given.".format(len(args)))
         return 0
     params = args[1].split()
     myself = PtGetLocalPlayer()
     player = args[0]
     if len(params) < 3:
-        print "AbsoluteDniGoto: {0} parameters given.".format(len(params))
+        print("AbsoluteDniGoto: {0} parameters given.".format(len(params)))
         return 0
     if not isPlayerInAge(player):
         SendChatMessage(self, myself, [player], "You must be in my age, use link to join me." , cFlags.flags)
@@ -1048,9 +1110,14 @@ def SavePosition(self, cFlags, args = []):
         SendChatMessage(self, myself, [player], "You must be in my age, use link to join me." , cFlags.flags)
         return 1
     strIndex = "0"
+    alias = ""
     if len(args) > 1:
-        strIndex = args[1]
-    xSave2.WriteMatrix44(self, strIndex, player)
+        params = args[1].split()
+        strIndex = params[0]
+        if len(params) > 1:
+            alias = re.sub(r'\W+', '', params[1].lower())
+    #xSave2.WriteMatrix44(self, strIndex, player, alias)
+    xSave2.WriteMatrix44(self, n=strIndex, player=player, ageFileName=None, prefix=None, aliasName=alias)
     SendChatMessage(self, myself, [player], "Your position is saved. Use \"ws " + strIndex + "\" to return to this position." , cFlags.flags)
     return 1
 
@@ -1065,9 +1132,18 @@ def ReturnToPosition(self, cFlags, args = []):
         SendChatMessage(self, myself, [player], "You must be in my age, use link to join me." , cFlags.flags)
         return 1
     strIndex = "0"
+    alias = ""
+    #if len(args) > 1:
+    #    strIndex = args[1]
+    #if len(args) > 2:
+    #    alias = re.sub(r'\W+', '', args[2].lower())
     if len(args) > 1:
-        strIndex = args[1]
-    ret = xSave2.WarpToSaved(self, strIndex, player)
+        params = args[1].split()
+        strIndex = params[0]
+        if len(params) > 1:
+            alias = re.sub(r'\W+', '', params[1].lower())
+    #ret = xSave2.WarpToSaved(self, strIndex, player, alias)
+    ret = xSave2.WarpToSaved(self, n=strIndex, player=player, ageFileName=None, prefix=None, aliasName=alias)
     if ret:
         SendChatMessage(self, myself, [player], "You are at your saved position " + strIndex + "." , cFlags.flags)
     else:
@@ -1091,7 +1167,10 @@ def Animer(self, cFlags, args = []):
         return 1
     animName = params[0]
     nbTimes = params[1]
-    ret = xAnim.Play(player, animName, nbTimes)
+    gender = ""
+    if len(params) > 2:
+        gender = params[2]
+    ret = xAnim.Play(player, animName, nbTimes, gender)
     if ret and animName in travelAnimList:
         AutoSaveMat(self, player)
         AutoWarp(self, player)
@@ -1125,7 +1204,7 @@ def Responder(soName, respName, pfm = None, ageName = None, state = None, ff = F
             break
     
     if respKey == None:
-        print "Responder():\tResponder not found..."
+        print("Responder():\tResponder not found...")
         return
     
     if pfm == None:
@@ -1214,7 +1293,7 @@ def LoadNewDesert(self, cFlags, args = []):
     if not isPlayerInAge(player):
         SendChatMessage(self, myself, [player], "You must be in my age, use link to join me.", cFlags.flags)
         return 1
-    import newdesert
+    from . import newdesert
     newdesert.load()
     SendChatMessage(self, myself, [player], "I'm loading NewDesert for you... Please wait.", cFlags.flags)
     return 1
@@ -1265,6 +1344,17 @@ def Ring(self, cFlags, args = []):
             SendChatMessage(self, myself, [player], "I failed to reset the rings!" , cFlags.flags)
             return 1
     
+    if color == "detach":
+        try:
+            xHood.DetachClones(soAvatar)
+            self.chatMgr.AddChatLine(None, "The clones are detached!", 3)
+            SendChatMessage(self, myself, [player], "The rings are detached, you can try to create one again!" , cFlags.flags)
+            return 1
+        except:
+            self.chatMgr.AddChatLine(None, "Err: I failed to detach the clones!", 3)
+            SendChatMessage(self, myself, [player], "I failed to detach the rings!" , cFlags.flags)
+            return 1
+    
     #bOn = bOn.lower()
     #if not (color in ("yellow", "blue", "red", "white", "white2", "white3", "white4")):
     if not (color in ("yellow", "blue", "red", "white")):
@@ -1275,8 +1365,13 @@ def Ring(self, cFlags, args = []):
         if params[1].lower().strip() == "off":
             bOn = 0
         else:
-            if params[1].lower().strip().isnumeric():
+            #if params[1].lower().strip().isnumeric():
+            p2 = params[1].lower().strip()
+            try:
+                float(p2)
                 params.insert(1, 'on')
+            except ValueError:
+                pass
         
     dist = 3
     height = 4
@@ -1363,10 +1458,13 @@ def Board(self, cFlags, args = []):
 
 # To open or close a Bahro door (in Eder Delin and Eder Tsogal currently)
 def OpenOrCloseBahroDoor(self, cFlags, args = []):
+    """
     if len(args) < 2:
         return 0
+    """
     myself = PtGetLocalPlayer()
     player = args[0]
+    """
     if not isPlayerInAge(player):
         SendChatMessage(self, myself, [player], "You must be in my age, use link to join me." , cFlags.flags)
         return 1
@@ -1399,6 +1497,11 @@ def OpenOrCloseBahroDoor(self, cFlags, args = []):
         self.chatMgr.AddChatLine(None, "=> Je ne sais pas dans quel age je suis!", 3)
         SendChatMessage(self, myself, [player], "Oops, I don't know where I am ..." , cFlags.flags)
     return 1
+    """
+    self.chatMgr.AddChatLine(None, "=> OpenOrCloseBahroDoor : cette commande est desactivee!", 3)
+    SendChatMessage(self, myself, [player], "Sorry, this command is disactivated." , cFlags.flags)
+    return 1
+    
 
 #
 def DisableFog(self, cFlags, args = []):
@@ -1509,7 +1612,7 @@ def SetRendererFogColor(self, cFlags, args = []):
                     strCol = items[0]
                     numero = int(items[1])
                 # nom de couleur connu?
-                if strCol in dicColors.keys():
+                if strCol in list(dicColors.keys()):
                     vr = float(dicColors[strCol][0]) * ((6. - float(numero)) / 5.) ** 2
                     vg = float(dicColors[strCol][1]) * ((6. - float(numero)) / 5.) ** 2
                     vb = float(dicColors[strCol][2]) * ((6. - float(numero)) / 5.) ** 2
@@ -1581,6 +1684,8 @@ def SetRendererClearColor(self, cFlags, args = []):
     numero = None
     dicColors = {
                 "white":[1, 1, 1], 
+                "grey":[.9, .9, .9], 
+                "gray":[.9, .9, .9], 
                 "red":[1, 0, 0], 
                 "pink":[1, 0.5, 0.5], 
                 "orange":[1, .5, 0], 
@@ -1592,6 +1697,8 @@ def SetRendererClearColor(self, cFlags, args = []):
                 "purple":[1, 0, .8], 
                 "black":[0, 0, 0], 
                 "gold":[1, .84, 0],
+                #"cave":[0.5252, 0.4907, 0.4785],
+                "cave":[0.8000, 0.7474, 0.7289],
                 }
     if len(args) > 1:
         params = args[1].split()
@@ -1607,7 +1714,7 @@ def SetRendererClearColor(self, cFlags, args = []):
                     strCol = items[0]
                     numero = int(items[1])
                 # nom de couleur connu?
-                if strCol in dicColors.keys():
+                if strCol in list(dicColors.keys()):
                     vcr = float(dicColors[strCol][0]) * ((6. - float(numero)) / 5.) ** 2
                     vcg = float(dicColors[strCol][1]) * ((6. - float(numero)) / 5.) ** 2
                     vcb = float(dicColors[strCol][2]) * ((6. - float(numero)) / 5.) ** 2
@@ -1900,13 +2007,13 @@ def Soccer(self, cFlags, args = []):
         SendChatMessage(self, myself, [player], "You must be in my age, use link to join me.", cFlags.flags)
         return 1
     try:
-        print ">> Soccer : soAvatar"
+        print(">> Soccer : soAvatar")
         soAvatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
-        print ">> Soccer : pos"
+        print(">> Soccer : pos")
         pos = soAvatar.position()
-        print ">> Soccer : ready to drop soccer balls ({} - {})".format(soAvatar, pos)
+        print(">> Soccer : ready to drop soccer balls ({} - {})".format(soAvatar, pos))
         DropObjects.Soccer(position=pos)
-        print ">> Soccer : done"
+        print(">> Soccer : done")
         return 1
     except:
         return 0
@@ -2124,6 +2231,30 @@ def LightForJalak(av, num=1, bLoadShowOn=True, bAttachOn=False, dx=0, dy=0, dz=0
     elif num == 6:
         CloneObject.Clone2("RTOmniLightBluAmbient", "Jalak", bShow=bOn, bLoad=bOn, matPos=pos1, bAttach=bAttachOn, soAvatar=av)
 
+"""
+E:\MystOnLineUruLiveAgain\PlClient_TEST\Python\plasma
+def PtSetLightValue(key,name,r,g,b,a):
+    ''' Key is the key of scene object host to light. Name is the name of the light to manipulate'''
+    pass
+"""
+
+#
+def YeeshaGlowLight(av, bLoadShowOn=True, bAttachOn=False, dx=0, dy=0, dz=4, rx=0, ry=0, rz=0, cr=1, cg=1, cb=1, ca=1):
+    bOn = bLoadShowOn
+    pos = av.getLocalToWorld()
+    pos1 = pos
+    pos1.translate(ptVector3(dx, dy, dz))
+    mRot = ptMatrix44()
+    mRot.rotate(0, (math.pi * rx) / 180)
+    mRot.rotate(1, (math.pi * ry) / 180)
+    mRot.rotate(2, (math.pi * rz) / 180)
+    pos1 = pos1 * mRot
+    CloneObject.Clone2(objName="RTGlowLight", age="CustomAvatars", bShow=bOn, bLoad=bOn, matPos=pos1, bAttach=bAttachOn, soAvatar=av)
+    mso = PtFindSceneobject("RTGlowLight", "CustomAvatars")
+    cloneKeys = PtFindClones(mso.getKey())
+    if len(cloneKeys) > 0:
+        ck = cloneKeys[0]
+        PtSetLightValue(key=ck, name="RTGlowLight", r=cr, g=cg, b=cb, a=ca)
 
 # Commande speciale pour un evenement particulier
 def SpecialEventCommand(self, cFlags, args = []):
@@ -2168,7 +2299,7 @@ def SpecialEventCommand(self, cFlags, args = []):
         """
         if eventNumber == 1:
             # -- 1 -- A Cleft avec ZandiMobile + clone de Minkata + nuit
-            print "==> event 1"
+            print("==> event 1")
             xBotAge.ToggleSceneObjects("Blocker", age = "Cleft", bDrawOn = bOn, bPhysicsOn = bOff)
             xBotAge.ToggleSceneObjects("ProxyPropertyLine", age = "Cleft", bDrawOn = bOn, bPhysicsOn = bOff)
             xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
@@ -2195,17 +2326,18 @@ def SpecialEventCommand(self, cFlags, args = []):
             SendChatMessage(self, myself, [player], "Event 1 (Free Cleft night) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 2:
             # -- 2 -- Hood + nuit + clone de SandscritRoot
-            print "==> event 2"
+            print("==> event 2")
             xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            print "==> Minkata ground"
+            print("==> Minkata ground")
             CloneObject.Minkata(bShow=bOn, bLoad=bOn)
-            print "==> GT sky"
-            CloneObject.co(["SphereEnviron", "SphereClouds"], "GreatTreePub", 1, bShow=bOn, bLoad=bOn)
+            print("==> GT sky")
+            #CloneObject.co(["SphereEnviron", "SphereClouds"], "GreatTreePub", 1, bShow=bOn, bLoad=bOn)
+            CloneObject.co(["SphereEnviron"], "GreatTreePub", 1, bShow=bOn, bLoad=bOn)
             # mettre l'Arche devant le Pod:
-            print "==> Arch"
+            print("==> Arch")
             #tupMat = ((-0.762557864189,-0.646920084953,0.0,30.8849506378),(0.646920084953,-0.762557864189,0.0,-12.7307682037),(0.0,0.0,1.0,-0.0328427329659),(0.0,0.0,0.0,1.0))
             tupMat = ((-0.541980564594,0.840391099453,0.0,86.2719726562),(-0.840391099453,-0.541980564594,0.0,82.5392074585),(0.0,0.0,1.0,-21.8916854858),(0.0,0.0,0.0,1.0))
             #print "==> Arch 2"
@@ -2215,7 +2347,7 @@ def SpecialEventCommand(self, cFlags, args = []):
             #print "==> Arch 4"
             CloneObject.co3("ArchOfKerath", "city", bShow=bOn, bLoad=bOn, scale=.2, matPos=mat)
             # mettre le sandscrit dans le Pod:
-            print "==> Sandscrit"
+            print("==> Sandscrit")
             tupMat = ((-0.275523930788,-0.961294174194,0.0,15.0463008881),(0.961294174194,-0.275523930788,0.0,3.88983178139),(0.0,0.0,1.0,2.06506371498),(0.0,0.0,0.0,1.0))
             mat = ptMatrix44()
             mat.setData(tupMat)
@@ -2224,7 +2356,7 @@ def SpecialEventCommand(self, cFlags, args = []):
             #Sandscrit_Mover
             CloneObject.co3("SandscritRoot", "Payiferen", bShow=bOn, bLoad=bOn, scale=0.2, matPos=mat)
             #CloneObject.co3("Sandscrit_Mover", "Payiferen", bShow=bOn, bLoad=bOn, scale=0.2, matPos=mat)
-            print "==> nuit"
+            print("==> nuit")
             if onOff == "on":
                 CreateReltoNight1(self, cFlags, [args[0], 60])
             else:
@@ -2232,14 +2364,14 @@ def SpecialEventCommand(self, cFlags, args = []):
             SendChatMessage(self, myself, [player], "Event 2 (Payiferen/GreatTreePub/ArchOfKerath) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 3:
             # -- 3 -- 
-            print "==> event 3"
+            print("==> event 3")
             xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            print "==> Minkata ground"
+            print("==> Minkata ground")
             CloneObject.Minkata(bShow=bOn, bLoad=bOn)
-            print "==> 2 Tails Monkey"
+            print("==> 2 Tails Monkey")
             tupMat = ((-0.275523930788,-0.961294174194,0.0,15.0),(0.961294174194,-0.275523930788,0.0,3.9),(0.0,0.0,1.0,11.5),(0.0,0.0,0.0,1.0))
             mat = ptMatrix44()
             mat.setData(tupMat)
@@ -2249,7 +2381,7 @@ def SpecialEventCommand(self, cFlags, args = []):
             SendChatMessage(self, myself, [player], "Event 3 (Negilahn) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 4:
             # -- 4 -- 
-            print "==> event 4"
+            print("==> event 4")
             """
             print "==> Cleft Desert Ground Plane"
             #tupMat = ((-0.275523930788,-0.961294174194,0.0,15.0),(0.961294174194,-0.275523930788,0.0,3.9),(0.0,0.0,1.0,11.5),(0.0,0.0,0.0,1.0))
@@ -2274,7 +2406,7 @@ def SpecialEventCommand(self, cFlags, args = []):
             xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            print "==> Gira sky"
+            print("==> Gira sky")
             CloneObject.co3("SunDummyNew", "Gira", bShow=bOn, bLoad=bOn)
             CloneObject.co3("Sky", "Gira", bShow=bOn, bLoad=bOn)
             
@@ -2288,7 +2420,7 @@ def SpecialEventCommand(self, cFlags, args = []):
             SendChatMessage(self, myself, [player], "Event 4 (Gira sky) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 5:
             # -- 5 -- 
-            print "==> event 5"
+            print("==> event 5")
             xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
@@ -2300,13 +2432,13 @@ def SpecialEventCommand(self, cFlags, args = []):
             xBotAge.ToggleSceneObjects("Dust", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Pod", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Rain", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            print "==> Gira sky"
+            print("==> Gira sky")
             CloneObject.co3("SkyGlobe", "Payiferen", bShow=bOn, bLoad=bOn)
             CloneObject.co3("StarSphere", "Payiferen", bShow=bOn, bLoad=bOn)
             SendChatMessage(self, myself, [player], "Event 5 (Payiferen sky) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 6:
             # -- 6 -- 
-            print "==> event 6"
+            print("==> event 6")
             xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
@@ -2318,12 +2450,12 @@ def SpecialEventCommand(self, cFlags, args = []):
             xBotAge.ToggleSceneObjects("Dust", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Pod", age = None, bDrawOn = bOff, bPhysicsOn = True)
             xBotAge.ToggleSceneObjects("Rain", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            print "==> Dereno fish C01"
+            print("==> Dereno fish C01")
             CloneObject.co3("C01_Root", "Dereno", bShow=bOn, bLoad=bOn)
             SendChatMessage(self, myself, [player], "Event 6 (Dereno) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 7:
             # -- 7 -- 
-            print "==> event 7"
+            print("==> event 7")
             """
             !toggle Wheel  0 0
             !toggle Horizon  0 0
@@ -2358,7 +2490,7 @@ def SpecialEventCommand(self, cFlags, args = []):
             SendChatMessage(self, myself, [player], "Event 7 (Caribbean) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 8:
             # -- 8 -- 
-            print "==> event 8 : City, Kahlo Pub, Memorial, Gerbes"
+            print("==> event 8 : City, Kahlo Pub, Memorial, Gerbes")
             #xBotAge.ToggleSceneObjects("Crack", age = None, bDrawOn = bOff, bPhysicsOn = bOff)
             xBotAge.ToggleSceneObjects("Curtain", age = None, bDrawOn = False, bPhysicsOn = False)
             xBotAge.ToggleSceneObjects("Debri", age = None, bDrawOn = bOff, bPhysicsOn = bOff)
@@ -2375,7 +2507,7 @@ def SpecialEventCommand(self, cFlags, args = []):
             SendChatMessage(self, myself, [player], "Event 8 (Memorial) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 9:
             # -- 9 -- 
-            print "==> event 9 : K'veer, Lights for NULP Dance Show"
+            print("==> event 9 : K'veer, Lights for NULP Dance Show")
             #CloneObject.co3("RTDirLightCoolDesertFill", "Minkata", bShow=bOn, bLoad=bOn, scale=1, matPos=None)
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForKveer(av=soPlayer, bLoadShowOn=bOn, bAttachOn=bOn)
@@ -2395,7 +2527,7 @@ def SpecialEventCommand(self, cFlags, args = []):
             LightForKveer2(av=soPlayer, num=8, bLoadShowOn=bOn, bAttachOn=bOn)
             LightForKveer2(av=soPlayer, num=9, bLoadShowOn=bOn, bAttachOn=bOn)
             """
-            print "==> event 10 : Jalak, Lights for NULP Dance Show"
+            print("==> event 10 : Jalak, Lights for NULP Dance Show")
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForJalak(av=soPlayer, num=1, bLoadShowOn=bOn, bAttachOn=bOn, dx=0, dy=0, dz=0, rx=180, ry=0, rz=0)
             LightForJalak(av=soPlayer, num=2, bLoadShowOn=bOn, bAttachOn=bOn, dx=0, dy=0, dz=0, rx=0, ry=0, rz=0)
@@ -2407,58 +2539,340 @@ def SpecialEventCommand(self, cFlags, args = []):
             SendChatMessage(self, myself, [player], "Event 10 (Projectors) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 91:
             # -- 91 -- 
-            print "==> event 91 : K'veer, Lights for NULP Dance Show"
+            print("==> event 91 : K'veer, Lights for NULP Dance Show")
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForKveer2(av=soPlayer, num=1, bLoadShowOn=bOn, bAttachOn=bOn)
             SendChatMessage(self, myself, [player], "Event 91 (Projectors) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 92:
             # -- 92 -- 
-            print "==> event 92 : K'veer, Lights for NULP Dance Show"
+            print("==> event 92 : K'veer, Lights for NULP Dance Show")
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForKveer2(av=soPlayer, num=2, bLoadShowOn=bOn, bAttachOn=bOn)
             SendChatMessage(self, myself, [player], "Event 92 (Projectors) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 93:
             # -- 93 -- 
-            print "==> event 93 : K'veer, Lights for NULP Dance Show"
+            print("==> event 93 : K'veer, Lights for NULP Dance Show")
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForKveer2(av=soPlayer, num=3, bLoadShowOn=bOn, bAttachOn=bOn)
             SendChatMessage(self, myself, [player], "Event 93 (Projectors) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 94:
             # -- 94 -- 
-            print "==> event 94 : K'veer, Lights for NULP Dance Show"
+            print("==> event 94 : K'veer, Lights for NULP Dance Show")
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForKveer2(av=soPlayer, num=4, bLoadShowOn=bOn, bAttachOn=bOn)
             SendChatMessage(self, myself, [player], "Event 94 (Projectors) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 95:
             # -- 95 -- 
-            print "==> event 95 : K'veer, Lights for NULP Dance Show"
+            print("==> event 95 : K'veer, Lights for NULP Dance Show")
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForKveer2(av=soPlayer, num=5, bLoadShowOn=bOn, bAttachOn=bOn)
             SendChatMessage(self, myself, [player], "Event 95 (Projectors) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 96:
             # -- 96 -- 
-            print "==> event 96 : K'veer, Lights for NULP Dance Show"
+            print("==> event 96 : K'veer, Lights for NULP Dance Show")
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForKveer2(av=soPlayer, num=6, bLoadShowOn=bOn, bAttachOn=bOn)
             SendChatMessage(self, myself, [player], "Event 96 (Projectors) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 97:
             # -- 97 -- 
-            print "==> event 97 : K'veer, Lights for NULP Dance Show"
+            print("==> event 97 : K'veer, Lights for NULP Dance Show")
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForKveer2(av=soPlayer, num=7, bLoadShowOn=bOn, bAttachOn=bOn)
             SendChatMessage(self, myself, [player], "Event 97 (Projectors) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 98:
             # -- 98 -- 
-            print "==> event 98 : K'veer, Lights for NULP Dance Show"
+            print("==> event 98 : K'veer, Lights for NULP Dance Show")
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForKveer2(av=soPlayer, num=8, bLoadShowOn=bOn, bAttachOn=bOn)
             SendChatMessage(self, myself, [player], "Event 98 (Projectors) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 99:
             # -- 99 -- 
-            print "==> event 99 : K'veer, Lights for NULP Dance Show"
+            print("==> event 99 : K'veer, Lights for NULP Dance Show")
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForKveer2(av=soPlayer, num=9, bLoadShowOn=bOn, bAttachOn=bOn)
             SendChatMessage(self, myself, [player], "Event 99 (Projectors) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 11:
+            # -- 11 -- 
+            print("==> event 11 : Jalak Light for Mystitech")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            LightForJalak(av=soPlayer, num=1, bLoadShowOn=bOn, bAttachOn=bOn, dx=0, dy=0, dz=0, rx=180, ry=0, rz=0)
+            SendChatMessage(self, myself, [player], "Projector 1 is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 12:
+            # -- 12 -- 
+            print("==> event 12 : Jalak Light for Mystitech")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            LightForJalak(av=soPlayer, num=2, bLoadShowOn=bOn, bAttachOn=bOn, dx=0, dy=0, dz=0, rx=0, ry=0, rz=0)
+            SendChatMessage(self, myself, [player], "Projector 2 is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 13:
+            # -- 13 -- 
+            print("==> event 1 : Jalak Light for Mystitech")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            LightForJalak(av=soPlayer, num=3, bLoadShowOn=bOn, bAttachOn=bOn, dx=0, dy=0, dz=0, rx=180, ry=0, rz=180)
+            SendChatMessage(self, myself, [player], "Projector 3 is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 14:
+            # -- 14 -- 
+            print("==> event 14 : Jalak Light for Mystitech")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            LightForJalak(av=soPlayer, num=4, bLoadShowOn=bOn, bAttachOn=bOn, dx=0, dy=0, dz=0, rx=180, ry=180, rz=0)
+            SendChatMessage(self, myself, [player], "Projector 4 is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 15:
+            # -- 15 -- 
+            print("==> event 15 : Jalak Light for Mystitech")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            LightForJalak(av=soPlayer, num=5, bLoadShowOn=bOn, bAttachOn=False, dx=0, dy=-40, dz=20, rx=-30, ry=0, rz=0)
+            SendChatMessage(self, myself, [player], "Projector 5 is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 16:
+            # -- 16 -- 
+            print("==> event 16 : Jalak Light for Mystitech")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            LightForJalak(av=soPlayer, num=6, bLoadShowOn=bOn, bAttachOn=bOn, dx=100, dy=100, dz=100, rx=0, ry=0, rz=0)
+            SendChatMessage(self, myself, [player], "Projector 6 is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 17:
+            # -- 17 -- 
+            print("==> event 17 : Yeesha Glow Light (detached)")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            YeeshaGlowLight(av=soPlayer, bLoadShowOn=bOn, bAttachOn=False, dx=0, dy=0, dz=4, rx=0, ry=0, rz=0, cr=1, cg=1, cb=1, ca=1)
+            SendChatMessage(self, myself, [player], "Yeesha Glow Light is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 170:
+            # -- 170 -- 
+            print("==> event 170 : Yeesha Glow Light (attached above you)")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            YeeshaGlowLight(av=soPlayer, bLoadShowOn=bOn, bAttachOn=bOn, dx=0, dy=0, dz=9, rx=0, ry=0, rz=0, cr=1, cg=1, cb=1, ca=1)
+            SendChatMessage(self, myself, [player], "Yeesha Glow Light (attached above you) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 171:
+            # -- 171 -- 
+            print("==> event 171 : Yeesha Glow Light (attached to your right)")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            YeeshaGlowLight(av=soPlayer, bLoadShowOn=bOn, bAttachOn=bOn, dx=-5, dy=0, dz=9, rx=0, ry=0, rz=0, cr=1, cg=1, cb=1, ca=1)
+            SendChatMessage(self, myself, [player], "Yeesha Glow Light (attached to your right) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 172:
+            # -- 172 -- 
+            print("==> event 172 : Yeesha Glow Light (attached to your left)")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            YeeshaGlowLight(av=soPlayer, bLoadShowOn=bOn, bAttachOn=bOn, dx=5, dy=0, dz=9, rx=0, ry=0, rz=0, cr=1, cg=1, cb=1, ca=1)
+            SendChatMessage(self, myself, [player], "Yeesha Glow Light(attached to your left) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 173:
+            # -- 173 -- 
+            print("==> event 173 : Yeesha Glow Light (attached in front of you)")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            YeeshaGlowLight(av=soPlayer, bLoadShowOn=bOn, bAttachOn=bOn, dx=0, dy=-5, dz=9, rx=0, ry=0, rz=0, cr=1, cg=1, cb=1, ca=1)
+            SendChatMessage(self, myself, [player], "Yeesha Glow Light (attached in front of you) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 174:
+            # -- 174 -- 
+            print("==> event 174 : Yeesha Glow Light (attached behind you)")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            YeeshaGlowLight(av=soPlayer, bLoadShowOn=bOn, bAttachOn=bOn, dx=0, dy=5, dz=9, rx=0, ry=0, rz=0, cr=1, cg=1, cb=1, ca=1)
+            SendChatMessage(self, myself, [player], "Yeesha Glow Light (attached behind you) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 18:
+            # -- 18 -- 
+            print("==> event 18 : City Museum Light")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            tupMat = ((-0.131536126137,0.991311430931,0.0,-177.0),(-0.991311430931,-0.131536126137,0.0,5.6),(0.0,0.0,1.0,322.0),(0.0,0.0,0.0,1.0))
+            mat = ptMatrix44()
+            mat.setData(tupMat)
+            mRot = ptMatrix44()
+            mRot.rotate(0, (math.pi * 40.0) / 180)
+            pos = mat * mRot
+            CloneObject.Clone2("RTProjDirLight03", "Payiferen", bShow=bOn, bLoad=bOn, matPos=pos, bAttach=False, soAvatar=soPlayer)
+        elif eventNumber == 19:
+            # -- 19 -- 
+            print("==> event 19 : City Stalagmite Light")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            tupMat = ((0.00654011964798,0.999978721142,0.0,-0.41703543067),(-0.999978721142,0.00654011964798,0.0,-93.100189209),(0.0,0.0,1.0,294.695495605),(0.0,0.0,0.0,1.0))
+            mat = ptMatrix44()
+            mat.setData(tupMat)
+            CloneObject.Clone2("RTProjDirLight03", "Payiferen", bShow=bOn, bLoad=bOn, matPos=mat, bAttach=False, soAvatar=soPlayer)
+        elif eventNumber == 20:
+            # -- 20 -- 
+            print("==> event 20 : City Library Tent Light and fog")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            tupMat = ((0.862352311611,0.506308674812,0.0,840.0),(-0.506308674812,0.862352311611,0.0,-543.0),(0.0,0.0,1.0,300.0),(0.0,0.0,0.0,1.0))
+            mat = ptMatrix44()
+            mat.setData(tupMat)
+            CloneObject.Clone2("RTProjDirLight03", "Payiferen", bShow=bOn, bLoad=bOn, matPos=mat, bAttach=False, soAvatar=soPlayer)
+            SetRendererFogColor(self, cFlags, [player, "yellow2"])
+            if bOn:
+                CreateReltoNight1(self, cFlags, [args[0], "off"])
+            else:
+                CreateReltoNight1(self, cFlags, [args[0], "on"])
+        elif eventNumber == 21:
+            # -- 21 -- 
+            print("==> event 21 : Red Testsonot Pulsing Light")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            pos = soPlayer.getLocalToWorld()
+            CloneObject.Clone2("RTWindowOmni03", "Tetsonot", bShow=bOn, bLoad=bOn, matPos=pos, bAttach=bOn, soAvatar=soPlayer)
+            SendChatMessage(self, myself, [player], "Event 21 (Red Testsonot Pulsing Light) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 22:
+            # -- 22 -- 
+            print("==> event 22 : White Kahlo Pulsing Light")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            pos = soPlayer.getLocalToWorld()
+            CloneObject.Clone2("kpRTOmniLight04", "city", bShow=bOn, bLoad=bOn, matPos=pos, bAttach=bOn, soAvatar=soPlayer)
+            SendChatMessage(self, myself, [player], "Event 22 (White Kahlo Pulsing Light) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 23:
+            # -- 23 -- 
+            print("==> event 23 : Fog Test")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            pos = soPlayer.getLocalToWorld()
+            #Add 1 clone of each dusts planes of Minkata
+            CloneObject.Clone2("DustPlaneParticle01", "Minkata", bShow=bOn, bLoad=bOn, matPos=pos, bAttach=bOn, soAvatar=soPlayer)
+            CloneObject.Clone2("DustPlaneParticle02", "Minkata", bShow=bOn, bLoad=bOn, matPos=pos, bAttach=bOn, soAvatar=soPlayer)
+            CloneObject.Clone2("DustPlaneParticle03", "Minkata", bShow=bOn, bLoad=bOn, matPos=pos, bAttach=bOn, soAvatar=soPlayer)
+            CloneObject.Clone2("DustPlaneParticle04", "Minkata", bShow=bOn, bLoad=bOn, matPos=pos, bAttach=bOn, soAvatar=soPlayer)
+            CloneObject.Clone2("DustPlaneParticle05", "Minkata", bShow=bOn, bLoad=bOn, matPos=pos, bAttach=bOn, soAvatar=soPlayer)
+            CloneObject.Clone2("DustPlaneParticle06", "Minkata", bShow=bOn, bLoad=bOn, matPos=pos, bAttach=bOn, soAvatar=soPlayer)
+            CloneObject.Clone2("DustPlaneParticle07", "Minkata", bShow=bOn, bLoad=bOn, matPos=pos, bAttach=bOn, soAvatar=soPlayer)
+            #Add 1 clone of dust plane of Payiferen
+            CloneObject.Clone2("DustPlaneParticle", "Payiferen", bShow=bOn, bLoad=bOn, matPos=pos, bAttach=bOn, soAvatar=soPlayer)
+            if PtGetAgeInfo().getAgeFilename() != "Minkata":
+                #Because the fog is automaticaly restored in Minkata
+                xBotAge.SetRenderer(style=None, start=-40, end=500, density=1, r=0.60, g=0.50, b=0.36)
+            if onOff == "on":
+                SkyOnOff(self, cFlags, [args[0], "off"])
+            else:
+                SkyOnOff(self, cFlags, [args[0], "on"])
+            SendChatMessage(self, myself, [player], "Event 23 (Fog Test) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 24:
+            # -- 24 -- 
+            print("==> event 24 : Bright golden mist in Er'cana.")
+            #Er'cana : Brume dorée brillante.
+            #//nosky (no juse the SkyDome and eventualy the Horizon in Er'cana)
+            xBotAge.ToggleSceneObjects("SkyDome", age="Ercana", bDrawOn=bOff, bPhysicsOn=True)
+            if onOff == "on":
+                #SkyOnOff(self, cFlags, [args[0], "off"])
+                #//skycolor gold 2
+                SetRendererClearColor(self, cFlags, [player, "gold2"])
+                #//fogshape -200 3000 2
+                SetRendererFogLinear(self, cFlags, [player, "-200 3000 2"])
+                #//fogcolor gold 2
+                SetRendererFogColor(self, cFlags, [player, "gold2"])
+            else:
+                #SkyOnOff(self, cFlags, [args[0], "on"])
+                SetRendererStyle(self, cFlags, [player, "default"])
+            SendChatMessage(self, myself, [player], "Event 24 (Bright golden mist) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 25:
+            # -- 25 -- 
+            print("==> event 25 : Remove Protractor of Great Zero.")
+            #GZ : Enlever le rapporteur.
+            xBotAge.ToggleSceneObjects("ProtractorPart", age="GreatZero", bDrawOn=bOff, bPhysicsOn=bOff)
+            xBotAge.ToggleSceneObjects("ProtractorCrystal01", age="GreatZero", bDrawOn=bOff, bPhysicsOn=bOff)
+            xBotAge.ToggleSceneObjects("ProtractorBase04", age="GreatZero", bDrawOn=bOff, bPhysicsOn=bOff)
+            xBotAge.ToggleSceneObjects("ProtractorBase03", age="GreatZero", bDrawOn=bOff, bPhysicsOn=bOff)
+            xBotAge.ToggleSceneObjects("ProtractorRails", age="GreatZero", bDrawOn=bOff, bPhysicsOn=bOff)
+            xBotAge.ToggleSceneObjects("LaserHalo", age="GreatZero", bDrawOn=bOff, bPhysicsOn=bOff)
+            SendChatMessage(self, myself, [player], "Event 25 (Remove Protractor of Great Zero) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 26:
+            # -- 26 -- 
+            print("==> event 26 : Projector - LightHouse.")
+            #Projector - LightHouse.
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            Light.PayLight3b(soPlayer, bOn, bOn, 0, 0, 100, 30, 0, 0)
+            SendChatMessage(self, myself, [player], "Event 26 (Projector - LightHouse) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 261:
+            # -- 261 -- 
+            print("==> event 261 : Projector - LightHouse fixed.")
+            #Projector - LightHouse.
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            Light.PayLight3b(soPlayer, bOn, False, 0, 0, 100, 30, 0, 0)
+            SendChatMessage(self, myself, [player], "Event 261 (Projector - LightHouse fixed) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 100:
+            print("==> event {} : Show all paintings.".format(eventNumber))
+            #Pellet Cave : Show all paintings.
+            if onOff == "on":
+                Pellet.ShowPaintings(nb=0)
+            else:
+                Pellet.ShowPaintings(nb=-1)
+            SendChatMessage(self, myself, [player], "Event {} (Show all paintings) is {}".format(eventNumber, onOff), cFlags.flags)
+        elif eventNumber >= 101 and eventNumber <= 117:
+            print("==> event {} : Show painting #{}.".format(eventNumber, eventNumber - 100))
+            #Pellet Cave : Show a choosen painting with a predefined background color.
+            if onOff == "on":
+                Pellet.ShowPaintings(nb=eventNumber - 100)
+            else:
+                Pellet.ShowPaintings(nb=-1)
+            SendChatMessage(self, myself, [player], "Event {} (Show painting #{}) is {}".format(eventNumber, eventNumber - 100, onOff), cFlags.flags)
+        elif eventNumber == 118:
+            print("==> event {} : Changing background color.".format(eventNumber))
+            #Pellet Cave : Changing background color.
+            if onOff == "on":
+                Pellet.ChangeSky(bOn=True)
+            else:
+                Pellet.ChangeSky(bOn=False)
+            SendChatMessage(self, myself, [player], "Event {} (Changing background color) is {}".format(eventNumber, onOff), cFlags.flags)
+        elif eventNumber == 119:
+            print("==> event {} : Drop white pellets.".format(eventNumber))
+            #Pellet Cave : Drop white pellets.
+            if onOff == "on":
+                Pellet.DropPellets(bOn=True, type=4, delay=19.0)
+            else:
+                Pellet.DropPellets(bOn=False)
+            SendChatMessage(self, myself, [player], "Event {} (Drop white pellets) is {}".format(eventNumber, onOff), cFlags.flags)
+        elif eventNumber == 120:
+            print("==> event {} : Hide some objects 1.".format(eventNumber))
+            # Hide some objects.
+            xBotAge.ToggleSceneObjects("Ladder", age="Cleft", bDrawOn=bOff, bPhysicsOn=bOff)
+            xBotAge.ToggleSceneObjects("Ladder", age="Teledahn", bDrawOn=bOff, bPhysicsOn=bOff)
+            xBotAge.ToggleSceneObjects("PipeInside", age="Teledahn", bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Tree", age="Garden", bDrawOn=bOff, bPhysicsOn=bOff)
+            xBotAge.ToggleSceneObjects("Bamboo", age="Garden", bDrawOn=bOff, bPhysicsOn=True)
+            SendChatMessage(self, myself, [player], "Event {} (Hide some objects 1) is {}".format(eventNumber, onOff), cFlags.flags)
+            
+        elif eventNumber == 121:
+            print("==> event {} : Hide some objects 2.".format(eventNumber))
+            # Hide some objects.
+            xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Rain", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Garden", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Water", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            SendChatMessage(self, myself, [player], "Event {} (Hide some objects 2) is {}".format(eventNumber, onOff), cFlags.flags)
+        elif eventNumber == 27:
+            # -- 27 -- 
+            print("==> event 27")
+            xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Cloud", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Back", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Fog", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Sphere", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Dust", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Pod", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Rain", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.SetRenderer(style = None, cr=0.00, cg=0.06, cb=0.13)
+            print("==> Minkata night sky")
+            CloneObject.co3("StarGlobe", "Minkata", bShow=bOn, bLoad=bOn)
+            CloneObject.co3("GalaxyDecal", "Minkata", bShow=bOn, bLoad=bOn)
+            CloneObject.co3("GalaxyDecalSmall", "Minkata", bShow=bOn, bLoad=bOn)
+            #CloneObject.co3("Constellation01Decal01", "Minkata", bShow=bOn, bLoad=bOn)
+            #CloneObject.co3("Constellation01Decal02", "Minkata", bShow=bOn, bLoad=bOn)
+            #CloneObject.co3("Constellation01Decal03", "Minkata", bShow=bOn, bLoad=bOn)
+            #CloneObject.co3("Constellation01Decal04", "Minkata", bShow=bOn, bLoad=bOn)
+            #CloneObject.co3("Constellation01Decal05", "Minkata", bShow=bOn, bLoad=bOn)
+            #CloneObject.co3("ConstellationDummyCave01", "Minkata", bShow=bOn, bLoad=bOn)
+            #CloneObject.co3("ConstellationDummyCave02", "Minkata", bShow=bOn, bLoad=bOn)
+            #CloneObject.co3("ConstellationDummyCave03", "Minkata", bShow=bOn, bLoad=bOn)
+            #CloneObject.co3("ConstellationDummyCave04", "Minkata", bShow=bOn, bLoad=bOn)
+            #CloneObject.co3("ConstellationDummyCave05", "Minkata", bShow=bOn, bLoad=bOn)
+            SendChatMessage(self, myself, [player], "Event 272 (Minkata night sky) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 271:
+            # -- 271 -- 
+            print("==> event 271")
+            print("==> Minkata night sky 1")
+            CloneObject.co3("StarGlobe", "Minkata", bShow=bOn, bLoad=bOn)
+            SendChatMessage(self, myself, [player], "Event 27 (Minkata night sky 1) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 272:
+            # -- 272 -- 
+            print("==> event 272")
+            print("==> Minkata night sky 2")
+            CloneObject.co3("GalaxyDecal", "Minkata", bShow=bOn, bLoad=bOn)
+            SendChatMessage(self, myself, [player], "Event 272 (Minkata night sky 2) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 273:
+            # -- 273 -- 
+            print("==> event 273")
+            print("==> Minkata night sky 3")
+            CloneObject.co3("GalaxyDecalSmall", "Minkata", bShow=bOn, bLoad=bOn)
+            SendChatMessage(self, myself, [player], "Event 273 (Minkata night sky 3) is {0}".format(onOff), cFlags.flags)
         else:
             pass
         return 1
@@ -2545,7 +2959,7 @@ def OnLake(self, cFlags, args = []):
         except ValueError:
             #print "==> OnLake 3 ko"
             return 0
-        print "==> OnLake 4"
+        print("==> OnLake 4")
         CloneObject.Minkata(bShow=True, bLoad=True, soPlayer=soAvatar, matPos=mPos)
         SendChatMessage(self, myself, [player], "To remove the 'onlake' effect... PM me 'nolake' or 'onlake off' then visit Minkata.", cFlags.flags)
         return 1
@@ -2609,14 +3023,14 @@ def ColumnUnderPlayer2(self, cFlags, args = []):
     fYAngle = 0.0
     fZAngle = 0.0
     if len(args) > 1:
-        print "ColumnUnderPlayer2 : args[1] = [{}]".format(args[1])
+        print("ColumnUnderPlayer2 : args[1] = [{}]".format(args[1]))
         params = args[1].split()
-        print "ColumnUnderPlayer2 : len(params) = {}".format(len(params))
+        print("ColumnUnderPlayer2 : len(params) = {}".format(len(params)))
         if len(params) > 0:
-            print "params[0]='{}'".format(params[0])
+            print("params[0]='{}'".format(params[0]))
             try:
                 fXAngle = float(params[0])
-                print "fXAngle={}".format(fXAngle)
+                print("fXAngle={}".format(fXAngle))
             except:
                 if params[0] == "up":
                     fXAngle = 30.0
@@ -2627,12 +3041,12 @@ def ColumnUnderPlayer2(self, cFlags, args = []):
                 elif params[0] == "off":
                     bAttach = False
                 else:
-                    print "Error on params[0]='{}'".format(params[0])
+                    print("Error on params[0]='{}'".format(params[0]))
         if len(params) > 1:
-            print "params[0]='{}'".format(params[1])
+            print("params[0]='{}'".format(params[1]))
             try:
                 fYAngle = float(params[1])
-                print "fYAngle={}".format(fYAngle)
+                print("fYAngle={}".format(fYAngle))
             except:
                 if params[1] == "up":
                     fYAngle = 30.0
@@ -2643,12 +3057,12 @@ def ColumnUnderPlayer2(self, cFlags, args = []):
                 elif params[1] == "off":
                     bAttach = False
                 else:
-                    print "Error on params[1]='{}'".format(params[1])
+                    print("Error on params[1]='{}'".format(params[1]))
         if len(params) > 2:
-            print "params[0]='{}'".format(params[2])
+            print("params[0]='{}'".format(params[2]))
             try:
                 fZAngle = float(params[2])
-                print "fZAngle={}".format(fZAngle)
+                print("fZAngle={}".format(fZAngle))
             except:
                 if params[2] == "up":
                     fZAngle = 30.0
@@ -2659,16 +3073,16 @@ def ColumnUnderPlayer2(self, cFlags, args = []):
                 elif params[2] == "off":
                     bAttach = False
                 else:
-                    print "Error on params[2]='{}'".format(params[2])
+                    print("Error on params[2]='{}'".format(params[2]))
         if len(params) > 3:
-            print "params[0]='{}'".format(params[3])
+            print("params[0]='{}'".format(params[3]))
             if params[3] == "hide":
                 bShow = False
             elif params[3] == "off":
                 bAttach = False
             else:
-                print "Error on params[3]='{}'".fromat(params[3])
-    print "Calling Columns2.ColumnUnderPlayer2(bOn={}, bShow{}, player={}, fXAngle={}, fYAngle={}, fZAngle={}, bAttach={})".format(True, bShow, player, fXAngle, fYAngle, fZAngle, bAttach)
+                print("Error on params[3]='{}'".fromat(params[3]))
+    print("Calling Columns2.ColumnUnderPlayer2(bOn={}, bShow{}, player={}, fXAngle={}, fYAngle={}, fZAngle={}, bAttach={})".format(True, bShow, player, fXAngle, fYAngle, fZAngle, bAttach))
     Columns2.ColumnUnderPlayer2(True, bShow, player, fXAngle, fYAngle, fZAngle, bAttach)
     bJalakAdded = True
     return 1
@@ -2715,31 +3129,43 @@ def SendGame(self, cFlags, args = []):
     player = args[0]
     idAvatar = player.getPlayerID()
     
-    print "SendGame {}, {}".format(idAvatar, type(idAvatar))
+    print("SendGame {}, {}".format(idAvatar, type(idAvatar)))
+    
+    # Ne rien envoyer si le joueur n'est pas un ami (ca va peut-etre eviter les plantages)
+    if not xPlayers.IsBud(idAvatar):
+        print("This player is not yet my friend => Don't send anything!")
+        return 1
+    
     if len(args) > 1:
         params = args[1].split()
         for param in params:
-            print "SendGame #{}, {}".format(param, type(param))
-            ret = MarkerGames.SendGame(gameId=param, playerId=idAvatar)
+            print("SendGame #{}, {}".format(param, type(param)))
+            # With old client
+            #ret = MarkerGames.SendGame(gameId=param, playerId=idAvatar)
+            # With new client
+            ret = MarkerGames2.SendGame(gameId=param, playerId=idAvatar)
             if ret[0] == 1:
                 SendChatMessage(self, myself, [player], "I'm sending you game #{} : {}. Look in your Incoming folder.".format(param, ret[1]), cFlags.flags)
-                print "SendGame : game sent -> #{} - {}".format(param, ret[1])
+                print("SendGame : game sent -> #{} - {}".format(param, ret[1]))
             else:
                 SendChatMessage(self, myself, [player], "Game #{0} not found, sorry.".format(param), cFlags.flags)
-                print "SendGame error : game not sent"
-        print "SendGame end 1"
+                print("SendGame error : game not sent")
+        print("SendGame end 1")
         return 1
     else:
-        print "SendGame => list"
+        print("SendGame => list")
         title = "{0}'s Marker Games".format(myself.getPlayerName())
-        ret = MarkerGames.SendGameList(title, playerId=idAvatar)
+        # With old client
+        #ret = MarkerGames.SendGameList(title, playerId=idAvatar)
+        # With new client
+        ret = MarkerGames2.SendGameList(title, playerId=idAvatar)
         if ret == 1:
             SendChatMessage(self, myself, [player], "I'm sending you my game list, look in your Incoming folder.", cFlags.flags)
-            print "SendGame : list sent"
+            print("SendGame : list sent")
         else:
             SendChatMessage(self, myself, [player], "No game list available, sorry.", cFlags.flags)
-            print "SendGame error : list not sent"
-        print "SendGame end 2"
+            print("SendGame error : list not sent")
+        print("SendGame end 2")
         return 1
 
 # Ride an animal
@@ -2755,7 +3181,7 @@ def RideAnimal(self, cFlags, args = []):
     if len(args) > 1:
         params = args[1].split()
         for param in params:
-            print "RideAnimal : {} ({})".format(param, type(param))
+            print("RideAnimal : {} ({})".format(param, type(param)))
         if len(params) > 2:
             t = params[1]
         if len(params) > 0:
@@ -2792,62 +3218,82 @@ class ExecuteDanceSteps:
     isRunning = False
     lstActions = list()
     lstIdDancers = list()
+    bAllOn = False
+    bBypassGroups = False
+    groupOfDancers = dict()
     nbActions = 0
     currentActionIndex = 0
 
-    def __init__(self):
-        print "ExecuteDanceSteps : init"
-        
+    #def __init__(self):
+    def __init__(self, bBypassGroups):
+        print("ExecuteDanceSteps : init")
+        self.bBypassGroups = bBypassGroups
     def Step(self):
-        print "ExecuteDanceSteps : Step {} ({}, {})".format(self.currentActionIndex, self.nbActions, len(self.lstActions))
+        print("ExecuteDanceSteps : Step {} ({}, {})".format(self.currentActionIndex, self.nbActions, len(self.lstActions)))
         delay = 0
         
         strAct = self.lstActions[self.currentActionIndex]
         if strAct.lower().startswith("dance "):
-            print strAct
+            print("ExecuteDanceSteps [Step] : Dance name = {}".fromat(strAct))
         elif strAct.lower().startswith("end"):
-            print "This is the end!"
+            print("ExecuteDanceSteps : This is the end!")
+        elif strAct.lower().startswith("#"):
+            print("ExecuteDanceSteps : Comment, skip it.")
         elif strAct.lower().startswith("group"):
-            print "New group of dancers."
-            self.lstIdDancers = Dance.GetIdDancerList(strAct)
+            print("ExecuteDanceSteps [Step] : New group of dancers.")
+            #self.lstIdDancers = Dance.GetIdDancerList(strAct)
+            self.lstIdDancers, self.bAllOn = Dance.GetIdDancerList(strAct)
+        elif strAct.lower().startswith("aliasgroup"):
+            print("ExecuteDanceSteps [Step] : New group of dancers by alias.")
+            self.lstIdDancers = Dance.GetIdDancerListFromAlias(strAct, self.groupOfDancers)
+        elif strAct.lower().startswith("definegroup"):
+            print("ExecuteDanceSteps [Step] : Define a new group of dancers.")
+            self.groupOfDancers = Dance.DefineGroup(strAct)
         else:
-            print "Command line"
+            print("ExecuteDanceSteps [Step] : Command line : {}".format(strAct))
             cmdLine = Dance.ConvertActionToCommand(strAct)
             # Executer la commande pour chaque danseur present dans mon age
-            self.lstIdDancers
+            #self.lstIdDancers
             agePlayers = PtGetPlayerList()
             agePlayers.append(PtGetLocalPlayer())
-            ageDancers = filter(lambda pl: pl.getPlayerID() in self.lstIdDancers, agePlayers)
-            # pour tester : je m'ajoute si la liste est vides
+            if self.bAllOn or self.bBypassGroups:
+                ageDancers = agePlayers
+            else:
+                ageDancers = [pl for pl in agePlayers if pl.getPlayerID() in self.lstIdDancers]
+            # pour tester : je m'ajoute si la liste est vide
             if len(ageDancers) == 0:
                 ageDancers.append(PtGetLocalPlayer())
+            # Dispatch the command to all players in the group
             for player in ageDancers:
                 cmdArgs = [player]
                 cmdArgs.append(cmdLine[1])
                 CallMethod(self=self.xKiSelf, cmdName=cmdLine[0], cFlags=self.xKiFlags, pAmIRobot=xBotAge.AmIRobot, args=cmdArgs)
             # Attendre et lancer la commande suivante
             delay = cmdLine[2]
+            print("ExecuteDanceSteps [Step {}] : delay = {}".format(self.currentActionIndex, delay))
         
         if self.currentActionIndex < self.nbActions - 1:
             self.currentActionIndex += 1
+            print("ExecuteDanceSteps [Step] : PtSetAlarm(delay = {})".format(delay))
             PtSetAlarm(delay, self, 0)
         else:
+            print("ExecuteDanceSteps [Step] : Stop")
             self.Stop()
         
         #PtSetAlarm(delay, self, 0)
         #pass
 
-    def onAlarm(self, param=1):
+    def onAlarm(self, param=0):
         #print "ExecuteDanceSteps : onalarm"
         if not self.isRunning:
-            print "ExecuteDanceSteps : Not running"
+            print("ExecuteDanceSteps [onAlarm] : Not running")
             return
         #
         #for strAct in self.lstActions:
         #self.Stop()
         
         #
-        print "ExecuteDanceSteps : call Step"
+        print("ExecuteDanceSteps [onAlarm] : call Step")
         self.Step()
         
         #if param == 1:
@@ -2858,6 +3304,7 @@ class ExecuteDanceSteps:
         #    PtSetAlarm(19, self, 1)
         
     def Start(self, xKiSelf, xKiFlags, lstActions):
+        #print "ExecuteDanceSteps : Start 1"
         self.xKiSelf = xKiSelf
         self.xKiFlags = xKiFlags
         self.lstActions = lstActions
@@ -2865,11 +3312,11 @@ class ExecuteDanceSteps:
         self.currentActionIndex = 0
         if not self.isRunning:
             self.isRunning = True
-            print "ExecuteDanceSteps : Start"
+            print("ExecuteDanceSteps : Start 2")
             self.onAlarm()
 
     def Stop(self):
-        print "ExecuteDanceSteps : Stop"
+        print("ExecuteDanceSteps : Stop")
         self.isRunning = False
 
 # Il me faut une instance de la classe ExecuteDanceSteps
@@ -2880,35 +3327,58 @@ executeDanceSteps = None
 
 # Methode pour executer une danse complete
 def StartDance(self, cFlags, args=[]):
+    #print "StartDance 1"
     global executeDanceSteps
     myself = PtGetLocalPlayer()
     player = args[0]
     if not isPlayerInAge(player):
         SendChatMessage(self, myself, [player], "You must be in my age, use link to join me.", cFlags.flags)
         return 1
+    bBypassGroups = False
+    #print "StartDance 2"
     if len(args) > 1:
+        params = args[1].split()
+    else:
+        return 0
+    print("StartDance 3")
+    if len(params) > 1:
+        # 2nd agument : Optional, dance for all, bypass the groups
+        if params[1].strip() == "all":
+            bBypassGroups = True
+    print("StartDance 4")
+    if len(params) > 0:
         # Un seul parametre est attendu : le nom du fichier de danse.
-        danceFileName = args[1].strip()
-        print "ExecuteDance : {} ({})".format(danceFileName, type(danceFileName))
-        
+        #print "StartDance 4"
+        danceFileName = params[0].strip()
+        print("ExecuteDance : name = {}, for all = {}".format(danceFileName, bBypassGroups))
         lstActions = Dance.ReadDanceFile(danceFileName)
+        #print "StartDance 5"
         # Au cas ou une danse soit deja lancee, il faut l'arreter avant de demarrer la nouvelle
         if executeDanceSteps is not None:
             executeDanceSteps.Stop()
         
+        #print "StartDance 6"
         if len(lstActions) > 0:
+            #print "StartDance 7"
             if executeDanceSteps is None:
-                executeDanceSteps = ExecuteDanceSteps()
+                executeDanceSteps = ExecuteDanceSteps(bBypassGroups)
+                #print "StartDance 8"
+            else:
+                executeDanceSteps.bBypassGroups = bBypassGroups
             # C'est parti...
             executeDanceSteps.Start(self, cFlags, lstActions)
+            #print "StartDance 9"
         else:
             SendChatMessage(self, myself, [player], "The dance file '{}' is empty or does not exist.".format(danceFileName), cFlags.flags)
+        #print "StartDance 10"
         return 1
     else:
+        #print "StartDance 11"
         return 0
 
 # Methode pour arreter l'execution d'une danse
 def StopDance(self, cFlags, args=[]):
+    #print "StopDance 1"
     global executeDanceSteps
     myself = PtGetLocalPlayer()
     player = args[0]
@@ -2931,6 +3401,109 @@ def StopDance(self, cFlags, args=[]):
     xBotAge.AmIRobot = pAmIRobot
 """
 
+# Methode pour sauvegarder l'apparence d'un joueur
+def SaveMe(self, cFlags, args=[]):
+    myself = PtGetLocalPlayer()
+    player = args[0]
+    if not isPlayerInAge(player):
+        SendChatMessage(self, myself, [player], "You must be in my age, use link to join me.", cFlags.flags)
+        return 1
+    if len(args) > 1:
+        # Un seul parametre est attendu : le nom du fichier d'habillement.
+        clothingName = args[1].strip()
+        print("SaveMe : {} ({})".format(clothingName, type(clothingName)))
+        
+        ret = clothing.SaveAvatarClothingTo(player, clothingName)
+        return ret
+    else:
+        return 0
+
+# Methode pour restaurer l'apparence d'un joueur
+def RestoreMe(self, cFlags, args=[]):
+    myself = PtGetLocalPlayer()
+    player = args[0]
+    if not isPlayerInAge(player):
+        SendChatMessage(self, myself, [player], "You must be in my age, use link to join me.", cFlags.flags)
+        return 1
+    if len(args) > 1:
+        # Un seul parametre est attendu : le nom du fichier d'habillement.
+        clothingName = args[1].strip()
+        print("RestoreMe : {} ({})".format(clothingName, type(clothingName)))
+        
+        ret = clothing.LoadAvatarClothingFrom(player, clothingName)
+        return ret
+    else:
+        return 0
+
+# Toggles the visibility of the avatar.
+def ToggleVisibility(self, cFlags, args=[]):
+    myself = PtGetLocalPlayer()
+    player = args[0]
+    if not isPlayerInAge(player):
+        SendChatMessage(self, myself, [player], "You must be in my age, use link to join me.", cFlags.flags)
+        return 1
+    if len(args) > 1:
+        bOn = False
+        # Un seul parametre est attendu.
+        strOnOff = args[1].strip()
+        print("ToggleVisibility : {}".format(strOnOff))
+        if strOnOff == "1" or strOnOff == "on" or strOnOff == "true" :
+            bOn = True
+        soAvatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+        soAvatar.draw.netForce(1)
+        soAvatar.draw.enable(bOn)
+        return 1
+    else:
+        return 0
+
+# Unload all the clones
+def UnloadClones(objectName, ageFileName):
+    print(">> UnloadClones(objectName='{}', ageFileName='{}') <<".format(objectName, ageFileName))
+    demandeur = xFireCamp.placeCleftFireCamp.Demandeur
+    print("demandeur = {}".format(demandeur))
+    masterKey = PtFindSceneobject(objectName, ageFileName).getKey()
+    xFireCamp.GestionClones.CacheCloneInutile(demandeur, masterKey, 0)
+    cloneKeys = PtFindClones(masterKey)
+    for ck in cloneKeys:
+        PtCloneKey(ck, 0)
+
+# Add or remove the campfire
+def PutCampFireHere(self, cFlags, args=[]):
+    myself = PtGetLocalPlayer()
+    player = args[0]
+    if not isPlayerInAge(player):
+        SendChatMessage(self, myself, [player], "You must be in my age, use link to join me.", cFlags.flags)
+        return 1
+    bOn = True
+    if len(args) > 1:
+        bOn = False
+        # Un seul parametre est attendu.
+        strOnOff = args[1].strip()
+        print("PutCampFireHere : {}".format(strOnOff))
+        if strOnOff == "1" or strOnOff == "on" or strOnOff == "true" :
+            bOn = True
+    if bOn:
+        SendChatMessage(self, myself, [player], "At first use loading firecamp takes about 40s, please be patient...", cFlags.flags)
+        xFireCamp.PutCleftFireCampHere(player)
+        return 1
+    else:
+        # removing campfire elements
+        print("Avant : DicDemandeursClones = {}".format(xFireCamp.GestionClones.VarPerso.AccessVarPerso.DicDemandeursClones))
+        UnloadClones(objectName="ClockPart08",       ageFileName="Ahnonay")
+        UnloadClones(objectName="ClockPart05",       ageFileName="Ahnonay")
+        UnloadClones(objectName="FlamerRed01",       ageFileName="BahroCave")
+        UnloadClones(objectName="SmokerUpRed",       ageFileName="BahroCave")
+        UnloadClones(objectName="DusterRed",         ageFileName="BahroCave")
+        UnloadClones(objectName="RTomniRed01",       ageFileName="BahroCave")
+        UnloadClones(objectName="RTomniRed06",       ageFileName="BahroCave")
+        UnloadClones(objectName="Flamer",            ageFileName="BahroCave")
+        UnloadClones(objectName="SmokerUp",          ageFileName="BahroCave")
+        UnloadClones(objectName="Duster",            ageFileName="BahroCave")
+        UnloadClones(objectName="RTOmniLighFlame",   ageFileName="BahroCave")
+        UnloadClones(objectName="RTOmniLighFlame01", ageFileName="BahroCave")
+        xFireCamp.placeCleftFireCamp = None
+        print("Apres : DicDemandeursClones = {}".format(xFireCamp.GestionClones.VarPerso.AccessVarPerso.DicDemandeursClones))
+        return 1
 """
 #Exemple:
 #Appelle la fonction maFonction de monModule.py
@@ -2976,27 +3549,38 @@ def Help(self, cFlags, args = []):
     player = args[0]
     idAvatar = player.getPlayerID()
     
-    self.chatMgr.AddChatLine(None, "** Help: sending to \"{}\". **".format(player.getPlayerName()), 3)
-    print("** Help: sending to \"{}\". **".format(player.getPlayerName()))
-
+    #self.chatMgr.AddChatLine(None, "** Help: sending to \"{}\". **".format(player.getPlayerName()), 3)
+    #print("** Help: sending to \"{}\". **".format(player.getPlayerName()))
+    msg = "** Help: sending to \"{0}\" [{1}]. **".format(player.getPlayerName(), idAvatar)
+    self.chatMgr.AddChatLine(None, msg, 3)
+    print(msg)
+    
     # aide sur une commande (en chat prive)
     if len(args) > 1:
         cmdName = args[1]
         HelpCmd(self, player, cFlags, cmdName)
         return 1
-    # si pas de commade specifiee, envoyer le KiMail
     
-#    #pour en mettre une copie dans mon journal Nexus
-#    journals = ptVault().getAgeJournalsFolder()
-#    agefolderRefs = journals.getChildNodeRefList()
-#    for agefolderRef in agefolderRefs:
-#        agefolder = agefolderRef.getChild()
-#        if agefolder.getType() == PtVaultNodeTypes.kFolderNode:
-#            agefolder = agefolder.upcastToFolderNode()
-#            if agefolder.folderGetName() == 'Nexus':
-#                journal = agefolder
-#                break
-
+    # si pas de commande specifiee, envoyer le KiMail
+    # mais seulement si le joueur est un ami (ca va peut-etre eviter les plantages)
+    # Ne rien envoyer si le joueur n'est pas un ami (ca va peut-etre eviter les plantages)
+    if not xPlayers.IsBud(idAvatar):
+        print("This player is not yet my friend => Don't send anything!")
+        return 1
+    
+    """
+    #pour en mettre une copie dans mon journal Nexus
+    journals = ptVault().getAgeJournalsFolder()
+    agefolderRefs = journals.getChildNodeRefList()
+    for agefolderRef in agefolderRefs:
+        agefolder = agefolderRef.getChild()
+        if agefolder.getType() == PtVaultNodeTypes.kFolderNode:
+            agefolder = agefolder.upcastToFolderNode()
+            if agefolder.folderGetName() == 'Nexus':
+                journal = agefolder
+                break
+    """
+    
     title1 = myself.getPlayerName() + "'s help"
     msg = "Shorah!\n"
     msg += "I'm an automated avatar created by Mirphak.\n"
@@ -3008,9 +3592,9 @@ def Help(self, cFlags, args = []):
     msg += "** LINKING THROUGH AGES:\n"
     msg += "link or meet : links your avatar to Mir-o-Bot's current Age.\n\n"
     msg += "to {city/library/ferry/dakotah/tokotah/concert/palace} : links YOU to different points of the public city\n"
-    msg += "or some public ages {gog/gome/kirel/kveer/phil}\n"
+    msg += "or some public ages {gog/gome/kirel/kveer/phil/chiso/messengerspub/veelay}\n"
     #msg += "or a Mir-o-Bot age {Ae'gura/Ahnonay Cathedral/Cleft/Relto/Eder Gira/Eder Kemo/Er'cana/Gahreesen/Hood/Kadish/Pellet Cave/Teledahn}.\n"
-    msg += "or a Mir-o-Bot age {aegura/ahnonay/cathedral/cleft/dereno/descent/ercana/gahreesen/gz/gira/hood/jalak/kadish/kemo/minkata/myst/negilahn/office/payiferen/pelletcave/relto/silo/spyroom/teledahn/tetsonot}.\n"
+    msg += "or a Mir-o-Bot age {aegura/ahnonay/cathedral/cleft/dereno/descent/ercana/gahreesen/gz/gira/hood/jalak/kadish/kemo/minkata/myst/negilahn/office/payiferen/pelletcave/relto/silo/spyroom/teledahn/tetsonot/mobkveer/mobgomepub}.\n"
     #msg += "or a Magic age: to {MBCity/MBRelto/MBErcana/MBTeledahn/MBOffice/MBKadish/MBKveer/MBHood/MBDereno/MBRudenna}.\n\n"
     #msg += "linkbotto {fh/fhci/fhde/fhga/fhte/fhka/fhgi/fhcl/mbe/mcl/mre/mkv/mka/scl}: links Mir-o-Bot to the specified Age.\n"
     msg += "linkbotto [age name]: links Mir-o-Bot to the specified Age.\n"
@@ -3032,7 +3616,7 @@ def Help(self, cFlags, args = []):
     """
     #msg += "   Mir-o-Bot's ages are available too :Ae'gura, Ahnonay, Ahnonay Cathedral, Cleft, Eder Gira, Eder Kemo, Eder Tsogal, Eder Delin, Er'cana, Gahreesen, Hood, Jalak, Kadish, Minkata, Pellet Cave, Relto, Teledahn\n"
     msg += "   Available Mir-o-Bots ages:\n"
-    msg += "   aegura, ahnonay, cathedral, cleft, dereno, descent, ercana, gahreesen, gira, gz, hood, jalak, kadish, kemo, minkata, mobkveer, myst, negilahn, office, payiferen, pelletcave, relto, silo, spyroom, teledahn, tetsonot\n\n"
+    msg += "   aegura, ahnonay, cathedral, cleft, dereno, descent, ercana, gahreesen, gira, gz, hood, jalak, kadish, kemo, minkata, mobkveer, myst, negilahn, office, payiferen, pelletcave, relto, silo, spyroom, teledahn, tetsonot, mobkveer, mobgomepub\n\n"
     msg += "   Some more arrival points in Mir-o-Bots ages that works with the to and linkbotto commands:\n"
     msg += "   Cleft : cleft1, cleft2.\n"
     msg += "   Er'cana : oven.\n"
@@ -3102,7 +3686,7 @@ def Help(self, cFlags, args = []):
     msg += "day : disables night.\n\n"
     #msg += "cms [on/off]: on = enables Colored Moving Sky during 5 minutes, off = disables Colored Moving Sky.\n\n"
     msg += "cms [on/off]: on = enables Colored Moving Sky, off = disables Colored Moving Sky.\n\n"
-    msg += "door [open/close] : opens or closes the bahro door (only in Delin or Tsogal).\n\n"
+    #msg += "door [open/close] : opens or closes the bahro door (only in Delin or Tsogal).\n\n"
     msg += "soccer : Drops some soccer balls.\n\n"
     #msg += "drop : Drops some objects.\n\n"
     #msg += "clean : Cleans the previously droped objects.\n\n"
@@ -3179,35 +3763,35 @@ def Help(self, cFlags, args = []):
     except:
         msg = "An error occured when creating help note 4."
         SendChatMessage(self, myself, [player], msg, cFlags.flags)
-
+    
     msg = "I'm sending you help Ki-mails..."
     SendChatMessage(self, myself, [player], msg, cFlags.flags)
-    if helpNote1 is not None:
+    if helpNote1 is not None and idAvatar is not None and idAvatar != 0 and idAvatar != myself.getPlayerID():
         try:
             helpNote1.sendTo(idAvatar)
         except:
             msg = "An error occured while sending help note 1."
             SendChatMessage(self, myself, [player], msg, cFlags.flags)
-    if helpNote2 is not None:
+    if helpNote2 is not None and idAvatar is not None and idAvatar != 0 and idAvatar != myself.getPlayerID():
         try:
             helpNote2.sendTo(idAvatar)
         except:
             msg = "An error occured while sending help note 2."
             SendChatMessage(self, myself, [player], msg, cFlags.flags)
-    if helpNote3 is not None:
+    if helpNote3 is not None and idAvatar is not None and idAvatar != 0 and idAvatar != myself.getPlayerID():
         try:
             helpNote3.sendTo(idAvatar)
         except:
             msg = "An error occured while sending help note 3."
             SendChatMessage(self, myself, [player], msg, cFlags.flags)
-    if helpNote4 is not None:
+    if helpNote4 is not None and idAvatar is not None and idAvatar != 0 and idAvatar != myself.getPlayerID():
         try:
             helpNote4.sendTo(idAvatar)
         except:
             msg = "An error occured while sending help note 4."
             SendChatMessage(self, myself, [player], msg, cFlags.flags)
     
-    msg = "You can also use \"help [command name]\".\n ** Available commands : " + ", ".join(cmdDict.keys())
+    msg = "You can also use \"help [command name]\".\n ** Available commands : " + ", ".join(list(cmdDict.keys()))
     SendChatMessage(self, myself, [player], msg, cFlags.flags)
     return 1
 
@@ -3236,14 +3820,43 @@ def HelpCmd(self, player, cFlags, cmdName):
         #SendChatMessage(self, myself, [player], msg, cFlags.flags)
     return 1
 
-def TestMsg(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> TestMsg", 3)
-    if len(args) < 2:
+# Envoyer la liste complete des animations au demandeur
+def SendAnimListNote(self, cFlags, args = []):
+    #self.chatMgr.AddChatLine(None, "> SendAnimListNote", 3)
+    if len(args) < 1:
+        self.chatMgr.AddChatLine(None, "** SendAnimListNote: no arg! **", 3)
+        print("** SendAnimListNote: no arg! **")
         return 0
     myself = PtGetLocalPlayer()
     player = args[0]
-    nFlag = int(args[1])
-    SendChatMessage(self, myself, [player], "type msg: %i" % (nFlag) , nFlag)
+    idAvatar = player.getPlayerID()
+    
+    msg = "** SendAnimListNote: sending to \"{0}\" [{1}]. **".format(player.getPlayerName(), idAvatar)
+    self.chatMgr.AddChatLine(None, msg, 3)
+    print(msg)
+    
+    # Ne rien envoyer si le joueur n'est pas un ami (ca va peut-etre eviter les plantages)
+    if not xPlayers.IsBud(idAvatar):
+        print("This player is not yet my friend => Don't send anything!")
+        return 1
+    
+    # create the note
+    try:
+        helpNote = ptVaultTextNoteNode(0)
+        helpNote.setTextW(AnimationList.containt)
+        helpNote.setTitleW(AnimationList.title)
+    except:
+        msg = "An error occured when creating the list of animations note."
+        SendChatMessage(self, myself, [player], msg, cFlags.flags)
+    
+    msg = "I'm sending you the list of animations KI-mail ..."
+    SendChatMessage(self, myself, [player], msg, cFlags.flags)
+    if helpNote is not None and idAvatar is not None and idAvatar != 0 and idAvatar != myself.getPlayerID():
+        try:
+            helpNote.sendTo(idAvatar)
+        except:
+            msg = "An error occured while sending the list of animations note."
+            SendChatMessage(self, myself, [player], msg, cFlags.flags)
     return 1
 
 
@@ -3282,12 +3895,14 @@ cmdDict = {
         " warps you to the avatar", 
         " or the first object found (use * as any unknown caracters but not a * alone), this command is case sensitive.\n\"list [object name]\" will help you to find object names"]),
     'list':(ShowSceneObjects,["list [object name]: shows you the list of object names found (use * as any unknown caracters but not a * alone), this command is case sensitive.\nTry \"find [one of the listed objects]\""]),
-    'anim':(Animer, ["[animation name] [n]:", 
-        " where [animation name] is in:", 
-        "    {ladderup/ladderdown/climbup/climbdown/stairs", 
-        "    /walk/run/back/moonwalk/swim", 
-        "    /dance/crazy/what/zomby/hammer/wait/laugh/thank/talk}.", 
-        " and [n] is the number of times you want to do."]),
+    'anim':(Animer, ["[animation name] [n] [f/m/b]: where", 
+        "- [animation name] is in the animation list (PM me animlist to have it)", 
+    #    "    {ladderup/ladderdown/climbup/climbdown/stairs", 
+    #    "    /walk/run/back/moonwalk/swim", 
+    #    "    /dance/crazy/what/zomby/hammer/wait/laugh/thank/talk}.", 
+        "- [n] is the number of times you want to do it.",
+        "- [f/m/b] (optional) f = female animation, m = male animation, b = bahro animation."]),
+    'animlist':(SendAnimListNote, ["animlist : Sends you a KI-mail contains the list of the avatar's animations"]),
     #'addcleft':(AddCleft,["addcleft: adds partially invisible Cleft."]),
     #'load':(LoadNewDesert,["load: loads \"A New Cycle Has Begun\"."]),
     'sp':(WarpToSpawnPoint,["sp [number]: warps you to a spawn point. Number is an integer, the max depending of the age."]),
@@ -3340,6 +3955,10 @@ cmdDict = {
     'startdance':(StartDance,["startdance [dance name]: Starts the dance named [dance name]."]),
     'stopdance':(StopDance,["stopdance : Stops the active dance."]),
     'rsph':(RotateAhnonaySphere, ["rsph : Rotates the Ahnonay spheres. Works only if the bot is in Ahnonay."]),
+    'saveme':(SaveMe,["saveme [name]: Saves my clothing in a file named [name]."]),
+    'restoreme':(RestoreMe,["restoreme [name]: Loads the clothing named [name]."]),
+    'vis':(ToggleVisibility,["vis [on/off]: Makes you visible or invisible."]),
+    'campfire':(PutCampFireHere,["campfire [on/off]: Puts a campfire where you are."]),
     #exemple:
     #'macommande':(MaMethode,["ligne d'aide 1", "ligne d'aide 2", "etc."]),
     'help':(Help, ["help: sends you a help text note.", "help [command name]: PM you a specific help on a command."])
@@ -3367,12 +3986,16 @@ alternatives = {
     'list':['list', 'show', 'search', 's', 'montre'],
     'help':['help', 'h', 'elp', 'aide', '?'],
     'anim':['anim', 'animation'],
+    'animlist':['animlist', 'animationlist', 'listanim', 'listanimation', 'listofanim', 'listofanimation', 'animslist', 'animationslist', 'listanims', 'listanimations', 'listofanims', 'listofanimations'],
     'light':['light', 'aura'],
     'fogshape':['fogshape', 'fogdensity'],
     'column':['col', 'colonne'],
     'onlake':['lakeon', 'lake'],
     'nolake':['lakeoff', 'onlakeoff', 'offlake'],
     'rsph':['rsph', 'rotsphere', 'rotspheres', 'rotatesphere', 'rotatespheres', 'turnsphere', 'turnspheres'],
+    'vis':['vis', 'visible'],
+    'campfire':['campfire', 'firecamp'],
+    'startdance':['startdance', 'startshow'],
 }
 
 # Noms alternatifs des animations
@@ -3390,7 +4013,7 @@ altAnim = {
     'zombie'    :['zombie'    , 'zomby', 'ombie', 'omby'],
     'marteau'   :['marteau'   , 'hammer'],
     'attente'   :['attente'   , 'wait'],
-    'rire2'      :['rire2'      , 'laugh2'],
+    'rire2'     :['rire2'     , 'laugh2'],
     'merci'     :['merci'     , 'thank', 'thanks'],
     'marche'    :['marche'    , 'walk'],
     'cours'     :['cours'     , 'run'],
@@ -3402,7 +4025,7 @@ altAnim = {
     # Other simple animations
     "agree"               : ["agree", "yes", "oui"], 
     "amazed"              : ["amazed", "etonne"], 
-    "askquestion"         : ["askquestion"], 
+    "askquestion"         : ["askquestion", "ask", "question"], 
     "ballpushwalk"        : ["ballpushwalk"], 
     "beckonbig"           : ["beckonbig"], 
     "beckonsmall"         : ["beckonsmall"], 
@@ -3473,18 +4096,123 @@ altAnim = {
     "wavelow"             : ["wavelow"], 
     "winded"              : ["winded"], 
     "yawn"                : ["yawn"], 
+    # Thoses other animations are working everywhere
+    "buttontouch"         : ["buttontouch"],
+    "doorbuttontouch"     : ["doorbuttontouch"],
+    "floorlevera"         : ["floorlevera"],
+    "floorleveraup"       : ["floorleveraup"],
+    "globalscopegrab"     : ["globalscopegrab"],
+    "globalscopehold"     : ["globalscopehold"],
+    "globalscoperelease"  : ["globalscoperelease"],
+    #"kihand"              : ["kihand"],
+    #"kihandlonger"        : ["kihandlonger"],
+    "kibegin"             : ["kibegin"],
+    "kiend"               : ["kiend"],
+    "kitap"               : ["kitap"],
+    "kiuse"               : ["kiuse"],
+    "pelletbookleft"      : ["pelletbookleft"],
+    "pelletbookright"     : ["pelletbookright"],
+    "pelletbookwait"      : ["pelletbookwait"],
+    #"personnallink"       : ["personnallink"],
+    "shootertrapactivate" : ["shootertrapactivate"],
+    "shortidle"           : ["shortidle"],
+    "shortleap"           : ["shortleap"],
+    "sitfront"            : ["sitfront"],
+    "sitidle"             : ["sitidle"],
+    "sitidleground"       : ["sitidleground"],
+    "steponfloorplate"    : ["steponfloorplate"],
+    # ** These should also work everywhere **
+    "afkidle"                 : ["afkidle"],
+    "blindsleverdown"         : ["blindsleverdown"],
+    "blindsleverup"           : ["blindsleverup"],
+    "blndfrntleverdown"       : ["blndfrntleverdown"],
+    "blndfrntleverup"         : ["blndfrntleverup"],
+    "bookaccept"              : ["bookaccept"],
+    "bookacceptidle"          : ["bookacceptidle"],
+    "bookoffer"               : ["bookoffer"],
+    "bookofferfinish"         : ["bookofferfinish"],
+    "bookofferidle"           : ["bookofferidle"],
+    "insertkihand"            : ["insertkihand"],
+    "insertkihandlonger"      : ["insertkihandlonger"],
+    "softlanding"             : ["softlanding"],
+    "touchpellet"             : ["touchpellet"],
+    # ** These only work in Ahnonay **
+    "swimdockexit"            : ["swimdockexit"],
+    "swimsurfacedive"         : ["swimsurfacedive"],
+    "swimunderwater"          : ["swimunderwater"],
+    "valvewheelcw"            : ["valvewheelcw"],
+    "valvewheelccw"           : ["valvewheelccw"],
+    # ** These only work in Er'cana **
+    "floorleverapullhard"     : ["floorleverapullhard"],
+    "floorleverapushhard"     : ["floorleverapushhard"],
+    "floorleverastuck"        : ["floorleverastuck"],
+    "floorleveraup"           : ["floorleveraup"],
+    "hatchlockedbelow"        : ["hatchlockedbelow"],
+    "hrvstrleverbackward"     : ["hrvstrleverbackward"],
+    "hrvstrleverforward"      : ["hrvstrleverforward"],
+    "pushdebris"              : ["pushdebris"],
+    # ** These only work in Cleft **
+    "cleftdropin"             : ["cleftdropin"],
+    "windmilllockedccw"       : ["windmilllockedccw"],
+    "windmilllockedcw"        : ["windmilllockedcw"],
+    # ** These only work in Gahreesen **
+    "elevatorarrivingbottom"  : ["elevatorarrivingbottom"],
+    "elevatorarrivingtop"     : ["elevatorarrivingtop"],
+    "elevatorleavingbottom"   : ["elevatorleavingbottom"],
+    "elevatorleavingtop"      : ["elevatorleavingtop"],
+    "wallclimbdismountdown"   : ["wallclimbdismountdown"],
+    "wallclimbdismountleft"   : ["wallclimbdismountleft"],
+    "wallclimbdismountright"  : ["wallclimbdismountright"],
+    "wallclimbdismountup"     : ["wallclimbdismountup"],
+    "wallclimbdown"           : ["wallclimbdown"],
+    "wallclimbidle"           : ["wallclimbidle"],
+    "wallclimbleft"           : ["wallclimbleft"],
+    "wallclimbright"          : ["wallclimbright"],
+    "wallclimbmountdown"      : ["wallclimbmountdown"],
+    "wallclimbmountleft"      : ["wallclimbmountleft"],
+    "wallclimbmountright"     : ["wallclimbmountright"],
+    "wallclimbmountup"        : ["wallclimbmountup"],
+    # ** These only work in Eder Gira **
+    "fumerolclothjump"        : ["fumerolclothjump"],
+    "fumerolledgeblast"       : ["fumerolledgeblast"],
+    "fumerolrockblast"        : ["fumerolrockblast"],
+    "vertblastlevel01"        : ["vertblastlevel01"],
+    "vertblastlevel02"        : ["vertblastlevel02"],
+    "vertblastlevel03"        : ["vertblastlevel03"],
+    "vertblastlevel04"        : ["vertblastlevel04"],
+    "vertblastlevel05"        : ["vertblastlevel05"],
+    "vertblastlevel06"        : ["vertblastlevel06"],
+    # ** These only work in Teledahn **
+    "aquariumbuttonhold"      : ["aquariumbuttonhold"],
+    "aquariumbuttonpress"     : ["aquariumbuttonpress"],
+    "aquariumbuttonrelease"   : ["aquariumbuttonrelease"],
+    "clutchlevergeargrind"    : ["clutchlevergeargrind"],
+    "dropoutofbucket"         : ["dropoutofbucket"],
+    "getinbucket"             : ["getinbucket"],
+    "getoutofbucket"          : ["getoutofbucket"],
+    "hatchclose"              : ["hatchclose"],
+    "hatchlockedabove"        : ["hatchlockedabove"],
+    "hatchlockedbelow"        : ["hatchlockedbelow"],
+    "hatchopenabove"          : ["hatchopenabove"],
+    "hatchopenbelow"          : ["hatchopenbelow"],
+    "noxiouscavedoorpullopen" : ["noxiouscavedoorpullopen"],
+    "noxiouscavedoorpushopen" : ["noxiouscavedoorpushopen"],
+    "noxiousdoorclose"        : ["noxiousdoorclose"],
+    "powertowerprimerbutton"  : ["powertowerprimerbutton"],
+    "powertowerprimerlevers"  : ["powertowerprimerlevers"],
+    "secretwallbutton"        : ["secretwallbutton"],
 }
 
 travelAnimList = ("echelle", "descendre", "ladderup", "ladderdown", "escalier", "nage", "marche", "cours", "recule", "pasdroite", "pasgauche", "brasse")
 
 def RetreaveCmdName(altCmdName):
-    for k, v in alternatives.items():
+    for k, v in list(alternatives.items()):
         if altCmdName.lower() in v:
             return str(k)
     return altCmdName
 
 def RetreaveAnimCmdName(altCmdName):
-    for k, v in altAnim.items():
+    for k, v in list(altAnim.items()):
         if altCmdName.lower() in v:
             return str(k)
     return None
@@ -3517,7 +4245,7 @@ def RetreaveSPCmd(altCmdName):
     }
     ageInfo = PtGetAgeInfo()
     ageFileName = ageInfo.getAgeFilename().lower()
-    if ageFileName in altSP.keys():
+    if ageFileName in list(altSP.keys()):
         if altCmdName.lower() in altSP[ageFileName]:
             return altCmdName.lower()
     return None
@@ -3526,14 +4254,14 @@ def RetreaveCmd(altCmd, args):
     if altCmd == "no":
         if len(args) > 1:
             if args[1] in ["ki", "light", "aura", "night", "sky", "fog", "bug", "bugs", "lake"]:
-                print "(a): {} off".format(args[1])
+                print("(a): {} off".format(args[1]))
                 cmd = "{} off".format(args[1])
                 args.pop(1)
                 return cmd
     if altCmd in ["open", "close"]:
         if len(args) > 1:
             if args[1] == "door":
-                print "(b): door {}".format(altCmd)
+                print("(b): door {}".format(altCmd))
                 cmd = "door {}".format(altCmd)
                 args.pop(1)
                 return cmd
@@ -3544,18 +4272,20 @@ def RetreaveCmd(altCmd, args):
         "light off":["lightoff", "auraoff", "nolight"],
         "door open":["opendoor", "dooropen"],
         "door close":["closedoor", "doorclose"],
-        "night on":["nighton",],
-        "night off":["nightoff", "nonight"],
+        "night on":["nighton", "starson"],
+        "night off":["nightoff", "nonight", "starsoff"],
         "sky on":["skyon",],
         "sky off":["skyoff", "nosky"],
         "fog on":["fogon",],
         "fog off":["fogoff", "nofog"],
-        "bugs on":["bugson",],
-        "bugs off":["bugsoff", "nobug"],
+        "bugs on":["bugson", "flieson", "fireflieson"],
+        "bugs off":["bugsoff", "nobug", "firefliesoff"],
+        "vis on":["vison", "vis1", "vistrue", "visible", "unhideme", "showme"],
+        "vis off":["visoff", "vis0", "visfalse", "invisible", "hideme"],
         }
-    for k, v in altCmds.items():
+    for k, v in list(altCmds.items()):
         if altCmd.lower() in v:
-            print "(c): {}".format(k)
+            print("(c): {}".format(k))
             return str(k)
     return None
 
@@ -3596,7 +4326,7 @@ def MaMethode(self, cFlags, args = []):
 #
 def CallMethod(self, cmdName, cFlags, pAmIRobot, args=[]):
     xBotAge.AmIRobot = pAmIRobot
-    print "xBotAge.AmIRobot = {}".format(xBotAge.AmIRobot)
+    print("xBotAge.AmIRobot = {}".format(xBotAge.AmIRobot))
     #traiter les noms de commande alternatifs
     try:
         cmdName = RetreaveCmdName(cmdName)
@@ -3621,7 +4351,7 @@ def CallMethod(self, cmdName, cFlags, pAmIRobot, args=[]):
             args.append(spAlias)
     #commande agglutinee
     if len(args) > 1:
-        print "avant: {} {}".format(cmdName, args[1])
+        print("avant: {} {}".format(cmdName, args[1]))
     #cmdAndArgs = RetreaveCmd(cmdName, args)
     #cmd = cmdAndArgs[0]
     #args = cmdAndArgs[1]
@@ -3632,11 +4362,11 @@ def CallMethod(self, cmdName, cFlags, pAmIRobot, args=[]):
         args.append(cmdNameAndArg[1])
     
     if len(args) > 1:
-        print "apres: {} {}".format(cmdName, args[1])
+        print("apres: {} {}".format(cmdName, args[1]))
     #traitement "normal"
     if cmdName in cmdDict:
         #self.chatMgr.AddChatLine(None, "** CallMethod: \"{}\" found. **".format(cmdName), 3)
-        print("** CallMethod: \"{}\" found. **".format(cmdName))
+        print(("** CallMethod: \"{}\" found. **".format(cmdName)))
         ret = None
         # During events I may have to disable all the commands but warp to bot
         if bBlockCmds:
@@ -3646,8 +4376,11 @@ def CallMethod(self, cmdName, cFlags, pAmIRobot, args=[]):
             #authorizedCmds = ('link', 'to', 'onbot', 'wd', 'warp', 'nolake', 'coord', 'save', 'ws', 'agoto', 'rgoto', 'dnigoto', 'land', 'turn', 'rot', 'float', 'jump', 'find', 'list', 'anim', 'sp', 'ki', 'light', 'nopanic', 'sdl', 'sendme', 'help')
             authorizedCmds = ()
             myself = PtGetLocalPlayer()
-            if myself.getPlayerID() != 2332508L:
-                authorizedCmds = ('link', 'to', 'onbot', 'wd', 'warp', 'onlake', 'nolake', 'coord', 'save', 'ws', 'agoto', 'rgoto', 'dnigoto', 'land', 'turn', 'rot', 'float', 'jump', 'find', 'list', 'anim', 'sp', 'ki', 'light', 'nopanic', 'sdl', 'sendme', 'help')
+            if myself.getPlayerID() != 2332508:
+                #authorizedCmds = ('link', 'to', 'onbot', 'wd', 'warp', 'onlake', 'nolake', 'coord', 'save', 'ws', 'agoto', 'rgoto', 'dnigoto', 'land', 'turn', 'rot', 'float', 'jump', 'find', 'list', 'anim', 'sp', 'ki', 'light', 'nopanic', 'sdl', 'sendme', 'help')
+                authorizedCmds = ('link', 'to', 'onbot', 'wd', 'warp', 'coord', 'save', 'ws', 'agoto', 'rgoto', 'dnigoto', 'land', 'turn', 'rot', 'float', 'jump', 'find', 'list', 'anim', 'sp', 'ki', 'light', 'nopanic', 'saveme', 'sendme', 'restoreme', 'help')
+                #authorizedCmds = ('onbot', 'link')
+                #authorizedCmds = ()
             if cmdName not in authorizedCmds:
                 #myself = PtGetLocalPlayer()
                 player = args[0]
@@ -3661,6 +4394,7 @@ def CallMethod(self, cmdName, cFlags, pAmIRobot, args=[]):
             #return cmdDict[cmdName][0]()
             ret = cmdDict[cmdName][0]()
         else:
+            """
             #self.chatMgr.DisplayStatusMessage("=> " + cmdName)
             #return cmdDict[cmdName][0](self, cFlags, args)
             ret = cmdDict[cmdName][0](self, cFlags, args)
@@ -3670,8 +4404,13 @@ def CallMethod(self, cmdName, cFlags, pAmIRobot, args=[]):
                 if isBuddyAdded:
                     self.chatMgr.AddChatLine(None, "----> '{0}' [{1}] a ete ajoute a mes buddies.".format(args[0].getPlayerName(), args[0].getPlayerID()), 3)
                 #self.chatMgr.AddChatLine(None, "----> '{0}' [{1}] m'a utilise.".format(args[0].getPlayerName(), args[0].getPlayerID()), 3)
+            """
+            isBuddyAdded = xPlayers.AddBud(args[0].getPlayerID())
+            if isBuddyAdded:
+                self.chatMgr.AddChatLine(None, "----> '{0}' [{1}] a ete ajoute a mes buddies.".format(args[0].getPlayerName(), args[0].getPlayerID()), 3)
+            ret = cmdDict[cmdName][0](self, cFlags, args)
         #self.chatMgr.AddChatLine(None, "** CallMethod: \"{}\" returned: {}. **".format(cmdName, ret), 3)
-        print("** CallMethod: \"{}\" returned: {}. **".format(cmdName, ret))
+        print(("** CallMethod: \"{}\" returned: {}. **".format(cmdName, ret)))
         return ret
     else:
         return 0

@@ -4,7 +4,7 @@
 
 from Plasma import *
 import math
-import CloneObject
+from . import CloneObject
 
 """
 * Objets du ciel a retourner:

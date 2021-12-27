@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Plasma import *
 
 #
@@ -7,7 +8,7 @@ def LinkPlayerTo(age, playerID = None, spawnPointNumber = None):
         playerID = PtGetLocalPlayer().getPlayerID()
     else:
         try:
-            playerID = long(playerID)
+            playerID = int(playerID)
         except:
             return "incorrect playerID"
             #pass

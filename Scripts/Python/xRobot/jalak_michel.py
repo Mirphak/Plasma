@@ -1,4 +1,4 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 
 """Scripts pour teleport avatars Uru Live
 Michel Lacoste
@@ -38,7 +38,7 @@ def SaveColumns(nomfichier,nomavatar):
         except OSError as e:
             if not(e.errno==errno.EEXIST and os.path.isdir(repertoire)):
                 raise
-        fWrite = file(chemin,'w')
+        fWrite = open(chemin,'w')
         i = 0
         for pos in byteColumns:
             fWrite.write(str(pos)+"\n")
@@ -61,23 +61,28 @@ def LoadColumns(nomfichier,nomavatar):
         if not(e.errno==errno.EEXIST and os.path.isdir(repertoire)):
             raise
     try:
-        fRead = file(chemin,'r')
+        fRead = open(chemin,'r')
     except:
-        print "ERROR!  File '%s' not found, load canceled." % (chemin)
+        print("ERROR!  File '%s' not found, load canceled." % (chemin))
         return 0
     preset = []
     i = 0
     for line in fRead:
-        pos = string.atoi(line)
+        #pos = string.atoi(line)
+        pos = 0
+        try:
+            pos = int(line)
+        except:
+            print("ERROR! in File '%s', line is not an integer." % (chemin))
         if pos < 0 or pos > 19:
-            print "ERROR!  Column %d has an invalid position of %d, must be an integer between 0 and 19.  Load canceled." % (i,pos)
+            print("ERROR!  Column %d has an invalid position of %d, must be an integer between 0 and 19.  Load canceled." % (i,pos))
             fRead.close()
             return -1
         else:
             preset.append(pos)
         i += 1
     if len(preset) != 25:
-        print "ERROR!  File contains %d positions, must contain positions for 25 columns, only.  Load canceled." % (len(preset))
+        print("ERROR!  File contains %d positions, must contain positions for 25 columns, only.  Load canceled." % (len(preset)))
         return -2
     else:
         PtSendKIMessage(26,"Reading file '%s', preset Jalak's columns"% (chemin))    	
@@ -119,7 +124,7 @@ def SaveCubes(nomfichier,nomavatar):
     except OSError as e:
         if not(e.errno==errno.EEXIST and os.path.isdir(repertoire)):
             raise
-    fWrite = file(chemin,'w')
+    fWrite = open(chemin,'w')
     fWrite.write(nomfichier+'\n')
     for cc in cubes:
         SObjet = PtFindSceneobject(cc, 'Jalak')
@@ -145,7 +150,7 @@ def FichierDisque(repertoire, nomfichier):
     try:
         fRead = open(chemin,'r')
     except:
-        print "ERROR!  File '%s' not found, load canceled." % (chemin)
+        print("ERROR!  File '%s' not found, load canceled." % (chemin))
         return None
     positions = []
     #i = 0
@@ -165,7 +170,7 @@ def FichierDisque(repertoire, nomfichier):
     # je l'enleve de la liste
     positions.pop(0)
     if len(positions) != 25:
-        print "ERROR!  File contains %d positions, must contain positions for 25 'cubes', only.  Load canceled." % (len(positions))
+        print("ERROR!  File contains %d positions, must contain positions for 25 'cubes', only.  Load canceled." % (len(positions)))
         #return 2
         return None
     else:
@@ -187,7 +192,7 @@ def LoadCubes(nomfichier,nomavatar):
     lstStrTuples = FichierDisque(repertoire, nomfichier)
     if lstStrTuples is None:
         # Une erreur s'est produite, fichier inexistant ou nb de tuples incorrect
-        print "ERROR!  File '%s' not found or incorrect number of tuples, load canceled." % (repertoire+nomfichier)
+        print("ERROR!  File '%s' not found or incorrect number of tuples, load canceled." % (repertoire+nomfichier))
         return 0
     #enlever les cubes du terrain
     ResetCubes()

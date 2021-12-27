@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ** Test de recherche d'un joueur **
 from Plasma import *
 from PlasmaVaultConstants import *
@@ -28,7 +29,7 @@ def FindPlayerByName(playerName):
         vault = ptVault()
         playerID = vault.findNode(tempNode).upcastToPlayerInfoNode().playerGetID()
     except:
-        playerID = 0L
+        playerID = 0
     return playerID
 
 #
@@ -64,13 +65,13 @@ def GetGameByGuid(gameGuid):
         node = ptVault().findNode(tempNode)
         if node.getType() == PtVaultNodeTypes.kMarkerGameNode:
             game = node.upcastToMarkerGameNode()
-            print "game found"
+            print("game found")
             return game
         else:
-            print "game not found"
+            print("game not found")
             return None
     except:
-        print "error in GetGameByGuid"
+        print("error in GetGameByGuid")
         return None
 
 
@@ -106,12 +107,12 @@ def GetDRCHoodByNum(hoodNum):
 def GetJournals():
     journals = ptVault().getAgeJournalsFolder()
     ageFolderRefs = journals.getChildNodeRefList()
-    print "ChildNodeCount\tClientID\tCreateAgeGuid\tCreateAgeName\tCreateAgeTime\tCreateTime\tCreatorNodeID\tFolderName\tFolderType\tID\tModifyTime\tOwnerNodeID\tType"
+    print("ChildNodeCount\tClientID\tCreateAgeGuid\tCreateAgeName\tCreateAgeTime\tCreateTime\tCreatorNodeID\tFolderName\tFolderType\tID\tModifyTime\tOwnerNodeID\tType")
     for ageFolderRef in ageFolderRefs:
         ageFolder = ageFolderRef.getChild()
         if ageFolder.getType() == PtVaultNodeTypes.kFolderNode:
             ageFolder = ageFolder.upcastToFolderNode()
-            print "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}".format(
+            print("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}".format(
             ageFolder.getChildNodeCount(), 
             ageFolder.getClientID(), 
             ageFolder.getCreateAgeGuid(), 
@@ -125,62 +126,62 @@ def GetJournals():
             ageFolder.getModifyTime(), 
             ageFolder.getOwnerNodeID(), 
             ageFolder.getType()
-            )
+            ))
 
 #
 def GetMyHoodLink():
     hood = ptVault().getLinkToMyNeighborhood()
-    print "getChildNodeCount    = " + str(hood.getChildNodeCount())
-    print "getClientID          = " + str(hood.getClientID())
-    print "getCreateAgeGuid     = " + str(hood.getCreateAgeGuid())
-    print "getCreateAgeName     = " + str(hood.getCreateAgeName())
-    print "getCreateAgeTime     = " + str(hood.getCreateAgeTime())
-    print "getCreateTime        = " + str(hood.getCreateTime())
-    print "getCreatorNodeID     = " + str(hood.getCreatorNodeID())
-    print "getID                = " + str(hood.getID())
-    print "getLocked            = " + str(hood.getLocked())
-    print "getModifyTime        = " + str(hood.getModifyTime())
-    print "getOwnerNodeID       = " + str(hood.getOwnerNodeID())
-    print "getType              = " + str(hood.getType())
-    print "getVolatile          = " + str(hood.getVolatile())
+    print("getChildNodeCount    = " + str(hood.getChildNodeCount()))
+    print("getClientID          = " + str(hood.getClientID()))
+    print("getCreateAgeGuid     = " + str(hood.getCreateAgeGuid()))
+    print("getCreateAgeName     = " + str(hood.getCreateAgeName()))
+    print("getCreateAgeTime     = " + str(hood.getCreateAgeTime()))
+    print("getCreateTime        = " + str(hood.getCreateTime()))
+    print("getCreatorNodeID     = " + str(hood.getCreatorNodeID()))
+    print("getID                = " + str(hood.getID()))
+    print("getLocked            = " + str(hood.getLocked()))
+    print("getModifyTime        = " + str(hood.getModifyTime()))
+    print("getOwnerNodeID       = " + str(hood.getOwnerNodeID()))
+    print("getType              = " + str(hood.getType()))
+    print("getVolatile          = " + str(hood.getVolatile()))
 
 #
 def GetMyHoodInfo():
     hood = ptVault().getLinkToMyNeighborhood().getAgeInfo()
-    print "getAgeDescription        = " + str(hood.getAgeDescription())
-    print "getAgeFilename           = " + str(hood.getAgeFilename())
+    print("getAgeDescription        = " + str(hood.getAgeDescription()))
+    print("getAgeFilename           = " + str(hood.getAgeFilename()))
     #print "getAgeID                 = " + str(hood.getAgeID())
-    print "getAgeInstanceGuid       = " + str(hood.getAgeInstanceGuid())
-    print "getAgeInstanceName       = " + str(hood.getAgeInstanceName())
+    print("getAgeInstanceGuid       = " + str(hood.getAgeInstanceGuid()))
+    print("getAgeInstanceName       = " + str(hood.getAgeInstanceName()))
     #print "getAgeLanguage           = " + str(hood.getAgeLanguage())
     #print "getAgeOwnersFolder       = " + str(hood.getAgeOwnersFolder())
     #print "getAgeSDL                = " + str(hood.getAgeSDL())
-    print "getAgeSequenceNumber     = " + str(hood.getAgeSequenceNumber())
-    print "getAgeUserDefinedName    = " + str(hood.getAgeUserDefinedName())
+    print("getAgeSequenceNumber     = " + str(hood.getAgeSequenceNumber()))
+    print("getAgeUserDefinedName    = " + str(hood.getAgeUserDefinedName()))
     #print "getCanVisitFolder        = " + str(hood.getCanVisitFolder())
     #print "getChildAgesFolder       = " + str(hood.getChildAgesFolder())
-    print "getChildNodeCount        = " + str(hood.getChildNodeCount())
+    print("getChildNodeCount        = " + str(hood.getChildNodeCount()))
     #print "getChildNodeRefList      = " + str(hood.getChildNodeRefList())
     #print "getClientID              = " + str(hood.getClientID())
     #print "getCreateAgeCoords       = " + str(hood.getCreateAgeCoords())
     #print "getCreateAgeGuid         = " + str(hood.getCreateAgeGuid())
     #print "getCreateAgeName         = " + str(hood.getCreateAgeName())
     #print "getCreateAgeTime         = " + str(hood.getCreateAgeTime())
-    print "getCreateTime            = " + str(hood.getCreateTime())
+    print("getCreateTime            = " + str(hood.getCreateTime()))
     #print "getCreatorNode           = " + str(hood.getCreatorNode())
-    print "getCreatorNodeID         = " + str(hood.getCreatorNodeID())
+    print("getCreatorNodeID         = " + str(hood.getCreatorNodeID()))
     #print "getCzar                  = " + str(hood.getCzar())
     #print "getCzarID                = " + str(hood.getCzarID())
-    print "getDisplayName           = " + str(hood.getDisplayName())
-    print "getID                    = " + str(hood.getID())
-    print "getModifyTime            = " + str(hood.getModifyTime())
+    print("getDisplayName           = " + str(hood.getDisplayName()))
+    print("getID                    = " + str(hood.getID()))
+    print("getModifyTime            = " + str(hood.getModifyTime()))
     #print "getNode(id))             = " + str(hood.getNode(id))
     #print "getOwnerNode             = " + str(hood.getOwnerNode())
     #print "getOwnerNodeID           = " + str(hood.getOwnerNodeID())
     #print "getParentAgeLink         = " + str(hood.getParentAgeLink())
-    print "getType                  = " + str(hood.getType())
+    print("getType                  = " + str(hood.getType()))
     #print "hasNode(id))             = " + str(hood.hasNode(id))
-    print "isPublic                 = " + str(hood.isPublic())
+    print("isPublic                 = " + str(hood.isPublic()))
 
 #playerID = FindPlayerByName(playerName)
 def Hood():
@@ -203,20 +204,20 @@ def Hood():
     except:
         hood = tempNode
 
-    print "getAgeDescription        = " + str(hood.getAgeDescription())
-    print "getAgeFilename           = " + str(hood.getAgeFilename())
-    print "getAgeInstanceGuid       = " + str(hood.getAgeInstanceGuid())
-    print "getAgeInstanceName       = " + str(hood.getAgeInstanceName())
-    print "getAgeSequenceNumber     = " + str(hood.getAgeSequenceNumber())
-    print "getAgeUserDefinedName    = " + str(hood.getAgeUserDefinedName())
-    print "getChildNodeCount        = " + str(hood.getChildNodeCount())
-    print "getCreateTime            = " + str(hood.getCreateTime())
-    print "getCreatorNodeID         = " + str(hood.getCreatorNodeID())
-    print "getDisplayName           = " + str(hood.getDisplayName())
-    print "getID                    = " + str(hood.getID())
-    print "getModifyTime            = " + str(hood.getModifyTime())
-    print "getType                  = " + str(hood.getType())
-    print "isPublic                 = " + str(hood.isPublic())
+    print("getAgeDescription        = " + str(hood.getAgeDescription()))
+    print("getAgeFilename           = " + str(hood.getAgeFilename()))
+    print("getAgeInstanceGuid       = " + str(hood.getAgeInstanceGuid()))
+    print("getAgeInstanceName       = " + str(hood.getAgeInstanceName()))
+    print("getAgeSequenceNumber     = " + str(hood.getAgeSequenceNumber()))
+    print("getAgeUserDefinedName    = " + str(hood.getAgeUserDefinedName()))
+    print("getChildNodeCount        = " + str(hood.getChildNodeCount()))
+    print("getCreateTime            = " + str(hood.getCreateTime()))
+    print("getCreatorNodeID         = " + str(hood.getCreatorNodeID()))
+    print("getDisplayName           = " + str(hood.getDisplayName()))
+    print("getID                    = " + str(hood.getID()))
+    print("getModifyTime            = " + str(hood.getModifyTime()))
+    print("getType                  = " + str(hood.getType()))
+    print("isPublic                 = " + str(hood.isPublic()))
 
 #
 def TestHood():
@@ -234,20 +235,20 @@ def TestHood():
     #SetAgeUserDefinedName
     #Set(Age)SequenceNumber
 
-    print "getAgeDescription        = " + str(tempNode.getAgeDescription())
-    print "getAgeFilename           = " + str(tempNode.getAgeFilename())
-    print "getAgeInstanceGuid       = " + str(tempNode.getAgeInstanceGuid())
-    print "getAgeInstanceName       = " + str(tempNode.getAgeInstanceName())
-    print "getAgeSequenceNumber     = " + str(tempNode.getAgeSequenceNumber())
-    print "getAgeUserDefinedName    = " + str(tempNode.getAgeUserDefinedName())
-    print "getChildNodeCount        = " + str(tempNode.getChildNodeCount())
-    print "getCreateTime            = " + str(tempNode.getCreateTime())
-    print "getCreatorNodeID         = " + str(tempNode.getCreatorNodeID())
-    print "getDisplayName           = " + str(tempNode.getDisplayName())
-    print "getID                    = " + str(tempNode.getID())
-    print "getModifyTime            = " + str(tempNode.getModifyTime())
-    print "getType                  = " + str(tempNode.getType())
-    print "isPublic                 = " + str(tempNode.isPublic())
+    print("getAgeDescription        = " + str(tempNode.getAgeDescription()))
+    print("getAgeFilename           = " + str(tempNode.getAgeFilename()))
+    print("getAgeInstanceGuid       = " + str(tempNode.getAgeInstanceGuid()))
+    print("getAgeInstanceName       = " + str(tempNode.getAgeInstanceName()))
+    print("getAgeSequenceNumber     = " + str(tempNode.getAgeSequenceNumber()))
+    print("getAgeUserDefinedName    = " + str(tempNode.getAgeUserDefinedName()))
+    print("getChildNodeCount        = " + str(tempNode.getChildNodeCount()))
+    print("getCreateTime            = " + str(tempNode.getCreateTime()))
+    print("getCreatorNodeID         = " + str(tempNode.getCreatorNodeID()))
+    print("getDisplayName           = " + str(tempNode.getDisplayName()))
+    print("getID                    = " + str(tempNode.getID()))
+    print("getModifyTime            = " + str(tempNode.getModifyTime()))
+    print("getType                  = " + str(tempNode.getType()))
+    print("isPublic                 = " + str(tempNode.isPublic()))
 
 # Ex: GetHood("MagicBot's") or GetHood("DRC", 5000)
 def GetHood(ageUserDefinedName, ageSequenceNumber=0):
@@ -301,7 +302,7 @@ def GetHoodChilds(ageUserDefinedName, ageSequenceNumber=0):
 def piln():
     tempNode = ptVaultPlayerInfoListNode()
     #tempNode.setCreatorNodeID(11139429L)
-    tempNode.setCreatorNodeID(11139429L)
+    tempNode.setCreatorNodeID(11139429)
     tempNode.setFolderType(19)
     tempNode.setType(30)
 
@@ -314,24 +315,24 @@ def piln():
     #hood = ptVault().getLinkToMyNeighborhood().getAgeInfo()
     #node = hood.getAgeOwnersFolder()
     
-    print "folderGetName       = " + str(node.folderGetName())
-    print "folderGetType       = " + str(node.folderGetType())
-    print "getChildNodeCount   = " + str(node.getChildNodeCount())
-    print "getChildNodeRefList = " + str(node.getChildNodeRefList())
-    print "getClientID         = " + str(node.getClientID())
-    print "getCreateAgeCoords  = " + str(node.getCreateAgeCoords())
-    print "getCreateAgeGuid    = " + str(node.getCreateAgeGuid())
-    print "getCreateAgeName    = " + str(node.getCreateAgeName())
-    print "getCreateAgeTime    = " + str(node.getCreateAgeTime())
-    print "getCreateTime       = " + str(node.getCreateTime())
-    print "getCreatorNode      = " + str(node.getCreatorNode())
-    print "getCreatorNodeID    = " + str(node.getCreatorNodeID())
-    print "getFolderName       = " + str(node.getFolderName())
-    print "getFolderNameW      = " + str(node.getFolderNameW())
-    print "getFolderType       = " + str(node.getFolderType())
-    print "getID               = " + str(node.getID())
-    print "getModifyTime       = " + str(node.getModifyTime())
-    print "getOwnerNode        = " + str(node.getOwnerNode())
-    print "getOwnerNodeID      = " + str(node.getOwnerNodeID())
-    print "getType             = " + str(node.getType())
+    print("folderGetName       = " + str(node.folderGetName()))
+    print("folderGetType       = " + str(node.folderGetType()))
+    print("getChildNodeCount   = " + str(node.getChildNodeCount()))
+    print("getChildNodeRefList = " + str(node.getChildNodeRefList()))
+    print("getClientID         = " + str(node.getClientID()))
+    print("getCreateAgeCoords  = " + str(node.getCreateAgeCoords()))
+    print("getCreateAgeGuid    = " + str(node.getCreateAgeGuid()))
+    print("getCreateAgeName    = " + str(node.getCreateAgeName()))
+    print("getCreateAgeTime    = " + str(node.getCreateAgeTime()))
+    print("getCreateTime       = " + str(node.getCreateTime()))
+    print("getCreatorNode      = " + str(node.getCreatorNode()))
+    print("getCreatorNodeID    = " + str(node.getCreatorNodeID()))
+    print("getFolderName       = " + str(node.getFolderName()))
+    print("getFolderNameW      = " + str(node.getFolderNameW()))
+    print("getFolderType       = " + str(node.getFolderType()))
+    print("getID               = " + str(node.getID()))
+    print("getModifyTime       = " + str(node.getModifyTime()))
+    print("getOwnerNode        = " + str(node.getOwnerNode()))
+    print("getOwnerNodeID      = " + str(node.getOwnerNodeID()))
+    print("getType             = " + str(node.getType()))
 #

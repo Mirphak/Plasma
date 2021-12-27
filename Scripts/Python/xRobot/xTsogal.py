@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from Plasma import *
 
-#Cette fonction ne s'utilise pas seule, elle est appelée par Action()
+#Cette fonction ne s'utilise pas seule, elle est appelÃ©e par Action()
 def RunResp(key, resp, stateidx = None, netForce = 1, netPropagate = 1, fastforward = 0):
     nt = ptNotify(key)
     nt.addReceiver(resp)

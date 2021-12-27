@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Dictionnaire(s) ou Liste(s) de SpawnPoints
 smDict = {
 "Personal":("StartPoint01", "PolesStartPoint02", "cPerf-SpawnPointRelto01", "cPerf-SpawnPointRelto02", "cPerf-SpawnPointRelto03", "StartPoint-Closet"),
@@ -59,7 +60,9 @@ spDict = {
         # MaintRoom03:
         ,"SaveClothPoint43", "SaveClothPoint53", "SaveClothPoint63"
         #,"StartPoint"
-        # Sphere 4 (sp 20 a 23)
+        # Sphere 4 (sp 20 a 25)
+        # ahnySphere04:"
+        , "LinkInPointSphere04"
         # MaintRoom04:
         ,"SaveClothPoint44", "SaveClothPoint54", "SaveClothPoint64"
         #,"StartPoint"
@@ -113,8 +116,6 @@ spDict = {
         , "StartinBoxYellow"
         #- grsnTeamRoom02 (17) : 
         , "StartinBoxPurple"
-        #- grsnWallRoomClimbingPhys (18) : 
-        #, "LinkInPointWall"
         # ** Gahreesen Prison **
         #- grsnTrainingCtrlLinkRm (18) : 
         , "grsnJourneyCloth05POS"
@@ -124,7 +125,7 @@ spDict = {
         #- grsnVeranda (21-22) : 
         , "grsnJourneyCloth04POS", "PlayerStart"
         # ** Gahreesen Wall **
-        #- WallRoom (24) : 
+        #- WallRoom (xx) : 
         #, "StartPoint"
         #- trainingCenterObservationRooms (23-25) : 
         , "grsnJourneyCloth03POS", "pstObservationRoom", "pstObservationRoom01"
@@ -133,13 +134,15 @@ spDict = {
         #- TrnCtrControlRoom02 (27-28) : 
         , "LinkInPointCtrlRm02", "tempStartPointDummy"
         # ** Gahreesen Nexus **
-        #- grsnNexusBlackRoom (29) (l'ascenseur un un sous-monde, faire //Walk 1) : 
+        #- grsnNexusBlackRoom (29) (l'ascenseur est un sous-monde, faire //Walk 1) : 
         , "Black_LinkInPointDefaultBlack"
         #- grsnNexusWhiteRoom (30) (l'ascenseur est un sous-monde, faire //Walk 1) : 
         , "LinkInPointDefaultWhite"
         # ** Gahreesen III **
         #- grsnExterior (subworld)(31-34) : 
         , "enterWellSubworldRegion", "exitWellSubRgn01", "exitWellSubRgn02", "SubworldEnterRegionTemp"
+        #- grsnWallRoomClimbingPhys (35) : 
+        , "LinkInPointWall"
     ],
     "GreatZero":["LinkInPointDefault"
         , "BigRoomLinkInPoint", "GZIntStart"

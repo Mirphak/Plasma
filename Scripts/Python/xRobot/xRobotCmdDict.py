@@ -9,14 +9,14 @@ from PlasmaVaultConstants import *
 import math
 import datetime
 
-import xBotKiCmds
-import xBotAge
-import xAnim
-import xSave
+from . import xBotKiCmds
+from . import xBotAge
+from . import xAnim
+from . import xSave
 
 
 #Ages de Mirphak (d'autres viendront peut-etre)
-import ages
+from . import ages
 
 #import note
 
@@ -112,7 +112,7 @@ lastLinkTime = datetime.datetime.now()
 def isPlayerInAge(player):
     #self.chatMgr.AddChatLine(None, "> isPlayerInAge", 3)
     agePlayers = PtGetPlayerList()
-    ids = map(lambda player: player.getPlayerID(), agePlayers)
+    ids = [player.getPlayerID() for player in agePlayers]
     try:
         if player.getPlayerID() in ids:
             return True
@@ -129,7 +129,7 @@ def SearchAvatarNameLike(name):
     pat = "^" + pat.replace("*", ".*") + ".*$"
     pattern = re.compile(pat)
     agePlayers = PtGetPlayerList()
-    players = filter(lambda player: pattern.match(player.getPlayerName().lower()), agePlayers)
+    players = [player for player in agePlayers if pattern.match(player.getPlayerName().lower())]
     return players
 
 
@@ -346,7 +346,7 @@ def GetPeople(kind = "buddy", listedPlayers = []):
 #
 def RemoveCleftLocal(self):
     self.chatMgr.AddChatLine(None, "> RemoveCleftLocal", 3)
-    import xCleft
+    from . import xCleft
     xCleft.DelPrpLocal()
 
 
@@ -365,19 +365,19 @@ def LinkBotTo(self, cFlags, args = []):
     player = args[0]
     msg = "Available links: "
     availableLinks = list()
-    for lk  in linkDic.keys():
-        if linkDic[lk][2] in allowedAgeInstanceGuids.values():
+    for lk  in list(linkDic.keys()):
+        if linkDic[lk][2] in list(allowedAgeInstanceGuids.values()):
             availableLinks.append(lk + " : " +linkDic[lk][0])
     msg += ", ".join(availableLinks)
     
     link = None
     # Is the age name in linkDic?
-    if (linkName in linkDic.keys()):
+    if (linkName in list(linkDic.keys())):
         link = linkDic[linkName]
-        if not(link[2] in allowedAgeInstanceGuids.values()):
+        if not(link[2] in list(allowedAgeInstanceGuids.values())):
             link = None
     # Trying Mir-o-Bot ages
-    elif (linkName in ages.MirobotAgeDict.keys()):
+    elif (linkName in list(ages.MirobotAgeDict.keys())):
         link = ages.MirobotAgeDict[linkName]
 #        xBotAge.currentBotAge = list(link)
 #        if len(link) > 4:
@@ -385,7 +385,7 @@ def LinkBotTo(self, cFlags, args = []):
 #            #self.chatMgr.AddChatLine(None, ",".join(xBotAge.currentBotAge), 3)
 #        xBotAge.LinkPlayerTo(self, link)
     # Trying MagicBot ages
-    elif (linkName in ages.MagicbotAgeDict.keys()):
+    elif (linkName in list(ages.MagicbotAgeDict.keys())):
         link = ages.MagicbotAgeDict[linkName]
 #        xBotAge.currentBotAge = list(link)
 #        if len(link) > 4:
@@ -799,7 +799,7 @@ def Responder(soName, respName, pfm = None, ageName = None, state = None, ff = F
             break
     
     if respKey == None:
-        print "Responder():\tResponder not found..."
+        print("Responder():\tResponder not found...")
         return
     
     if pfm == None:
@@ -898,7 +898,7 @@ def AddCleft(self, cFlags, args = []):
         #PtSendRTChat(myself, [player], "You must be in my age, use link to join me." , 24)
         PtSendRTChat(myself, [player], "You must be in my age, use link to join me.", cFlags.flags)
         return 1
-    import xCleft
+    from . import xCleft
     ret = xCleft.AddCleft(self, args)
     if ret:
         PtSetAlarm(5, xBotAge.AlarmDisablePanicLinks(), 0)
@@ -924,7 +924,7 @@ def DisablePanicLinks(self, cFlags, args = []):
 def Ring(self, cFlags, args = []):
     if len(args) < 2:
         return 0
-    import xHood
+    from . import xHood
     params = args[1].split()
     if len(params) < 2:
         return 0
@@ -1078,7 +1078,7 @@ def Help(self, cFlags, args = []):
             msg = "An error occured while sending help note."
         PtSendRTChat(myself, [player], msg, cFlags.flags)
     
-    msg = "You can also use \"help [command name]\".\n ** Available commands : " + ", ".join(cmdDict.keys())
+    msg = "You can also use \"help [command name]\".\n ** Available commands : " + ", ".join(list(cmdDict.keys()))
     PtSendRTChat(myself, [player], msg, cFlags.flags)
     return 1
 
@@ -1103,7 +1103,7 @@ def HelpCmd(player, cFlags, cmdName):
         #command not found, PM command list
         msg = "\"" + cmdName + "\" not found."
         PtSendRTChat(myself, [player], msg, cFlags.flags)
-        msg = "Available commands: " + ", ".join(cmdDict.keys())
+        msg = "Available commands: " + ", ".join(list(cmdDict.keys()))
         PtSendRTChat(myself, [player], msg, cFlags.flags)
     return 1
 
@@ -1214,13 +1214,13 @@ altAnim = {
 travelAnimList = ("echelle", "descendre", "ladderup", "ladderdown", "escalier", "nage", "marche", "cours", "recule")
 
 def RetreaveCmdName(altCmdName):
-    for k, v in alternatives.items():
+    for k, v in list(alternatives.items()):
         if altCmdName.lower() in v:
             return str(k)
     return altCmdName
 
 def RetreaveAnimCmdName(altCmdName):
-    for k, v in altAnim.items():
+    for k, v in list(altAnim.items()):
         if altCmdName.lower() in v:
             return str(k)
     return None

@@ -4,12 +4,12 @@
     Version 1 : 07/11/2015
 
     Version 2 : 14/01/2017
-        Je voudrais savoir comment tout le monde dernière tournée est allé et 
-        si vos vacances ont été un certain temps mais je vais être mentionner 
-        les visites Cavern et des histoires à toutes les guildes réunion ce samedi.
+        Je voudrais savoir comment tout le monde derniÃ¨re tournÃ©e est allÃ© et 
+        si vos vacances ont Ã©tÃ© un certain temps mais je vais Ãªtre mentionner 
+        les visites Cavern et des histoires Ã  toutes les guildes rÃ©union ce samedi.
 
-        Was était se demander ce que vous les gars voudrais faire pour des effets spéciaux 
-        ou même mélanger tour un peu sur cette prochaine tournée la semaine prochaine 
+        Was Ã©tait se demander ce que vous les gars voudrais faire pour des effets spÃ©ciaux 
+        ou mÃªme mÃ©langer tour un peu sur cette prochaine tournÃ©e la semaine prochaine 
         pas demain le vendredi suivant /
 
         C'est Teledahn.
@@ -18,37 +18,147 @@
 
         Nous saluons le retour.
 
-        Nous sommes arrivés à travers les visites sans beaucoup de hangups, je dirais. 
-        Peu d'autre chose peut être dit - Relto est un âge où il ya très peu à explorer.
+        Nous sommes arrivÃ©s Ã  travers les visites sans beaucoup de hangups, je dirais. 
+        Peu d'autre chose peut Ãªtre dit - Relto est un Ã¢ge oÃ¹ il ya trÃ¨s peu Ã  explorer.
 
-        Teledahn est l'un des endroits où j'aime sortir de la grille autant que possible. 
-        Sur l'autre île, ou du moins sur le dessus de la tour de bureau pour le voir. 
-        Vers le bord de l'île où le ruisseau descend pour former la cascade. 
+        Teledahn est l'un des endroits oÃ¹ j'aime sortir de la grille autant que possible. 
+        Sur l'autre Ã®le, ou du moins sur le dessus de la tour de bureau pour le voir. 
+        Vers le bord de l'Ã®le oÃ¹ le ruisseau descend pour former la cascade. 
         Vers le bas sur l'eau pour voir le seau d'ascenseur. 
         Ce genre de chose.
 
-        De l'expérience passée, nous savons aussi que nous devons nous téléporter autant que 
-        possible pour éviter les ascenseurs et les échelles, car ils nous ralentissent beaucoup.
+        De l'expÃ©rience passÃ©e, nous savons aussi que nous devons nous tÃ©lÃ©porter autant que 
+        possible pour Ã©viter les ascenseurs et les Ã©chelles, car ils nous ralentissent beaucoup.
 
-        Si une voie peut être trouvée pour mettre en évidence ou de contraste les glyphes dans 
+        Si une voie peut Ãªtre trouvÃ©e pour mettre en Ã©vidence ou de contraste les glyphes dans 
         le tunnel d'admission d'eau, ce serait bien. 
-        Nous avons toujours eu des problèmes avec les gens qui les voyaient clairement de tous 
+        Nous avons toujours eu des problÃ¨mes avec les gens qui les voyaient clairement de tous 
         les postes.
 
-        Le véritable problème est sur la fin de la conférence, cependant. 
-        Garder les choses à une simple session de deux heures de visite est difficile!
+        Le vÃ©ritable problÃ¨me est sur la fin de la confÃ©rence, cependant. 
+        Garder les choses Ã  une simple session de deux heures de visite est difficile!
 
         =======================
-        Message d'avertissement sur le fait de se coincer sur les échelles.
-        Préparez les chaînes. Nous ne sommes donc pas coincé dans les échelles.
-        KI lumière, Invisibilité.
+        Message d'avertissement sur le fait de se coincer sur les Ã©chelles.
+        PrÃ©parez les chaÃ®nes. Nous ne sommes donc pas coincÃ© dans les Ã©chelles.
+        KI lumiÃ¨re, InvisibilitÃ©.
 
         Par la suite ...
-        Minkata étage
+        Minkata Ã©tage
         Shroomie
 
         Ne pense pas que je dois ajouter beaucoup. 
-        Si autre que le ci-dessus, je vais avoir mes mains plein de gens se perdre ou collé.
+        Si autre que le ci-dessus, je vais avoir mes mains plein de gens se perdre ou collÃ©.
+
+    Version 3 : 14/11/2020
+        Next tour is Teledahn. 
+        Weâ€™ll have to see if it can be done in one session â€“ in the past, 
+        weâ€™ve had to split it up because itâ€™s a long tour.
+
+        Special effect requestsâ€¦.
+
+        As far as moving around goes, 
+        itâ€™s another place where we want to avoid ladders and the elevator as much as we can 
+        because they slow the tour down.
+
+        I have a request that I havenâ€™t made quite this way before. In the past, 
+        Iâ€™ve asked to be taken up to the top of the mushroom stalk that the processing center 
+        is inside for an overview of the Age. 
+        That requires making a Jalak pillar platform. 
+        Iâ€™d like to have that again, but this time Iâ€™d like to begin the tour up there 
+        while I talk about the Age as a whole.
+
+        We would then warp down to the catwalk near the solar power tower 
+        so I can talk about the outdoor machinery.
+
+        From there, itâ€™s a warp up to the office at the top of the tower, 
+        a warp to the control room in the middle, and then a warp down to the hut, 
+        and lastly a warp all the way down to the bottom of the pumping room 
+        without stopping in the basin. 
+        Weâ€™ll just walk into the pipe from there.
+
+        We walk through the pipe, the prison cell, and out of the cave to the waterfall lagoon 
+        and eventually to the harbor.
+
+        As usual, Iâ€™d like to have a viewing platform above the stream down the mountain 
+        so I can show that the â€œsunâ€ disk is artificial and has a back side.
+
+        Another spot Iâ€™d like to have a platform is above the eastern island thatâ€™s across 
+        from the control tower. 
+        We rarely go there.
+
+        Thatâ€™s all I can think of for now. 
+        Iâ€™ll be supplementing the tour with still pictures on the stream.
+
+        -----
+
+        I forgot to ask about this, and weâ€™re half a week outâ€¦
+
+        Mirphak, I just thought about the animals in Teledahn and wondered if you could isolate 
+        them and show their animations.
+
+        The three animals are the flappers, the buggaro, and Shroomie.
+
+        What I have in mind is to get one, hold it in a fixed position, 
+        and show its animation as it hangs in one place. 
+        The flappers have a feeding animation during their jumps, 
+        but itâ€™s hard to show. 
+        Weâ€™ve never grabbed a buggaro before and just held it in one place for the guests to see, 
+        and of course Shroomie is a must. 
+        Weâ€™ve shown Shroomie before, but the other two are ones I never thought of showing off before.
+
+        Do you think you can do it?
+        
+        =====
+        - 0 - Preparation arrivee :
+        ---------------------------
+            !to teledahn
+            !sp 0 (hutte)
+            !check noladder
+            import xTeledahn as t
+            t.elev()
+            
+        - 1 - Aller au sommet du champi
+        -------------------------------
+            !sp 17 (bureau haut champi)
+            t.platform("roof")
+            !warpall
+        
+        - 2 - La tour solaire
+        ---------------------
+            !sp 2
+            (t.power() [de 0 a 3])
+        
+        - 3 - Bureau haut champi
+        ------------------------
+            !sp 17
+        
+        - 4 - Salle de controle
+        -----------------------
+            !sp 19
+        
+        - 5 - Retour hutte
+        ------------------
+            !sp 0 ou 7
+        
+        - 6 - Fond salle pompage (debut tuyau)
+        --------------------------------------
+            !sp 9 (?)
+        
+        - 7 - Prison
+        ------------------
+            !toggle Door  0 0
+        
+        - 8 - Soleil
+        ------------------
+            t.platform("sun")
+            !warpall
+        
+        - 9 - Eastern Island
+        ------------------
+            !sp 5 (!sp 4)
+        
+            
 """
 
 """
@@ -84,10 +194,10 @@
 
 from Plasma import *
 
-import Ride
-import Platform
+from . import Ride
+from . import Platform
 import math
-import CloneFactory
+from . import CloneFactory
 
 """
 - ** onlake
@@ -198,7 +308,7 @@ def shroomie(act="sur moi"):
 def ride(soName="oiseaut1", t=60.0):
     #recuperer tous les joueurs
     playerList = PtGetPlayerList()
-    playerList.append(PtGetLocalPlayer())
+    #playerList.append(PtGetLocalPlayer())
     for player in playerList:
         """
         objKey = PtGetAvatarKeyFromClientID(player.getPlayerID())
@@ -271,33 +381,33 @@ def shroomifyAll(bOn=True):
 #=========================================
 # Parameters: masterkey, bShow, iCurClone, matPos, bPhys, bAttach, soAvatar
 def PutItHere2(params=[]):
-    print "PutItHere2 begin"
+    print("PutItHere2 begin")
     
     #Verifions les parametres
     # au moins 7 parametres
     if len(params) > 6:
-        print "PutItHere2 params 6"
+        print("PutItHere2 params 6")
         if isinstance(params[6], ptSceneobject):
             soAvatar = params[6]
-            print "soAvatar is a ptSceneobject"
+            print("soAvatar is a ptSceneobject")
         else:
             soAvatar = PtGetLocalAvatar()
     else:
         soAvatar = PtGetLocalAvatar()
-    print "soAvatar Name={}".format(soAvatar.getName())
+    print("soAvatar Name={}".format(soAvatar.getName()))
     # au moins 6 parametres
     if len(params) > 5:
-        print "PutItHere2 params 5"
+        print("PutItHere2 params 5")
         try:
             bAttach = bool(params[5])
         except:
             bAttach = False
     else:
         bAttach = False
-    print "PutItHere2 : bAttach={}".format(bAttach)
+    print("PutItHere2 : bAttach={}".format(bAttach))
     # au moins 5 parametres
     if len(params) > 4:
-        print "PutItHere2 params 4"
+        print("PutItHere2 params 4")
         try:
             bPhys = bool(params[4])
         except:
@@ -306,7 +416,7 @@ def PutItHere2(params=[]):
         bPhys = False
     # au moins 4 parametres
     if len(params) > 3:
-        print "PutItHere2 params 2"
+        print("PutItHere2 params 2")
         if isinstance(params[3], ptMatrix44):
             pos = params[3]
         else:
@@ -317,7 +427,7 @@ def PutItHere2(params=[]):
         pos = PtGetLocalAvatar().getLocalToWorld()
     # au moins 3 parametres
     if len(params) > 2:
-        print "PutItHere2 params 2"
+        print("PutItHere2 params 2")
         if isinstance(params[2], int):
             iCurClone = params[2]
         else:
@@ -328,7 +438,7 @@ def PutItHere2(params=[]):
         iCurClone = 0
     # au moins 2 parametres
     if len(params) > 1:
-        print "PutItHere2 params 1"
+        print("PutItHere2 params 1")
         try:
             bShow = bool(params[1])
         except:
@@ -337,26 +447,26 @@ def PutItHere2(params=[]):
         bShow = True
     # au moins 1 parametre
     if len(params) > 0:
-        print "PutItHere2 params 0"
+        print("PutItHere2 params 0")
         masterKey = params[0]
         if not isinstance(masterKey, ptKey):
-            print "PutItHere: first paremeter must be a ptKey"
+            print("PutItHere: first paremeter must be a ptKey")
             return 1
     # pas de parametre
     if len(params) == 0:
-        print "PutItHere2: needs 1 to 6 paremeters"
+        print("PutItHere2: needs 1 to 6 paremeters")
         return 1
     
-    print "PutItHere2 params ok"
+    print("PutItHere2 params ok")
     soMaster = masterKey.getSceneObject()
-    print "PutItHere2(objName={}, bShow={}, ...)".format(soMaster.getName(), bShow)
+    print("PutItHere2(objName={}, bShow={}, ...)".format(soMaster.getName(), bShow))
     
     # Manipulons les clones
     cloneKeys = PtFindClones(masterKey)
     if len(cloneKeys) < 1:
-        print "PutItHere2 no clone found!"
+        print("PutItHere2 no clone found!")
     else:
-        print "PutItHere2 : the stuff" 
+        print("PutItHere2 : the stuff") 
         #use the iCurClone-th clone
         ck = cloneKeys[iCurClone]
         soTop = ck.getSceneObject()
@@ -376,19 +486,19 @@ def PutItHere2(params=[]):
             soTop.physics.enable(0)
         #
         if bAttach:
-            print "Attach"
+            print("Attach")
             Attacher(soTop, soAvatar, bPhys=True)
         else:
-            print "Detach"
+            print("Detach")
             Detacher(soTop, soAvatar)
 
-    print "PutItHere2 done"
+    print("PutItHere2 done")
     return 0
 
 #=========================================
 # Create N clones and put the choosen one somewhere
 def CloneThem2(objName, age, bShow=True, bLoad=True, iNbClones=10, iCurClone=0, matPos=None, fct=PutItHere2, bAttach=True, soAvatar=None):
-    print "          ** CloneThem2 ** 1 begin"
+    print("          ** CloneThem2 ** 1 begin")
     msg = "Columnst.CloneThem2(): "
     nb = iNbClones
     masterkey = None
@@ -396,31 +506,31 @@ def CloneThem2(objName, age, bShow=True, bLoad=True, iNbClones=10, iCurClone=0, 
     try:
         masterkey = PtFindSceneobject(objName, age).getKey()
     except:
-        print "{} not found in {}".format(objName, age)
+        print("{} not found in {}".format(objName, age))
         msg += "{} not found in {}\n".format(objName, age)
-    print "          ** CloneThem2 ** 2"
+    print("          ** CloneThem2 ** 2")
     if isinstance(masterkey, ptKey):
         if bLoad:
-            print "          ** CloneThem2 ** 3 loading"
+            print("          ** CloneThem2 ** 3 loading")
             # Combien de clones a-t-on deja?
             nbClones = len(PtFindClones(masterkey))
-            print "Test : nb de clones de {} ==> {}".format(objName, nbClones)
+            print("Test : nb de clones de {} ==> {}".format(objName, nbClones))
             # Ajouter des clones si besoin
             if nbClones < nb:
                 CloneFactory.CloneObject(objName, age, nb - nbClones)
             # Attendre que les clones soient prets et les manipuler
-            print "objName={}, age={}, nb={}, fct={}, masterkey={}, bShow={}, iCurClone={}, matPos={}, bPhys={}, bAttach={}, soAvatar={}".format(objName, age, nb, fct, masterkey, bShow, iCurClone, matPos, True, bAttach, soAvatar)
+            print("objName={}, age={}, nb={}, fct={}, masterkey={}, bShow={}, iCurClone={}, matPos={}, bPhys={}, bAttach={}, soAvatar={}".format(objName, age, nb, fct, masterkey, bShow, iCurClone, matPos, True, bAttach, soAvatar))
             PtSetAlarm(1, CloneFactory.AlarmWaittingForClones(objName, age, nb, fct, [masterkey, bShow, iCurClone, matPos, True, bAttach, soAvatar]), 1)
-            print "Clone of {} loaded".format(objName)
+            print("Clone of {} loaded".format(objName))
             msg += "Clone of {} loaded\n".format(objName)
         else:
             # Retour a la normale
             CloneFactory.DechargerClones(masterkey)
             #DayTime()
-            print "Clone of {} unloaded".format(objName)
+            print("Clone of {} unloaded".format(objName))
             msg += "Clone of {} unloaded\n".format(objName)
     else:
-        print "not a ptKey!"
+        print("not a ptKey!")
         msg += "not a ptKey\n"
     return msg
 
@@ -442,13 +552,13 @@ def CloneColumns2(objName, age, bLoadOn=True, bShowOn=True, iNbCol=10, iCurCol=0
     elif position is None:
         mPos = PtGetLocalAvatar().getLocalToWorld()
     else:
-        print "Rect Error: matAv must be a ptMatrix44"
+        print("Rect Error: matAv must be a ptMatrix44")
         return 0
     
     # parameters are set, we can continue
-    print "objName={}, age={}".format(objName, age)
-    print "iCurCol={}, iNbCol={}".format(iCurCol, iNbCol)
-    print "fXAngle={}, fYAngle={}, fZAngle={}".format(fXAngle, fYAngle, fZAngle)
+    print("objName={}, age={}".format(objName, age))
+    print("iCurCol={}, iNbCol={}".format(iCurCol, iNbCol))
+    print("fXAngle={}, fYAngle={}, fZAngle={}".format(fXAngle, fYAngle, fZAngle))
     
     # rotations:
     mRotX = ptMatrix44()
@@ -469,7 +579,7 @@ def CloneColumns2(objName, age, bLoadOn=True, bShowOn=True, iNbCol=10, iCurCol=0
     #apply the translation
     mPos = mPos * mTrans
     
-    print "objName={}, age={}, bLoadOn={}, bShowOn={}, iNbCol={}, iCurCol={}, matAv={}, mTrans={}, fXAngle={}, fYAngle={}, fZAngle={}, bAttachOn={}, soAv={}".format(objName, age, bLoadOn, bShowOn, iNbCol, iCurCol, matAv, mTrans, fXAngle, fYAngle, fZAngle, bAttachOn, soAv)
+    print("objName={}, age={}, bLoadOn={}, bShowOn={}, iNbCol={}, iCurCol={}, matAv={}, mTrans={}, fXAngle={}, fYAngle={}, fZAngle={}, bAttachOn={}, soAv={}".format(objName, age, bLoadOn, bShowOn, iNbCol, iCurCol, matAv, mTrans, fXAngle, fYAngle, fZAngle, bAttachOn, soAv))
 
     ret = CloneThem2(objName, age, iNbClones=iNbCol, iCurClone=iCurCol, bShow=bShowOn, bLoad=bLoadOn, matPos=mPos, fct=PutItHere2, bAttach=bAttachOn, soAvatar=soAv)
     return ret
@@ -492,16 +602,16 @@ def ColumnUnderPlayer(bOn=True, player=None):
     try:
         playerID = player.getPlayerID()
     except:
-        print "player not found"
+        print("player not found")
         return 0
     if playerID == PtGetLocalPlayer().getPlayerID():
         soAvatar = PtGetLocalAvatar()
         bIsInAge = True
-        print "Player is myself"
+        print("Player is myself")
     else:
         pass
     agePlayers = PtGetPlayerList()
-    ids = map(lambda player: playerID, agePlayers)
+    ids = [playerID for player in agePlayers]
     if playerID in ids:
         soAvatar = PtGetAvatarKeyFromClientID(playerID).getSceneObject()
         bIsInAge = True
@@ -510,7 +620,7 @@ def ColumnUnderPlayer(bOn=True, player=None):
     # search player/column couple
     bPlayerHasColumn = False
     iCurCol = -1
-    for k, v in dicCol.iteritems():
+    for k, v in dicCol.items():
         if v == playerID:
             bPlayerHasColumn = True
             iCurCol = k
@@ -524,7 +634,7 @@ def ColumnUnderPlayer(bOn=True, player=None):
     if not bPlayerHasColumn:
         bFreeColumnFound = False
         #find the first free column
-        for k, v in dicCol.iteritems():
+        for k, v in dicCol.items():
             if v == 0:
                 bFreeColumnFound = True
                 iCurCol = k
@@ -541,7 +651,7 @@ def ColumnUnderPlayer(bOn=True, player=None):
 
 #attacher so1 a so2 : attacher(obj, av) ou l'inverse    
 def Attacher(so1, so2, bPhys=False):
-    """attacher so1 à so2 : attacher(obj, av) ou l'inverse"""
+    """attacher so1 Ã  so2 : attacher(obj, av) ou l'inverse"""
     so1.physics.netForce(1)
     so1.draw.netForce(1)
     PtAttachObject(so1, so2, 1)
@@ -551,4 +661,65 @@ def Detacher(so1, so2):
     so1.physics.netForce(1)
     so1.draw.netForce(1)
     PtDetachObject(so1, so2, 1)
+
+#================================================================
+
+# Get an SDL value.
+def GetSDL(name):
+	sdl = PtGetAgeSDL()
+	value = sdl[name][0]
+	return value
+
+# Set an SDL value.
+def SetSDL(name, value):
+	sdl = PtGetAgeSDL()
+	sdl[name] = (value,)
+
+# Toggle Bool SDL.
+def ToggleBoolSDL(name):
+    try:
+        sdlValue = GetSDL(name)
+    except:
+        print("sdl not found")
+        return 0
+    sdlValue = not sdlValue
+    print("sdlValue={}".format(sdlValue))
+    try:
+        SetSDL(name, sdlValue)
+    except:
+        pass
+
+# Toggle Integer SDL.
+def ToggleIntSDL(name, minValue, maxValue):
+    try:
+        sdlValue = GetSDL(name)
+    except:
+        print("sdl not found")
+        return 0
+    sdlValue = (sdlValue + 1 - minValue) % (maxValue - minValue + 1)
+    sdlValue = sdlValue + minValue
+    print("sdlValue={}".format(sdlValue))
+    try:
+        SetSDL(name, sdlValue)
+    except:
+        pass
+
+#
+"""
+# Shroomie Creature
+    VAR INT    ShroomieTotalTimesSeen[1] DEFAULT=0 DISPLAYOPTION=hidden
+    VAR INT    ShroomieTimeLastSeen[1] DEFAULT=0 DISPLAYOPTION=hidden
+"""
+
+#
+def elev():
+    ToggleBoolSDL("tldnElevatorLocked")
+
+#
+def power():
+    ToggleIntSDL("tldnPwrTwrPumpCount", 0, 3)
+
+
+
+
 

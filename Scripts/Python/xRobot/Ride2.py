@@ -1,4 +1,4 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 
 """Scripts pour animation d'objets animables Uru Live
 Michel Lacoste
@@ -24,7 +24,7 @@ def SCOJoueur(nom):
 def SCOListAvatars ():    
     """Retourne la liste des avatars presents dans l'age courant sous forme de SceneObjects"""
     Listejoueurs = PtGetPlayerList()
-    Liste = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), Listejoueurs)
+    Liste = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in Listejoueurs]
     Liste.append(PtGetLocalAvatar())
     return Liste
     
@@ -181,7 +181,7 @@ def Suivre(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
         sdl["islmS1FinaleBahro"]=(1,)
         sdl['islmS1FinaleBahroCity6']=(1,)        
     else:
-            print "{} inconnu".format(objet)
+            print("{} inconnu".format(objet))
             return
     animal = defobjet.split(',')
     Age = animal[0]
@@ -245,7 +245,7 @@ class Delier:
 import sys
     
         
-#Cette fonction ne s'utilise pas seule, elle est appelée par Action()
+#Cette fonction ne s'utilise pas seule, elle est appelÃ©e par Action()
 def runResp(key, resp, stateidx = None, netForce = 1, netPropagate = 1, fastforward = 0):
     nt = ptNotify(key)
     nt.addReceiver(resp)
@@ -455,7 +455,7 @@ animals = {
 
 ## Recherche de l'animal
 def GetAnimal(name):
-    for k, v in animals.items():
+    for k, v in list(animals.items()):
         if name.lower() in v[0]:
             return [k, v[1]]
     return None
@@ -494,7 +494,7 @@ def Suivre2(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
     animal = GetAnimal(object)
     if animal is None:
         # l'animal n'a pas ete trouve, on arrete la.
-        print "L'animal '{0}' n'a pas ete trouve".format(objet)
+        print("L'animal '{0}' n'a pas ete trouve".format(objet))
         return
     
     # Pour les Bahros de la Ville :

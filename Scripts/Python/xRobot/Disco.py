@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 # Colors
 # Functions to change colors.
 
 from Plasma import *
 #import random
 import math
-import xBotAge
+from . import xBotAge
 
 ## Set fog color.
 #def SetFog(r,g,b):
@@ -76,7 +77,7 @@ class DiscoFog:
 
         #print "self.step = {}".format(self.step)
         if self.step == 0:
-            print ">> update style"
+            print(">> update style")
             #xBotAge.SetRendererStyle(vstyle = "100000")
             #xBotAge.SetRendererFogLinear(self.start, self.end, self.density)
             #xBotAge.SetRendererClearColor(.6, .6, .6)

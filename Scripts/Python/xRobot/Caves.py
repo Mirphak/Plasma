@@ -79,10 +79,18 @@
         Floor(en=True)
 """
 from Plasma import *
-import Sky
-import Pellet
-import BahroCaveFloor
-import xBotAge
+from . import Sky
+from . import Pellet
+from . import BahroCaveFloor
+from . import xBotAge
+
+from . import DropObjects
+from . import CloneObject
+
+
+#
+def Floor(en=True):
+    BahroCaveFloor.Floor(en)
 
 #
 def ChangeSky(bOn=True):
@@ -169,11 +177,11 @@ def Spawn(spawnPointNumber=0):
     # PelletBahroCave :
     sp += ["LinkInPointDefault", "LinkInWithPellet", "LinkInPointLower"]
     
-    print "Spawn ({0})".format(spawnPointNumber)
+    print("Spawn ({0})".format(spawnPointNumber))
     
     pos = None
     if isinstance(spawnPointNumber, int):
-        print "Spawn ({0}) => sp : {1}".format(spawnPointNumber, sp[spawnPointNumber])
+        print("Spawn ({0}) => sp : {1}".format(spawnPointNumber, sp[spawnPointNumber]))
         #pos = xBotAge.GetSPCoord(spawnPointNumber)
         """
         try:
@@ -186,20 +194,20 @@ def Spawn(spawnPointNumber=0):
             pos = None
         """
         sol = PtFindSceneobjects(sp[spawnPointNumber])
-        print "Spawn ({0}) => sol : {1}".format(spawnPointNumber, sol)
+        print("Spawn ({0}) => sol : {1}".format(spawnPointNumber, sol))
         
         so = None
         if len(sol) > 0:
             so = sol[0]
-            print "Spawn ({0}) => so : {1}".format(spawnPointNumber, so)
+            print("Spawn ({0}) => so : {1}".format(spawnPointNumber, so))
         if isinstance(so, ptSceneobject):
             pos = so.getLocalToWorld()
-            print "Spawn ({0}) => pos : {1}".format(spawnPointNumber, pos)
+            print("Spawn ({0}) => pos : {1}".format(spawnPointNumber, pos))
         
     if isinstance(pos, ptMatrix44):
-        print "Spawn ({0}) => pos : ptMatrix44".format(spawnPointNumber)
+        print("Spawn ({0}) => pos : ptMatrix44".format(spawnPointNumber))
         soAvatar = PtGetLocalAvatar()
-        print "Spawn ({0}) => soAvatar : {0}".format(soAvatar)
+        print("Spawn ({0}) => soAvatar : {0}".format(soAvatar))
         soAvatar.netForce(1)
         soAvatar.physics.warp(pos)
 
@@ -241,3 +249,66 @@ def WarpToSpawnPoint(self, cFlags, args = []):
         soAvatar.netForce(1)
         soAvatar.physics.warp(pos)
     return 1
+
+#attacher so1 a so2 : attacher(obj, av) ou l'inverse    
+def Attacher(so1, so2):
+    """attacher so1 à so2 : attacher(obj, av) ou l'inverse"""
+    so1.physics.netForce(1)
+    so1.draw.netForce(1)
+    PtAttachObject(so1, so2, 1)
+
+# detacher so1 de so2 : detach(obj, av) ou l'inverse    
+def Detacher(so1, so2):
+    so1.physics.netForce(1)
+    so1.draw.netForce(1)
+    PtDetachObject(so1, so2, 1)
+
+# attache ou detache le ballon a/de moi
+def AttachSoccerToMe(bAttachOn=True):
+    av = PtGetLocalAvatar()
+    #avpos = PtGetLocalAvatar().getLocalToWorld()
+    so = PtFindSceneobject("SoccerBall", "Minkata")
+    #sopos = so.getLocalToWorld()
+
+    if bAttachOn:
+        Attacher(so1=so, so2=av)
+    else:
+        Detacher(so1=so, so2=av)
+
+# attache ou detache le sol a/de moi
+def AttachGroundToSoccer(bAttachOn=True):
+    soGround = PtFindSceneobject("GroundPlaneVis", "Minkata")
+    soSoccer = PtFindSceneobject("SoccerBall", "Minkata")
+    if bAttachOn:
+        Attacher(so1=soGround, so2=soSoccer)
+    else:
+        Detacher(so1=soGround, so2=soSoccer)
+
+# OnLake
+def OnLake(bOn=True):
+    soAvatar = PtGetLocalAvatar()
+    if bOn:
+        mPos = soAvatar.getLocalToWorld()
+        CloneObject.Minkata(bShow=True, bLoad=True, soPlayer=soAvatar, matPos=mPos)
+        DropObjects.CloneObjectList(lstObj=["SoccerBall"], age="Minkata", nb=1, bShow=bOn, bLoad=bOn, matPos=mPos)
+    else:
+        CloneObject.Minkata(bShow=False, bLoad=False)
+
+# 
+def LakeOnMe():
+    soAvatar = PtGetLocalAvatar()
+    mPos = soAvatar.getLocalToWorld()
+    mkSoccer = PtFindSceneobject("SoccerBall", "Minkata").getKey()
+    cks = PtFindClones(mkSoccer)
+    if len(cks) > 0:
+        sos = cks[0].getSceneObject()
+        mkFloor = PtFindSceneobject("GroundFloorProxy", "Minkata").getKey()
+        ckf = PtFindClones(mkFloor)
+        if len(ckf) > 0:
+            sof = ckf[0].getSceneObject()
+            sof.netForce(True)
+            AttachGroundToSoccer(bAttachOn=True)
+        sos.netForce(True)
+        sos.draw.enable(False)
+        sos.physics.enable(False)
+        sos.physics.warp(mPos)

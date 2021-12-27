@@ -4,7 +4,45 @@
     -- V1 : 24/10/2015 => Door
     -- V2 : Cavern Tour du 16/01/2016
     -- V3 : Cavern Tour du 28/01/2017
-       
+    -- V4 : Cavern Tour du 09/01/2021
+        Larry F - sam. 2 janv. 04:17
+        À Susa'n, moi
+        Hmm. That’s sooner than I though it would be, but yes. That’s the schedule.
+        Kadish Tolesa. I think I have that ready… Yes, I think so. My notes look updated.
+
+        Special effects are pretty limited. 
+        Mostly just making sure that doors are open and warping us past ladders and other chokepoints.
+
+        After meeting the tour neighborhood, we start in the Kādish Gallery. 
+        I’ll have the group use the bot’s “to city” command to get us to Ae’gura 
+        and we’ll walk to the gallery from there. 
+        I’ll talk about the gallery for awhile, and then we link to the bot in the Tolesa link-in area.
+
+        We want the revolving door from the telescope puzzle to be open. 
+        I’ll have the group close it behind us. 
+        Same for the moon room – have the floor open. 
+        We don’t want to use puzzle solutions during the trip.
+
+        When we get to the vista, 
+        I’d like to have an onlake effect so that the guests can run around for a bit because 
+        it’s the only outdoors the Age has.
+
+        We want to operate the pyramid prism ball so the group can see it rotate atop the pyramid 
+        from outside. 
+        No need for the elevator to be working, 
+        because I want to warp past it because it’s a chokepoint.
+
+        When we get to the weight puzzle room, 
+        if we have it solved the first thing people will do is start climbing the ladders, 
+        so I’m thinking we should not have it solved and just warp up to the top.
+
+        We want the vault to be open when we get there, 
+        and an onlake effect there would also be fun. 
+        We’ll do that after the tour ends. From the vault, we want to warp to the empty vault. 
+        Maybe have the onlake be there instead of the first vault?
+
+        Anyway, tour ends in the empty vault.
+
 """
 
 from Plasma import *
@@ -69,8 +107,8 @@ from Plasma import *
             "k19":"LinkInPointYeeshaVault"   # = sp 19
 
 """
-#Cette fonction ne s'utilise pas seule, elle est appel�e par Action()
-def RunResp(key, resp, stateidx = None, netForce = 1, netPropagate = 1, fastforward = 0):
+#Cette fonction ne s'utilise pas seule, elle est appelée par Action()
+def RunResp(key, resp, stateidx=None, netForce=1, netPropagate=1, fastforward=0):
     nt = ptNotify(key)
     nt.addReceiver(resp)
     nt.netPropagate(netPropagate)
@@ -85,7 +123,7 @@ def RunResp(key, resp, stateidx = None, netForce = 1, netPropagate = 1, fastforw
     nt.send()
 
 # open or close the bahro door ('open' = 0, 'close' = 1)
-def Door(action = 0):
+def Door(action=0):
     objName = "TreeGateWood"
     ageName = "Kadish"
     so = PtFindSceneobject(objName, ageName)
@@ -109,9 +147,9 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) != None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) != None]
     return nameList
 
 # Retourne la liste des clones trouve des objets dont le nom ressemble a <name>
@@ -119,14 +157,14 @@ def GetCloneList(name):
     nameList = FindSOName(name)
     soCloneDic = {}
     for soName in nameList:
-        print "nom: {}".format(soName)
+        print("nom: {}".format(soName))
         try:
             sol = PtFindSceneobjects(soName)
             for mso in sol:
-                print "mso: {}".format(mso.getName())
+                print("mso: {}".format(mso.getName()))
                 cloneKeys = PtFindClones(mso.getKey())
-                print "cloneKeys: {}".format(len(cloneKeys))
-                soCloneList = map(lambda ck: ck.getSceneObject(), cloneKeys)
+                print("cloneKeys: {}".format(len(cloneKeys)))
+                soCloneList = [ck.getSceneObject() for ck in cloneKeys]
                 soCloneDic.update({mso.getName(): soCloneList})
         except:
             continue
@@ -144,14 +182,14 @@ def tmf(bOn=0):
             #clone.physics.netForce(1)
             #clone.physics.disable()
     else:
-        print "No clone found"
+        print("No clone found")
 
 #
 def wa(where=None):
     #avCentre = PtGetLocalAvatar()
     #mat = avCentre.getLocalToWorld()
     mat = None
-    if where is None or where not in range(1, 5):
+    if where is None or where not in list(range(1, 5)):
         mat = PtGetLocalAvatar().getLocalToWorld()
     else:
         if where == 1:
@@ -170,7 +208,7 @@ def wa(where=None):
     #recuperer tous les joueurs
     playerList = PtGetPlayerList()
     playerList.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)

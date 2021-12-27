@@ -1,4 +1,4 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 
 from Plasma import *
 
@@ -48,7 +48,7 @@ class ClonageBilles:
     def __init__(self, nombre):
         self._nombre = nombre
         self._delais = 1
-        print "init ClonageBilles(%i)" % self._nombre
+        print("init ClonageBilles(%i)" % self._nombre)
 
     # Clonage general (n billes de chaque couleur)
     def ClonerBilles(self, nombre):
@@ -59,7 +59,7 @@ class ClonageBilles:
     def onAlarm (self, param):
         if param == 1:
             # partie 1 : clonage
-            print "clonage en cours..."
+            print("clonage en cours...")
             self.ClonerBilles(self._nombre)
             PtSetAlarm(self._delais, self, 2)
         elif param == 2:
@@ -67,13 +67,13 @@ class ClonageBilles:
             n = len(PtFindClones(self._masterKey2))
             # attendre que tous les clones soient crees
             if n < self._nombre:
-                print "%i clones trouves sur les %i demandes!" % (n, self._nombre)
+                print("%i clones trouves sur les %i demandes!" % (n, self._nombre))
                 PtSetAlarm(self._delais, self, 2)
             else:
-                print "sauvegarde des %i clones..." % n
+                print("sauvegarde des %i clones..." % n)
                 self.sauver()
         else:
-            print "ClonageBilles.onAlarm : param incorrect"
+            print("ClonageBilles.onAlarm : param incorrect")
 
     # Sauvons les clones!
     def sauver(self):
@@ -81,18 +81,18 @@ class ClonageBilles:
         global dicMarblesDra
         global dicClonesPhy
         global dicClonesDra
-        for couleur in dicMarblesPhy.keys():
+        for couleur in list(dicMarblesPhy.keys()):
             keyPhy = dicMarblesPhy[couleur]
             keyDra = dicMarblesDra[couleur]
-            print couleur + " clones " + str(len(PtFindClones(keyPhy)))
+            print(couleur + " clones " + str(len(PtFindClones(keyPhy))))
             dicClonesPhy[couleur] = PtFindClones(keyPhy)
             dicClonesDra[couleur] = PtFindClones(keyDra)
-            print couleur + " phy " + str(len(dicClonesPhy[couleur]))
-            print couleur + " dra " + str(len(dicClonesDra[couleur]))
+            print(couleur + " phy " + str(len(dicClonesPhy[couleur])))
+            print(couleur + " dra " + str(len(dicClonesDra[couleur])))
 
 # Appelee dans xScore pour creer les clones dont on a besoin
 def Cloner(nombre):
-    print "Cloner(" + str(nombre) + ")"
+    print("Cloner(" + str(nombre) + ")")
     PtSetAlarm(1, ClonageBilles(nombre), 1)
 
 
@@ -135,7 +135,7 @@ def Deplacer(so1, so2, dx = 0, dy = 0, dz = 0, bPhys = True):
 
 #attacher so1 a so2 : attacher(obj, av) ou l'inverse    
 def Attacher(so1, so2, dx = 0, dy = 0, dz = 0, bPhys = False):
-    """attacher so1 à so2 : attacher(obj, av) ou l'inverse"""
+    """attacher so1 Ã  so2 : attacher(obj, av) ou l'inverse"""
     so1.physics.netForce(1)
     so1.draw.netForce(1)
     Deplacer(so1, so2, dx, dy, dz, bPhys)
@@ -153,6 +153,6 @@ def Detacher(so1, so2):
 
 #
 def nbClones():
-    print str(len(PtFindClones(dicMarblesPhy["red"])))
-    print str(len(dicClonesPhy["red"]))
-    print str(len(dicClonesDra["red"]))
+    print(str(len(PtFindClones(dicMarblesPhy["red"]))))
+    print(str(len(dicClonesPhy["red"])))
+    print(str(len(dicClonesDra["red"])))

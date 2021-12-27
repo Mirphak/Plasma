@@ -11,7 +11,7 @@ def ListMyAges():
         myKey = myKey.replace("'", "")
         myKey = myKey.replace("eder", "")
         #ageDict.update({myKey:ageInfoList})
-        print "{5} : {3} ({4}) {0}|{1}|{2}".format(ageInfo.getAgeInstanceName(), ageInfo.getAgeFilename(), ageInfo.getAgeInstanceGuid(), ageInfo.getAgeUserDefinedName(), ageInfo.getAgeSequenceNumber(), myKey)
+        print("{5} : {3} ({4}) {0}|{1}|{2}".format(ageInfo.getAgeInstanceName(), ageInfo.getAgeFilename(), ageInfo.getAgeInstanceGuid(), ageInfo.getAgeUserDefinedName(), ageInfo.getAgeSequenceNumber(), myKey))
 
 def GetMyAges():
     ageDict = dict()
@@ -55,15 +55,15 @@ def GetMyAges():
 #
 def PrintMyAgeList():
     ageDict = GetMyAges()
-    for k, v in sorted(ageDict.iteritems()):
-        print "{0}:{1}, ".format(k, v)
+    for k, v in sorted(ageDict.items()):
+        print("{0}:{1}, ".format(k, v))
 
 #
 MirphakAgeDict = {
 }
 
 tmp = dict()
-for k, v in MirphakAgeDict.iteritems():
+for k, v in MirphakAgeDict.items():
         tmp.update({k.lower().replace(" ", "").replace("'", "").replace("eder", ""): v})
 MirphakAgeDict = tmp
 
@@ -96,7 +96,9 @@ MirobotAgeDict = {
     "jalak":["Jalak", "Jalak", "1269ee23-baff-4ca2-a3bc-f80df29fe978", "Mir-o-Bot's", ""], 
     "kadish":["Kadish", "Kadish", "31b44de5-0d1e-4c1b-8d8d-d9592df2f214", "Mir-o-Bot's", "LinkInPointFromGallery"], 
     "kemo":["Eder Kemo", "Garden", "3a366b1e-9488-4c77-a278-a6375161ac92", "Mir-o-Bot's", "Perf-SpawnPointKemo02"], 
+    "mobgz":["GreatZero", "GreatZero", "66d12fcf-4635-4e7d-b991-38fa5d70108a", "mob's", "BigRoomLinkInPoint"],
     "mobkveer":["K'veer", "Kveer", "dc721118-1ea2-44ad-9ff0-df58676ed73c", "Mir-o-Bot's", ""],
+    "mobrelto":["Relto", "Personal", "d21c19f9-c664-4650-a027-512688fc75d4", "mob's", "LinkInPointCloset"],
     "minkata":["Minkata", "Minkata", "125c7c98-9c18-49df-acce-ddc3f8108bd6", "Mir-o-Bot's", ""], 
     "myst1":["Myst", "Myst", "63aad82f-5d85-416e-bd35-50b63b09b5e2", "Mir-o-Bot's", ""], 
     "myst":["Myst", "Myst", "67b9503e-3eaf-4d5a-a0dc-3ff7dccddcde", "Mir-o-Bot's", ""],
@@ -109,8 +111,8 @@ MirobotAgeDict = {
 
     "tsogal":["EderTsogal", "EderTsogal", "03c05256-c149-4fa5-9210-b848b9b9b5c0", "Mir-o-Bot's", ""],
     "delin":["EderDelin", "EderDelin", "6ed7f98c-a3f6-4000-bb79-91843f78441a", "Mir-o-Bot's", ""],
-    "GZ":["Ae'gura", "GreatZero", "76aa23d2-07a0-45f6-b355-5de39302f455", "Mir-o-Bot's GZ", ""],
-    "GreatZero":["Ae'gura", "GreatZero", "76aa23d2-07a0-45f6-b355-5de39302f455", "Mir-o-Bot's GZ", ""],
+    "GZ":["GreatZero", "GreatZero", "76aa23d2-07a0-45f6-b355-5de39302f455", "Mir-o-Bot's GZ", ""],
+    "GreatZero":["GreatZero", "GreatZero", "76aa23d2-07a0-45f6-b355-5de39302f455", "Mir-o-Bot's GZ", "BigRoomLinkInPoint"],
     "Descent":["Descent", "Descent", "4543f4e3-aa4b-4c4b-b6f4-eaa1aee4c440", "Mir-o-Bot's", "LinkInPointShaftFall"],
     "Tiwah":["Descent", "Descent", "4543f4e3-aa4b-4c4b-b6f4-eaa1aee4c440", "Mir-o-Bot's", "LinkInPointShaftFall"],
     "GreatShaft":["Descent", "Descent", "4543f4e3-aa4b-4c4b-b6f4-eaa1aee4c440", "Mir-o-Bot's", ""],
@@ -126,19 +128,48 @@ MirobotAgeDict = {
     "Office":["Ae'gura", "BaronCityOffice", "2aaf334b-a49e-40f2-963b-5be146d40021", "Mir-o-Bot's Office", ""],
     
     "spyroom":["spyroom", "spyroom", "df9d49ec-0b9c-4716-9a0f-a1b66f7d9814", "mob's (Sharper's spy room)", ""],
+    
+    "mobgomepub":["GoMePubNew", "GoMePubNew", "da149d57-5671-4302-95d6-8d9ea52167ff", "Mir-o-Bot's", ""],
+    "mobchiso":["ChisoPreniv", "ChisoPreniv", "788b836d-2019-48bd-af66-c9f0674dff5a", "Mir-o-Bot's", ""],
+    "mobveelay":["VeeTsah", "VeeTsah", "e8c6fbef-4e47-4951-8a9f-ab8c1b800c49", "Mir-o-Bot's", ""],
+    "mobSerene":["Serene", "Serene", "f5a44340-3506-4c8f-af97-8bb338193460", "Mir-o-Bot's", ""],
+    "mobTrebivdil":["Tre'bivdil", "trebivdil", "ea180c91-e06d-44c4-b18c-c769a7c714cb", "Mir-o-Bot's", ""],
+    "mobVothol":["Vothol Gallery", "vothol", "09d93976-b95d-4a31-b2e7-0e63903d77ff", "Mir-o-Bot's", ""],
 }
 
 tmp = dict()
-for k, v in MirobotAgeDict.iteritems():
+for k, v in MirobotAgeDict.items():
         tmp.update({k.lower().replace(" ", "").replace("'", "").replace("eder", ""): v})
 MirobotAgeDict = tmp
 
 
 #MagicBot ages:
 MagicbotAgeDict = {
+    "MBErcana":["Ercana", "Ercana", "7c6348d0-ea67-496f-922c-ed940b54f534", "", ""],
+    "MBcity":["city", "city", "2cb76f8d-2b26-4732-8275-cdd4172424f0", "", "LinkInPointBahro-PalaceBalcony"],
+    "MBHood":["Hood", "Neighborhood", "65ef6345-3aa7-4233-a5bb-e86280cc0dd3", "Magic Bot's", ""],
+    "MBDereno":["Dereno", "Dereno", "462edc6f-d783-44ae-b254-1bd7b0205082", "MagicBot's", ""],
+    "MBTeledahn":["Teledahn", "Teledahn", "955890b9-dad2-4b90-b7e1-7aae59736e3a", "", ""],
+    "MBKadish":["Kadish", "Kadish", "fdd4cdbd-51db-4773-8bad-dff0cf14185b", "", ""],
+    "MBKveer":["Kveer", "Kveer", "6cd9097b-33bc-4b7a-a78e-392dd4ef2235", "", "LinkInPointPrison"],
+    "polo":["Ahnonay", "Ahnonay", "4e1783b5-3620-4139-9798-b51f78cc354b", "", ""],
+    "MBDelin":["EderDelin", "EderDelin", "bfd99634-18cd-496e-9b7e-d0868c41e373", "", ""],
+    "MBTsogal":["EderTsogal", "EderTsogal", "5cac5a2b-2fd1-4287-b551-9601f7d8989b", "", ""],
+    "MBGira":["Gira", "Gira", "627cb1ae-efbb-4e0f-9a95-8c1a7cf622ae", "", ""],
+    "MBGarden":["Garden", "Garden", "365e1f3e-c779-4b85-a506-c01a76b7c88a", "", ""],
+    "MBKemo":["Garden", "Garden", "365e1f3e-c779-4b85-a506-c01a76b7c88a", "", "Perf-SpawnPointKemo02"],
+    "MBJalak":["Jalak", "Jalak", "bf6516a8-c43a-436a-ab95-2318d7a38a7f", "", ""],
+    "MBMinkata":["Minkata", "Minkata", "c5a6e34e-b8c4-45d7-8d18-e1224d5cd95f", "Magic Bot's", ""],
+    "soccer":["Minkata", "Minkata", "eaca856a-7c6a-48bd-99c2-654263e694b1", "", ""],
+    "MBSpy":["spyroom", "spyroom", "78308f2a-e80f-47dd-9fb4-f1334ce72521", "", ""],
+    "MBSilo":["ErcanaCitySilo", "ErcanaCitySilo", "28515865-127d-43f6-9c84-c630190807af", "", ""],
+    "MBCave":["LiveBahroCaves", "LiveBahroCaves", "0e421cd5-e56a-426d-a7b7-51a98755ada2", "LiveBahroCaves", ""],
+    "MagicGreatTreePub":["GreatTreePub", "GreatTreePub", "75bdd14e-a525-4283-a5a0-579878f7305c", "Magic", ""],
+    "MBDescent":["Descent", "Descent", "5db9ede0-afa4-47e8-ba15-02cb72b9117b", "Magic", ""],
+    "MBGTP":["GreatTreePub", "GreatTreePub", "75bdd14e-a525-4283-a5a0-579878f7305c", "Magic", ""],
 }
 tmp = dict()
-for k, v in MagicbotAgeDict.iteritems():
+for k, v in MagicbotAgeDict.items():
         tmp.update({k.lower(): v})
 MagicbotAgeDict = tmp
 
@@ -152,6 +183,7 @@ PublicAgeDict = {
     "concert":["Ae'gura", "city", "f4dcfd9d-d897-4e5b-9ac9-f39961500bbb", "D'ni-", "LinkInPointConcertHallFoyer"],
     "library":["Ae'gura", "city", "f4dcfd9d-d897-4e5b-9ac9-f39961500bbb", "D'ni-", "LinkInPointLibrary"],
     "palace":["Ae'gura", "city", "f4dcfd9d-d897-4e5b-9ac9-f39961500bbb", "D'ni-", "LinkInPointPalace"],
+    #"gallery":["Ae'gura", "city", "f4dcfd9d-d897-4e5b-9ac9-f39961500bbb", "D'ni-", "LinkInPointKadishGallery"],
     "phil":["philRelto", "philRelto", "e8a2aaed-5cab-40b6-97f3-6d19dd92a71f", "philRelto", ""],
     "kirel":["Kirel", "Neighborhood02", "4cfbe95a-1bb2-4cbc-a6c4-87eb28a2aac1", "D'ni-", ""],
     "kveer":["Kveer", "Kveer", "68e219e0-ee25-4df0-b855-0435584e29e2", "D'ni-", "LinkInPointPrison"],
@@ -163,10 +195,22 @@ PublicAgeDict = {
     "watchers":["The Watcher's Pub", "GreatTreePub", "75bdd14e-a525-4283-a5a0-579878f7305a", "D'ni-", ""],
     "pub":["The Watcher's Pub", "GreatTreePub", "75bdd14e-a525-4283-a5a0-579878f7305a", "D'ni-", ""],
     "writers":["GuildPub-Writers", "GuildPub-Writers", "5cf4f457-d546-47dc-80eb-a07cdfefa95d", "", ""],
+    "gog":["Hood", "Neighborhood", "ce228892-97ff-42d3-bd3f-2726b4e61f5b", "Guild of Greeters'", ""],
+    "gome":["Hood", "Neighborhood", "34ac88e0-14e3-4eb2-87b7-984725875e44", "Guild of Messengers'", ""],
+    "international":["Hood", "Neighborhood", "b98bd2b4-3c56-4508-a239-2302e03f01f3", "International's", ""],
+    "obd":["Hood", "Neighborhood", "02ab8bcd-2d66-4727-a295-fa6850132aa6", "Obductee's", ""],
+    "tjh":["Hood", "Neighborhood", "200be199-f5a0-40a7-b0c9-dad2eb5898e3", "Tereeza's", ""],
+    "veelay":["Veelay Tsahvahn", "VeeTsah", "c446d2ed-225f-4492-a9b6-3569d77e462b", "", ""],
+    "chiso":["ChisoPreniv", "ChisoPreniv", "0b4f5ad9-d93d-52e3-83e4-9364c2149ae4", "ChisoPreniv", ""],
+    "messengerspub":["Messengers' Pub - Ae'gura", "GoMePubNew", "0e1c2ec4-47e0-4231-b258-75d9e138b4b9", "", ""],
+    "serene":["Serene", "Serene", "4b70e35f-80c8-463c-b8f5-087e211c112e", "", ""],
+    "trebivdil":["Tre'bivdil", "trebivdil", "5b06b39d-27ff-4a80-a00e-40bbdb802e8a", "", ""],
+    "vothol":["Vothol Gallery", "Vothol", "303478a8-9e47-4aa7-adc5-985a09033ee8", "", ""],
 }
 
 # liste des instances disponibles pour moi
 # (instance name, file name, guid, user defined name, spawn point)
 linkDic = {
+    "fh":["Fun House", "Neighborhood", "33a235b1-9fe0-47f0-a73e-6fbd0044717a", "The", "LinkInPointBevinBalcony"],
 }
 

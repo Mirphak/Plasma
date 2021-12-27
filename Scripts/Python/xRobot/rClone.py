@@ -102,7 +102,7 @@ class AlarmCloneObject:
         self._nombre = nombre
         self._delais = 1
         self._attempts = 1
-        print "init AlarmCloneObject(%i)" % self._nombre
+        print("init AlarmCloneObject(%i)" % self._nombre)
 
     # Clonage general (n clones)
     #def Cloner(self, nombre):
@@ -121,7 +121,7 @@ class AlarmCloneObject:
                 PtSetAlarm(self._delais, self, 1)
             elif param == 1:
                 # partie 1 : clonage
-                print "clonage en cours..."
+                print("clonage en cours...")
                 # Existe-t-il deja des clones?
                 n = len(PtFindClones(self._masterKey))
                 if n < self._nombre:
@@ -135,14 +135,14 @@ class AlarmCloneObject:
                 n = len(PtFindClones(self._masterKey))
                 # attendre que tous les clones soient crees
                 if n < self._nombre:
-                    print "%i clones trouves sur les %i demandes! (attempt #%i)" % (n, self._nombre, self._attempts)
+                    print("%i clones trouves sur les %i demandes! (attempt #%i)" % (n, self._nombre, self._attempts))
                     if self._attempts < self._maxAttempts:
                         self._attempts = self._attempts + 1
                         PtSetAlarm(self._delais, self, 2)
                     else:
-                        print "Le clonage met trop de temps!!"
+                        print("Le clonage met trop de temps!!")
                 else:
-                    print "sauvegarde des %i clones..." % n
+                    print("sauvegarde des %i clones..." % n)
                     self.saveClones()
                     PtSetAlarm(self._delais, self, 3)
             elif param == 3:
@@ -151,26 +151,26 @@ class AlarmCloneObject:
                 for ck in cloneKeys:
                     PtCloneKey(ck, 1)
             else:
-                print "AlarmCloneObject.onAlarm : param incorrect"
+                print("AlarmCloneObject.onAlarm : param incorrect")
         else:
-            print "self._masterKey is not a ptKey (object not found)"
+            print("self._masterKey is not a ptKey (object not found)")
 
     # Sauvons les clones!
     def saveClones(self):
         global dicClones
         #dicClones["FissureStarField"] = PtFindClones(self._masterKey
-        if not dicClone.has_key(self._ageFileName):
+        if self._ageFileName not in dicClone:
             dicClones.update({self._ageFileName:{}})
-        if not dicClone[self._ageFileName].has_key(self._objectName):
+        if self._objectName not in dicClone[self._ageFileName]:
             dicClones[self._ageFileName].update({self._objectName:[]})
         dicClones[self._ageFileName][self._objectName] = PtFindClones(self._masterKey)
-        print "nb clones: " + str(len(dicClones[self._ageFileName][self._objectName]))
+        print("nb clones: " + str(len(dicClones[self._ageFileName][self._objectName])))
 
 #=========================================
 # Exemple : clonage du FissureStarField
 def CloneFissureStarField(nombre):
     #objectName, ageFileName, nombre
-    print "CloneFissureStarField()"
+    print("CloneFissureStarField()")
     #PtSetAlarm(1, AlarmCloneObject(nombre), 1)
     PtSetAlarm(1, AlarmCloneObject("FissureStarField", "Personal", nombre), 0)
 
@@ -189,7 +189,7 @@ class AlarmWaittingForClones:
         self._masterKey = PtFindSceneobject(self._objectName, self._ageFileName).getKey()
     
     def onAlarm(self, param):
-        print "> AlarmWaitting.onAlarm"
+        print("> AlarmWaitting.onAlarm")
         if param == 1:
             #nbClonesFound = len(dicClones["FissureStarField"])
             #if !dicClone.has_key(self._ageFileName):
@@ -198,11 +198,11 @@ class AlarmWaittingForClones:
             #    dicClones[self._ageFileName].update({self._objectName:[]})
             #nbClonesSaved = len(dicClones["Personal"]["FissureStarField"])
             nbClonesFound = len(PtFindClones(self._masterKey))
-            print ">> nb de clones de %s %i" % ("FissureStarField", nbClonesFound)
+            print(">> nb de clones de %s %i" % ("FissureStarField", nbClonesFound))
             # Attendre que tous les clones soient crees, mais pas indefiniment au cas ou
             if (nbClonesFound < self._nbClones and self._nbFois < 20):
                 self._nbFois += 1
-                print ">>> Attente nb: %i" % self._nbFois
+                print(">>> Attente nb: %i" % self._nbFois)
                 PtSetAlarm(1, self, 1)
             else:
                 PtSetAlarm(1, self, 2)
@@ -211,9 +211,9 @@ class AlarmWaittingForClones:
             cloneKeys = PtFindClones(self._masterKey)
             nbClonesFound = len(cloneKeys)
             #print ">> nb de clones de %s %i" % ("FissureStarField", nbClonesFound)
-            print ">> nb de clones de {} {}".format(self._objectName, nbClonesFound)
+            print(">> nb de clones de {} {}".format(self._objectName, nbClonesFound))
             if (self._nbFois < 20):
-                print ">> Les clones sont prets."
+                print(">> Les clones sont prets.")
                 soMaster = PtFindSceneobject(self._objectName, self._ageFileName)
                 ## Masquons les clones surnumeraires s'il y en a
                 #for i in range(0, nbClonesFound - 2):
@@ -253,9 +253,9 @@ class AlarmWaittingForClones:
                 #Mais il faut que je lance la commande deux fois, pourquoi?
                 #Test en temporisant
                 RechargerClones(self._masterKey)
-                print ">> Fin."
+                print(">> Fin.")
             else:
-                print ">> Le clonage prend trop de temps!!"
+                print(">> Le clonage prend trop de temps!!")
             self._nbFois = 0
 
 # Cree une sphere etoilee complete a partir de 2 clones tete-beche de "FissureStarField" agrandis
@@ -267,7 +267,7 @@ def CreateNightSky(scale=7.5, bOn=True):
         # Combien de clones a-t-on deja?
         #nbClones = len(dicClones["FissureStarField"])
         nbClones = len(PtFindClones(masterKey))
-        print "CreateNightSky : nb de clones de %s ==> %i" % ("FissureStarField", nbClones)
+        print("CreateNightSky : nb de clones de %s ==> %i" % ("FissureStarField", nbClones))
         # Ajouter des clones si besoin
         if nbClones < nb:
             CloneFissureStarField(nb - nbClones)
@@ -295,20 +295,20 @@ def CreateNightSky(scale=7.5, bOn=True):
 def SetFog(style = "default", start = 0, end = 0, density = 0, r = 0.4, g = 0.4, b = 0.5, cr = 0.4, cg = 0.4, cb = 0.5):
     #default (see fni settings)
     if style == "default":
-        print "default"
+        print("default")
         fy = "Graphics.Renderer.Setyon 10000"
         fd = "Graphics.Renderer.Fog.SetDefLinear 1 900 2"
         fc = "Graphics.Renderer.Fog.SetDefColor .4 .4 .5"
         cc = "Graphics.Renderer.SetClearColor .4 .4 .5"
     elif style == "nofog":
-        print "nofog"
+        print("nofog")
         fy = "Graphics.Renderer.Setyon 10000"
         fd = "Graphics.Renderer.Fog.SetDefLinear 0 0 0"
         fc = "Graphics.Renderer.Fog.SetDefColor .4 .4 .5"
         cc = "Graphics.Renderer.SetClearColor .1 .1 .3"
     #personalized style
     else:
-        print "personalized"
+        print("personalized")
         try:
             yon = int(style)
             fy = "Graphics.Renderer.Setyon %i" % (yon)
@@ -332,12 +332,12 @@ def SetFog(style = "default", start = 0, end = 0, density = 0, r = 0.4, g = 0.4,
 #=========================================
 # Test : clonage d'un object (nom de l'objet, nom fichier age et nombre de clones en parametre)
 def CloneObject(objectName, ageFileName, nombre):
-    print "CloneObject({}, {}, {})".format(objectName, ageFileName, nombre)
+    print("CloneObject({}, {}, {})".format(objectName, ageFileName, nombre))
     PtSetAlarm(1, AlarmCloneObject(objectName, ageFileName, nombre), 0)
 
 #methode par defaut de manipulation d'objet
 def DoNothing(params=[]):
-    print "DoNothing()"
+    print("DoNothing()")
 #
 class AlarmWaittingForClones_v2:
     _nbFois = 0
@@ -354,23 +354,23 @@ class AlarmWaittingForClones_v2:
         self._masterKey = PtFindSceneobject(self._objectName, self._ageFileName).getKey()
     
     def onAlarm(self, param):
-        print "> AlarmWaitting.onAlarm"
+        print("> AlarmWaitting.onAlarm")
         if param == 1:
             nbClonesFound = len(PtFindClones(self._masterKey))
-            print ">> nb de clones de %s %i" % (self._objectName, nbClonesFound)
+            print(">> nb de clones de %s %i" % (self._objectName, nbClonesFound))
             # Attendre que tous les clones soient crees, mais pas indefiniment au cas ou
             if (nbClonesFound < self._nbClones and self._nbFois < 20):
                 self._nbFois += 1
-                print ">>> Attente nb: %i" % self._nbFois
+                print(">>> Attente nb: %i" % self._nbFois)
                 PtSetAlarm(1, self, 1)
             else:
                 PtSetAlarm(1, self, 2)
         elif param == 2:
             cloneKeys = PtFindClones(self._masterKey)
             nbClonesFound = len(cloneKeys)
-            print ">> nb de clones de {} {}".format(self._objectName, nbClonesFound)
+            print(">> nb de clones de {} {}".format(self._objectName, nbClonesFound))
             if (self._nbFois < 20):
-                print ">> Les clones sont prets."
+                print(">> Les clones sont prets.")
                 soMaster = PtFindSceneobject(self._objectName, self._ageFileName)
                 # Manipulons les clones
                 self._method(self._params)
@@ -378,9 +378,9 @@ class AlarmWaittingForClones_v2:
                 PtSetAlarm(1, self, 3)
             elif param == 3:
                 RechargerClones(self._masterKey)
-                print ">> Fin."
+                print(">> Fin.")
             else:
-                print ">> Le clonage prend trop de temps!!"
+                print(">> Le clonage prend trop de temps!!")
             self._nbFois = 0
 
 # Faire quelque chose avec des clones
@@ -389,7 +389,7 @@ def Test(objectName="BeachBall", ageFileName="Neighborhood", nb=2, bOn=True):
     if bOn:
         # Combien de clones a-t-on deja?
         nbClones = len(PtFindClones(masterKey))
-        print "Test : nb de clones de {} ==> {}".format(objectName, nbClones)
+        print("Test : nb de clones de {} ==> {}".format(objectName, nbClones))
         # Ajouter des clones si besoin
         if nbClones < nb:
             CloneObject(objectName, ageFileName, nb - nbClones)

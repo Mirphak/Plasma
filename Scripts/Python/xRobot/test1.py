@@ -49,7 +49,7 @@ def Books():
 # Toggle Eder books.
 def Eders(i):
     eder = GetSDL("nb01LinkBookEderVis")
-    print eder
+    print(eder)
     try:
         i = int(i)
         #2 = Delin
@@ -71,30 +71,30 @@ def Glass(name, i):
         ga = GetSDL("nb01StainedWindowOption")
         ed = GetSDL("nb01StainedGlassEders")
         gz = GetSDL("nb01StainedGlassGZ")
-        print "Stain glass panels: ga={}, ed={}, gz{}".format(ga, ed, gz)
+        print("Stain glass panels: ga={}, ed={}, gz{}".format(ga, ed, gz))
     except KeyError:
-        print "sdl not found"
+        print("sdl not found")
     name = name.lower()
     if name.startswith("ga"):
         try:
             i = int(i)
             SetSDL("nb01StainedWindowOption", i)
         except:
-            print "wrong sdl value"
+            print("wrong sdl value")
     elif name.startswith("ed"):
         try:
             i = int(i)
             SetSDL("nb01StainedGlassEders", i)
         except:
-            print "wrong sdl value"
+            print("wrong sdl value")
     elif name.startswith("gr") or name == "gz":
         try:
             i = int(i)
             SetSDL("nb01StainedGlassGZ", i)
         except:
-            print "wrong sdl value"
+            print("wrong sdl value")
     else:
-        print "name <> 'ga' or 'ed' or 'gz'"
+        print("name <> 'ga' or 'ed' or 'gz'")
         return 0
 
 #
@@ -117,10 +117,10 @@ def ToggleBoolSDL(name):
     try:
         sdlValue = GetSDL(name)
     except:
-        print "sdl not found"
+        print("sdl not found")
         return 0
     sdlValue = not sdlValue
-    print "sdlValue={}".format(sdlValue)
+    print("sdlValue={}".format(sdlValue))
     try:
         SetSDL(name, sdlValue)
     except:
@@ -135,10 +135,10 @@ def ToggleIntSDL(name, minValue, maxValue):
     try:
         sdlValue = GetSDL(name)
     except:
-        print "sdl not found"
+        print("sdl not found")
         return 0
     sdlValue = (sdlValue + 1) % (maxValue - minValue + 1)
-    print "sdlValue={}".format(sdlValue)
+    print("sdlValue={}".format(sdlValue))
     try:
         SetSDL(name, sdlValue)
     except:
@@ -153,13 +153,13 @@ def ListMyAges():
     ages = ptVault().getAgesIOwnFolder().getChildNodeRefList()
     for age in ages:
         ageInfo = age.getChild().upcastToAgeLinkNode().getAgeInfo()
-        print "{3} ({4}) {0}|{1}|{2}".format(ageInfo.getAgeInstanceName(), ageInfo.getAgeFilename(), ageInfo.getAgeInstanceGuid(), ageInfo.getAgeUserDefinedName(), ageInfo.getAgeSequenceNumber())
+        print("{3} ({4}) {0}|{1}|{2}".format(ageInfo.getAgeInstanceName(), ageInfo.getAgeFilename(), ageInfo.getAgeInstanceGuid(), ageInfo.getAgeUserDefinedName(), ageInfo.getAgeSequenceNumber()))
 
 """
 # Mes ages sur Destiny:
 # relto : Mirphak's (0) Relto|Personal|d924cbbd-7522-41c4-84f0-63113fe51140
 # neighborhood : DS (2) Neighborhood|Neighborhood|9e683602-655d-4f07-aa7d-580bb76eb446
-# aegura :  M¯À5­hï8hï8;#«x (0) Ae'gura|city|7e0facea-dae1-4aec-a4ca-e76c05fdcfcf
+# aegura :  MÂ¯Ã€5Â­hÃ¯8hÃ¯8;#Â«x (0) Ae'gura|city|7e0facea-dae1-4aec-a4ca-e76c05fdcfcf
 # avatarcustomization : Mirphak's (0) AvatarCustomization|AvatarCustomization|d93536c8-3817-4030-a2b6-ddd545811521
 # pelletcave : Mirphak's (0) Pellet Cave|PelletBahroCave|093d762a-c544-4aeb-b596-a56860e421be
 # nexus : Mirphak's (0) Nexus|Nexus|28454641-68fa-4fa4-905d-2c16e02e28e8
@@ -179,7 +179,7 @@ def FindPlayerByIDs(fromID, toID):
             vault = ptVault()
             #print playerID
             playerName = vault.findNode(tempNode).upcastToPlayerInfoNode().playerGetName()
-            print "%i %s" % (playerID, playerName)
+            print("%i %s" % (playerID, playerName))
             playerNames.append((playerID, playerName))
         except:
             pass
@@ -195,29 +195,29 @@ class test1(ptResponder):
         self.id = 5026
         version = 1
         self.version = version
-        print "__init__test1 v.", version,".0"
+        print("__init__test1 v.", version,".0")
 
     ############################
     def OnFirstUpdate(self):
         #random.seed()
-        print "====> OnFirstUpdate : no parameter"
+        print("====> OnFirstUpdate : no parameter")
 
     ############################
     def OnServerInitComplete(self):
-        print "====> OnServerInitComplete : no parameter"
+        print("====> OnServerInitComplete : no parameter")
  
     ###########################
     def OnSDLNotify(self,VARname,SDLname,playerID,tag):
-        print "====> OnNotify : VARname='{0}', SDLname='{1}', playerID='{2}', tag='{3}'".format(VARname,SDLname,playerID,tag)
+        print("====> OnNotify : VARname='{0}', SDLname='{1}', playerID='{2}', tag='{3}'".format(VARname,SDLname,playerID,tag))
 
    ############################
     def OnNotify(self,state,id,events):
-        print "====> OnNotify : state='{0}', id='{1}', events='{2}', owned='{3}'".format(state, id, events, self.sceneobject.isLocallyOwned())
+        print("====> OnNotify : state='{0}', id='{1}', events='{2}', owned='{3}'".format(state, id, events, self.sceneobject.isLocallyOwned()))
 
     ############################
     def OnTimer(self,TimerID):
-        print "====> OnTimer : TimerID='{0}'".format(TimerID)
+        print("====> OnTimer : TimerID='{0}'".format(TimerID))
 
     ###########################
     def OnBackdoorMsg(self, target, param):
-        print "====> OnBackdoorMsg : target='{0}', param='{1}'".format(target, param)
+        print("====> OnBackdoorMsg : target='{0}', param='{1}'".format(target, param))

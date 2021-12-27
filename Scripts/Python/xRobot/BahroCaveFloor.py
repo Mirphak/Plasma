@@ -23,7 +23,7 @@ def Floor(en=True):
             ((1.0, 0.0, 0.0, 99.92294311523438), (0.0, 1.0, 0.0, -63.619476318359375), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0)),
             ),
         }
-    for key, items in d.items():
+    for key, items in list(d.items()):
         m = ptMatrix44()
         m.setData(items[en])
         p = PtFindSceneobject(key, age).physics

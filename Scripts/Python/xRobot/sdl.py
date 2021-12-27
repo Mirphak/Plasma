@@ -49,7 +49,7 @@ def Books():
 # Toggle Eder books.
 def Eders(i):
     eder = GetSDL("nb01LinkBookEderVis")
-    print eder
+    print(eder)
     try:
         i = int(i)
         #2 = Delin
@@ -71,30 +71,30 @@ def Glass(name, i):
         ga = GetSDL("nb01StainedWindowOption")
         ed = GetSDL("nb01StainedGlassEders")
         gz = GetSDL("nb01StainedGlassGZ")
-        print "Stain glass panels: ga={}, ed={}, gz{}".format(ga, ed, gz)
+        print("Stain glass panels: ga={}, ed={}, gz{}".format(ga, ed, gz))
     except KeyError:
-        print "sdl not found"
+        print("sdl not found")
     name = name.lower()
     if name.startswith("ga"):
         try:
             i = int(i)
             SetSDL("nb01StainedWindowOption", i)
         except:
-            print "wrong sdl value"
+            print("wrong sdl value")
     elif name.startswith("ed"):
         try:
             i = int(i)
             SetSDL("nb01StainedGlassEders", i)
         except:
-            print "wrong sdl value"
+            print("wrong sdl value")
     elif name.startswith("gr") or name == "gz":
         try:
             i = int(i)
             SetSDL("nb01StainedGlassGZ", i)
         except:
-            print "wrong sdl value"
+            print("wrong sdl value")
     else:
-        print "name <> 'ga' or 'ed' or 'gz'"
+        print("name <> 'ga' or 'ed' or 'gz'")
         return 0
 
 #
@@ -117,10 +117,10 @@ def ToggleBoolSDL(name):
     try:
         sdlValue = GetSDL(name)
     except:
-        print "sdl not found"
+        print("sdl not found")
         return 0
     sdlValue = not sdlValue
-    print "sdlValue={}".format(sdlValue)
+    print("sdlValue={}".format(sdlValue))
     try:
         SetSDL(name, sdlValue)
     except:
@@ -141,11 +141,11 @@ def ToggleIntSDL(name, minValue, maxValue):
     try:
         sdlValue = GetSDL(name)
     except:
-        print "sdl not found"
+        print("sdl not found")
         return 0
     sdlValue = (sdlValue + 1 - minValue) % (maxValue - minValue + 1)
     sdlValue = sdlValue + minValue
-    print "sdlValue={}".format(sdlValue)
+    print("sdlValue={}".format(sdlValue))
     try:
         SetSDL(name, sdlValue)
     except:
@@ -166,25 +166,25 @@ def ToggleHoodSDL(name):
         try:
             ToggleIntSDL("nb01StainedWindowOption", 0, 2)
         except:
-            print "wrong sdl value"
+            print("wrong sdl value")
     elif name.startswith("ed"):
         try:
             ToggleIntSDL("nb01StainedGlassEders", 1, 6)
         except:
-            print "wrong sdl value"
+            print("wrong sdl value")
     elif name.startswith("gr") or name == "gz":
         try:
             ToggleIntSDL("nb01StainedGlassGZ", 1, 3)
         except:
-            print "wrong sdl value"
+            print("wrong sdl value")
     elif name == "lamp":
         try:
             ToggleBoolSDL("nb01LampOption01Vis")
         except:
-            print "wrong sdl value"
+            print("wrong sdl value")
 
     else:
-        print "name <> 'ga' or 'ed' or 'gz'"
+        print("name <> 'ga' or 'ed' or 'gz'")
         return 0
 
 #
@@ -236,13 +236,14 @@ def init():
     try:
         chronString = chronString.split(",")
         for sol in chronString:
-            chronSolutions.append(string.atoi(sol))
-        print "found pellet cave solution: ",chronSolutions
-        print "current sdl values for solution = ",sdlSolutions
+            #chronSolutions.append(string.atoi(sol))
+            chronSolutions.append(int(sol))
+        print("found pellet cave solution: ",chronSolutions)
+        print("current sdl values for solution = ",sdlSolutions)
         #if self.sceneobject.isLocallyOwned():
         ShowSymbols()
     except:
-        print "ERROR!  Couldn't get the solution information, symbols won't appear"
+        print("ERROR!  Couldn't get the solution information, symbols won't appear")
 
     linkmgr = ptNetLinkingMgr()
     link = linkmgr.getCurrAgeLink()
@@ -257,7 +258,7 @@ def init():
         try:
             avatar = PtGetLocalAvatar()
         except:
-            print"failed to get local avatar"
+            print("failed to get local avatar")
             return
         #avatar.avatar.registerForBehaviorNotify(self.key)
     else:
@@ -266,7 +267,8 @@ def init():
         entry = vault.findChronicleEntry("GotPellet")
         if type(entry) != type(None):
             entryValue = entry.chronicleGetValue()
-            gotPellet = string.atoi(entryValue)
+            #gotPellet = string.atoi(entryValue)
+            gotPellet = int(entryValue)
             if gotPellet != 0:
                 entry.chronicleSetValue("%d" % (0))
                 entry.save()
@@ -280,7 +282,7 @@ def init():
         try:
             ageSDL = PtGetAgeSDL()
         except:
-            print "PelletBahroCave.OnServerInitComplete():\tERROR---Cannot find the PelletBahroCave Age SDL"
+            print("PelletBahroCave.OnServerInitComplete():\tERROR---Cannot find the PelletBahroCave Age SDL")
             ageSDL[SDLGotPellet.value] = (0,)
     
         ageSDL.setNotify(self.key,SDLGotPellet.value,0.0)
@@ -300,7 +302,7 @@ def GetPelletCaveSolution():
         ageInfoChild = ageInfoChildRef.getChild()
         folder = ageInfoChild.upcastToFolderNode()
         if folder and folder.folderGetName() == "AgeData":
-            print "Found age data folder"
+            print("Found age data folder")
             ageDataChildren = folder.getChildNodeRefList()
             for ageDataChildRef in ageDataChildren:
                 ageDataChild = ageDataChildRef.getChild()
@@ -328,7 +330,7 @@ def ShowSymbols():
         ageSDL[sdlSolutionNames[n]] = (newVal,)
         sdlSolutions[n] = newVal        
         n += 1
-    print "SDL solutions list now = ",sdlSolutions
+    print("SDL solutions list now = ",sdlSolutions)
 
 #=====================================
 # GreatTreePub.sdl
@@ -364,9 +366,9 @@ def GuildSdl():
     for name in names:
         try:
             value = GetSDL(name)
-            print "Guil SDL name={}, value={}".format(name, value)
+            print("Guil SDL name={}, value={}".format(name, value))
         except:
-            print "Guil SDL \"{}\" not found".format(name)
+            print("Guil SDL \"{}\" not found".format(name))
 
 # toggles guild bool sdl
 def guild(name):
@@ -379,7 +381,7 @@ def guild(name):
         "ladder":"grtpBallHallDoorVis", 
         "ball":"grtpDeadBahroVis"
     }
-    if (name in dicNames.keys()):
+    if (name in list(dicNames.keys())):
         ToggleBoolSDL(dicNames[name])
     else:
         print("wrong sdl name")
@@ -401,7 +403,7 @@ def city(name):
         "kahlo":"islmKahloPubHallCollapse", 
         "memorial":"islmMemorialImagerVis"
     }
-    if (name in dicNames.keys()):
+    if (name in list(dicNames.keys())):
         ToggleBoolSDL(dicNames[name])
     else:
         print("wrong sdl name")

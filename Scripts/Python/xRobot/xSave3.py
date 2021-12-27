@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #xSave module
 
 from Plasma import *

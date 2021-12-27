@@ -1,11 +1,11 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 """Scripts pour lier un avatar a un objet (exemple ici avec un Bahro de la ville)
 Michel Lacoste
 -----Avril 2013------"""
 from Plasma import *
 import math
 
-#1. les scripts et classes nécessaires
+#1. les scripts et classes nÃ©cessaires
 def PtpJoueur(nomOuIdJoueur):
     """Retourne le Ptplayer du joueur LOCAL a partir de son nom ou son numero d'ID de KI """
     Liste = PtGetPlayerList()
@@ -26,8 +26,8 @@ def Suivre(parametres="sandscrit:moi:20:0:0:0:0"):
     objet = params[0]
     nomOuIdAvatar = params[1]
     duree = int(params[2])
-    print "'{}', '{}', {}".format(objet, nomOuIdAvatar, duree)
-    print "nombre de parametres:%d" %(len(params))
+    print("'{}', '{}', {}".format(objet, nomOuIdAvatar, duree))
+    print("nombre de parametres:%d" %(len(params)))
     if (len (params) == 7):
         rotx = int(params[3])
         roty = int(params[4])
@@ -73,7 +73,7 @@ class Lier:
         self._anglez = anglez
         self._hauteur = hauteur
     def onAlarm (self, param):
-        print "Lier"
+        print("Lier")
         try:
             Aobj = PtFindSceneobject(self._obj, self._age)
         except:
@@ -92,7 +92,7 @@ class Lier:
         hz.translate(ptVector3(0,0,self._hauteur))
         self._joueur.physics.warp(centreobj * rotx * roty * rotz * hz)
         PtAttachObject(self._joueur, Aobj,1)
-        print "duree:{}".format(self._duree)
+        print("duree:{}".format(self._duree))
         if self._duree > 0:
             PtSetAlarm(self._duree, Delier(self._age, self._joueur, Aobj), 1)
         
@@ -103,7 +103,7 @@ class Delier:
         self._joueur = joueur
         self._obj = obj
     def onAlarm (self, param):
-        print "Delier"
+        print("Delier")
         PtDetachObject(self._joueur,self._obj,1)
         try:
             Robj=PtFindSceneobject('LinkInPointDefault',PtGetAgeName())
@@ -131,7 +131,7 @@ class suivreobj:
         
         
 #2. fonction princiopale qui lie un avatar a un objet (ici le bahro 1 de la ville) durant 30 secondes
-# si la duree de vol est egale a 0, alors l'avatar restera indéfiniment lie a l'animal. Il faut alors le delier manuellement.
+# si la duree de vol est egale a 0, alors l'avatar restera indÃ©finiment lie a l'animal. Il faut alors le delier manuellement.
 # voir en dessous la liste des autres objets auxquels on peut relier un avatar
 # il est a noter que pour les bahros de la ville il faut d'abord changer certaines sdl, pour les autres animaux non
 # regarde la liste en bas.
@@ -171,7 +171,7 @@ def singe(nplayer="moi", duree = 30):
     
 ######### C'est tout ! lol
 
-### Voici quelques animaux auxqules on peut se lier, avec les angles pour que l'avatar soit bien aligné quand i est dessus
+### Voici quelques animaux auxqules on peut se lier, avec les angles pour que l'avatar soit bien alignÃ© quand i est dessus
 # oiseau 1 du Relto:("Personal,psnlMYSTII,DCSoarBird01,0,0,180,0")
 
 # oiseau 2 du Relto: ("Personal,psnlMYSTII,DCSoarBird03,0,0,180,0")

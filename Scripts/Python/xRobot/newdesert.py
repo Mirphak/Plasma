@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Plasma import *
 
 def load():
@@ -5,7 +6,7 @@ def load():
     PtSetAlarm(1,dis(),0)
     PtSetAlarm(1,hide(),0)
     #PtSetAlarm(1,morehide(),0)
-    print 'The floor is completely safe :)';
+    print('The floor is completely safe :)');
     
 class dis:
     def onAlarm(self,context): 
@@ -143,7 +144,7 @@ class dis:
         obj42.physics.enable(0)
         obj43.physics.netForce(1)
         obj43.physics.enable(0)
-        print 'All undesired objects have been disabled'; 
+        print('All undesired objects have been disabled'); 
 
 class hide:
     def onAlarm(self,context): 
@@ -800,7 +801,7 @@ class hide:
         obj258.draw.enable(0)
         obj259.draw.netForce(1)
         obj259.draw.enable(0)
-        print 'All undesired objects have been hide';
+        print('All undesired objects have been hide');
 
 #class morehide:
 #    def onAlarm(self,context):

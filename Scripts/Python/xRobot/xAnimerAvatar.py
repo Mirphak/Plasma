@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def AnimeAv(parametres):
     """danse:1:moi Lance une animation dans la liste ci-dessous ou standard:nombre de fois:avatar ou tout le monde si vide"""
     params = parametres.split(':')

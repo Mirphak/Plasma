@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 "Jeux de marqueurs"
 "List of markers games"

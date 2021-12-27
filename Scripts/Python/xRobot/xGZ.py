@@ -211,7 +211,36 @@
             import CloneObject
             CloneObject.co3("grsnTerrain", "Garrison", bShow=bOn, bLoad=bOn, scale=1, matPos=mat)
 
-            
+=================================================================================================
+    Version 3 : 11/04/2020
+
+    De Larry :
+The effects needed shouldn’t be anything out of the ordinary.
+
+For the Great Zero, we start in the antechamber, then Mirphak teleports us down to the courtyard. 
+We want the machine to be turned off. 
+I’ll ask Mirphak to turn the machine on so the guests can see it activate, then it gets turned off once more.
+
+We’ll walk up to the calibration chamber as I explain things along the way. 
+In the Calibration chamber, Mirphak turns on the machine again when I ask so we can see the neutrino beam being generated. 
+I’ll have a number of still pictures to show on the stream side as the lecture proceeds.
+
+The Great Shaft is also pretty straightforward for Mirphak. 
+We need a floor to stand on at the bottom, and the panic link zone turned off. 
+But he’s got that automated now, so no big deal. 
+We start in the Eder Tomahn, and teleport down to the bottom when I’m done there.
+
+I’ll have some still pictures to show, but the new trick will be stream side – 
+I’m going to run the DIRT Descent demo to show things that most of the guests probably have not seen. 
+Since that was just released a few months ago, it should be fun for the guests. 
+It’ll include two D’ni machines the guests won’t have seen, the Worm and the Scarab. 
+I also intend to show a little of the area past the door to the tunnels leading toward D’ni that can’t be opened in Myst V.
+
+Oh, I did forget one effect for the Great Zero – 
+we need an onlake effect so we can run around outside the calibration chamber where the neutrino collection towers are. 
+But again, that’s nothing new.
+
+
 """
 
 # Python/fun/mystitech/gzSDL.py
@@ -231,10 +260,10 @@ class gz_callback:
 
 from Plasma import *
 import math
-import sdl
-import Ride
-import Platform
-import CloneObject
+from . import sdl
+from . import Ride
+from . import Platform
+from . import CloneObject
 
 #
 def clone(obj="grsnTerrain", age="Garrison", bOn=True):
@@ -247,7 +276,7 @@ def togglesdl(name):
         "active":"grtzGZActive", 
         "state":"grtzGreatZeroState", 
     }
-    if (name in dicNames.keys()):
+    if (name in list(dicNames.keys())):
         sdl.ToggleBoolSDL(dicNames[name])
     else:
         print("wrong sdl name")
@@ -255,17 +284,17 @@ def togglesdl(name):
 
 #
 dicBot = {
-    32319L:"Mir-o-Bot", 
-    27527L:"Magic Bot", 
-    71459L:"Mimi Bot", 
+    32319:"Mir-o-Bot", 
+    27527:"Magic Bot", 
+    71459:"Mimi Bot", 
     #L:"Stone5", 
-    64145L:"Annabot",
+    64145:"Annabot",
     #L:"SkydiverBot",
-    3975L:"OHBot",
-    24891L:"Magic-Treasure",
-    26224L:"Magic Treasure",
-    21190L:"Mimi Treasure",
-    2332508L:"mob",
+    3975:"OHBot",
+    24891:"Magic-Treasure",
+    26224:"Magic Treasure",
+    21190:"Mimi Treasure",
+    2332508:"mob",
     }
 
 # Larry LeDeay [KI: 11308]
@@ -284,9 +313,9 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
     
     #agePlayers = GetAllAgePlayers()
     # ne pas tenir compte des robots
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in dicBot.keys()), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
     agePlayers.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), agePlayers)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in agePlayers]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)
@@ -296,9 +325,9 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
 
     i = 0
     n = len(agePlayers)
-    print "nb de joueurs: %s" % (n)
+    print("nb de joueurs: %s" % (n))
     dist = float(coef * n) / (2.0 * math.pi)
-    print "distance: %s" % (dist)
+    print("distance: %s" % (dist))
     nbCercles = dist // maxdist
     if nbCercles > 0:
         dist = dist / nbCercles
@@ -306,7 +335,7 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
         avatar = soAvatarList[i]
         angle = (float(i%maxdist) * float(nbCercles) * 2.0 * math.pi) / float(n)
         dist = dist + (n // maxdist)
-        print "angle(%s): %s" % (i, angle)
+        print("angle(%s): %s" % (i, angle))
         dx = float(dist)*math.cos(angle)
         dy = float(dist)*math.sin(angle)
         #matrix = avCentre.getLocalToWorld()
@@ -352,7 +381,7 @@ def hide(bOn=False):
 # long platform(where=1)
 def platform2(where=None):
     matPos = None
-    if where is None or where not in range(1, 5):
+    if where is None or where not in list(range(1, 5)):
         matPos = PtGetLocalAvatar().getLocalToWorld()
     else:
         #Ahnonay

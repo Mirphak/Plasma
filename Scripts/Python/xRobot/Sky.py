@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Fait varier la couleur du fond de ciel.
 # (1 + math.sin(radAngle) + math.sin(3*radAngle)/3 + math.sin(5*radAngle)/5)/2
 # (1 + math.sin(radAngle + (2*math.pi/3)) + math.sin(3*(radAngle + (2*math.pi/3)))/3 + math.sin(5*(radAngle + (2*math.pi/3)))/5)/2

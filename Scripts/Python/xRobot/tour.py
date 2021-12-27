@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from Plasma import *
 
@@ -7,7 +8,7 @@ def LinkPlayerTo(age, playerID=None, spawnPointNumber=None):
         playerID = PtGetLocalPlayer().getPlayerID()
     else:
         try:
-            playerID = long(playerID)
+            playerID = int(playerID)
         except:
             return "incorrect playerID"
             #pass
@@ -56,7 +57,7 @@ def LinkAll(ageName="tsogal"):
     }
     
     ageName = ageName.lower()
-    if (ageName in ages.keys()):
+    if (ageName in list(ages.keys())):
         age = ages[ageName]
     else:
         return
@@ -99,7 +100,7 @@ def wa(where=None):
     #recuperer tous les joueurs
     playerList = PtGetPlayerList()
     playerList.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)

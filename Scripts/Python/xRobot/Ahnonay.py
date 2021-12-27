@@ -3,6 +3,7 @@
 # == Script pour Ahnonay ==
 # Mirphak 2016-12-01 version 1
 # Mirphak 2017-06-24 version 2
+# Mirphak 2021-11-13 version 3
 """
     ** Larry's wish list 2017-06-05 **
     1 - We start out in the Ahnonay Cathedral, and that’s just a matter of getting there. 
@@ -72,8 +73,8 @@ from xPsnlVaultSDL import *
 import time
 
 import math
-import sdl
-import Platform
+from . import sdl
+from . import Platform
 
 # Cette fonction ne s'utilise pas seule, elle est appelee par Courant()
 def RunResp(key, resp, stateidx=None, netForce=1, netPropagate=1, fastforward=0):
@@ -103,12 +104,12 @@ def Courant(action=0):
 def QSphere():
     ageName = PtGetAgeName()
     if ageName != 'Ahnonay' :
-        print "Vous n'etes pas a Ahnonay"
+        print("Vous n'etes pas a Ahnonay")
         return 0
     else:
         ageSDL = PtGetAgeSDL ()
         sphere = ageSDL ["ahnyCurrentSphere"] [0]
-        print "Vous etes dans la sphere {}".format(sphere)
+        print("Vous etes dans la sphere {}".format(sphere))
         return sphere
 
 # To rotate to the next sphere, return the active sphere (sphere = 1 a 4)
@@ -158,9 +159,9 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) != None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) != None]
     return nameList
 
 # Find scene objects with name like soName in all loaded districts (Warning, it includes GUI)
@@ -189,7 +190,7 @@ def togglesdl(name):
         "wings":"ercaHrvstrWingsOk", 
         "wd":"ercaHrvstrWingLeverDown", 
     }
-    if (name in dicNames.keys()):
+    if (name in list(dicNames.keys())):
         sdl.ToggleBoolSDL(dicNames[name])
     else:
         print("wrong sdl name")
@@ -197,7 +198,7 @@ def togglesdl(name):
 # platform(name="spy")
 def platform(where=None):
     matPos = None
-    if where is None or where not in range(1, 5):
+    if where is None or where not in list(range(1, 6)):
         matPos = PtGetLocalAvatar().getLocalToWorld()
     else:
         if where == 1:
@@ -215,7 +216,113 @@ def platform(where=None):
         
     Platform.CreatePlatform2(bShow=False, matAv=matPos)
 
+# Move me on the platform
+def go(where=1):
+    me = PtGetLocalAvatar()
+    if where is None or where not in list(range(1, 6)):
+        pass
+    else:
+        if where == 1:
+            tupPos = ((0.98276501894, 0.184859260917, 0.0, 23.3415126801), (-0.184859260917, 0.98276501894, 0.0, 54.0308570862), (0.0, 0.0, 1.0, -0.0328424945474), (0.0, 0.0, 0.0, 1.0))
+        elif where == 2:
+            tupPos = ((-0.897078573704, -0.44187015295, 0.0, 649.721862793), (0.44187015295, -0.897078573704, 0.0, -877.984619141), (0.0, 0.0, 1.0, 9445.71386719), (0.0, 0.0, 0.0, 1.0))
+        elif where == 3:
+            tupPos = ((0.00954949762672, -0.999954581261, 0.0, -102.545890808), (0.999954581261, 0.00954949762672, 0.0, 54.9582672119), (0.0, 0.0, 1.0, 10563.0976562), (0.0, 0.0, 0.0, 1.0))
+        elif where == 4:
+            tupPos = ((-0.748968303204, 0.662607133389, 0.0, 1560.00488281), (-0.662607133389, -0.748968303204, 0.0, -51.4498291016), (0.0, 0.0, 1.0, 10171.9091797), (0.0, 0.0, 0.0, 1.0))
+        elif where == 5:
+            tupPos = ((-0.937420606613, -0.3482016325, 0.0, 993.751708984), (0.3482016325, -0.937420606613, 0.0, -455.378509521), (0.0, 0.0, 1.0, 9424.86523438), (0.0, 0.0, 0.0, 1.0))
+        matPos = ptMatrix44()
+        matPos.setData(tupPos)
+        me.netForce(1)
+        me.physics.warp(matPos)
+
+# Cavern Tour Platform for Ahnonay Sphere 4 - Walkway from Statue to Maintenance Room
+def walkway():
+    Platform.StatueMaintRoom(attach=False)
+
+# Enable or disable pysics for all players
+def phys(bOn=False):
+    #recuperer tous les joueurs
+    playerList = PtGetPlayerList()
+    playerList.append(PtGetLocalPlayer())
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
+    for soavatar in soAvatarList:
+        soavatar.netForce(True)
+        soavatar.physics.enable(bOn)
+
+
 #========================================================
+def PageAll(bOn=True):
+    pages = [
+        "Sphere01BuildingInterior",
+        "MaintRoom01",
+        "ahnySphere01",
+        "MaintRoom02",
+        "ahnySphere02",
+        "MaintRoom03",
+        "ahnySphere03",
+        "Vortex",
+        "Hub",
+        "MaintRoom04",
+        "EngineerHut",
+        "ahnySphere04"
+    ]
+    
+    #PtPageInNode(pages)
+    for page in pages:
+        if bOn:
+            PtConsoleNet("Nav.PageInNode {0}".format(page), 1)
+        else:
+            PtConsoleNet("Nav.PageOutNode {0}".format(page), 0)
 
-
+#==========================================================
+"""
+    # ahnySphereCtrl:"
+    "LinkInPointDefault"
+    
+    # Sphere 1 (sp 1 a 5)
+    # ahnySphere01:"
+    , "LinkInPointSphere01", "SaveClothPoint31"
+    #, "SaveClothPoint_old"
+    # MaintRoom01:
+    ,"SaveClothPoint41", "SaveClothPoint51", "SaveClothPoint61"
+    #,"StartPoint"
+    
+    # Sphere 2 (sp 6 a 12)
+    # ahnySphere02:"
+    , "LinkInPointSphere02", "SaveClothPoint12", "SaveClothPoint22", "SaveClothPoint32"
+    # MaintRoom02:
+    ,"SaveClothPoint42", "SaveClothPoint52", "SaveClothPoint62"
+    #,"StartPoint"
+    
+    # Sphere 3 (sp 13 a 19)
+    # ahnySphere03:"
+    , "LinkInPointSphere03", "SaveClothPoint13", "SaveClothPoint23", "SaveClothPoint33"
+    # MaintRoom03:
+    ,"SaveClothPoint43", "SaveClothPoint53", "SaveClothPoint63"
+    #,"StartPoint"
+    
+    # Sphere 4 (sp 20 a 23)
+    # ahnySphere04:"
+    , "LinkInPointSphere04"    
+    # MaintRoom04:
+    ,"SaveClothPoint44", "SaveClothPoint54", "SaveClothPoint64"
+    #,"StartPoint"
+    # EngeneerHut: (sp 24)
+    ,"SaveClothPoint74"
+    # Hub: (sp 25)
+    ,"Dummy01"
+    
+    Les spawn points utiles:
+    - Arrivee sphere 1 : !sp 1
+    - Arrivee maint  1 : !sp 4
+    - Arrivee sphere 2 : !sp 6
+    - Arrivee maint  2 : !sp 10
+    - Arrivee sphere 3 : !sp 13
+    - Arrivee maint  3 : !sp 17
+    - Arrivee sphere 4 : !sp 20
+    - Arrivee maint  4 : !sp 21
+"""
 #
+

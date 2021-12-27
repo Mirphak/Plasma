@@ -81,7 +81,7 @@ animDict = {'danse'      : ['Dance'],
 """
 
 from Plasma import *
-import xSave
+from . import xSave
 
 #
 animDict = {
@@ -267,7 +267,7 @@ travelAnimList = ("climbdown", "climbup", "ladderdown", "ladderup", "run", "stai
 
 #
 def RetreaveAnimCmdName(altCmdName):
-    for k, v in altAnim.items():
+    for k, v in list(altAnim.items()):
         if altCmdName.lower() in v:
             return str(k)
     return None
@@ -293,7 +293,7 @@ def Play(player, animName, nbTimes=1, duration=1):
     gAnimSeq = []
     try:
         animSeq = animDict[animName]
-        gAnimSeq = map(lambda x: gender+x, animSeq)
+        gAnimSeq = [gender+x for x in animSeq]
     except KeyError:
         gAnimSeq = [gender+animName]
     except:

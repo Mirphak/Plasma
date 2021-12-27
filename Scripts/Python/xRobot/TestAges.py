@@ -50,7 +50,7 @@ def ListMyAges():
     for age in ages:
         ageInfo = age.getChild().upcastToAgeLinkNode().getAgeInfo()
         i += 1
-        print "{0}\t: {1}".format(i, ageInfo.getAgeFilename())
+        print("{0}\t: {1}".format(i, ageInfo.getAgeFilename()))
 
 """
 ===========================================
@@ -108,7 +108,7 @@ def GetChildAges():
             link = contentA.getChild()
             info = link.upcastToAgeInfoNode()
         
-        print "Age : {0}".format(info.getAgeFilename())
+        print("Age : {0}".format(info.getAgeFilename()))
         
         childAgeFolder = info.getChildAgesFolder()
         contentsC = childAgeFolder.getChildNodeRefList()
@@ -116,7 +116,7 @@ def GetChildAges():
             link = contentC.getChild()
             link = link.upcastToAgeLinkNode()
             name = link.getAgeInfo().getAgeFilename()
-            print ">> Child : {0}".format(name)
+            print(">> Child : {0}".format(name))
 
 # Pour Ahnonay (voir xLinkingBookGUIPopup.py) ==> RIEN !!
 def GetAhnonaySP():
@@ -138,7 +138,7 @@ def GetAhnonaySP():
                         #spawnInfo = spawn.split(",")
                         #spawnPointInfo = ptSpawnPointInfo(spawnInfo[0], spawnInfo[1])
                         #spawnPoints.append(spawnPointInfo)
-                        print spawn
+                        print(spawn)
                     break
 
 # Et ca? ==> Pas mieux!!
@@ -159,7 +159,7 @@ def PelletCaveFromAhnonay():
                     ageDataChild = ageDataChildRef.getChild()
                     chron = ageDataChild.upcastToChronicleNode()
                     if chron and chron.getName() == "PelletCaveGUID":
-                        print "Found pellet cave guid - ", chron.getValue()
+                        print("Found pellet cave guid - ", chron.getValue())
                         return chron.getValue()
                 return ""
 

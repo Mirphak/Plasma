@@ -96,6 +96,57 @@
         C'est à propos de tout ce que je peux penser ou me souvenir.
         D'autres suggestions?
 
+* Ercana Tour V3 09/10/2021
+    We’ll want to start out in the silo since Er’cana is going to be a lot 
+    more fun to run around in after the tour is over. 
+    The list of things to do in the silo are:
+
+        - Display the different pellet drop effects on the lake water on request.
+        - Either enable an on-lake effect or build a viewing platform above the 
+          outside wall of the silo so that the guests can see what is on the other side.
+
+    Mostly it’ll just be me talking, though.
+
+    Er’cana will be more complex, of course. 
+    We have a lot of chokepoints to get past there. 
+    One idea I have this year is in regard to the broken catwalk. 
+    In the past, we tried teleporting past it, swimming across the gap and various other methods. 
+    But this year, 
+    if we can port in the Jalak pillars I’d like to lay one across that gap so 
+    the guests can just walk on it. 
+    If we can do that, it’d be a more elegant way to handle the issue. 
+    I’d want the pillar to be visible so that the guests know they can go there. 
+    We might also want to use a pillar as a bridge over the sinkhole under the 
+    broken section of harvester track.
+
+        - We start in the box canyon where avatars normally first link into the Age. 
+          This time I plan to show some still pictures of what the area around the plant looks like in Uru:CC too.
+        - We move to the harvester, and I talk about the big door there.
+        - We move to the other side of the canyon and talk about the cave and sinkhole, 
+          and then move across to the other canyon branch to go look at the lion cub outline on the canyon wall. 
+          Since it’s part of the texture, I doubt that Mirphak can do anything to make it stand out, 
+          but it’d be nice if he can find a way.
+        - We go back to the harvester and show it with the wings down if possible. 
+          If not, I can show that in concept art. 
+          I talk about the harvester and how it works. 
+          I’d like to have a way for the visitors to see it from the top, so maybe another Jalak platform?
+        - We ride the harvester to the factory. 
+          There, I talk about the factory and the installation on the canyon wall. 
+          If possible, I want to get a platform or some other way of taking the guests up close to that.
+        - We warp into the factory and I talk about the first chamber. 
+          We summon the grain hopper so that the guests can see it hooked up to the suction pipes.
+        - Instead of climbing up and down ladders, 
+          I’d rather warp to the outside so I can talk about the windmill, flywheels and grain towers.
+        - From there, we walk through the milling room to the control room.
+        - From the control room, 
+          I’d like to walk up the stairs and across a Jalak pillar bridge through the mixing vat area.
+        - We walk into the machine room and from there to the pellet baking chamber.
+        - We warp up to the top of the pellet chamber to look at the dam and the scenery. 
+          We’ll want an onlake effect so that the guests can run around from there. 
+          That’s the end of the tour, so anything goes from that point on, 
+          including taking them up on top of the canyon side walls to run around up 
+          there along with anything else Mirphak might want to do with the Age.
+
     ***
     Devant la fissure : //sp3
     Rendre la fissure visible : !toggle Object03  0 1
@@ -103,21 +154,21 @@
 
 from Plasma import *
 import math
-import sdl
+from . import sdl
 
 #
 dicBot = {
-    32319L:"Mir-o-Bot", 
-    27527L:"Magic Bot", 
-    71459L:"Mimi Bot", 
+    32319:"Mir-o-Bot", 
+    27527:"Magic Bot", 
+    71459:"Mimi Bot", 
     #L:"Stone5", 
-    64145L:"Annabot",
+    64145:"Annabot",
     #L:"SkydiverBot",
-    3975L:"OHBot",
-    24891L:"Magic-Treasure",
-    26224L:"Magic Treasure",
-    21190L:"Mimi Treasure",
-    2332508L:"mob",
+    3975:"OHBot",
+    24891:"Magic-Treasure",
+    26224:"Magic Treasure",
+    21190:"Mimi Treasure",
+    2332508:"mob",
     }
 
 # Larry LeDeay [KI: 11308]
@@ -135,9 +186,9 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
     
     #agePlayers = GetAllAgePlayers()
     # ne pas tenir compte des robots
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in dicBot.keys()), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
     agePlayers.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), agePlayers)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in agePlayers]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)
@@ -147,9 +198,9 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
 
     i = 0
     n = len(agePlayers)
-    print "nb de joueurs: %s" % (n)
+    print("nb de joueurs: %s" % (n))
     dist = float(coef * n) / (2.0 * math.pi)
-    print "distance: %s" % (dist)
+    print("distance: %s" % (dist))
     nbCercles = dist // maxdist
     if nbCercles > 0:
         dist = dist / nbCercles
@@ -157,7 +208,7 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
         avatar = soAvatarList[i]
         angle = (float(i%maxdist) * float(nbCercles) * 2.0 * math.pi) / float(n)
         dist = dist + (n // maxdist)
-        print "angle(%s): %s" % (i, angle)
+        print("angle(%s): %s" % (i, angle))
         dx = float(dist)*math.cos(angle)
         dy = float(dist)*math.sin(angle)
         #matrix = avCentre.getLocalToWorld()
@@ -216,7 +267,7 @@ def wa(n=None, bCircle=False):
         #recuperer tous les joueurs
         playerList = PtGetPlayerList()
         playerList.append(PtGetLocalPlayer())
-        soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+        soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
         for soavatar in soAvatarList:
             #faire flotter tout le monde
             soavatar.netForce(1)
@@ -244,9 +295,9 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) != None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) != None]
     return nameList
 
 # Find scene objects with name like soName in all loaded districts (Warning, it includes GUI)
@@ -277,7 +328,7 @@ def LinkPlayerTo(age, playerID=None, spawnPointNumber=None):
         playerID = PtGetLocalPlayer().getPlayerID()
     else:
         try:
-            playerID = long(playerID)
+            playerID = int(playerID)
         except:
             return "incorrect playerID"
             #pass
@@ -324,9 +375,9 @@ playerIdList = []
 #
 def SavePlayers():
     global playerIdList
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in dicBot.keys()), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
     agePlayers.append(PtGetLocalPlayer())
-    playerIdList = map(lambda player: player.getPlayerID(), agePlayers)
+    playerIdList = [player.getPlayerID() for player in agePlayers]
 
 """
     "aegura":["city", "city", "9511bed4-d2cb-40a6-9983-6025cdb68d8b", "Mir-o-Bot's", "LinkInPointBahro-PalaceBalcony"],
@@ -377,7 +428,7 @@ def togglesdl(name):
         "wings":"ercaHrvstrWingsOk", 
         "wd":"ercaHrvstrWingLeverDown", 
     }
-    if (name in dicNames.keys()):
+    if (name in list(dicNames.keys())):
         sdl.ToggleBoolSDL(dicNames[name])
     else:
         print("wrong sdl name")

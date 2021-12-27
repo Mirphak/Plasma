@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 """
 """
@@ -7,8 +8,8 @@ from xPsnlVaultSDL import *
 import time
 
 import math
-import sdl
-import Platform
+from . import sdl
+from . import Platform
 
 
 
@@ -35,7 +36,7 @@ def LinkPlayerTo(age, playerID=None, spawnPointNumber=None):
         playerID = PtGetLocalPlayer().getPlayerID()
     else:
         try:
-            playerID = long(playerID)
+            playerID = int(playerID)
         except:
             return "incorrect playerID"
             #pass
@@ -89,7 +90,7 @@ def LinkAll(ageName="pelletcave"):
     }
     
     ageName = ageName.lower()
-    if (ageName in ages.keys()):
+    if (ageName in list(ages.keys())):
         age = ages[ageName]
     else:
         return
@@ -105,7 +106,7 @@ def wa(where=None):
     #avCentre = PtGetLocalAvatar()
     #mat = avCentre.getLocalToWorld()
     mat = None
-    if where is None or where not in range(1, 5):
+    if where is None or where not in list(range(1, 5)):
         mat = PtGetLocalAvatar().getLocalToWorld()
     else:
         """
@@ -127,7 +128,7 @@ def wa(where=None):
     #recuperer tous les joueurs
     playerList = PtGetPlayerList()
     playerList.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)
@@ -155,9 +156,9 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) != None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) != None]
     return nameList
 
 # Find scene objects with name like soName in all loaded districts (Warning, it includes GUI)
@@ -235,7 +236,7 @@ def Responder(soName, respName, pfm = None, ageName = None, state = None, ff = F
             break
     
     if respKey == None:
-        print "Responder():\tResponder not found..."
+        print("Responder():\tResponder not found...")
         return
     
     if pfm == None:
@@ -312,32 +313,32 @@ def symbol(quad="N", n=1, bOn=True):
     quad = quad.upper()
     if quad not in ("N", "E", "S", "W"):
         quad = "N"
-    if n not in range(1, 7):
+    if n not in list(range(1, 7)):
         n = 1
     #soName = "BahroSymbolDecal" + quad + "_0" + str(n)
     soName = "BahroSymbolDecal" + quad + "_01"
     so = PtFindSceneobject(soName, age)
-    print "so {} found".format(soName)
+    print("so {} found".format(soName))
     sok = so.getKey()
     OnOff = "Off"
     if bOn:
         OnOff = "On"
     rn = "cRespSolutionSymbols" + OnOff + quad
-    print "resp {} search...".format(rn)
+    print("resp {} search...".format(rn))
     for resp in so.getResponders():
-        print "= resp {} ?".format(resp.getName())
+        print("= resp {} ?".format(resp.getName()))
         if resp.getName() == rn:
-            print "resp {} found".format(rn)
+            print("resp {} found".format(rn))
             RunResponder(sok, resp, n)
             break
 
 #def RunResponder(key, resp, stateidx = None, netForce = 1, netPropagate = 1, fastforward = 0):
 def machine(n=0):
-    if n not in range(0, 6):
+    if n not in list(range(0, 6)):
         n = 0
     soName = "MachineCamRespDummy"
     so = PtFindSceneobject(soName, age)
-    print "so {} found".format(soName)
+    print("so {} found".format(soName))
     sok = so.getKey()
     #rn = "cRespSolutionSymbols" + OnOff + quad
     #print "resp {} search...".format(rn)
@@ -385,7 +386,7 @@ def Floor(en=True):
             ((1.0, 0.0, 0.0, 99.92294311523438), (0.0, 1.0, 0.0, -63.619476318359375), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0)),
             ),
         }
-    for key, items in d.items():
+    for key, items in list(d.items()):
         m = ptMatrix44()
         m.setData(items[en])
         p = PtFindSceneobject(key, age).physics
@@ -407,7 +408,7 @@ class Pellets:
     _nbTry   = 0
 
     def __init__(self):
-        print "Pellets: init"
+        print("Pellets: init")
         
     def Launch(self):
         #print "Pellets:"
@@ -416,7 +417,7 @@ class Pellets:
     def onAlarm(self, param=1):
         #print "Pellets:onalarm"
         if not self._running:
-            print "Pellets:not running"
+            print("Pellets:not running")
             return
         #print "Pellets:call Launch"
         #self.Launch()
@@ -431,11 +432,11 @@ class Pellets:
         self._xKiSelf = xKiSelf
         if not self._running:
             self._running = True
-            print "Pellets:start"
+            print("Pellets:start")
             self.onAlarm()
 
     def Stop(self):
-        print "Pellets:stop"
+        print("Pellets:stop")
         self._running = False
 
 pellets = Pellets()

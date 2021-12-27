@@ -1,4 +1,4 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 
 """
     V1 : 27/02/2016
@@ -92,6 +92,115 @@
             If the floor behind the rubble inside the Kahlo Pub is solid (and not phantom), 
             remove that rubble to allow the guests to see the room on the other side.
 
+    V4 : 02/05/2020
+            import xRobot.Light as L
+            + L.PayLight3b(None, True, True , 0, 0, 100, 30, 0, 0)
+            = //event 26 : Projector - LightHouse
+        * Museum :
+            !sp 21 (en bas des escaliers a l'entree)
+            //event 18 (City Museum Light)
+            !toggle Barricade  0 0
+            //event 26 (Projector - LightHouse)
+            //float
+            //ws 1 ct ( = agoto -287 78 185)
+            import xRobot.xCity as c
+            c.platform()
+            //land
+            !wa (or >>> c.wa())
+            !toggle column Jalak 0 1
+            //jump 70
+        * Tokotah I = Plazza :
+            - arrivee 
+                => !sp 11 //greattree
+                => !sp 10 //alley
+            - enlever tente, caisses, table
+                => !toggle Tent  0 0
+                => !toggle Crate  0 0
+                => !toggle crate  0 0
+                => !toggle Table  0 0
+              ou
+                c.togglesdl(name="tent")
+            - Palace : 
+                + Behind the Palace
+                    (!toggle PALACEnew  0 1)
+                    c.platok1()
+                    !sp 3
+                    !wa
+                + upper palace roof
+                //float
+                !sp 4
+                c.platform()
+                //land
+                !wa
+                
+        * Tokotah II (sur le toit du kahlo pub) :
+            - arrivee => !sp 5, //kr
+            - plateforme => c.platok2():
+        * Kahlo pub :
+            - arrivee => a pied !
+            - montrer le memorial
+                togglesdl(name="kahlob")    "islmCityBlocker17Vis", 
+                togglesdl(name="kahloc")    "islmKahloPubHallCollapse", 
+                togglesdl(name="mem")       "islmMemorialImagerVis", 
+              ou
+                //event 8 (City, Kahlo Pub, Memorial, Gerbes)
+            - Acces piece du fond :
+                //event 26 (Projector - LightHouse)
+                //float
+                //ws 2 ct ( = agoto -110 -212 128)
+                import xRobot.xCity as c
+                c.platform()
+                //land
+                !wa (or >>> c.wa())
+                !toggle column Jalak 0 1
+                !toggle KpWallsCollision  0 0
+        * Ferry Terminal :
+            - arrivee => //ferry et autres ...
+            - light meter
+                togglesdl(name="lm")        "islmLakeLightMeterVis", 
+            - barricades devant le terminal et autres:
+                !toggle Barricade  0 0
+                !toggle Rock  0 0
+                !toggle Rubble  0 0
+                !toggle Rub  0 0
+                !toggle Crack  0 0
+                !toggle crack  0 0
+                !toggle Crate  0 0
+                !toggle crate  0 0
+                !toggle Blocker  0 0
+                !toggle Proxy  0 0
+                !toggle Door  1 0
+                ?
+                !toggle harborLakeSurfaceLight01  1 1
+                !toggle harborLakeSurfaceLight02  1 1
+                !toggle harborLakeSurfaceLight03  1 1
+            - vues depuis le lac
+                +
+                //onlake
+                //ws 5 ct
+                !wa
+                +
+                //float
+                //ws 6 ct
+                platform()
+                //land
+                !wa
+                + boat entrance
+                //ws 7 ct
+                !wa
+                + Arch
+                //ws 8 ct
+                !wa
+                
+        * Water Front :
+            - enlever porte : !toggle Door  1 0
+
+                togglesdl(name="gh")        "islmGuildHallConstructionVis", 
+                togglesdl(name="expl")      "islmExplosionRun", 
+                togglesdl(name="scream")    "islmScreamRun", 
+                togglesdl(name="tldn")      "islmTeledahnLinkLibraryExteriorVis", 
+                togglesdl(name="canyon")    "islmCanyonConstructionVis", 
+        
 """
 from Plasma import *
 #from PlasmaTypes import *
@@ -99,9 +208,91 @@ from Plasma import *
 #import time
 
 import math
-import sdl
-import Platform
-import Ride
+from . import sdl
+from . import Platform
+from . import Ride
+
+# ** city Districts **
+cityDistricts = [
+    # ** Bahro flyers **
+    "bahroFlyers_arch", 
+    "bahroFlyers_city1", 
+    "bahroFlyers_city2", 
+    "bahroFlyers_city3", 
+    "bahroFlyers_city4", 
+    "bahroFlyers_city5", 
+    "bahroFlyers_city6", 
+    # ** Cones **
+    #"conesCanyon", 
+    #"conesCaveTJunction", 
+    #"conesCourtyard", 
+    #"conesFerry", 
+    #"conesGreatStair", 
+    #"conesLibrary", 
+    #"conesLibraryInterior", 
+    # ** islm **
+    "islmDRCStageState01", 
+    "islmDRCStageState02", 
+    "islmDRCTentTablePic", 
+    "islmFanSoundRun", 
+    "islmLakeLightMeter", 
+    "islmLibBanners00Vis", 
+    "islmLibBanners02Vis", 
+    "islmLibBanners03Vis", 
+    # ** Books in Library **
+    "LibraryAhnonayVis", 
+    "LibraryErcanaVis", 
+    "LibraryGarrisonVis", 
+    "LibraryKadishVis", 
+    "LibraryTeledahnVis", 
+    # ** Normal city districts **
+    #"canyon", 
+    #"cavetjunction", 
+    #"courtyard", 
+    #"ferry", 
+    #"greatstair", 
+    #"guildhall", 
+    #"harbor", 
+    #"HarborReflect", 
+    #"islmBahroShoutFerry", 
+    #"islmBahroShoutLibrary", 
+    #"islmBahroShoutPalace", 
+    #"islmJCNote", 
+    #"islmNegilahnCreatureChartGUI", 
+    #"islmNickNote", 
+    #"islmPodMapGUI", 
+    #"islmWatsonLetterGUI", 
+    #"KadishGallery", 
+    #"KahloPub", 
+    #"kahlopubtunnel", 
+    #"library", 
+    #"LibraryInterior", 
+    #"MuseumInteriorPage", 
+    #"palace"
+]
+
+#
+def PageInOffice():
+    pages = cityDistricts
+    #PtPageInNode(pages)
+    for page in pages:
+        PtConsoleNet("Nav.PageInNode BaroCityOffice", True)
+
+#
+def PageInAll():
+    pages = cityDistricts
+    #PtPageInNode(pages)
+    for page in pages:
+        PtConsoleNet("Nav.PageInNode {0}".format(page), True)
+
+#
+def PageOutAll():
+    pages = cityDistricts
+    #PtPageOutNode(page, 1)
+    for page in pages:
+        PtConsoleNet("Nav.PageOutNode {0}".format(page), False)
+
+
 
 """
     STATEDESC city
@@ -320,26 +511,27 @@ def wa(where=None):
     #avCentre = PtGetLocalAvatar()
     #mat = avCentre.getLocalToWorld()
     mat = None
-    if where is None or where not in range(1, 5):
+    if where is None or where not in list(range(1, 5)):
         mat = PtGetLocalAvatar().getLocalToWorld()
     else:
-        if where == 1:
-            tupPos = ((0.98276501894, 0.184859260917, 0.0, 23.3415126801), (-0.184859260917, 0.98276501894, 0.0, 54.0308570862), (0.0, 0.0, 1.0, -0.0328424945474), (0.0, 0.0, 0.0, 1.0))
-        elif where == 2:
-            tupPos = ((-0.897078573704, -0.44187015295, 0.0, 649.721862793), (0.44187015295, -0.897078573704, 0.0, -877.984619141), (0.0, 0.0, 1.0, 9445.71386719), (0.0, 0.0, 0.0, 1.0))
-        elif where == 3:
-            tupPos = ((0.00954949762672, -0.999954581261, 0.0, -102.545890808), (0.999954581261, 0.00954949762672, 0.0, 54.9582672119), (0.0, 0.0, 1.0, 10563.0976562), (0.0, 0.0, 0.0, 1.0))
-        elif where == 4:
-            tupPos = ((-0.748968303204, 0.662607133389, 0.0, 1560.00488281), (-0.662607133389, -0.748968303204, 0.0, -51.4498291016), (0.0, 0.0, 1.0, 10171.9091797), (0.0, 0.0, 0.0, 1.0))
-        elif where == 5:
-            tupPos = ((-0.937420606613, -0.3482016325, 0.0, 993.751708984), (0.3482016325, -0.937420606613, 0.0, -455.378509521), (0.0, 0.0, 1.0, 9424.86523438), (0.0, 0.0, 0.0, 1.0))
-        mat = ptMatrix44()
-        mat.setData(tupPos)
+        #if where == 1:
+        #    tupPos = ((0.98276501894, 0.184859260917, 0.0, 23.3415126801), (-0.184859260917, 0.98276501894, 0.0, 54.0308570862), (0.0, 0.0, 1.0, -0.0328424945474), (0.0, 0.0, 0.0, 1.0))
+        #elif where == 2:
+        #    tupPos = ((-0.897078573704, -0.44187015295, 0.0, 649.721862793), (0.44187015295, -0.897078573704, 0.0, -877.984619141), (0.0, 0.0, 1.0, 9445.71386719), (0.0, 0.0, 0.0, 1.0))
+        #elif where == 3:
+        #    tupPos = ((0.00954949762672, -0.999954581261, 0.0, -102.545890808), (0.999954581261, 0.00954949762672, 0.0, 54.9582672119), (0.0, 0.0, 1.0, 10563.0976562), (0.0, 0.0, 0.0, 1.0))
+        #elif where == 4:
+        #    tupPos = ((-0.748968303204, 0.662607133389, 0.0, 1560.00488281), (-0.662607133389, -0.748968303204, 0.0, -51.4498291016), (0.0, 0.0, 1.0, 10171.9091797), (0.0, 0.0, 0.0, 1.0))
+        #elif where == 5:
+        #    tupPos = ((-0.937420606613, -0.3482016325, 0.0, 993.751708984), (0.3482016325, -0.937420606613, 0.0, -455.378509521), (0.0, 0.0, 1.0, 9424.86523438), (0.0, 0.0, 0.0, 1.0))
+        #mat = ptMatrix44()
+        #mat.setData(tupPos)
+        pass
     
     #recuperer tous les joueurs
     playerList = PtGetPlayerList()
     playerList.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)
@@ -367,9 +559,9 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) != None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) != None]
     return nameList
 
 # Find scene objects with name like soName in all loaded districts (Warning, it includes GUI)
@@ -409,8 +601,9 @@ def togglesdl(name="lm"):
         "kahloc":"islmKahloPubHallCollapse", 
         #"mem":"MemorialImagerStartTime", #INT
         "mem":"islmMemorialImagerVis", 
+        "gz":"islmGZBeamVis",
     }
-    if (name in dicNames.keys()):
+    if (name in list(dicNames.keys())):
         sdl.ToggleBoolSDL(dicNames[name])
     else:
         print("wrong sdl name")
@@ -418,28 +611,33 @@ def togglesdl(name="lm"):
 # long platform(where=1)
 def platform(where=None):
     matPos = None
-    if where is None or where not in range(1, 5):
+    if where is None or where not in list(range(1, 5)):
         matPos = PtGetLocalAvatar().getLocalToWorld()
     else:
-        #Ahnonay
-        if where == 1:
-            tupPos = ((0.98276501894, 0.184859260917, 0.0, 23.3415126801), (-0.184859260917, 0.98276501894, 0.0, 54.0308570862), (0.0, 0.0, 1.0, -0.0328424945474), (0.0, 0.0, 0.0, 1.0))
-        elif where == 2:
-            tupPos = ((-0.897078573704, -0.44187015295, 0.0, 649.721862793), (0.44187015295, -0.897078573704, 0.0, -877.984619141), (0.0, 0.0, 1.0, 9445.71386719), (0.0, 0.0, 0.0, 1.0))
-        elif where == 3:
-            tupPos = ((0.00954949762672, -0.999954581261, 0.0, -102.545890808), (0.999954581261, 0.00954949762672, 0.0, 54.9582672119), (0.0, 0.0, 1.0, 10563.0976562), (0.0, 0.0, 0.0, 1.0))
-        elif where == 4:
-            tupPos = ((-0.748968303204, 0.662607133389, 0.0, 1560.00488281), (-0.662607133389, -0.748968303204, 0.0, -51.4498291016), (0.0, 0.0, 1.0, 10171.9091797), (0.0, 0.0, 0.0, 1.0))
-        elif where == 5:
-            tupPos = ((-0.937420606613, -0.3482016325, 0.0, 993.751708984), (0.3482016325, -0.937420606613, 0.0, -455.378509521), (0.0, 0.0, 1.0, 9424.86523438), (0.0, 0.0, 0.0, 1.0))
-        matPos = ptMatrix44()
-        matPos.setData(tupPos)
+        ##Ahnonay
+        #if where == 1:
+        #    tupPos = ((0.98276501894, 0.184859260917, 0.0, 23.3415126801), (-0.184859260917, 0.98276501894, 0.0, 54.0308570862), (0.0, 0.0, 1.0, -0.0328424945474), (0.0, 0.0, 0.0, 1.0))
+        #elif where == 2:
+        #    tupPos = ((-0.897078573704, -0.44187015295, 0.0, 649.721862793), (0.44187015295, -0.897078573704, 0.0, -877.984619141), (0.0, 0.0, 1.0, 9445.71386719), (0.0, 0.0, 0.0, 1.0))
+        #elif where == 3:
+        #    tupPos = ((0.00954949762672, -0.999954581261, 0.0, -102.545890808), (0.999954581261, 0.00954949762672, 0.0, 54.9582672119), (0.0, 0.0, 1.0, 10563.0976562), (0.0, 0.0, 0.0, 1.0))
+        #elif where == 4:
+        #    tupPos = ((-0.748968303204, 0.662607133389, 0.0, 1560.00488281), (-0.662607133389, -0.748968303204, 0.0, -51.4498291016), (0.0, 0.0, 1.0, 10171.9091797), (0.0, 0.0, 0.0, 1.0))
+        #elif where == 5:
+        #    tupPos = ((-0.937420606613, -0.3482016325, 0.0, 993.751708984), (0.3482016325, -0.937420606613, 0.0, -455.378509521), (0.0, 0.0, 1.0, 9424.86523438), (0.0, 0.0, 0.0, 1.0))
+        #matPos = ptMatrix44()
+        #matPos.setData(tupPos)
+        pass
         
     Platform.CreatePlatform2(bShow=False, matAv=matPos)
 
 # Plateforme speciale pour Tokotah 2
 def platok2():
     Platform.CreatePlatformForTokotah2()
+
+# Plateforme speciale pour Tokotah 1
+def platok1():
+    Platform.SecretPath2()
 
 #========================================================
 """
@@ -484,17 +682,17 @@ def CercleV(coef=2.0, avCentre=None):
         avCentre = PtGetLocalAvatar()
     #agePlayers = GetAllAgePlayers()
     # ne pas tenir compte des robots
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in dicBot.keys()), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
     i = 0
     n = len(agePlayers)
-    print "nb de joueurs: %s" % (n)
+    print("nb de joueurs: %s" % (n))
     dist = float(coef * n) / (2.0 * math.pi)
-    print "distance: %s" % (dist)
+    print("distance: %s" % (dist))
     for i in range(n):
         player = agePlayers[i]
         avatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
         angle = (float(i) * 2.0 * math.pi) / float(n)
-        print "angle(%s): %s" % (i, angle)
+        print("angle(%s): %s" % (i, angle))
         dx = float(dist)*math.cos(angle)
         #dy = float(dist)*math.sin(angle)
         dy = 0
@@ -510,11 +708,11 @@ class CircleAlarm:
         CercleV(coef=2.0, avCentre=None)
 
 
-# en ville les oiseaux b1 a b6
+# en ville les bahros volants b1 a b6 et bahro
 def ride(soName="b1", t=30.0):
     #recuperer tous les joueurs
     playerList = PtGetPlayerList()
-    playerList.append(PtGetLocalPlayer())
+    #playerList.append(PtGetLocalPlayer())
     for player in playerList:
         playerName = player.getPlayerName()
         Ride.Suivre(objet=soName, Avatar=playerName, duree=t)
@@ -550,12 +748,12 @@ def ride(soName="b1", t=30.0):
             togglesdl(name="kahlob")    "islmCityBlocker17Vis", 
             togglesdl(name="kahloc")    "islmKahloPubHallCollapse", 
             togglesdl(name="mem")       "islmMemorialImagerVis", 
-        - Acces pice du fond :
+        - Acces piece du fond :
             platform()
             !toggle KpWallsCollision  0 0
     * Ferry Terminal :
         - arrivee => //ferry et autres ...
-        - light mater
+        - light meter
             togglesdl(name="lm")        "islmLakeLightMeterVis", 
         - barricades devant le terminal et autres:
             !toggle Barricade  0 0
@@ -588,7 +786,7 @@ def ride(soName="b1", t=30.0):
     ** ordre d'exploration de zeke :
         ferry termiral, 
         kalo pub, 
-        tokadak alley, 
+        tokotah alley, 
         and musuem
 """
 

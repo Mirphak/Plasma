@@ -2,9 +2,9 @@
 
 from Plasma import *
 import os
-import SpawnPoints
-import ages
-import xPlayers
+from . import SpawnPoints
+from . import ages
+from . import xPlayers
 
 currentBotAge = list()
 
@@ -22,7 +22,7 @@ def ChangerNomAge(newAgeName, playerID=None):
     if not playerID:
         playerID = PtGetLocalPlayer().getPlayerID()
     try:
-        playerID = long(playerID.strip())
+        playerID = int(playerID.strip())
     except:
         return None
     tempNode.playerSetID(playerID)
@@ -40,7 +40,7 @@ def GetPlayerAgeInfo(playerID=None):
         playerID = PtGetLocalPlayer().getPlayerID()
     else:
         try:
-            playerID = long(playerID)
+            playerID = int(playerID)
         except:
             return None
     tempNode.playerSetID(playerID)
@@ -109,54 +109,54 @@ def GetSPByAlias(spawnPointAlias=None):
     pos = None
     spName = None
     if ageFileName == "city":    
-        if spawnPointAlias in SpawnPoints.aliasCitySP.keys():
+        if spawnPointAlias in list(SpawnPoints.aliasCitySP.keys()):
             spName = SpawnPoints.aliasCitySP[spawnPointAlias]
             so = PtFindSceneobject(spName, PtGetAgeName())
             pos = so.getLocalToWorld()
     elif ageFileName == "minkata":    
-        if spawnPointAlias in SpawnPoints.aliasMinkataSP.keys():
+        if spawnPointAlias in list(SpawnPoints.aliasMinkataSP.keys()):
             spName = SpawnPoints.aliasMinkataSP[spawnPointAlias]
             try:
                 so = PtFindSceneobject(spName, PtGetAgeName())
                 pos = so.getLocalToWorld()
             except:
-                print "sp minkata : spawnPointAlias={0}, spName={1}".format(spawnPointAlias, spName)
+                print("sp minkata : spawnPointAlias={0}, spName={1}".format(spawnPointAlias, spName))
                 spName = None
     elif ageFileName == "ercana":    
-        if spawnPointAlias in SpawnPoints.aliasErcanaSP.keys():
+        if spawnPointAlias in list(SpawnPoints.aliasErcanaSP.keys()):
             spName = SpawnPoints.aliasErcanaSP[spawnPointAlias]
             try:
                 so = PtFindSceneobject(spName, PtGetAgeName())
                 pos = so.getLocalToWorld()
             except:
-                print "sp ercana : spawnPointAlias={0}, spName={1}".format(spawnPointAlias, spName)
+                print("sp ercana : spawnPointAlias={0}, spName={1}".format(spawnPointAlias, spName))
                 spName = None
     elif ageFileName == "kadish":    
-        if spawnPointAlias in SpawnPoints.aliasKadishSP.keys():
+        if spawnPointAlias in list(SpawnPoints.aliasKadishSP.keys()):
             spName = SpawnPoints.aliasKadishSP[spawnPointAlias]
             try:
                 so = PtFindSceneobject(spName, PtGetAgeName())
                 pos = so.getLocalToWorld()
             except:
-                print "sp kadish : spawnPointAlias={0}, spName={1}".format(spawnPointAlias, spName)
+                print("sp kadish : spawnPointAlias={0}, spName={1}".format(spawnPointAlias, spName))
                 spName = None
     elif ageFileName == "teledahn":    
-        if spawnPointAlias in SpawnPoints.aliasTeledahnSP.keys():
+        if spawnPointAlias in list(SpawnPoints.aliasTeledahnSP.keys()):
             spName = SpawnPoints.aliasTeledahnSP[spawnPointAlias]
             try:
                 so = PtFindSceneobject(spName, PtGetAgeName())
                 pos = so.getLocalToWorld()
             except:
-                print "sp teledahn : spawnPointAlias={0}, spName={1}".format(spawnPointAlias, spName)
+                print("sp teledahn : spawnPointAlias={0}, spName={1}".format(spawnPointAlias, spName))
                 spName = None
     elif ageFileName == "garrison":    
-        if spawnPointAlias in SpawnPoints.aliasGarrisonSP.keys():
+        if spawnPointAlias in list(SpawnPoints.aliasGarrisonSP.keys()):
             spName = SpawnPoints.aliasGarrisonSP[spawnPointAlias]
             try:
                 so = PtFindSceneobject(spName, PtGetAgeName())
                 pos = so.getLocalToWorld()
             except:
-                print "sp gahreesen : spawnPointAlias={0}, spName={1}".format(spawnPointAlias, spName)
+                print("sp gahreesen : spawnPointAlias={0}, spName={1}".format(spawnPointAlias, spName))
                 spName = None
     if spName is None or spName == "":
         spName = "Spawn point not found!"
@@ -172,7 +172,7 @@ def GetSpawnPoint(spawnPointNumber=None):
     currentBotAge = GetBotAge()
     SetBotAgeSP(spawnPt)
     ageFileName = currentBotAge[1]
-    if currentBotAge[1] in SpawnPoints.spDict.keys():
+    if currentBotAge[1] in list(SpawnPoints.spDict.keys()):
         if spawnPointNumber >= 0 and spawnPointNumber < len(SpawnPoints.spDict[currentBotAge[1]]):
             spawnPt = SpawnPoints.spDict[currentBotAge[1]][spawnPointNumber]
             SetBotAgeSP(spawnPt)
@@ -206,7 +206,7 @@ def LinkPlayerTo(self, age, playerID=None, spawnPointNumber=None):
         playerID = PtGetLocalPlayer().getPlayerID()
     else:
         try:
-            playerID = long(playerID)
+            playerID = int(playerID)
         except:
             return "incorrect playerID"
             #pass
@@ -259,13 +259,13 @@ def LinkPlayerToPublic(self, linkName, playerID=None):
     linkName = linkName.replace("'", "")
     linkName = linkName.replace("eder", "")
     link = None
-    if (linkName in ages.PublicAgeDict.keys() and not (playerID is None or (playerID == PtGetLocalPlayer().getPlayerID()) and AmIRobot)):
+    if (linkName in list(ages.PublicAgeDict.keys()) and not (playerID is None or (playerID == PtGetLocalPlayer().getPlayerID()) and AmIRobot)):
         link = ages.PublicAgeDict[linkName]
-    elif (linkName in ages.MirobotAgeDict.keys()):
+    elif (linkName in list(ages.MirobotAgeDict.keys())):
         link = ages.MirobotAgeDict[linkName]
-    elif (linkName in ages.MagicbotAgeDict.keys()):
+    elif (linkName in list(ages.MagicbotAgeDict.keys())):
         link = ages.MagicbotAgeDict[linkName]
-    elif (playerID == PtGetLocalPlayer().getPlayerID() and linkName in ages.linkDic.keys()):
+    elif (playerID == PtGetLocalPlayer().getPlayerID() and linkName in list(ages.linkDic.keys())):
         link = ages.linkDic[linkName]
     else:
         return None
@@ -325,9 +325,9 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) is not None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) is not None]
     return nameList
 
 # Find scene objects with name like soName in all loaded districts (Warning, it includes GUI)
@@ -459,7 +459,7 @@ def SaveSOWithCoords(name):
         file.close()
         return 1
     except:
-        print "Error : {0}".format(fileName)
+        print("Error : {0}".format(fileName))
         return 0
 
 #
@@ -486,18 +486,18 @@ def InitJalakButtons():
     global soListButtonsJalak
     global soListPositionsJalak
     global isJalakButtonsInit
-    print "InitJalakButtons 1"
+    print("InitJalakButtons 1")
     soListButtonsJalak.extend(FindSOInAge("clkDn_", "Jalak"))
-    print "InitJalakButtons 2"
+    print("InitJalakButtons 2")
     soListButtonsJalak.extend(FindSOInAge("clkUp_", "Jalak"))
-    print "InitJalakButtons 3"
+    print("InitJalakButtons 3")
     soListButtonsJalak.extend(FindSOInAge("MiniKIJalakIcon", "GUI"))
-    print "InitJalakButtons 4"
+    print("InitJalakButtons 4")
     soListButtonsJalak.extend(FindSOInAge("JalakButtonsDlgDragBox", "GUI"))
-    print "InitJalakButtons 5"
+    print("InitJalakButtons 5")
     if soListButtonsJalak:
         for so in soListButtonsJalak:
-            print ">> {0}".format(so.getName())
+            print(">> {0}".format(so.getName()))
             soListPositionsJalak.append(so.getLocalToWorld())
     
     isJalakButtonsInit = True
@@ -530,7 +530,7 @@ def ToggleJalakButtons():
     """
     ageFilename = PtGetAgeInfo().getAgeFilename()
     if ageFilename != "Jalak":
-        print "You are not in Jalak"
+        print("You are not in Jalak")
         return 0
     
     global bJalakIsOn
@@ -570,6 +570,53 @@ def ToggleJalakButtons():
         return 0
     return 0
     """
+
+#
+def ToggleAhnonayPressureRegions():
+    """
+        ToggleSceneObjects(name, age, bDrawOn, bPhysicsOn)
+        Dans Ahnonay - ahnySphere01 a 04
+            "PressueRegion" 01 a 25
+    """
+    ageFilename = PtGetAgeInfo().getAgeFilename()
+    if ageFilename != "Ahnonay":
+        print("You are not in Ahnonay")
+        return 0
+    
+    soListButtonsAhnonay = [
+        'PressueRegion01', 
+        'PressueRegion02', 
+        'PressueRegion03', 
+        'PressueRegion04', 
+        'PressueRegion05', 
+        'PressueRegion06', 
+        'PressueRegion07', 
+        'PressueRegion08', 
+        'PressueRegion09', 
+        'PressueRegion10', 
+        'PressueRegion11', 
+        'PressueRegion12', 
+        'PressueRegion13', 
+        'PressueRegion14', 
+        'PressueRegion15', 
+        'PressueRegion16', 
+        'PressueRegion17', 
+        'PressueRegion18', 
+        'PressueRegion19', 
+        'PressueRegion20', 
+        'PressueRegion21', 
+        'PressueRegion22', 
+        'PressueRegion23', 
+        'PressueRegion24', 
+        'PressueRegion25', 
+    ]
+    
+    for soName in soListButtonsAhnonay:
+        so = PtFindSceneobject(soName, 'Ahnonay')
+        so.netForce(1)
+        matTrans = ptMatrix44()
+        matTrans.translate(ptVector3(1000.0, 1000.0, -1000.0))
+        so.physics.warp(matTrans)
 
 # First try, I assume that all the panic links contain "Panic" in there names.
 def DisablePanicLinks():
@@ -642,16 +689,16 @@ dicFniSettings = {
 
 #
 def SetRenderer(style = "default", start = None, end = None, density = None, r = None, g = None, b = None, cr = None, cg = None, cb = None):
-    print "SetRenderer(style = \"{}\", start = {}, end = {}, density = {}, r = {}, g = {}, b = {}, cr = {}, cg = {}, cb = {})".format(style, start, end, density, r, g, b, cr, cg, cb)
+    print("SetRenderer(style = \"{}\", start = {}, end = {}, density = {}, r = {}, g = {}, b = {}, cr = {}, cg = {}, cb = {})".format(style, start, end, density, r, g, b, cr, cg, cb))
     global dicFniSettings
     #default (see fni settings)
     if style == "default":
-        print "default"
+        print("default")
         ageFilename = PtGetAgeInfo().getAgeFilename()
         dicFniSettings = GetFniSettings(ageFilename)
     # default values of the current age without fog
     elif style == "nofog":
-        print "nofog"
+        print("nofog")
         ageFilename = PtGetAgeInfo().getAgeFilename()
         dicFniSettings = GetFniSettings(ageFilename)
         dicFniSettings["fd"] = "Graphics.Renderer.Fog.SetDefLinear 0 0 0"
@@ -665,7 +712,7 @@ def SetRenderer(style = "default", start = None, end = None, density = None, r =
             dicFniSettings["cc"] = "Graphics.Renderer.SetClearColor %f %f %f" % (cr, cg, cb)
     #personalized style with yon
     else:
-        print "personalized"
+        print("personalized")
         try:
             yon = int(style)
             dicFniSettings["fy"] = "Graphics.Renderer.Setyon %i" % (yon)
@@ -679,7 +726,7 @@ def SetRenderer(style = "default", start = None, end = None, density = None, r =
             #age fni style if style is an ageFilename or black
             dicFniSettings = GetFniSettings(style)
     # 
-    for value in dicFniSettings.itervalues():
+    for value in dicFniSettings.values():
         PtConsoleNet(value, True)
 
 #
@@ -705,16 +752,16 @@ def LinkAll(self, linkName=""):
     #myself = PtGetLocalPlayer()
     linkName = linkName.lower().replace(" ", "").replace("'", "").replace("eder", "")
     link = None
-    if (linkName in ages.PublicAgeDict.keys()):
+    if (linkName in list(ages.PublicAgeDict.keys())):
         link = ages.PublicAgeDict[linkName]
         self.chatMgr.AddChatLine(None, "Age public trouve.", 3)
-    elif (linkName in ages.MirobotAgeDict.keys()):
+    elif (linkName in list(ages.MirobotAgeDict.keys())):
         link = ages.MirobotAgeDict[linkName]
         self.chatMgr.AddChatLine(None, "Age de Mir-o-Bot trouve.", 3)
-    elif (linkName in ages.MagicbotAgeDict.keys()):
+    elif (linkName in list(ages.MagicbotAgeDict.keys())):
         link = ages.MagicbotAgeDict[linkName]
         self.chatMgr.AddChatLine(None, "Age magique trouve.", 3)
-    elif (linkName in ages.linkDic.keys()):
+    elif (linkName in list(ages.linkDic.keys())):
         link = ages.linkDic[linkName]
         self.chatMgr.AddChatLine(None, "Age de linkDic trouve.", 3)
     else:
@@ -723,30 +770,33 @@ def LinkAll(self, linkName=""):
     if link is not None:
         # Lier tous joueurs dans mon age sauf moi-meme et les robots connus
         self.chatMgr.AddChatLine(None, "Liaison des autres joueurs de l'age.", 3)
-        agePlayers = filter(lambda pl: not(pl.getPlayerID() in xPlayers.dicBot.keys()), PtGetPlayerList())
+        agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(xPlayers.dicBot.keys()))]
         for player in agePlayers:
             LinkPlayerTo(self, link, playerID=player.getPlayerID(), spawnPointNumber=None)
+        '''
         # Et me lier. Si je ne suis pas Mir-o-Bot, il se liera par ses propres moyens
-        self.chatMgr.AddChatLine(None, "Dois-je me lier aussi? Robot:{}, Public:{}".format(AmIRobot, linkName in ages.PublicAgeDict.keys()), 3)
+        self.chatMgr.AddChatLine(None, "Dois-je me lier aussi? Robot:{}, Public:{}".format(AmIRobot, linkName in list(ages.PublicAgeDict.keys())), 3)
         #if not (linkName in ages.PublicAgeDict.keys() and AmIRobot):
         # Mmmm, AmIRobot n'est pas mis a jour, en attendant de trouver une solution, je m'interdis les ages publics
-        if not (linkName in ages.PublicAgeDict.keys()):
+        if not (linkName in list(ages.PublicAgeDict.keys())):
             self.chatMgr.AddChatLine(None, "Liaison de mon avatar.", 3)
             # Supprimer les prp des autres ages pour ne pas planter lors de la liaison. (Jalak, Bugs, City, Relto, Cleft)
             # Meme si je ne m'en sers pas Stone, Michel ou Yoda ont pu les ajouter.
             pages = ["jlakArena", "ItinerantBugCloud", "greatstair", "psnlMYSTII", "Desert", "Cleft", "FemaleCleftDropIn", "MaleCleftDropIn", "clftJCsDesert", "clftJCsChasm"]
             for page in pages:
                 PtPageOutNode(page)
-            # Enregistrer l'age ou je rend
+            # Enregistrer l'age ou je me rend
             currentBotAge = list(link)
             if len(link) > 4:
                 SetBotAgeSP(link[4])
                 self.chatMgr.AddChatLine(None, ",".join(currentBotAge), 3)
             # Decharger les ages clones
-            
-            # Liaison
+            """
+            # Liaison de mon avatar (je l'enleve pour voir si ca evite le plantage)
             myPlayerID = PtGetLocalPlayer().getPlayerID()
             LinkPlayerTo(self, link, playerID=myPlayerID, spawnPointNumber=None)
+            """
+        '''
     return "LinkAll to '{0}' done.".format(linkName)
 
 # Warps all players in the age to me or to an object
@@ -782,7 +832,7 @@ def WarpAll(where=None):
     #recuperer tous les joueurs
     playerList = PtGetPlayerList()
     playerList.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)

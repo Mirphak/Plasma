@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from Plasma import *
+import math
 
 # Variable pour savoir si le mode robot est actif
 amIRobot = 0
@@ -13,20 +14,20 @@ class SurveyBotAge:
     _nbTry   = 0
 
     def __init__(self):
-        print "SurveyBotAge:"
+        print("SurveyBotAge:")
         
     def WhereAmI(self):
         #print "SurveyBotAge:"
         myCurrentAgeInstanceGuid = PtGetAgeInfo().getAgeInstanceGuid()
         # Am I in one of Mir-o-Bot's age?
-        for val in ages.MirobotAgeDict.values():
+        for val in list(ages.MirobotAgeDict.values()):
             if val[2] == myCurrentAgeInstanceGuid:
                 # I am in a Mir-o-Bot age, it's ok.
                 #print "SurveyBotAge:ok mob"
                 self._nbTry = 0
                 return
         # Am I in one of MagicBot age?
-        for val in ages.MagicbotAgeDict.values():
+        for val in list(ages.MagicbotAgeDict.values()):
             if val[2] == myCurrentAgeInstanceGuid:
                 # I am in a Mir-o-Bot age, it's ok.
                 #print "SurveyBotAge:ok magic"
@@ -41,26 +42,26 @@ class SurveyBotAge:
                 #print "SurveyBotAge:ok own"
                 self._nbTry = 0
                 return
-        print "This age is not allowed for the bot: {0}, {1}".format(PtGetAgeInfo().getAgeFilename(), myCurrentAgeInstanceGuid)
+        print("This age is not allowed for the bot: {0}, {1}".format(PtGetAgeInfo().getAgeFilename(), myCurrentAgeInstanceGuid))
         # I am not welcome here, link myself in an allowed age
         if self._xKiSelf is None:
-            print "SurveyBotAge:Error: self._xKiSelf is none, quit MOULa"
+            print("SurveyBotAge:Error: self._xKiSelf is none, quit MOULa")
             PtConsole("App.Quit")
         else:
             self._nbTry += 1
-            print "SurveyBotAge:try link (#{})".format(self._nbTry)
+            print("SurveyBotAge:try link (#{})".format(self._nbTry))
             if self._nbTry > 8:
                 PtConsole("App.Quit")
             try:
                 LinkToPublicAge(self._xKiSelf, "hood")
             except:
-                print "SurveyBotAge:error linking"
+                print("SurveyBotAge:error linking")
                 PtConsole("App.Quit")
         
     def onAlarm(self, param=1):
         #print "SurveyBotAge:onalarm"
         if not self._running:
-            print "SurveyBotAge:not running"
+            print("SurveyBotAge:not running")
             return
         #print "SurveyBotAge:call WhereAmI"
         self.WhereAmI()
@@ -70,11 +71,11 @@ class SurveyBotAge:
         self._xKiSelf = xKiSelf
         if not self._running:
             self._running = True
-            print "SurveyBotAge:start"
+            print("SurveyBotAge:start")
             self.onAlarm()
 
     def Stop(self):
-        print "SurveyBotAge:stop"
+        print("SurveyBotAge:stop")
         self._running = False
 
 #surveyBot = SurveyBotAge()
@@ -312,7 +313,7 @@ class SurveyPlayer:
 
     #
     def __init__(self):
-        print "SurveyPlayer : init"
+        print("SurveyPlayer : init")
     
     # Pour savoir si le joueur est dans l'age du robot
     def IsPlayerInAge(self):
@@ -329,7 +330,7 @@ class SurveyPlayer:
         else:   
             # Pour les autres joueurs
             agePlayers = PtGetPlayerList()
-            ids = map(lambda agePlayer: agePlayer.getPlayerID(), agePlayers)
+            ids = [agePlayer.getPlayerID() for agePlayer in agePlayers]
             try:
                 if playerId in ids:
                     isHere = True
@@ -359,10 +360,10 @@ class SurveyPlayer:
     def onAlarm(self, param=1):
         #print "SurveyPlayer:onalarm"
         if not self._running:
-            print "SurveyPlayer : not running"
+            print("SurveyPlayer : not running")
             return
         if param == 1:
-            print "SurveyPlayer : onAlarm 1 => call IsPlayerInAge"
+            print("SurveyPlayer : onAlarm 1 => call IsPlayerInAge")
             playerIsHere = self.IsPlayerInAge()
             if playerIsHere:
                 # Le joueur est arrive
@@ -382,53 +383,65 @@ class SurveyPlayer:
         
     def Start(self, player, xKiSelf):
         if not isinstance(player, ptPlayer):
-            print "SurveyPlayer : not player"
+            print("SurveyPlayer : not player")
             return
         if xKiSelf is None:
-            print "SurveyPlayer : Error : self._xKiSelf is none"
+            print("SurveyPlayer : Error : self._xKiSelf is none")
             return
         self._player = player
         self._xKiSelf = xKiSelf
         if not self._running:
             self._running = True
             self._nbTry = 0
-            print "SurveyPlayer : start"
+            print("SurveyPlayer : start")
             self.onAlarm()
 
     def Stop(self):
-        print "SurveyPlayer:stop"
+        print("SurveyPlayer:stop")
         self._running = False
 
 #surveyPlayer = SurveyPlayer()
 #************************************************************************#
 
 adminList = [
-    32319L,   # Mir-o-Bot
-    31420L,   # Mirphak
-    2332508L, # mob
-    115763L,  # Willy
+    32319,   # Mir-o-Bot
+    31420,   # Mirphak
+    2332508, # mob
+    11896,  # MagicYoda
+    #115763L,  # Willy
+    #127131,  # tsuno
     #133403L,  # sendlinger
-    137998L,  # Mabe
-    254640L,  # Eternal Seeker
-    254930L,  # Kamikatze
+    #137998,  # Mabe
+    #254640,  # Eternal Seeker
+    #254930,  # Kamikatze
+    #966183L,  # y e e s h a
     #2975513L, # Didi
-    5667000L, # Minasunda
-    5710565L, # Salirama
+    #1261291L, # Y E E R K
+    #5667000, # Minasunda
+    #5710565, # Salirama
     #6725908L, # Raymondo
-    6559861L, # Kawliga
-    6583813L, # Roland (Mav Hungary)
+    #6559861L, # Kawliga
+    #6583813L, # Roland (Mav Hungary)
+    #6682907,  # 
     #6833983L, # malcg
-    7060111L, # Aeonihya
-    7132841L, # Mina Sunda
-    7172637L, # Baeda
-    7227499L, # Lidia (Mav Hungary)
-    7327507L, # artopia
+    #6961947, # Calisia (= Terry L. Britton)
+    #7060111, # Aeonihya
+    #7132841, # Mina Sunda
+    #7172637L, # Baeda
+    #7227499L, # Lidia (Mav Hungary)
+    #7327507L, # artopia
+    #7517653L, # ladylora
+    #7881034L, # Yakoso
+    #7939982, # Claidi Song
+    #7965725L, # Z A N D l
+    #8068100L,  # NDG Eternal Seeker
+    #8315178L,  # Roland (Mav Hungary)
 ]
 
 #
 def Arena():
     agePlayers = PtGetPlayerList()
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in adminList), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in adminList)]
     for player in agePlayers:
         soav = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
         some = PtGetLocalAvatar()
@@ -441,5 +454,131 @@ def Arena():
                     posme = some.getLocalToWorld()
                     soav.netForce(1)
                     soav.physics.warp(posme)
+
+#
+def MovePlayersOutsideMyst25ReltoDanceArea():
+    agePlayers = PtGetPlayerList()
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in adminList)]
+    x0 = 34.5
+    y0 = 100.4
+    r0 = 30.0
+    for player in agePlayers:
+        soav = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+        some = PtGetLocalAvatar()
+        posav = soav.position()
+        x = posav.getX() - x0
+        y = posav.getY() - y0
+        r = math.sqrt(x**2 + y**2)
+        if r < r0:
+            if posav.getZ() > -25 and posav.getZ() < 50:
+                some = PtGetLocalAvatar()
+                posme = some.getLocalToWorld()
+                soav.netForce(1)
+                soav.physics.warp(posme)
+
+#==================================#
+# Survey Player in Relto Dance Area
+#==================================#
+class SurveyPlayerInReltoDanceArea:
+    _running = False
+    _pos = ptMatrix44()
+    #_x0 = 34.5
+    #_y0 = 100.4
+    #_r0 = 30.0
+    #_x0 = 74.5
+    #_y0 = 140.4
+    #_r0 = 78.0
+    _x0 = 50.0
+    _y0 = 132.0
+    _r0 = 55.0
+
+    #
+    def __init__(self):
+        print("SurveyPlayerInReltoDanceArea : init")
+        try:
+            so = PtFindSceneobject("LinkInPointBahroPoles", "Personal")
+            self._pos = so.getLocalToWorld()
+        except:
+            print("Error 1")
+            try:
+                some = PtGetLocalAvatar()
+                self._pos = some.getLocalToWorld()
+            except:
+                print("Error 2")
+    #
+    def MovePlayersOutsideMyst25ReltoDanceArea(self):
+        agePlayers = PtGetPlayerList()
+        agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in adminList)]
+        agePlayers.append(PtGetLocalPlayer())
+        for player in agePlayers:
+            soav = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            #some = PtGetLocalAvatar()
+            posav = soav.position()
+            x = posav.getX() - self._x0
+            y = posav.getY() - self._y0
+            r = math.sqrt(x**2 + y**2)
+            #try:
+            #    print "Player : {0} => X={1}, Y={2}, Z={3}, x={4}, y={5}, r={6}".format(player.getPlayerID(), posav.getX(), posav.getY(), posav.getZ(), x, y, r)
+            #except:
+            #    print "Error 3"
+            if r < self._r0:
+                if posav.getZ() > -25 and posav.getZ() < 50:
+                    try:
+                        print("SurveyPlayerInReltoDanceArea : Moving player => {0} => X={1}, Y={2}, Z={3}, x={4}, y={5}, r={6}".format(player.getPlayerName(), posav.getX(), posav.getY(), posav.getZ(), x, y, r))
+                    except:
+                        print("Error 4")
+                    #some = PtGetLocalAvatar()
+                    #posme = some.getLocalToWorld()
+                    soav.netForce(1)
+                    #soav.physics.warp(posme)
+                    #Move player to LinkInPointBahroPoles
+                    try:
+                        soav.physics.warp(self._pos)
+                    except:
+                        print("Error 5")
+    
+    #
+    def onAlarm(self, param=1):
+        #print "SurveyPlayerInReltoDanceArea : onalarm"
+        if not self._running:
+            print("SurveyPlayerInReltoDanceArea : not running")
+            return
+        
+        #
+        if PtGetAgeInfo().getAgeFilename() != "Personal":
+            print("SurveyPlayerInReltoDanceArea : I'm not in Relto, stop running")
+            self.Stop()
+            return
+        
+        #print "SurveyPlayerInReltoDanceArea : onAlarm => call MovePlayersOutsideMyst25ReltoDanceArea"
+        self.MovePlayersOutsideMyst25ReltoDanceArea()
+        PtSetAlarm(1, self, 1)
+        
+    def Start(self):
+        if not self._running:
+            self._running = True
+            print("SurveyPlayerInReltoDanceArea : start")
+            self.onAlarm()
+
+    def Stop(self):
+        print("SurveyPlayerInReltoDanceArea:stop")
+        self._running = False
+
+#
+surveille = None
+
+#
+def stopchecking():
+    global surveille
+    if isinstance(surveille, SurveyPlayerInReltoDanceArea):
+        surveille.Stop()
+        surveille = None
+
+#
+def startchecking():
+    global surveille
+    stopchecking()
+    surveille = SurveyPlayerInReltoDanceArea()
+    surveille.Start()
 
 #

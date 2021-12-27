@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 # <ageFileName>.fni (fog settings)
-
+"""
 # Tetsonot
 Graphics.Renderer.Setyon 100000 
 Graphics.Renderer.Fog.SetDefLinear 0 0 0
@@ -250,3 +251,4 @@ Graphics.Renderer.Setyon 10000
 Graphics.Renderer.Fog.SetDefLinear 0 1500 0
 Graphics.Renderer.Fog.SetDefColor 0 0 0
 Graphics.Renderer.SetClearColor 1 1 1
+"""

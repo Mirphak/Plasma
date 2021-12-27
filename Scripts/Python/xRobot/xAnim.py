@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Plasma import *
 
 animDict = {'danse'      : ['Dance'],
@@ -14,7 +15,7 @@ animDict = {'danse'      : ['Dance'],
             'zombie'     : ['Fall2', 'Fall2','Fall2', 'Fall', 'Fall', 'Fall2', 'Fall', 'Fall', 'GroundImpact'],
             'marteau'    : ['SideSwimLeft', 'SideSwimRight', 'SideSwimRight', 'SideSwimLeft'],
             'attente'    : ['TapFoot', 'StepLeft', 'LeanLeft', 'CrossArms', 'LookAround', 'StepRight', 'LeanRight','Peer'],
-            'rire2'       : ['Point', 'Laugh', 'Shakefist', 'Thank'],
+            'rire2'      : ['Point', 'Laugh', 'Shakefist', 'Thank'],
             'merci'      : ['Kneel', 'KiGlance', 'Thank'],
             'marche'     : ['Walk'],
             'cours'      : ['Run'],
@@ -109,24 +110,140 @@ animDict = {'danse'      : ['Dance'],
             "sit"           : ["Sit"],
             "wavebye"       : ["Wave"],
             "yes"           : ["Agree"],
-            }
+            # to be tried
+            "buttontouch"         : ["ButtonTouch"],
+            "doorbuttontouch"     : ["DoorButtonTouch"],
+            #"fallinglinkout"      : ["FallingLinkOut"], # /!\bloquant
+            #"fishbooklinkout"     : ["FishBookLinkOut"], # /!\bloquant
+            "floorlevera"         : ["FloorLeverA"],
+            "floorleveraup"       : ["FloorLeverAUp"],
+            "globalscopegrab"     : ["GlobalScopeGrab"],
+            "globalscopehold"     : ["GlobalScopeHold"],
+            "globalscoperelease"  : ["GlobalScopeRelease"],
+            "kihand"              : ["KiHand"],
+            "kihandlonger"        : ["KiHandLonger"],
+            "kibegin"             : ["KiBegin"],
+            "kiend"               : ["KiEnd"],
+            "kiglance"            : ["KiGlance"],
+            "kitap"               : ["KITap"],
+            "kiuse"               : ["KiUse"],
+            #"linkout"             : ["LinkOut"], # /!\bloquant
+            "pelletbookleft"      : ["PelletBookLeft"],
+            "pelletbookright"     : ["PelletBookRight"],
+            "pelletbookwait"      : ["PelletBookWait"],
+            "personnallink"       : ["PersonnalLink"],
+            "shootertrapactivate" : ["ShooterTrapActivate"],
+            "shortidle"           : ["ShortIdle"],
+            "shortleap"           : ["ShortLeap"],
+            "sitfront"            : ["SitFront"],
+            "sitidle"             : ["SitIdle"],
+            "sitidleground"       : ["SitIdleGround"],
+            "steponfloorplate"    : ["StepOnFloorPlate"],
+            # ** Thoses should also work everywhere **
+            "afkidle"                 : ["AFKIdle"],
+            "blindsleverdown"         : ["BlindsLeverDown"],
+            "blindsleverup"           : ["BlindsLeverUp"],
+            "blndfrntleverdown"       : ["BlndFrntLeverDown"],
+            "blndfrntleverup"         : ["BlndFrntLeverUp"],
+            "bookaccept"              : ["BookAccept"],
+            "bookacceptidle"          : ["BookAcceptIdle"],
+            "bookoffer"               : ["BookOffer"],
+            "bookofferfinish"         : ["BookOfferFinish"],
+            "bookofferidle"           : ["BookOfferIdle"],
+            "insertkihand"            : ["InsertKiHand"],
+            "insertkihandlonger"      : ["InsertKiHandLonger"],
+            "softlanding"             : ["SoftLanding"],
+            "touchpellet"             : ["TouchPellet"],
+            # ** Thoses only work in Ahnonay **
+            "swimdockexit"            : ["SwimDockExit"],
+            "swimsurfacedive"         : ["SwimSurfaceDive"],
+            "swimunderwater"          : ["SwimUnderwater"],
+            "valvewheelcw"            : ["ValveWheelCW"],
+            "valvewheelccw"           : ["ValveWheelCCW"],
+            # ** Thoses only work in Er'cana **
+            "floorleverapullhard"     : ["FloorLeverAPullHard"],
+            "floorleverapushhard"     : ["FloorLeverAPushHard"],
+            "floorleverastuck"        : ["FloorLeverAStuck"],
+            "floorleveraup"           : ["FloorLeverAUp"],
+            "hatchlockedbelow"        : ["HatchLockedBelow"],
+            "hrvstrleverbackward"     : ["HrvstrLeverBackward"],
+            "hrvstrleverforward"      : ["HrvstrLeverForward"],
+            "pushdebris"              : ["PushDebris"],
+            # ** Thoses only work in Cleft **
+            "cleftdropin"             : ["CleftDropIn"],
+            "windmilllockedccw"       : ["WindmillLockedCCW"],
+            "windmilllockedcw"        : ["WindmillLockedCW"],
+            # ** Thoses only work in Gahreesen **
+            "elevatorarrivingbottom"  : ["ElevatorArrivingBottom"],
+            "elevatorarrivingtop"     : ["ElevatorArrivingTop"],
+            "elevatorleavingbottom"   : ["ElevatorLeavingBottom"],
+            "elevatorleavingtop"      : ["ElevatorLeavingTop"],
+            "wallclimbdismountdown"   : ["WallClimbDismountDown"],
+            "wallclimbdismountleft"   : ["WallClimbDismountLeft"],
+            "wallclimbdismountright"  : ["WallClimbDismountRight"],
+            "wallclimbdismountup"     : ["WallClimbDismountUp"],
+            "wallclimbdown"           : ["WallClimbDown"],
+            "wallclimbidle"           : ["WallClimbIdle"],
+            "wallclimbleft"           : ["WallClimbleft"], # (pas WallClimbLeft !)
+            "wallclimbright"          : ["WallClimbright"], # (pas WallClimbRight !)
+            "wallclimbmountdown"      : ["WallClimbMountDown"],
+            "wallclimbmountleft"      : ["WallClimbMountLeft"],
+            "wallclimbmountright"     : ["WallClimbMountRight"],
+            "wallclimbmountup"        : ["WallClimbMountUp"],
+            # ** Thoses only work in Eder Gira **
+            "fumerolclothjump"        : ["FumerolClothJump"],
+            "fumerolledgeblast"       : ["FumerolLedgeBlast"],
+            "fumerolrockblast"        : ["FumerolRockBlast"],
+            "vertblastlevel01"        : ["VertBlastLevel01"],
+            "vertblastlevel02"        : ["VertBlastLevel02"],
+            "vertblastlevel03"        : ["VertBlastLevel03"],
+            "vertblastlevel04"        : ["VertBlastLevel04"],
+            "vertblastlevel05"        : ["VertBlastLevel05"],
+            "vertblastlevel06"        : ["VertBlastLevel06"],
+            # ** Thoses only work in Teledahn **
+            "aquariumbuttonhold"      : ["AquariumButtonHold"],
+            "aquariumbuttonpress"     : ["AquariumButtonPress"],
+            "aquariumbuttonrelease"   : ["AquariumButtonRelease"],
+            "clutchlevergeargrind"    : ["ClutchLeverGearGrind"],
+            "dropoutofbucket"         : ["DropOutOfBucket"],
+            "getinbucket"             : ["GetInBucket"],
+            "getoutofbucket"          : ["GetOutOfBucket"],
+            "hatchclose"              : ["HatchClose"],
+            "hatchlockedabove"        : ["HatchLockedAbove"],
+            "hatchlockedbelow"        : ["HatchLockedBelow"],
+            "hatchopenabove"          : ["HatchOpenAbove"],
+            "hatchopenbelow"          : ["HatchOpenBelow"],
+            "noxiouscavedoorpullopen" : ["NoxiousCaveDoorPullOpen"],
+            "noxiouscavedoorpushopen" : ["NoxiousCaveDoorPushOpen"],
+            "noxiousdoorclose"        : ["NoxiousDoorClose"],
+            "powertowerprimerbutton"  : ["PowerTowerPrimerButton"],
+            "powertowerprimerlevers"  : ["PowerTowerPrimerLevers"],
+            "secretwallbutton"        : ["SecretWallButton"],
+           }
 
-def Play(player, animName, nbTimes):
+#
+def Play(player, animName, nbTimes, gender=""):
     try :
         repet = int(nbTimes)
     except ValueError:
         repet = 0
     objKey = PtGetAvatarKeyFromClientID(player.getPlayerID())
     avatar = objKey.getSceneObject().avatar
-
-    if avatar.getAvatarClothingGroup() == 0:
+    
+    if gender == "b":
+        gender = "kg"
+    elif gender == "f":
+        gender = "Female"
+    elif gender == "m":
+        gender = "Male"
+    elif avatar.getAvatarClothingGroup() == 0:
         gender = "Male"
     else:
         gender = "Female"
     gAnimSeq = []
     try:
         animSeq = animDict[animName]
-        gAnimSeq = map(lambda x: gender+x, animSeq)
+        gAnimSeq = [gender+x for x in animSeq]
     except KeyError:
         gAnimSeq = [gender+animName]
     except:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 dicObjectsShowHide = {
 	"Personal":{
 		"SingleShow":{"Night":[], "Day":["FogLayerBill", "CameraClouds", "SunGlow"]},

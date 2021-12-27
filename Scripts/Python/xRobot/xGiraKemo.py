@@ -18,26 +18,63 @@
     hide()
     
     //skycolor blue 4
+    
+    V3 : 06/02/2021
+        - Cavern Tour : Larry F (22 janv. 2021 20:21)
+        Got a look at the schedule and found that it won’t work as it is set up now. 
+        While we could potentially pad a tour of Gira and Kemo out to fill a time slot, 
+        the same cannot be said of Delin, Tsogal and Jalak. 
+        All three of those locations make for very short tours and we’d cover them in an hour.
+
+        With that in mind, I want to do the four gardens in one tour and tack Jalak onto another tour where we have 
+        an opening. 
+        Minkata is a possibility. 
+        Or it would be if it were on the schedule. 
+        So, one more entry needs to be added for Minkata and Jalak.
+
+        Requests for the four gardens. I’d like to run them in this order:
+
+        * Delin: 
+            No special effects needed. We just need to get there.
+
+        * Tsogal: 
+            Same as Delin.
+
+        * Gira: 
+            I’ll want to warp down to the bottom of the last waterfall to the hidden area. 
+            Otherwise, nothing in particular.
+
+        * Kemo: 
+            By this time, Mirphak knows most of what to do better than I do. 
+            Be prepared to remove the trees and bamboo grove around the Bahroglyph sites so that a large group 
+            can see them easily, and work your magic to highlight, isolate and enhance them. 
+            Build a Jalak pillar platform so we can see the hanging creatures on the canyon rim up close. 
+            See if you can get us below the fish pond to see the kēmo fish eye to eye – another pillar platform, maybe? 
+            I’ll be showing a lot of pictures in the stream this time to enhance the show, 
+            so it’ll be even more than in previous seasons.
+
+        If we run short I may do something for Direbo, but I’m not expecting to have that much time left over after Kēmo.
+    
 """
 from Plasma import *
 import math
-import sdl
-import Ride
-import Platform
+from . import sdl
+from . import Ride
+from . import Platform
 
 #
 dicBot = {
-    32319L:"Mir-o-Bot", 
-    27527L:"Magic Bot", 
-    71459L:"Mimi Bot", 
+    32319:"Mir-o-Bot", 
+    27527:"Magic Bot", 
+    71459:"Mimi Bot", 
     #L:"Stone5", 
-    64145L:"Annabot",
+    64145:"Annabot",
     #L:"SkydiverBot",
-    3975L:"OHBot",
-    24891L:"Magic-Treasure",
-    26224L:"Magic Treasure",
-    21190L:"Mimi Treasure",
-    2332508L:"mob",
+    3975:"OHBot",
+    24891:"Magic-Treasure",
+    26224:"Magic Treasure",
+    21190:"Mimi Treasure",
+    2332508:"mob",
     }
 
 # Larry LeDeay [KI: 11308]
@@ -50,17 +87,17 @@ def CercleV(coef=2.0, avCentre=None):
         avCentre = PtGetLocalAvatar()
     #agePlayers = GetAllAgePlayers()
     # ne pas tenir compte des robots
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in dicBot.keys()), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
     i = 0
     n = len(agePlayers)
-    print "nb de joueurs: %s" % (n)
+    print("nb de joueurs: %s" % (n))
     dist = float(coef * n) / (2.0 * math.pi)
-    print "distance: %s" % (dist)
+    print("distance: %s" % (dist))
     for i in range(n):
         player = agePlayers[i]
         avatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
         angle = (float(i) * 2.0 * math.pi) / float(n)
-        print "angle(%s): %s" % (i, angle)
+        print("angle(%s): %s" % (i, angle))
         dx = float(dist)*math.cos(angle)
         #dy = float(dist)*math.sin(angle)
         dy = 0
@@ -82,9 +119,9 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
     
     #agePlayers = GetAllAgePlayers()
     # ne pas tenir compte des robots
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in dicBot.keys()), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
     agePlayers.append(PtGetLocalPlayer())
-    soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), agePlayers)
+    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in agePlayers]
     for soavatar in soAvatarList:
         #faire flotter tout le monde
         soavatar.netForce(1)
@@ -94,9 +131,9 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
 
     i = 0
     n = len(agePlayers)
-    print "nb de joueurs: %s" % (n)
+    print("nb de joueurs: %s" % (n))
     dist = float(coef * n) / (2.0 * math.pi)
-    print "distance: %s" % (dist)
+    print("distance: %s" % (dist))
     nbCercles = dist // maxdist
     if nbCercles > 0:
         dist = dist / nbCercles
@@ -104,7 +141,7 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
         avatar = soAvatarList[i]
         angle = (float(i%maxdist) * float(nbCercles) * 2.0 * math.pi) / float(n)
         dist = dist + (n // maxdist)
-        print "angle(%s): %s" % (i, angle)
+        print("angle(%s): %s" % (i, angle))
         dx = float(dist)*math.cos(angle)
         dy = float(dist)*math.sin(angle)
         #matrix = avCentre.getLocalToWorld()
@@ -163,7 +200,7 @@ def wa(n=None, bCircle=False):
         #recuperer tous les joueurs
         playerList = PtGetPlayerList()
         playerList.append(PtGetLocalPlayer())
-        soAvatarList = map(lambda player: PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject(), playerList)
+        soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
         for soavatar in soAvatarList:
             #faire flotter tout le monde
             soavatar.netForce(1)
@@ -191,9 +228,9 @@ def FindSOName(soName):
     strList = soName.split("*")
     nameList = list()
     for str in strList:
-        nameList.extend(map(lambda so: so.getName(), PtFindSceneobjects(str)))
+        nameList.extend([so.getName() for so in PtFindSceneobjects(str)])
     nameList = list(set(nameList))
-    nameList = filter(lambda x: pattern.match(x) != None, nameList)
+    nameList = [x for x in nameList if pattern.match(x) != None]
     return nameList
 
 # Find scene objects with name like soName in all loaded districts (Warning, it includes GUI)
@@ -224,7 +261,7 @@ def LinkPlayerTo(age, playerID=None, spawnPointNumber=None):
         playerID = PtGetLocalPlayer().getPlayerID()
     else:
         try:
-            playerID = long(playerID)
+            playerID = int(playerID)
         except:
             return "incorrect playerID"
             #pass
@@ -271,9 +308,9 @@ playerIdList = []
 #
 def SavePlayers():
     global playerIdList
-    agePlayers = filter(lambda pl: not(pl.getPlayerID() in dicBot.keys()), PtGetPlayerList())
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
     agePlayers.append(PtGetLocalPlayer())
-    playerIdList = map(lambda player: player.getPlayerID(), agePlayers)
+    playerIdList = [player.getPlayerID() for player in agePlayers]
 
 """
     "aegura":["city", "city", "9511bed4-d2cb-40a6-9983-6025cdb68d8b", "Mir-o-Bot's", "LinkInPointBahro-PalaceBalcony"],
@@ -322,7 +359,7 @@ def togglesdl(name):
         "wings":"ercaHrvstrWingsOk", 
         "wd":"ercaHrvstrWingLeverDown", 
     }
-    if (name in dicNames.keys()):
+    if (name in list(dicNames.keys())):
         sdl.ToggleBoolSDL(dicNames[name])
     else:
         print("wrong sdl name")
@@ -380,7 +417,7 @@ def platform(name="sun"):
 # long platform(where=1)
 def platform2(where=None):
     matPos = None
-    if where is None or where not in range(1, 5):
+    if where is None or where not in list(range(1, 5)):
         matPos = PtGetLocalAvatar().getLocalToWorld()
     else:
         #Ahnonay

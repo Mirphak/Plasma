@@ -32,7 +32,7 @@ def Responder(soName, respName, pfm = None, ageName = None, state = None, ff = F
             break
     
     if respKey == None:
-        print "Responder():\tResponder not found..."
+        print("Responder():\tResponder not found...")
         return
     
     if pfm == None:
@@ -111,9 +111,9 @@ def test2(rn = "cRespUrwin-Walk_01"):
     if len(cklst) > 0:
         sok = cklst[0]
         so = sok.getSceneObject()
-        print "clone[0] selected"
+        print("clone[0] selected")
     else:
-        print "no clone found, original selected"
+        print("no clone found, original selected")
     rf = False
     for resp in so.getResponders():
         if resp.getName() == rn:
@@ -121,16 +121,16 @@ def test2(rn = "cRespUrwin-Walk_01"):
             RunResponder(sok, resp)
             break
     if rf:
-        print "responder found"
+        print("responder found")
     else:
-        print "responder not found"
+        print("responder not found")
 
 #
 def clone(bOn=True):
-    import CloneObject
+    from . import CloneObject
     myself = PtGetLocalPlayer()
     # mettre le sandscrit dans le Pod:
-    print "==> Sandscrit"
+    print("==> Sandscrit")
     tupMat = ((-0.275523930788,-0.961294174194,0.0,15.0463008881),(0.961294174194,-0.275523930788,0.0,3.88983178139),(0.0,0.0,1.0,2.06506371498),(0.0,0.0,0.0,1.0))
     mat = ptMatrix44()
     mat.setData(tupMat)

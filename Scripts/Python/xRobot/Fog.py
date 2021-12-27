@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Fait varier la couleur du fog.
 
 from Plasma import *

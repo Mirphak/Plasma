@@ -313,34 +313,34 @@ def GetPeople(kind = "buddy", listedPlayers = []):
                         player = ptPlayer(ebud.playerGetName(),ebud.playerGetID())
                         if player not in listedPlayers:
                             selPlyrList.append(player)
-        selPlyrList = filter(lambda pl: not(pl.getPlayerID() in xPlayers.dicBot.keys()), selPlyrList)
+        selPlyrList = [pl for pl in selPlyrList if not(pl.getPlayerID() in list(xPlayers.dicBot.keys()))]
     return selPlyrList
 
 # Get buddy list
 def GetBuddyList():
     vault = ptVault()
     if not isinstance(vault, ptVault):
-        print "vault not found!"
+        print("vault not found!")
         return None
     buddiesFolder = vault.getBuddyListFolder()
     if not isinstance(buddiesFolder, ptVaultPlayerInfoListNode):
-        print "buddiesFolder not found!"
+        print("buddiesFolder not found!")
         return None
     lst = []
     for buddyVaultNodeRef in buddiesFolder.getChildNodeRefList():
         if not isinstance(buddyVaultNodeRef, ptVaultNodeRef):
-            print "buddyVaultNodeRef not found!"
+            print("buddyVaultNodeRef not found!")
             return None
         buddyVaultNode = buddyVaultNodeRef.getChild()
         if not isinstance(buddyVaultNode, ptVaultNode):
-            print "buddyVaultNode not found!"
+            print("buddyVaultNode not found!")
             return None
         # On peut deja recuperer la date de creation du noeud ici
         #buddyVaultNode.getCreateTime()
         
         buddyPlayerInfoNode = buddyVaultNode.upcastToPlayerInfoNode()
         if not isinstance(buddyPlayerInfoNode, ptVaultPlayerInfoNode):
-            print "buddyVaultNode not found!"
+            print("buddyVaultNode not found!")
             return None
         # On peut recuperer les infos du joueur ici
         playerId = buddyPlayerInfoNode.playerGetID()
@@ -382,11 +382,11 @@ def SaveBuddyList():
 def SaveBuddyKiList():
     vault = ptVault()
     if not isinstance(vault, ptVault):
-        print "vault not found!"
+        print("vault not found!")
         return 0
     buddiesFolder = vault.getBuddyListFolder()
     if not isinstance(buddiesFolder, ptVaultPlayerInfoListNode):
-        print "buddiesFolder not found!"
+        print("buddiesFolder not found!")
         return 0
     if not os.path.exists("Buddies"):
         os.makedirs("Buddies")
@@ -396,15 +396,15 @@ def SaveBuddyKiList():
     with open(fileName, 'w') as f:
         for buddyVaultNodeRef in buddiesFolder.getChildNodeRefList():
             if not isinstance(buddyVaultNodeRef, ptVaultNodeRef):
-                print "buddyVaultNodeRef not found!"
+                print("buddyVaultNodeRef not found!")
                 continue
             buddyVaultNode = buddyVaultNodeRef.getChild()
             if not isinstance(buddyVaultNode, ptVaultNode):
-                print "buddyVaultNode not found!"
+                print("buddyVaultNode not found!")
                 continue
             buddyPlayerInfoNode = buddyVaultNode.upcastToPlayerInfoNode()
             if not isinstance(buddyPlayerInfoNode, ptVaultPlayerInfoNode):
-                print "buddyVaultNode not found!"
+                print("buddyVaultNode not found!")
                 continue
             playerId = buddyPlayerInfoNode.playerGetID()
             f.write("{0}\n".format(playerId))

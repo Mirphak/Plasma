@@ -222,9 +222,9 @@ def SetSDL(name, value):
 def ShowAllSdl():
     ageSdl = PtGetAgeSDL()
     for s in lstSdlOne:
-        print "SDL '{0}' : {1}".format(s[0], ageSdl[s[0]])
+        print("SDL '{0}' : {1}".format(s[0], ageSdl[s[0]]))
     for s in lstSdlTwo:
-        print "SDL '{0}' : {1}".format(s[0], ageSdl[s[0]])
+        print("SDL '{0}' : {1}".format(s[0], ageSdl[s[0]]))
 
 #
 def ResetAge():
