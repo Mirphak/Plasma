@@ -367,7 +367,7 @@ void    plAvatarInputInterface::RestoreDefaultKeyMappings()
     fControlMap->BindKey( plCtrlKeyCombo( KEY_P ),      B_CONTROL_TOGGLE_PHYSICAL );
     fControlMap->BindKey( KEY_U,                        B_CONTROL_MOVE_UP );
     fControlMap->BindKey( KEY_H,                        B_CONTROL_MOVE_DOWN );
-    fControlMap->BindKey( plCtrlKeyCombo( KEY_C ),      B_TOGGLE_DRIVE_MODE );
+    fControlMap->BindKey( plCtrlKeyCombo( KEY_D ),      B_TOGGLE_DRIVE_MODE );
     
     fControlMap->BindKeyToConsoleCmd( plCtrlKeyCombo( KEY_L ),  "NextStatusLog" );
 #endif
