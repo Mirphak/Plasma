@@ -115,14 +115,14 @@ class xKIChat(object):
         self.MessageHistoryList = [] # Contains our message history
         self.MessageCurrentLine = "" # Hold current line while navigating message history
 
+        self.xKI = xKI
+
     @property
     def chatArea(self):
         if self.KILevel < kNormalKI:
             return self.microChatArea
         else:
             return self.miniChatArea
-
-        self.xKI = xKI
 
     #######
     # GUI #
