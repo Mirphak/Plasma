@@ -69,86 +69,154 @@ kListLightResps = ["respKILightOff","respKILightOn" ]
 ## The name of the KI light scene object.
 kKILightObjectName = "RTOmniKILight"
 
-## The easter eggs chat commands.
+## Gahreesen Nexus Private Chat channels
+kBlackNexus = 6
+kWhiteNexus = 7
+
+## The color names usable to set the KI text color override
+kColorNames = {
+    PtGetLocalizedString("Global.Colors.Black"): "black",
+    PtGetLocalizedString("Global.Colors.Blue"): "blue",
+    PtGetLocalizedString("Global.Colors.Brown"): "brown",
+    PtGetLocalizedString("Global.Colors.Cyan"): "cyan",
+    PtGetLocalizedString("Global.Colors.DarkBrown"): "darkbrown",
+    PtGetLocalizedString("Global.Colors.DarkGreen"): "darkgreen",
+    PtGetLocalizedString("Global.Colors.DarkPurple"): "darkpurple",
+    PtGetLocalizedString("Global.Colors.Gray"): "gray",
+    PtGetLocalizedString("Global.Colors.Green"): "green",
+    PtGetLocalizedString("Global.Colors.Magenta"): "magenta",
+    PtGetLocalizedString("Global.Colors.Maroon"): "maroon",
+    PtGetLocalizedString("Global.Colors.NavyBlue"): "navyblue",
+    PtGetLocalizedString("Global.Colors.Orange"): "orange",
+    PtGetLocalizedString("Global.Colors.Pink"): "pink",
+    PtGetLocalizedString("Global.Colors.Red"): "red",
+    PtGetLocalizedString("Global.Colors.SlateBlue"): "slateblue",
+    PtGetLocalizedString("Global.Colors.SteelBlue"): "steelblue",
+    PtGetLocalizedString("Global.Colors.Tan"): "tan",
+    PtGetLocalizedString("Global.Colors.White"): "white",
+    PtGetLocalizedString("Global.Colors.Yellow"): "yellow"
+}
+
+## The easter eggs chat command fill-ins.
+## Dictionary key is Age filename
+## "see": [Required] Write an entire sentence, and end it with punctuation.
+## "exits": [Required] Your text will be preceded by "There are exits to the", so
+##     prefix your text with a space if needed and end it with punctuation.
+##     Set value to None to use "... well, there are no exits."
+## "people": [Optional] Your text will be preceded by "Standing near you is", so
+##     prefix your text with a space if needed and end it with punctuation.
+##     Only define "people" for your location if you want to override default behavior
+##     of using nearby players' names or it's a private Age that has NPCs (e.g., Cleft).
+##     *Default Value*: Comma-separated list of player names from GetPlayersInChatDistance
+##         OR " nobody in particular." if there are no nearby players
 kEasterEggs = {
-               "city" : {"see" : "You see the remnants of a great civilization, ready to be rebuilt. Where are the flying monkeys?",
-                         "exits" : "NorthWest and South."},
-               "Personal" : {"see" : "You see a small hut... looks deserted.",
-                             "exits" : None},
-               "Teledahn" : {"see" : "You see 'shrooms everywhere! Big ones, small ones. Are they edible?",
-                             "exits" : "East."},
-               "Nexus" : {"see" : "You see a jukebox-like machine.",
-                          "exits" : None},
-               "Garden" : {"see" : "You see bugs. BUGS! I hate bugs.",
-                           "exits" : "North and South."},
-               "EderTsogal" : {"see" : "You see grass, water and things floating in the air (not feathers).",
-                               "exits" : "North. But you'll have to climb or fly to get there."},
-               "Dereno" : {"see" : "Ah, Dah-Ree-Toe. You see... Well, if someone would clean those stupid windows you could see a *lot*. Have I been here before? Maybe all pods just look the same.",
-                           "exits" : "SouthWest and East. But they are both blocked."},
-               "BahroCave" : {"see" : "You see a darkly lit cavern. Strange images on the wall next to you, flickering in the subdued light.Be afraid. Be very afraid!",
-                              "exits" : "North, West and East. But they are blocked by a large hole in the floor."},
-               "Minkata" : {"see" : "You see sand and dust in all directions. Above you there is a filtered sun or two... or more. Somewhere there is a horse with no name.",
-                            "exits" : "East. Nine days away."},
-               "Cleft" : {"see" : "You see sand for as far as the eye can see. Gonna need a vehicle of some sort.",
-                          "exits" : "... well, I don't know. Maybe you can ask the old man (if he ever stops listening to that music!).",
-                          "people" : "an old man. Ok, maybe he's not standing. BTW, wasn't he on M*A*S*H?"},
-               "GoMePubNew" : {"see" : "You are in a festively yet dimly lit Pub. The echoes of Messenger work and play echo along the walls of the massive main chamber.",
-                               "exits" : "... wait, where ARE the exits? Who built this place anyway?",
-                               "people" : "a large group of people...unless you are here by yourself...in which case, you don't."},
-               "ChisoPreniv" : {"see" : "All around you are bookshelves upon bookshelves but not a book to read. To the south is a large set of windows that reveal a vast landscape that you'll never be able to access.",
-                                "exits" : " ... I guess in this library, the only exit is through the window, but let's not do that"},
+    "city" : {
+        "see" : "You see the remnants of a great civilization, ready to be rebuilt. Where are the flying monkeys?",
+        "exits" : " NorthWest and South."
+    },
+    "Personal" : {
+        "see" : "You see a small hut... looks deserted.",
+        "exits" : None
+    },
+    "Teledahn" : {
+        "see" : "You see 'shrooms everywhere! Big ones, small ones. Are they edible?",
+        "exits" : " East."
+    },
+    "Nexus" : {
+        "see" : "You see a jukebox-like machine.",
+        "exits" : None
+    },
+    "Garden" : {
+        "see" : "You see bugs. BUGS! I hate bugs.",
+        "exits" : " North and South."
+    },
+    "EderTsogal" : {
+        "see" : "You see grass, water and things floating in the air (not feathers).",
+        "exits" : " North. But you'll have to climb or fly to get there."
+    },
+    "Dereno" : {
+        "see" : "Ah, Dah-Ree-Toe. You see... Well, if someone would clean those stupid windows you could see a *lot*. Have I been here before? Maybe all pods just look the same.",
+        "exits" : " SouthWest and East. But they are both blocked."
+    },
+    "BahroCave" : {
+        "see" : "You see a darkly lit cavern. Strange images on the wall next to you, flickering in the subdued light.Be afraid. Be very afraid!",
+        "exits" : " North, West and East. But they are blocked by a large hole in the floor."
+    },
+    "Minkata" : {
+        "see" : "You see sand and dust in all directions. Above you there is a filtered sun or two... or more. Somewhere there is a horse with no name.",
+        "exits" : " East. Nine days away."
+    },
+    "Cleft" : {
+        "see" : "You see sand for as far as the eye can see. Gonna need a vehicle of some sort.",
+        "exits" : "... well, I don't know. Maybe you can ask the old man (if he ever stops listening to that music!).",
+        "people" : " an old man. Ok, maybe he's not standing. BTW, wasn't he on M*A*S*H?"
+    },
+    "GoMePubNew" : {
+        "see" : "You are in a festively yet dimly lit Pub. The echoes of Messenger work and play echo along the walls of the massive main chamber.",
+        "exits" : "... wait, where ARE the exits? Who built this place anyway?",
+        "people" : " a large group of people... unless you are here by yourself... in which case, you don't."
+    },
+    "ChisoPreniv" : {
+        "see" : "All around you are bookshelves upon bookshelves but not a book to read. To the south is a large set of windows that reveal a vast landscape that you'll never be able to access.",
+        "exits" : "... I guess in this library, the only exit is through the window, but let's not do that."
+    }
 }
 
 ## Constants for Age display names.
 class kAges:
-    Display = {"Ae'gura" : "D'ni-Ae'gura",
-               "AhnonayCathedral" : "Ahnonay Cathedral",
-               "AvatarCustomization" : "Avatar Customization",
-               "BaronCityOffice" : "D'ni-Ae'gura",
-               "city" : "D'ni-Ae'gura",
-               "Cleft" : "D'ni-Riltagamin",
-               "Descent" : "D'ni-Tiwah",
-               "EderDelin" : "Eder Delin",
-               "EderTsogal" : "Eder Tsogal",
-               "Er'canaCitySilo" : "D'ni-Ashem'en",
-               "ErcanaCitySilo" : "D'ni-Ashem'en",
-               "GreatTreePub" : "D'ni-Watcher's Pub",
-               "Great Zero" : "D'ni-Rezeero",
-               "GreatZero" : "D'ni-Rezeero",
-               "GuildPub-Cartographers" : "D'ni-Cartographers' Pub",
-               "GuildPub-Greeters" : "D'ni-Greeters' Pub",
-               "GuildPub-Maintainers" : "D'ni-Maintainers' Pub",
-               "GuildPub-Messengers" : "D'ni-Messengers' Pub",
-               "GuildPub-Writers" : "D'ni-Writers' Pub",
-               "Kirel" : "D'ni-Kirel",
-               "K'veer" : "D'ni-K'veer",
-               "Kveer" : "D'ni-K'veer",
-               "Neighborhood02" : "D'ni-Kirel",
-               "Old Spy Room" : "D'ni-Ae'gura",
-               "philRelto" : "Phil's Relto",
-               "Shaft" : "D'ni-Tiwah",
-               "Spy Room" : "D'ni-Ae'gura",
-               "spyroom" : "D'ni-Ae'gura",
-##             Fan Ages
-               "Trebivdil" : "Tre'bivdil",
-               "trebivdil" : "Tre'bivdil",
-               "vothol" : "D'ni-Vothol Gallery",
-               "FehnirHouse" : "D'ni-Fehnir's House",
-               "GoMePubNew" : "D'ni-Messengers' Pub - Ae'gura",
-               "ChisoPreniv" : "Chiso Preniv",
-               "VeeTsah" : "Veelay Tsahvahn"}
+    Display = {
+        "Ae'gura" : "D'ni-Ae'gura",
+        "AhnonayCathedral" : "Ahnonay Cathedral",
+        "AvatarCustomization" : "Avatar Customization",
+        "BaronCityOffice" : "D'ni-Ae'gura",
+        "city" : "D'ni-Ae'gura",
+        "Cleft" : "D'ni-Riltagamin",
+        "Descent" : "D'ni-Tiwah",
+        "EderDelin" : "Eder Delin",
+        "EderTsogal" : "Eder Tsogal",
+        "Er'canaCitySilo" : "D'ni-Ashem'en",
+        "ErcanaCitySilo" : "D'ni-Ashem'en",
+        "GreatTreePub" : "D'ni-Watcher's Pub",
+        "Great Zero" : "D'ni-Rezeero",
+        "GreatZero" : "D'ni-Rezeero",
+        "GuildPub-Cartographers" : "D'ni-Cartographers' Pub",
+        "GuildPub-Greeters" : "D'ni-Greeters' Pub",
+        "GuildPub-Maintainers" : "D'ni-Maintainers' Pub",
+        "GuildPub-Messengers" : "D'ni-Messengers' Pub",
+        "GuildPub-Writers" : "D'ni-Writers' Pub",
+        "Kirel" : "D'ni-Kirel",
+        "K'veer" : "D'ni-K'veer",
+        "Kveer" : "D'ni-K'veer",
+        "Neighborhood02" : "D'ni-Kirel",
+        "Old Spy Room" : "D'ni-Ae'gura",
+        "philRelto" : "Phil's Relto",
+        "Shaft" : "D'ni-Tiwah",
+        "Spy Room" : "D'ni-Ae'gura",
+        "spyroom" : "D'ni-Ae'gura",
+##      Fan Ages
+        "Trebivdil" : "Tre'bivdil",
+        "trebivdil" : "Tre'bivdil",
+        "vothol" : "D'ni-Vothol Gallery",
+        "FehnirHouse" : "D'ni-Fehnir's House",
+        "GoMePubNew" : "D'ni-Messengers' Pub - Ae'gura",
+        "ChisoPreniv" : "Chiso Preniv",
+        "VeeTsah" : "Veelay Tsahvahn"
+    }
     Hide = {"BahroCave", "PelletBahroCave", "Pellet Cave", "LiveBahroCave", "LiveBahroCaves"}
-    NoInvite = {"Personal", "Nexus", "Cleft", "AvatarCustomization", "city",
-                "BahroCave", "LiveBahroCave", "LiveBahroCaves", 
-                "BaronCityOffice", "ErcanaCitySilo", "GreatZero", "Shaft",
-                "Descent", "Spyroom", "Myst"}
-    Replace = {"Ercana" : "Er'cana",
-               "Garden" : "Eder Kemo",
-               "Garrison" : "Gahreesen",
-               "Gira" : "Eder Gira",
-               "Personal" : "Relto",
-              }
-    
+    NoInvite = {
+        "Personal", "Nexus", "Cleft", "AvatarCustomization", "city",
+        "BahroCave", "LiveBahroCave", "LiveBahroCaves", 
+        "BaronCityOffice", "ErcanaCitySilo", "GreatZero", "Shaft",
+        "Descent", "Spyroom", "Myst"
+    }
+    Replace = {
+        "Ercana" : "Er'cana",
+        "Garden" : "Eder Kemo",
+        "Garrison" : "Gahreesen",
+        "Gira" : "Eder Gira",
+        "Personal" : "Relto"
+    }
+
 ## Constants used for the chat.
 class kChat:
     MaxChatSize = 2048
@@ -168,6 +236,7 @@ class kChat:
     SystemMessage = 8
     InterAge = 9
     InterAgeSelf = 10
+    AudioSubtitle = 11
     
     # Chat fading.
     FadeNotActive = 0
@@ -221,9 +290,10 @@ class kColors:
     
     DniShowBtn     = DniShowRed
     DniGhostBtn    = DniHideBlue
-
+    
     TextNoteURL = DniLilac
-
+    
+    AudioSubtitleHeader = DniBlueDk
     # Chat colors (messages and headers).
     ChatMessage             = DniWhite
     ChatMessageMention      = DniYellowLt
@@ -243,6 +313,7 @@ class kColors:
 ## Constants for KI Chat commands.
 class kCommands:
     Localized = {PtGetLocalizedString("KI.Commands.ChatClearAll") : "ClearChat",
+                 PtGetLocalizedString("KI.Commands.ChatSetTextColor") : "SetTextColor",
                  PtGetLocalizedString("KI.Commands.ChatStartLog") : "StartLog",
                  PtGetLocalizedString("KI.Commands.ChatStopLog") : "StopLog",
                  PtGetLocalizedString("KI.Commands.AddBuddy") : "AddBuddy",
@@ -571,7 +642,23 @@ class kGUI:
     BKEditFieldJRNTitle = 0
     BKEditFieldJRNNote = 1
     BKEditFieldPICTitle = 2
-
+    
+    # Yes/No dialog.
+    YesNoTextID=12
+    YesButtonID = 10
+    NoButtonID = 11
+    YesButtonTextID = 60
+    NoButtonTextID = 61
+    YesNoLogoutButtonID = 62
+    YesNoLogoutTextID = 63
+    YNQuit = 0
+    YNDelete = 1
+    YNOfferLink = 2
+    YNOutside = 3
+    YNKIFull = 4
+    YNWanaPlay = 5
+    YNNoReason = 6
+    
     # Question note dialog.
     QNTitle = 100
     QNMessage = 101

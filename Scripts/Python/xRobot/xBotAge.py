@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from Plasma import *
+from PlasmaKITypes import *
+
 import os
+
 from . import SpawnPoints
 from . import ages
 from . import xPlayers
@@ -240,7 +243,7 @@ def LinkPlayerTo(self, age, playerID=None, spawnPointNumber=None):
             ageSpawPoint = age[4]
         if ageSpawPoint != "":
             spawnPt = ageSpawPoint
-    self.chatMgr.AddChatLine(None, "sp=\""+spawnPt+"\"", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "sp=\""+spawnPt+"\"")
     spawnPoint = ptSpawnPointInfo()
     spawnPoint.setName(spawnPt)
     ageLink.setSpawnPoint(spawnPoint)
@@ -648,7 +651,7 @@ def ToggleFog():
 
 # Reads the fni file of an age and returns a list of strings representing the fni settings
 def GetFniSettings(ageFilename):
-    #self.chatMgr.AddChatLine(None, "> GetFniSettings", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> GetFniSettings")
     fileName = "dat/" + ageFilename + ".fni"
     #fniSettings = list()
     dicFniSettings = {
@@ -754,32 +757,32 @@ def LinkAll(self, linkName=""):
     link = None
     if (linkName in list(ages.PublicAgeDict.keys())):
         link = ages.PublicAgeDict[linkName]
-        self.chatMgr.AddChatLine(None, "Age public trouve.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Age public trouve.")
     elif (linkName in list(ages.MirobotAgeDict.keys())):
         link = ages.MirobotAgeDict[linkName]
-        self.chatMgr.AddChatLine(None, "Age de Mir-o-Bot trouve.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Age de Mir-o-Bot trouve.")
     elif (linkName in list(ages.MagicbotAgeDict.keys())):
         link = ages.MagicbotAgeDict[linkName]
-        self.chatMgr.AddChatLine(None, "Age magique trouve.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Age magique trouve.")
     elif (linkName in list(ages.linkDic.keys())):
         link = ages.linkDic[linkName]
-        self.chatMgr.AddChatLine(None, "Age de linkDic trouve.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Age de linkDic trouve.")
     else:
-        self.chatMgr.AddChatLine(None, "Ages non trouve.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Ages non trouve.")
         return "Age not found"
     if link is not None:
         # Lier tous joueurs dans mon age sauf moi-meme et les robots connus
-        self.chatMgr.AddChatLine(None, "Liaison des autres joueurs de l'age.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Liaison des autres joueurs de l'age.")
         agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(xPlayers.dicBot.keys()))]
         for player in agePlayers:
             LinkPlayerTo(self, link, playerID=player.getPlayerID(), spawnPointNumber=None)
         '''
         # Et me lier. Si je ne suis pas Mir-o-Bot, il se liera par ses propres moyens
-        self.chatMgr.AddChatLine(None, "Dois-je me lier aussi? Robot:{}, Public:{}".format(AmIRobot, linkName in list(ages.PublicAgeDict.keys())), 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Dois-je me lier aussi? Robot:{}, Public:{}".format(AmIRobot, linkName in list(ages.PublicAgeDict.keys())))
         #if not (linkName in ages.PublicAgeDict.keys() and AmIRobot):
         # Mmmm, AmIRobot n'est pas mis a jour, en attendant de trouver une solution, je m'interdis les ages publics
         if not (linkName in list(ages.PublicAgeDict.keys())):
-            self.chatMgr.AddChatLine(None, "Liaison de mon avatar.", 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "Liaison de mon avatar.")
             # Supprimer les prp des autres ages pour ne pas planter lors de la liaison. (Jalak, Bugs, City, Relto, Cleft)
             # Meme si je ne m'en sers pas Stone, Michel ou Yoda ont pu les ajouter.
             pages = ["jlakArena", "ItinerantBugCloud", "greatstair", "psnlMYSTII", "Desert", "Cleft", "FemaleCleftDropIn", "MaleCleftDropIn", "clftJCsDesert", "clftJCsChasm"]
@@ -789,7 +792,7 @@ def LinkAll(self, linkName=""):
             currentBotAge = list(link)
             if len(link) > 4:
                 SetBotAgeSP(link[4])
-                self.chatMgr.AddChatLine(None, ",".join(currentBotAge), 3)
+                PtSendKIMessage(kKILocalChatStatusMsg, ",".join(currentBotAge))
             # Decharger les ages clones
             """
             # Liaison de mon avatar (je l'enleve pour voir si ca evite le plantage)

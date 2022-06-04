@@ -3,6 +3,11 @@
 #Import du module Plasma
 from Plasma import *
 
+"""
+    ## xKIChat : Remove a player from this player's buddies.
+    def RemoveBuddy(self, player):
+"""
+
 # Remove a player in my buddies list
 def RemoveBud(idplayer):
     vault = ptVault()
@@ -108,37 +113,3 @@ def RemoveAllBuddies():
     except:
         print("RemoveAllBuddies : Error")
         #return False
-
-#
-
-"""
-    ## xKIChat : Remove a player from this player's buddies.
-    def RemoveBuddy(self, player):
-
-        pID = self.GetPID(player)
-        vault = ptVault()
-        buddies = vault.getBuddyListFolder()
-        if buddies is None:
-            return
-
-        # Is it a number?
-        if pID:
-            if buddies.playerlistHasPlayer(pID):
-                buddies.playerlistRemovePlayer(pID)
-                self.chatMgr.DisplayStatusMessage(PtGetLocalizedString("KI.Player.Removed"))
-            else:
-                self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Player.NotFound"), kChat.SystemMessage)
-        # Or is it a username?
-        else:
-            buddyRefs = buddies.getChildNodeRefList()
-            for plyr in buddyRefs:
-                if isinstance(plyr, ptVaultNodeRef):
-                    PLR = plyr.getChild()
-                    PLR = PLR.upcastToPlayerInfoNode()
-                    if PLR is not None and PLR.getType() == PtVaultNodeTypes.kPlayerInfoNode:
-                        if player == PLR.playerGetName():
-                            buddies.playerlistRemovePlayer(PLR.playerGetID())
-                            self.chatMgr.DisplayStatusMessage(PtGetLocalizedString("KI.Player.Removed"))
-                            return
-            self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Player.NumberOnly"), kChat.SystemMessage)
-"""

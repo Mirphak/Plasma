@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # == Commandes specifiques au Relto ==
 from Plasma import *
+from PlasmaKITypes import *
 import math
 
 age = "Personal"
@@ -333,12 +334,12 @@ def CreateNightSky(scale=7.5, bOn=True):
 
 #
 def AddRelto(self, args = []):
-    self.chatMgr.AddChatLine(None, "Adding Relto...", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "Adding Relto...")
     try:
         PtSetAlarm(1, AlarmAddPrp(), 0)
         PtSetAlarm(5, AlarmEnableAll(), 0)
-        self.chatMgr.AddChatLine(None, "Relto added!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Relto added!")
         return 1
     except:
-        self.chatMgr.AddChatLine(None, "Error while adding Relto.", 3)
+        PtSendKIMessage(kKILocalChatErrorMsg, "Error while adding Relto.")
         return 0

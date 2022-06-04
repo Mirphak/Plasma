@@ -964,3 +964,4 @@ def CercleH(objname="Duster", age="BahroCave", n=10, scale=1.0, coef=2.0, avCent
         print("x={}, y={}, z={}".format(dx, dy, dz))
         Clone(ageName=age, obj=objname, bOnOff=True, nb=n, num=i, x=dx, y=dy, z=dz, scale=1, bAttacher=False)
 
+#

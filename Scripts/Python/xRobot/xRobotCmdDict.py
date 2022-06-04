@@ -110,7 +110,7 @@ lastLinkTime = datetime.datetime.now()
 #----------------------------------------------------------------------------#
 
 def isPlayerInAge(player):
-    #self.chatMgr.AddChatLine(None, "> isPlayerInAge", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> isPlayerInAge")
     agePlayers = PtGetPlayerList()
     ids = [player.getPlayerID() for player in agePlayers]
     try:
@@ -122,7 +122,7 @@ def isPlayerInAge(player):
         return False
 
 def SearchAvatarNameLike(name):
-    #self.chatMgr.AddChatLine(None, "> SearchAvatarNameLike", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> SearchAvatarNameLike")
     import re
     cond = r"[^a-z1-9*]"
     pat = re.sub(cond, ".", name.lower())
@@ -134,7 +134,7 @@ def SearchAvatarNameLike(name):
 
 
 def GetAgePlayerByName(name):
-    #self.chatMgr.AddChatLine(None, "> GetAgePlayerByName", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> GetAgePlayerByName")
     players = SearchAvatarNameLike(name)
     if len(players) > 0:
         return players[0]
@@ -143,7 +143,7 @@ def GetAgePlayerByName(name):
 
 
 def LinkToPublicAge(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> LinkToPublicAge", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> LinkToPublicAge")
     if len(args) < 2:
         return 0
     linkName = args[1].lower().replace(" ", "").replace("'", "")
@@ -161,9 +161,9 @@ def LinkToPublicAge(self, cFlags, args = []):
 # Links the player to the current bot age
 #def LinkHere(self, cFlags, player):
 def LinkHere(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> LinkHere ", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> LinkHere ")
     if len(args) < 1:
-        self.chatMgr.AddChatLine(None, "> LinkHere: len(args) = " + str(len(args)), 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "> LinkHere: len(args) = " + str(len(args)))
         return 0
     elif len(args) > 1:
         LinkToPublicAge(self, cFlags, args)
@@ -180,7 +180,7 @@ def LinkHere(self, cFlags, args = []):
     else:
         if len(xBotAge.currentBotAge) < 3:
             xBotAge.currentBotAge = xBotAge.GetBotAge()
-        self.chatMgr.AddChatLine(None, ", ".join(xBotAge.currentBotAge), 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, ", ".join(xBotAge.currentBotAge))
         #xBotAge.LinkPlayerTo(self, xBotAge.currentBotAge, player[0].getPlayerID())
         #PtSendRTChat(myself, [player[0]], "Welcome to " + botAgeName, 24)
         xBotAge.LinkPlayerTo(self, xBotAge.currentBotAge, player.getPlayerID())
@@ -190,7 +190,7 @@ def LinkHere(self, cFlags, args = []):
     #    return 0
 
 def WarpToMe(self, cFlags, player):
-    self.chatMgr.AddChatLine(None, "> WarpToMe", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> WarpToMe")
     myself = PtGetLocalPlayer()
     if type(player) == list and len(player) > 0:
         if isPlayerInAge(player[0]):
@@ -206,7 +206,7 @@ def WarpToMe(self, cFlags, player):
         return 0
 
 def WarpToPlayer(self, cFlags, player, toPlayer):
-    self.chatMgr.AddChatLine(None, "> WarpToPlayer", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> WarpToPlayer")
     if isPlayerInAge(player):
         av = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
         so = PtGetAvatarKeyFromClientID(toPlayer.getPlayerID()).getSceneObject()
@@ -218,7 +218,7 @@ def WarpToPlayer(self, cFlags, player, toPlayer):
     return 1
 
 def WarpToDefaultLinkInPoint(self, cFlags, player):
-    self.chatMgr.AddChatLine(None, "> WarpToDefaultLinkInPoint", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> WarpToDefaultLinkInPoint")
     myself = PtGetLocalPlayer()
     if type(player) == list and len(player) > 0:
         if isPlayerInAge(player[0]):
@@ -234,7 +234,7 @@ def WarpToDefaultLinkInPoint(self, cFlags, player):
         return 0
 
 def WarpToSpawnPoint(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> WarpToSpawnPoint", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> WarpToSpawnPoint")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -250,14 +250,14 @@ def WarpToSpawnPoint(self, cFlags, args = []):
     pos = xBotAge.GetSPCoord(spawnPointNumber)
     spName = xBotAge.GetSPName(spawnPointNumber)
     PtSendRTChat(myself, [player], spName , cFlags.flags)
-    self.chatMgr.AddChatLine(None, "> " + spName, 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> " + spName)
     soAvatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
     soAvatar.netForce(1)
     soAvatar.physics.warp(pos)
     return 1
 
 def FindSceneObjectPosition(self, name):
-    self.chatMgr.AddChatLine(None, "> FindSceneObjectPosition", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> FindSceneObjectPosition")
     o = list(name + "not found!")
     so = xBotAge.GetFirstSOPosition(name)
     if so:
@@ -266,7 +266,7 @@ def FindSceneObjectPosition(self, name):
     return o
 
 def ShowSceneObjects(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> ShowSceneObjects", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> ShowSceneObjects")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -282,7 +282,7 @@ def ShowSceneObjects(self, cFlags, args = []):
 
 #
 def Red(player):
-    #self.chatMgr.AddChatLine(None, "> Red", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> Red")
     if type(player) == list and len(player) > 0:
         av = PtGetAvatarKeyFromClientID(player[0].getPlayerID()).getSceneObject()
         av.avatar.netForce(1)
@@ -296,7 +296,7 @@ bugs = PtFindSceneobject("BugFlockingEmitTest", "Garden")
 #NE FONCTIONNE PAS...
 def Bugs(self, args = []):
     global bugs
-    self.chatMgr.AddChatLine(None, "> Bugs", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> Bugs")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -316,7 +316,7 @@ def Bugs(self, args = []):
     PtSendRTChat(myself, [player], msg, 24)
 
 def GetPeople(kind = "buddy", listedPlayers = []):
-    #self.chatMgr.AddChatLine(None, "> GetPeople", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> GetPeople")
     selPlyrList = []
     #agePlayers = PtGetPlayerList()
     vault = ptVault()
@@ -345,7 +345,7 @@ def GetPeople(kind = "buddy", listedPlayers = []):
 
 #
 def RemoveCleftLocal(self):
-    self.chatMgr.AddChatLine(None, "> RemoveCleftLocal", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> RemoveCleftLocal")
     from . import xCleft
     xCleft.DelPrpLocal()
 
@@ -354,7 +354,7 @@ def RemoveCleftLocal(self):
 #def LinkBotTo(player, linkName):
 def LinkBotTo(self, cFlags, args = []):
     global lastLinkTime
-    self.chatMgr.AddChatLine(None, "> LinkBotTo", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> LinkBotTo")
     now = datetime.datetime.now()
     minDiff = 10 * 60
     
@@ -382,7 +382,7 @@ def LinkBotTo(self, cFlags, args = []):
 #        xBotAge.currentBotAge = list(link)
 #        if len(link) > 4:
 #            xBotAge.SetBotAgeSP(link[4])
-#            #self.chatMgr.AddChatLine(None, ",".join(xBotAge.currentBotAge), 3)
+#            #PtSendKIMessage(kKILocalChatStatusMsg, ",".join(xBotAge.currentBotAge))
 #        xBotAge.LinkPlayerTo(self, link)
     # Trying MagicBot ages
     elif (linkName in list(ages.MagicbotAgeDict.keys())):
@@ -390,7 +390,7 @@ def LinkBotTo(self, cFlags, args = []):
 #        xBotAge.currentBotAge = list(link)
 #        if len(link) > 4:
 #            xBotAge.SetBotAgeSP(link[4])
-#            #self.chatMgr.AddChatLine(None, ",".join(xBotAge.currentBotAge), 3)
+#            #PtSendKIMessage(kKILocalChatStatusMsg, ",".join(xBotAge.currentBotAge))
 #        xBotAge.LinkPlayerTo(self, link)
     # Definitly not found
     else:
@@ -409,7 +409,7 @@ def LinkBotTo(self, cFlags, args = []):
             xBotAge.currentBotAge = list(link)
             if len(link) > 4:
                 xBotAge.SetBotAgeSP(link[4])
-                self.chatMgr.AddChatLine(None, ",".join(xBotAge.currentBotAge), 3)
+                PtSendKIMessage(kKILocalChatStatusMsg, ",".join(xBotAge.currentBotAge))
             xBotAge.LinkPlayerTo(self, link)
             lastLinkTime = datetime.datetime.now()
             
@@ -426,7 +426,7 @@ def LinkBotTo(self, cFlags, args = []):
         return 0
 
 def GetCoord(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> GetCoord", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> GetCoord")
     if len(args) < 1:
         return 0
     myself = PtGetLocalPlayer()
@@ -469,7 +469,7 @@ def GetCoord(self, cFlags, args = []):
         return 1
 
 def Find(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> Find", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> Find")
     if len(args) < 1:
         return 0
     myself = PtGetLocalPlayer()
@@ -537,7 +537,7 @@ def AutoWarp(self, player):
     xSave.WarpToSaved(self, player, None, "auto")
 
 def AbsoluteGoto(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> AbsoluteGoto", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> AbsoluteGoto")
     if len(args) < 2:
         return 0
     params = args[1].split()
@@ -574,7 +574,7 @@ def AbsoluteGoto(self, cFlags, args = []):
         return 0
 
 def RelativeGoto(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> RelativeGoto", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> RelativeGoto")
     if len(args) < 2:
         return 0
     params = args[1].split()
@@ -602,7 +602,7 @@ def RelativeGoto(self, cFlags, args = []):
         return 0
     
 def Land(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> Land", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> Land")
     if len(args) < 1:
         return 0
     myself = PtGetLocalPlayer()
@@ -616,7 +616,7 @@ def Land(self, cFlags, args = []):
     return 1
 
 def Float(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> Float", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> Float")
     if len(args) < 1:
         return 0
     elif len(args) < 2:
@@ -629,7 +629,7 @@ def Float(self, cFlags, args = []):
             return RelativeGoto(self, cFlags, [args[0], "0 0 0"])
 
 def Jump(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> Jump", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> Jump")
     if len(args) < 2:
         return 0
     params = args[1].split()
@@ -647,7 +647,7 @@ def Jump(self, cFlags, args = []):
         return 0
 
 def Warp(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> Warp", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> Warp")
     myself = PtGetLocalPlayer()
     player = args[0]
     #PtSendRTChat(myself, [player], str(args) , 1)
@@ -667,7 +667,7 @@ def Warp(self, cFlags, args = []):
         return 0
 
 def Rotate(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> Rotate", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> Rotate")
     if len(args) < 2:
         return 0
     params = args[1].split()
@@ -703,7 +703,7 @@ def Rotate(self, cFlags, args = []):
         return 0
 
 def RotateZ(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> RotateZ", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> RotateZ")
     #myself = PtGetLocalPlayer()
     #player = args[0]
     #PtSendRTChat(myself, [player], str(args) , 1)
@@ -717,7 +717,7 @@ def RotateZ(self, cFlags, args = []):
 
 # Save the position of an avatar in a file
 def SavePosition(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> SavePosition", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> SavePosition")
     if len(args) < 1:
         return 0
     myself = PtGetLocalPlayer()
@@ -731,7 +731,7 @@ def SavePosition(self, cFlags, args = []):
 
 # Warp the avatar to his last saved position
 def ReturnToPosition(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> ReturnToPosition", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> ReturnToPosition")
     if len(args) < 1:
         return 0
     myself = PtGetLocalPlayer()
@@ -750,7 +750,7 @@ def ReturnToPosition(self, cFlags, args = []):
 
 # Faire faire une animation a l'avatar demandeur
 def Animer(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> Animer", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> Animer")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -876,20 +876,20 @@ def BugsLight(self, cFlags, args = []):
 #
 #def AddCleft(self, args = []):
 #    global debugInfo
-#    self.chatMgr.AddChatLine(None, "Adding Cleft...", 3)
+#    PtSendKIMessage(kKILocalChatStatusMsg, "Adding Cleft...")
 #    try:
 #        #import xCleft
 #        debugInfo = "AddCleft"
 #        PtSetAlarm (1,AddPrp(), 0)
 #        PtSetAlarm(10, EnableAll(), 0)
-#        self.chatMgr.AddChatLine(None, "Cleft added! " + debugInfo, 3)
+#        PtSendKIMessage(kKILocalChatStatusMsg, "Cleft added! " + debugInfo)
 #    except:
-#        self.chatMgr.AddChatLine(None, "Error while adding Cleft.", 3)
+#        PtSendKIMessage(kKILocalChatStatusMsg, "Error while adding Cleft.")
 #    return 1
 
 #
 def AddCleft(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> AddCleft", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> AddCleft")
     if len(args) < 1:
         return 0
     myself = PtGetLocalPlayer()
@@ -917,7 +917,7 @@ def DisablePanicLinks(self, cFlags, args = []):
         PtSendRTChat(myself, [player], "You must be in my age, use link to join me.", cFlags.flags)
         return 1
     xBotAge.DisablePanicLinks()
-    self.chatMgr.AddChatLine(None, "Panic links are disabled!", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "Panic links are disabled!")
     PtSendRTChat(myself, [player], "Panic zones are disabled!", cFlags.flags)
 
 #
@@ -936,7 +936,7 @@ def Ring(self, cFlags, args = []):
     soAvatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
     if len(xBotAge.currentBotAge) > 1:
         if xBotAge.currentBotAge[1] == "Neighborhood":
-            self.chatMgr.AddChatLine(None, ">Ring ", 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, ">Ring ")
             #1st parameter: color
             color = params[0].lower().strip()
             #bOn = bOn.lower()
@@ -954,7 +954,7 @@ def Ring(self, cFlags, args = []):
                 try:
                     height = float(params[2].lower().strip())
                 except:
-                    self.chatMgr.AddChatLine(None, "Err: the optional 3rd parameter must be a number!", 3)
+                    PtSendKIMessage(kKILocalChatStatusMsg, "Err: the optional 3rd parameter must be a number!")
                     PtSendRTChat(myself, [player], "The optional 3rd parameter must be a number!" , cFlags.flags)
                     return 1
             #4th parameter: distance
@@ -962,26 +962,26 @@ def Ring(self, cFlags, args = []):
                 try:
                     dist = float(params[3].lower().strip())
                 except:
-                    self.chatMgr.AddChatLine(None, "Err: the optional 4th parameter must be a number!", 3)
+                    PtSendKIMessage(kKILocalChatStatusMsg, "Err: the optional 4th parameter must be a number!")
                     PtSendRTChat(myself, [player], "The optional 4th parameter must be a number!" , cFlags.flags)
                     return 1
-            self.chatMgr.AddChatLine(None, "ring " + color + ", " + str(bOn), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "ring " + color + ", " + str(bOn))
             xHood.Entourer(dist, height, color, 9, soAvatar, bOn)
-            self.chatMgr.AddChatLine(None, "=> nb clones: " + str(len(xHood.lstClones)), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "=> nb clones: " + str(len(xHood.lstClones)))
             PtSendRTChat(myself, [player], "I'm creating a fire marble ring for you, wait a bit ... (tell me if it does'nt work)" , cFlags.flags)
             return 1
         else:
-            self.chatMgr.AddChatLine(None, "=> Je ne suis pas dans un Hood!", 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "=> Je ne suis pas dans un Hood!")
             PtSendRTChat(myself, [player], "This command does'nt work here, we must be in a Hood." , cFlags.flags)
             return 1
     else:
-        self.chatMgr.AddChatLine(None, "=> Je ne sais pas dans quel age je suis!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "=> Je ne sais pas dans quel age je suis!")
         PtSendRTChat(myself, [player], "Oops, I don't know where I am ..." , cFlags.flags)
         return 1
 
 # Envoyer une note d'aide au demandeur (inspire du script de Michel)
 def Help(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> Help", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> Help")
     if len(args) < 1:
         return 0
     myself = PtGetLocalPlayer()
@@ -1084,7 +1084,7 @@ def Help(self, cFlags, args = []):
 
 #
 def HelpCmd(player, cFlags, cmdName):
-    #self.chatMgr.AddChatLine(None, "> HelpCmd", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> HelpCmd")
     myself = PtGetLocalPlayer()
     try:
         cmdName = RetreaveCmdName(cmdName)
@@ -1108,7 +1108,7 @@ def HelpCmd(player, cFlags, cmdName):
     return 1
 
 def TestMsg(self, cFlags, args = []):
-    self.chatMgr.AddChatLine(None, "> TestMsg", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> TestMsg")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -1233,7 +1233,7 @@ def CallMethod(self, fromAge, cmdName, cFlags, args = []):
     #traiter les noms de commande alternatifs
     try:
         cmdName = RetreaveCmdName(cmdName)
-        #self.chatMgr.DisplayStatusMessage("=> " + cmdName)
+        #PtSendKIMessage(kKILocalChatStatusMsg, "=> " + cmdName)
     except:
         pass
     #raccourcis pour les animations (sans taper "anim")

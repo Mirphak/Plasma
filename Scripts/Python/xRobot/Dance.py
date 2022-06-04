@@ -2,6 +2,8 @@
 #Dance module
 
 from Plasma import *
+from PlasmaKITypes import *
+
 import os
 
 #===========================================================================================================
@@ -11,7 +13,7 @@ import os
 
 #
 def SetFileName(self, playerID, ageFileName = None, prefix = None):
-    #self.chatMgr.AddChatLine(None, "> SetFileName", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> SetFileName")
     if ageFileName == None:
         ageFileName = PtGetAgeInfo().getAgeFilename()
     if not os.path.exists("Save"):
@@ -20,12 +22,12 @@ def SetFileName(self, playerID, ageFileName = None, prefix = None):
     if prefix != None and str(prefix) != "":
         fileName += "_" + str(prefix)
     fileName += ".txt"
-    #self.chatMgr.AddChatLine(None, "==> " + fileName, 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "==> " + fileName)
     return fileName
 
 # Reads the file and returns a list of strings representing the saved positions
 def ReadFile(fileName):
-    #self.chatMgr.AddChatLine(None, "> ReadFile", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> ReadFile")
     positions = list()
     try:
         file = open(fileName, "r")
@@ -39,7 +41,7 @@ def ReadFile(fileName):
     return positions
 
 def WriteFile(fileName, content):
-    #self.chatMgr.AddChatLine(None, "> WriteFile", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> WriteFile")
     try:
         file = open(fileName, "w")
         file.write(content)
@@ -50,7 +52,7 @@ def WriteFile(fileName, content):
 
 #Returns the tuple of the n-th position from a list of strings representing the saved positions
 def GetPosition(positions, n = None):
-    #self.chatMgr.AddChatLine(None, "> GetPosition", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> GetPosition")
     if type(positions) != list:
         return None
     if positions == list():
@@ -72,23 +74,23 @@ def GetPosition(positions, n = None):
             lstVal = list()
             for elm in lst:
                 lstVal.append(float(elm))
-                #self.chatMgr.AddChatLine(None, "=> pos elm: " + str(elm), 3)
+                #PtSendKIMessage(kKILocalChatStatusMsg, "=> pos elm: " + str(elm))
             lstPos.append(tuple(lstVal))
-        #self.chatMgr.AddChatLine(None, "=> lstPos ok ", 3)
+        #PtSendKIMessage(kKILocalChatStatusMsg, "=> lstPos ok ")
         tuplePos = tuple(lstPos)
         return tuplePos
     else:
         return None
 
 def WriteMatrix44(self, n = None, player = None, ageFileName = None, prefix = None):
-    #self.chatMgr.AddChatLine(None, "> WriteMatrix44", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> WriteMatrix44")
     if n == None:
         #n = len(positions)
         n = 0
     try:
         n = int(n)
     except:
-        self.chatMgr.AddChatLine(None, "==> n must be an integer in [0, 9]", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "==> n must be an integer in [0, 9]")
         return 1
     # Get the playerID
     if player == None:
@@ -97,9 +99,9 @@ def WriteMatrix44(self, n = None, player = None, ageFileName = None, prefix = No
     # Get the already known positions for this player and age (if none, it'll return an empty list)
     fileName = SetFileName(self, playerID, ageFileName, prefix)
     positions = ReadFile(fileName)
-    #self.chatMgr.AddChatLine(None, "==> " + str(len(positions)) + " position(s) found", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "==> " + str(len(positions)) + " position(s) found")
     if n < 0 or n >= len(positions):
-        self.chatMgr.AddChatLine(None, "==> n must be an integer in [0, " + str(len(positions) - 1) + "]", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "==> n must be an integer in [0, " + str(len(positions) - 1) + "]")
         return 1
     # Get new position
     soAvatar = PtGetAvatarKeyFromClientID(playerID).getSceneObject()
@@ -123,19 +125,19 @@ def WriteMatrix44(self, n = None, player = None, ageFileName = None, prefix = No
         content += strPos + "\n"
     content = content[:len(content) - 1]
     # Edit the file
-    #self.chatMgr.AddChatLine(None, "==> content length : "+str(len(content)), 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "==> content length : "+str(len(content)))
     if WriteFile(fileName, content) == 1:
-        self.chatMgr.AddChatLine(None, player.getPlayerName() + " has been saved his (her) position.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " has been saved his (her) position.")
     else:
-        self.chatMgr.AddChatLine(None, player.getPlayerName() + " - Error while saving position!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " - Error while saving position!")
 
 def WarpToSaved(self, n = None, player = None, ageFileName = None, prefix = None):
-    #self.chatMgr.AddChatLine(None, "> WarpToSaved(n='"+str(n)+"', ...)", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> WarpToSaved(n='"+str(n)+"', ...)")
     if player == None:
         player = PtGetLocalPlayer()
     playerID = player.getPlayerID()
     soAvatar = PtGetAvatarKeyFromClientID(playerID).getSceneObject()
-    #self.chatMgr.AddChatLine(None, "=> " + player.getPlayerName(), 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "=> " + player.getPlayerName())
     try:
         # Get the already known positions for this player and age (if none, it'll return an empty list)
         fileName = SetFileName(self, playerID, ageFileName, prefix)
@@ -145,10 +147,10 @@ def WarpToSaved(self, n = None, player = None, ageFileName = None, prefix = None
         matPos.setData(tuplePos)
         soAvatar.netForce(1)
         soAvatar.physics.warp(matPos)
-        self.chatMgr.AddChatLine(None, player.getPlayerName() + " is going to his (her) saved position.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " is going to his (her) saved position.")
         return 1
     except:
-        self.chatMgr.AddChatLine(None, player.getPlayerName() + " has no saved position.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " has no saved position.")
         return 0
 
 #===========================================================================================================
@@ -194,18 +196,18 @@ def WarpToSaved(self, n = None, player = None, ageFileName = None, prefix = None
 """
 #
 def SetDanceFileName(self, danceFileName=""):
-    #self.chatMgr.AddChatLine(None, "> SetFileName", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> SetFileName")
     subdir = "Dance"
     if not os.path.exists(subdir):
         os.mkdir(subdir)
     fileName = subdir + "/" + danceFileName + ".txt"
-    #self.chatMgr.AddChatLine(None, "==> " + fileName, 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "==> " + fileName)
     return fileName
 """
 
 # Reads the file dance and returns a list of strings representing the actions the bot has to do
 def ReadDanceFile(danceFileName):
-    #self.chatMgr.AddChatLine(None, "> ReadDanceFile", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> ReadDanceFile")
     subdir = "Dance"
     if not os.path.exists(subdir):
         os.mkdir(subdir)

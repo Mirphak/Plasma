@@ -5,8 +5,8 @@
     2018-05-21
 """
 
-
 from Plasma import *
+from PlasmaKITypes import *
 import os
 
 ## Set the file name
@@ -74,13 +74,13 @@ def WriteMatrix44(self, n=None):
     try:
         n = int(n)
     except:
-        self.chatMgr.AddChatLine(None, "==> n must be a positive integer.", 3)
+        PtSendKIMessage(kKILocalChatErrorMsg, "==> n must be a positive integer.")
         return 1
     # Get the already known positions inthis age (if none, it'll return an empty list)
     fileName = SetFileName(self)
     positions = ReadFile(fileName)
     if n < 0:
-        self.chatMgr.AddChatLine(None, "==> n must be a positive integer.", 3)
+        PtSendKIMessage(kKILocalChatErrorMsg, "==> n must be a positive integer.")
         return 1
     elif n >= len(positions):
         # I need to increase the number of positions in the list
@@ -107,7 +107,7 @@ def WriteMatrix44(self, n=None):
     content = content[:len(content) - 1]
     # Edit the file
     if WriteFile(fileName, content) == 0:
-        self.chatMgr.AddChatLine(None, "Error while saving your position!", 3)
+        PtSendKIMessage(kKILocalChatErrorMsg, "Error while saving your position!")
 
 def WarpToSaved(self, n=None):
     soAvatar = PtGetLocalAvatar()
@@ -120,8 +120,8 @@ def WarpToSaved(self, n=None):
         matPos.setData(tuplePos)
         soAvatar.netForce(1)
         soAvatar.physics.warp(matPos)
-        #self.chatMgr.AddChatLine(None, "You are going to your saved position.", 0)
+        #PtSendKIMessage(kKILocalChatStatusMsg, "You are going to your saved position.")
         return 1
     except:
-        #self.chatMgr.AddChatLine(None, "You have no saved position!", 3)
+        #PtSendKIMessage(kKILocalChatErrorMsg, "You have no saved position!")
         return 0

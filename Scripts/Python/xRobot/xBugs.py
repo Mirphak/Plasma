@@ -15,7 +15,7 @@ def DelPrpLocal(page=pageBugs):
 #
 def Bugs(av, bOnOff):
     #global bugs
-    #self.chatMgr.AddChatLine(None, "> Bugs", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> Bugs")
     #if len(args) < 2:
     #    return 0
     #myself = PtGetLocalPlayer()

@@ -9,8 +9,8 @@
 """
 
 from Plasma import *
-
 from PlasmaTypes import *
+from PlasmaKITypes import *
 from xPsnlVaultSDL import *
 
 age = "Cleft"
@@ -108,14 +108,14 @@ class AlarmEnableAll:
         EnableAll(context)
 #
 def AddCleft(self, args = []):
-    self.chatMgr.AddChatLine(None, "Adding Cleft...", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "Adding Cleft...")
     try:
         PtSetAlarm (1, AlarmAddPrp(), 0)
         PtSetAlarm(5, AlarmEnableAll(), 0)
-        self.chatMgr.AddChatLine(None, "Cleft added!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Cleft added!")
         return 1
     except:
-        self.chatMgr.AddChatLine(None, "Error while adding Cleft.", 3)
+        PtSendKIMessage(kKILocalChatErrorMsg, "Error while adding Cleft.")
         return 0
 
 # ============================================================================

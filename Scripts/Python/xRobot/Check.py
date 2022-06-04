@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from Plasma import *
+from PlasmaKITypes import *
 import math
 
 # Variable pour savoir si le mode robot est actif
@@ -100,7 +101,7 @@ except:
 
 #Pour savoir si le joueur est dans l'age du robot
 def isPlayerInAge(player):
-    #self.chatMgr.AddChatLine(None, "> isPlayerInAge", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> isPlayerInAge")
     if player.getPlayerID() == PtGetLocalPlayer().getPlayerID():
         return True
     agePlayers = PtGetPlayerList()
@@ -116,7 +117,7 @@ def isPlayerInAge(player):
 #Recherche d'un avatar par son nom 
 #une partie du nom suffit, on peut mettre des * pour remplacer des bouts
 def SearchAvatarNameLike(name):
-    #self.chatMgr.AddChatLine(None, "> SearchAvatarNameLike", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> SearchAvatarNameLike")
     #cond = r"[^a-z1-9*]"
     cond = r"[^?a-z1-9*_\\]"
     name = name.lower().replace("\\", "\\\\").replace("?", "\?")
@@ -134,7 +135,7 @@ def SearchAvatarNameLike(name):
 
 
 def GetAgePlayerByName(name):
-    #self.chatMgr.AddChatLine(None, "> GetAgePlayerByName", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> GetAgePlayerByName")
     players = SearchAvatarNameLike(name)
     if len(players) > 0:
         return players[0]
@@ -147,7 +148,7 @@ def GetAgePlayerByName(name):
 # voir dans xBotAge, la methode LinkPlayerToPublic
 def LinkToPublicAge(self, cFlags, args = []):
     #global xBotAge.AmIRobot = AmIRobot
-    #self.chatMgr.AddChatLine(None, "> LinkToPublicAge", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> LinkToPublicAge")
     if len(args) < 2:
         return 0
     linkName = args[1].lower().replace(" ", "").replace("'", "").replace("eder", "")
@@ -166,9 +167,9 @@ def LinkToPublicAge(self, cFlags, args = []):
 
 # Links the player to the current bot age
 def LinkHere(self, cFlags, args = []):
-    #self.chatMgr.AddChatLine(None, "> LinkHere ", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> LinkHere ")
     if len(args) < 1:
-        self.chatMgr.AddChatLine(None, "> LinkHere: len(args) = " + str(len(args)), 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "> LinkHere: len(args) = " + str(len(args)))
         return 0
     elif len(args) > 1:
         LinkToPublicAge(self, cFlags, args)
@@ -186,13 +187,13 @@ def LinkHere(self, cFlags, args = []):
         #if len(xBotAge.currentBotAge) < 3:
         #    xBotAge.currentBotAge = xBotAge.GetBotAge()
         #xBotAge.currentBotAge = xBotAge.GetBotAge()
-        self.chatMgr.AddChatLine(None, ", ".join(xBotAge.currentBotAge), 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, ", ".join(xBotAge.currentBotAge))
         xBotAge.LinkPlayerTo(self, xBotAge.currentBotAge, player.getPlayerID())
         SendChatMessage(self, myself, [player], "Welcome to " + botAgeName, cFlags.flags)
     return 1
 
 def WarpToMe(self, cFlags, player):
-    #self.chatMgr.AddChatLine(None, "> WarpToMe", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> WarpToMe")
     myself = PtGetLocalPlayer()
     if type(player) == list and len(player) > 0:
         if isPlayerInAge(player[0]):
@@ -217,7 +218,7 @@ def WarpToMe(self, cFlags, player):
 
 #
 def WarpToPlayer(self, cFlags, player, toPlayer):
-    #self.chatMgr.AddChatLine(None, "> WarpToPlayer", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> WarpToPlayer")
     myself = PtGetLocalPlayer()
     if isPlayerInAge(player):
         av = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
@@ -231,7 +232,7 @@ def WarpToPlayer(self, cFlags, player, toPlayer):
     return 1
 
 def WarpToDefaultLinkInPoint(self, cFlags, player):
-    #self.chatMgr.AddChatLine(None, "> WarpToDefaultLinkInPoint", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> WarpToDefaultLinkInPoint")
     myself = PtGetLocalPlayer()
     if type(player) == list and len(player) > 0:
         if isPlayerInAge(player[0]):
@@ -250,7 +251,7 @@ def WarpToDefaultLinkInPoint(self, cFlags, player):
         return 0
 
 def WarpToSpawnPoint(self, cFlags, args = []):
-    #self.chatMgr.AddChatLine(None, "> WarpToSpawnPoint", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> WarpToSpawnPoint")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -270,14 +271,14 @@ def WarpToSpawnPoint(self, cFlags, args = []):
         if isinstance(pos, ptMatrix44):
             spName = xBotAge.GetSPName(spawnPointNumber)
             SendChatMessage(self, myself, [player], spName, cFlags.flags)
-            #self.chatMgr.AddChatLine(None, "> " + spName, 3)
+            #PtSendKIMessage(kKILocalChatStatusMsg, "> " + spName)
         else:
             SendChatMessage(self, myself, [player], "Unknown spawn point!" , cFlags.flags)
     elif spawnPointAlias is not None:
         pos = xBotAge.GetSPByAlias(spawnPointAlias)[0]
         spName = xBotAge.GetSPByAlias(spawnPointAlias)[1]
         SendChatMessage(self, myself, [player], spName, cFlags.flags)
-        #self.chatMgr.AddChatLine(None, "> " + spName, 3)
+        #PtSendKIMessage(kKILocalChatStatusMsg, "> " + spName)
     else:
         return 0
     if isinstance(pos, ptMatrix44):
@@ -287,7 +288,7 @@ def WarpToSpawnPoint(self, cFlags, args = []):
     return 1
 
 def FindSceneObjectPosition(self, name):
-    #self.chatMgr.AddChatLine(None, "> FindSceneObjectPosition", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> FindSceneObjectPosition")
     o = list(name + "not found!")
     so = xBotAge.GetFirstSoWithCoord(name)
     if so:

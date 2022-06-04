@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from Plasma import *
+from PlasmaKITypes import *
 import math
 
 #nb01ConesVisMaster
@@ -379,12 +380,12 @@ class AlarmAddPrp:
 
 #
 def AddHood(self, args = []):
-    self.chatMgr.AddChatLine(None, "Adding Hood...", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "Adding Hood...")
     try:
         PtSetAlarm (1, AlarmAddPrp(), 0)
         #PtSetAlarm(5, AlarmEnableAll(), 0)
-        self.chatMgr.AddChatLine(None, "Hood added!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Hood added!")
         return 1
     except:
-        self.chatMgr.AddChatLine(None, "Error while adding Hood.", 3)
+        PtSendKIMessage(kKILocalChatErrorMsg, "Error while adding Hood.")
         return 0

@@ -214,7 +214,7 @@ def Spawn(spawnPointNumber=0):
 
 #
 def WarpToSpawnPoint(self, cFlags, args = []):
-    #self.chatMgr.AddChatLine(None, "> WarpToSpawnPoint", 3)
+    #print("> WarpToSpawnPoint")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -234,14 +234,14 @@ def WarpToSpawnPoint(self, cFlags, args = []):
         if isinstance(pos, ptMatrix44):
             spName = xBotAge.GetSPName(spawnPointNumber)
             SendChatMessage(self, myself, [player], spName , cFlags.flags)
-            #self.chatMgr.AddChatLine(None, "> " + spName, 3)
+            #print("> " + spName)
         else:
             SendChatMessage(self, myself, [player], "Unknown spawn point!" , cFlags.flags)
     elif spawnPointAlias is not None:
         pos = xBotAge.GetSPByAlias(spawnPointAlias)[0]
         spName = xBotAge.GetSPByAlias(spawnPointAlias)[1]
         SendChatMessage(self, myself, [player], spName , cFlags.flags)
-        #self.chatMgr.AddChatLine(None, "> " + spName, 3)
+        #print("> " + spName)
     else:
         return 0
     if isinstance(pos, ptMatrix44):

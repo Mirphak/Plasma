@@ -3,6 +3,7 @@
 # Mirphak 2015-11-01 version 1
 
 from Plasma import *
+from PlasmaKITypes import *
 import math
 
 age = "Jalak"
@@ -170,14 +171,13 @@ def HideJalak():
 
 #
 def AddJalak(self, args = []):
-    self.chatMgr.AddChatLine(None, "Adding Jalak...", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "Adding Jalak...")
     try:
         PtSetAlarm (0, AlarmAddPrp(), 0)
-        
-        self.chatMgr.AddChatLine(None, "Jalak added!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Jalak added!")
         return 1
     except:
-        self.chatMgr.AddChatLine(None, "Error while adding Jalak.", 3)
+        PtSendKIMessage(kKILocalChatErrorMsg, "Error while adding Jalak.")
         return 0
 
 #=========================================

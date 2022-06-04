@@ -3,6 +3,7 @@
 
 import os
 from Plasma import *
+from PlasmaKITypes import *
 
 
 def WriteMatrix44(self, player = None, ageFileName = None, prefix = None):
@@ -17,10 +18,10 @@ def WriteMatrix44(self, player = None, ageFileName = None, prefix = None):
     if prefix != None and str(prefix) != "":
         fileName += "_" + str(prefix)
     fileName += ".txt"
-    #self.chatMgr.DisplayStatusMessage(player.getPlayerName())
-    #self.chatMgr.DisplayStatusMessage(str(playerID))
+    #PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName())
+    #PtSendKIMessage(kKILocalChatStatusMsg, str(playerID))
     soAvatar = PtGetAvatarKeyFromClientID(playerID).getSceneObject()
-    #self.chatMgr.DisplayStatusMessage(str(soAvatar))
+    #PtSendKIMessage(kKILocalChatStatusMsg, str(soAvatar))
     matPos = soAvatar.getLocalToWorld()
     tuplePos = matPos.getData()
     strPos = ""
@@ -35,10 +36,10 @@ def WriteMatrix44(self, player = None, ageFileName = None, prefix = None):
     #    file.write(str(id) + ": \"" + game.getGameName() + "\"\n")
     file.write(strPos)
     file.close()
-    self.chatMgr.AddChatLine(None, player.getPlayerName() + " has been saved his (her) position.", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " has been saved his (her) position.")
 
 def WarpToSaved(self, player = None, ageFileName = None, prefix = None):
-    #self.chatMgr.AddChatLine(None, "> WarpToSaved", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> WarpToSaved")
     if player == None:
         player = PtGetLocalPlayer()
     playerID = player.getPlayerID()
@@ -49,12 +50,12 @@ def WarpToSaved(self, player = None, ageFileName = None, prefix = None):
         fileName += "_" + str(prefix)
     fileName += ".txt"
     soAvatar = PtGetAvatarKeyFromClientID(playerID).getSceneObject()
-    #self.chatMgr.AddChatLine(None, "=> " + player.getPlayerName(), 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "=> " + player.getPlayerName())
     try:
         file = open(fileName, "r")
         strPos = file.read()
         file.close()
-        #self.chatMgr.AddChatLine(None, "=> Read: " + fileName, 3)
+        #PtSendKIMessage(kKILocalChatStatusMsg, "=> Read: " + fileName)
         lstPos = list()
         lstStr = strPos.split("\n")
         for s in lstStr:
@@ -62,16 +63,16 @@ def WarpToSaved(self, player = None, ageFileName = None, prefix = None):
             lstVal = list()
             for elm in lst:
                 lstVal.append(float(elm))
-                #self.chatMgr.AddChatLine(None, "=> pos elm: " + str(elm), 3)
+                #PtSendKIMessage(kKILocalChatStatusMsg, "=> pos elm: " + str(elm))
             lstPos.append(tuple(lstVal))
-        #self.chatMgr.AddChatLine(None, "=> lstPos ok ", 3)
+        #PtSendKIMessage(kKILocalChatStatusMsg, "=> lstPos ok ")
         tuplePos = tuple(lstPos)
         matPos = ptMatrix44()
         matPos.setData(tuplePos)
         soAvatar.netForce(1)
         soAvatar.physics.warp(matPos)
-        self.chatMgr.AddChatLine(None, player.getPlayerName() + " is going to his (her) saved position.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " is going to his (her) saved position.")
         return 1
     except:
-        self.chatMgr.AddChatLine(None, player.getPlayerName() + " has no saved position.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " has no saved position.")
         return 0

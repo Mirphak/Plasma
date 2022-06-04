@@ -155,6 +155,8 @@ kChronicleGZMarkersAquired = "GZMarkersAquired"
 kChronicleGZMarkersAquiredType = 1
 kChronicleCalGZMarkersAquired = "CalGZMarkers"
 kChronicleCalGZMarkersAquiredType = 1
+kChronicleKITextColor = "KITextColor"
+kChronicleKITextColorType = 1
 
 
 def PtDetermineKILevel():
@@ -299,11 +301,13 @@ def PtUpdateCGZStartTime(time=None):
 # OnRTChat flags (see pfKIMsg.h)
 kRTChatPrivate = 0x01
 kRTChatAdmin = 0x02
-kRTChatPrivateAdmin= kRTChatPrivate | kRTChatAdmin
+kRTChatPrivateAdmin = kRTChatPrivate | kRTChatAdmin
 kRTChatGlobal = 0x04
 kRTChatInterAge = 0x08
 kRTChatStatusMsg = 0x10
 kRTChatNeighborsMsg = 0x20
+kRTChatAudioSubtitleMsg = 0x40
+kRTChatLocKeyMsg = 0x80
 
 # flags channel mask
 kRTChatFlagMask = 65535

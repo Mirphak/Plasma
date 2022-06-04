@@ -326,7 +326,7 @@ def AutoWarp(self, player):
 
 # Faire faire une animation a l'avatar demandeur
 def Animer(self, cFlags, args = []):
-    #self.chatMgr.AddChatLine(None, "> Animer", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "> Animer")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()

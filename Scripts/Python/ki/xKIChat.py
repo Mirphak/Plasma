@@ -73,7 +73,8 @@ from . import xMystitech
 class xKIChat(object):
 
     ## Set up the chat manager's default state.
-    def __init__(self, StartFadeTimer, ResetFadeState, FadeCompletely, GetCensorLevel, xKI):
+    #def __init__(self, StartFadeTimer, ResetFadeState, FadeCompletely, GetCensorLevel, xKI):
+    def __init__(self, StartFadeTimer, ResetFadeState, FadeCompletely, GetCensorLevel):
 
         # Set the default properties.
         self.chatLogFile = None
@@ -107,22 +108,12 @@ class xKIChat(object):
         # Add the commands processor.
         self.commandsProcessor = CommandsProcessor(self)
 
-        # Set a fake player name to avoid errors.
-        self.playerName = None
-
         # Message History
         self.MessageHistoryIs = -1 # Current position in message history (up/down key)
         self.MessageHistoryList = [] # Contains our message history
-        self.MessageCurrentLine = "" # Hold current line while navigating message history
 
-        self.xKI = xKI
-
-    @property
-    def chatArea(self):
-        if self.KILevel < kNormalKI:
-            return self.microChatArea
-        else:
-            return self.miniChatArea
+        # Was used in xRobot and in xMarkerEditor
+        #self.xKI = xKI
 
     #######
     # GUI #
@@ -146,23 +137,22 @@ class xKIChat(object):
                     return True
         return False
 
+    ## Scroll the chat in the specified direction on the miniKI.
+    # Possible directions are to scroll up, down, to the beginning and to the
+    # end.
+    def ScrollChatArea(self, direction):
+
+        if self.KILevel < kNormalKI:
+            mKIdialog = KIMicro.dialog
+        else:
+            mKIdialog = KIMini.dialog
+        self.ResetFadeState()
+        chatarea = ptGUIControlMultiLineEdit(mKIdialog.getControlFromTag(kGUI.ChatDisplayArea))
+        chatarea.moveCursor(direction)
+
     ############
     # Chatting #
     ############
-
-    # Update the current player name.
-    def _setPlayerName(self, value):
-        value = re.escape(value if value else "Anonymous Coward")
-
-        # (?:^|[\s\W](?<!\/\/|\w\.)) - non-capturing group: line start or whitespace or non-word character
-        #                              with lookbehind that excludes matches preceded by // or word character and .
-        #                              trying to prevent mentions that are part of a URL
-        # (?P<mention>({value}\s?)+) - named capture group: one or more occurrence of name, optionally split by a space
-        # (?=$|[\s\W])               - lookahead ensures match is followed by line end or whitespace or non-word character
-        regex = rf"(?:^|[\s\W](?<!\/\/|\w\.))(?P<mention>({value}\s?)+)(?=$|[\s\W])"
-        PtDebugPrint(f"xKIChat: The chat mention regex is now `{regex}`", level = kWarningLevel)
-        self._chatMentionRegex = re.compile(regex, re.IGNORECASE)
-    playerName = property(None, _setPlayerName)
 
     ## Make the player enter or exit chat mode.
     # Chat mode means the player's keyboard input is being sent to the chat.
@@ -226,7 +216,7 @@ class xKIChat(object):
         message = self.commandsProcessor(message)
         if not message:
             return
-        msg = message.casefold()
+        msg = message.lower()
 
         # Get any selected players.
         userListBox = ptGUIControlListBox(KIMini.dialog.getControlFromTag(kGUI.PlayerList))
@@ -281,13 +271,13 @@ class xKIChat(object):
             pWords = message.split(" ", 1)
             foundBuddy = False
             # Make sure it's still just a "/p".
-            if len(pWords) > 1 and pWords[0].casefold() == PtGetLocalizedString("KI.Commands.ChatPrivate"):
+            if len(pWords) > 1 and pWords[0] == PtGetLocalizedString("KI.Commands.ChatPrivate"):
                 # Try to find the buddy in the DPL online lists.
                 for player in self.BKPlayerList:
                     # Is the player in this Age?
                     if isinstance(player, ptPlayer):
-                        plyrName = player.getPlayerName().casefold()
-                        if pWords[1].casefold().startswith(plyrName + " "):
+                        plyrName = player.getPlayerName()
+                        if pWords[1].startswith(plyrName + " "):
                             selPlyrList.append(player)
                             cFlags.private = True
                             foundBuddy = True
@@ -300,8 +290,8 @@ class xKIChat(object):
                         ePlyr = player.getChild()
                         ePlyr = ePlyr.upcastToPlayerInfoNode()
                         if ePlyr is not None:
-                            plyrName = ePlyr.playerGetName().casefold()
-                            if pWords[1].casefold().startswith(plyrName + " "):
+                            plyrName = ePlyr.playerGetName()
+                            if pWords[1].startswith(plyrName + " "):
                                 selPlyrList.append(ptPlayer(ePlyr.playerGetName(), ePlyr.playerGetID()))
                                 cFlags.private = True
                                 cFlags.interAge = True
@@ -435,6 +425,9 @@ class xKIChat(object):
         # Fix for Character of Doom (CoD).
         (message, RogueCount) = re.subn("[\x00-\x08\x0a-\x1f]", "", message)
 
+        # Censor the chat message to their taste
+        message = xCensor.xCensor(message, self.GetCensorLevel())
+
         if self.KILevel == kMicroKI:
             mKIdialog = KIMicro.dialog
         else:
@@ -442,9 +435,6 @@ class xKIChat(object):
         pretext = ""
         headerColor = kColors.ChatHeaderBroadcast
         bodyColor = kColors.ChatMessage
-        mentionColor = kColors.ChatMessageMention
-        censorLevel = self.GetCensorLevel()
-        hasMention = False
 
         # Is it an object to represent the flags?
         if isinstance(cFlags, ChatFlags):
@@ -467,7 +457,6 @@ class xKIChat(object):
                         headerColor = kColors.ChatHeaderNeighbors
                     else:
                         headerColor = kColors.ChatHeaderBuddies
-
                 if cFlags.toSelf:
                     pretext = PtGetLocalizedString("KI.Chat.InterAgeSendTo")
                     if message[:2] == "<<":
@@ -501,8 +490,8 @@ class xKIChat(object):
                         self.lastPrivatePlayerID = (player.getPlayerName(), player.getPlayerID(), 1)
                         PtFlashWindow()
                     # Are we mentioned in the message?
-                    elif self._chatMentionRegex.search(message) is not None:
-                        hasMention = True
+                    elif message.lower().find(PtGetLocalPlayer().getPlayerName().lower()) >= 0:
+                        bodyColor = kColors.ChatMessageMention
                         PtFlashWindow()
 
             # Is it a ccr broadcast?
@@ -544,8 +533,8 @@ class xKIChat(object):
                     self.AddPlayerToRecents(player.getPlayerID())
 
                     # Are we mentioned in the message?
-                    if self._chatMentionRegex.search(message) is not None:
-                        hasMention = True
+                    if message.lower().find(PtGetClientName().lower()) >= 0:
+                        bodyColor = kColors.ChatMessageMention
                         forceKI = True
                         PtFlashWindow()
 
@@ -590,62 +579,56 @@ class xKIChat(object):
             else:
                 chatMessageFormatted = " {}".format(message)
 
-        if hasMention:
-            chatMentions = [(i.start("mention"), i.end("mention"), i.group("mention")) for i in self._chatMentionRegex.finditer(chatMessageFormatted)]
-        else:
-            chatMentions = []
+        chatArea = ptGUIControlMultiLineEdit(mKIdialog.getControlFromTag(kGUI.ChatDisplayArea))
+        chatArea.beginUpdate()
+        savedPosition = chatArea.getScrollPosition()
+        wasAtEnd = chatArea.isAtEnd()
+        chatArea.moveCursor(PtGUIMultiLineDirection.kBufferEnd)
+        chatArea.insertColor(headerColor)
 
-        for chatArea in (self.miniChatArea, self.microChatArea):
-            with PtBeginGUIUpdate(chatArea):
-                savedPosition = chatArea.getScrollPosition()
-                wasAtEnd = chatArea.isAtEnd()
-                chatArea.moveCursor(PtGUIMultiLineDirection.kBufferEnd)
-                chatArea.insertColor(headerColor)
+        # Added unicode support here.
+        chatArea.insertStringW("\n{}".format(chatHeaderFormatted))
+        chatArea.insertColor(bodyColor)
+        chatArea.insertStringW(chatMessageFormatted)
+        chatArea.moveCursor(PtGUIMultiLineDirection.kBufferEnd)
 
-                # Added unicode support here.
-                chatArea.insertStringW("\n{}".format(chatHeaderFormatted))
-                chatArea.insertColor(bodyColor)
+        # Write to the log file.
+        if self.chatLogFile is not None and self.chatLogFile.isOpen():
+            self.chatLogFile.write(chatHeaderFormatted[0:] + chatMessageFormatted)
 
-                lastInsert = 0
+        # If the chat is overflowing, erase the first line.
+        if chatArea.getBufferSize() > kChat.MaxChatSize:
+            while chatArea.getBufferSize() > kChat.MaxChatSize and chatArea.getBufferSize() > 0:
+                PtDebugPrint("xKIChat.AddChatLine(): Max chat buffer size reached. Removing top line.", level=kDebugDumpLevel)
+                chatArea.deleteLinesFromTop(1)
+                if savedPosition > 0:
+                    # this is only accurate if the deleted line only occupied one line in the control (wasn't soft-wrapped), but that tends to be the usual case
+                    savedPosition -= 1
+        if not wasAtEnd:
+            # scroll back to where we were
+            chatArea.setScrollPosition(savedPosition)
+            # flash the down arrow to indicate that new chat has come in
+            self.incomingChatFlashState = 3
+            PtAtTimeCallback(self.key, 0.0, kTimers.IncomingChatFlash)
+        chatArea.endUpdate()
 
-                # If we have player name mentions, we change text colors mid-message
-                for start, end, mention in chatMentions:
-                    if start > lastInsert:
-                        # Insert normal text up to the current name mention position
-                        chatArea.insertStringW(chatMessageFormatted[lastInsert:start], censorLevel=censorLevel)
+        # Copy all the data to the miniKI if the user upgrades it.
+        if self.KILevel == kMicroKI:
+            chatArea2 = ptGUIControlMultiLineEdit(KIMini.dialog.getControlFromTag(kGUI.ChatDisplayArea))
+            chatArea2.beginUpdate()
+            chatArea2.moveCursor(PtGUIMultiLineDirection.kBufferEnd)
+            chatArea2.insertColor(headerColor)
 
-                    lastInsert = end
-                    chatArea.insertColor(mentionColor)
-                    chatArea.insertStringW(mention, censorLevel=censorLevel, urlDetection=False)
-                    chatArea.insertColor(bodyColor)
+            # Added unicode support here.
+            chatArea2.insertStringW("\n{}".format(chatHeaderFormatted))
+            chatArea2.insertColor(bodyColor)
+            chatArea2.insertStringW(chatMessageFormatted)
+            chatArea2.moveCursor(PtGUIMultiLineDirection.kBufferEnd)
 
-                # If there is remaining text to display after last mention, write it
-                # Or if it was just a plain message with no mention of player's name
-                if lastInsert != len(chatMessageFormatted):
-                    chatArea.insertStringW(chatMessageFormatted[lastInsert:], censorLevel=censorLevel)
-
-                chatArea.moveCursor(PtGUIMultiLineDirection.kBufferEnd)
-
-                # Write to the log file.
-                if self.chatLogFile is not None and self.chatLogFile.isOpen():
-                    self.chatLogFile.write(chatHeaderFormatted[0:] + chatMessageFormatted)
-
-                # If the chat is overflowing, erase the first line.
-                if chatArea.getBufferSize() > kChat.MaxChatSize:
-                    while chatArea.getBufferSize() > kChat.MaxChatSize and chatArea.getBufferSize() > 0:
-                        PtDebugPrint("xKIChat.AddChatLine(): Max chat buffer size reached. Removing top line.", level=kDebugDumpLevel)
-                        chatArea.deleteLinesFromTop(1)
-                        if savedPosition > 0:
-                            # this is only accurate if the deleted line only occupied one line in the control (wasn't soft-wrapped), but that tends to be the usual case
-                            savedPosition -= 1
-
-                # Presentation options for the current KI Chat Area
-                if not wasAtEnd and chatArea == self.chatArea:
-                    # scroll back to where we were
-                    chatArea.setScrollPosition(savedPosition)
-                    # flash the down arrow to indicate that new chat has come in
-                    self.incomingChatFlashState = 3
-                    PtAtTimeCallback(self.key, 0.0, kTimers.IncomingChatFlash)
+            if chatArea2.getBufferSize() > kChat.MaxChatSize:
+                while chatArea2.getBufferSize() > kChat.MaxChatSize and chatArea2.getBufferSize() > 0:
+                    chatArea2.deleteLinesFromTop(1)
+            chatArea2.endUpdate()
 
         # Update the fading controls.
         self.ResetFadeState()
@@ -851,7 +834,7 @@ class CommandsProcessor:
     # to apply the command.
     def __call__(self, message):
 
-        msg = message.casefold()
+        msg = message.lower()
 
         # Load all available commands.
         commands = dict()
@@ -935,7 +918,7 @@ class CommandsProcessor:
         if message.startswith("/"):
             words = message.split()
             try:
-                emote = xKIExtChatCommands.xChatEmoteXlate[str(words[0][1:].casefold())]
+                emote = xKIExtChatCommands.xChatEmoteXlate[str(words[0][1:].lower())]
                 if emote[0] in xKIExtChatCommands.xChatEmoteLoop:
                     PtAvatarEnterAnimMode(emote[0])
                 else:
@@ -952,38 +935,27 @@ class CommandsProcessor:
                 else:
                     statusMsg = PtGetLocalizedString(emote[1], [PtGetLocalPlayer().getPlayerName()])
                 self.chatMgr.DisplayStatusMessage(statusMsg, 1)
-
-                # Get remaining message string after emote command
                 message = message[len(words[0]):]
-                if message == "" or message.isspace():
+                if message == "":
                     return None
                 return message[1:]
             except LookupError:
                 try:
-                    command = xKIExtChatCommands.xChatExtendedChat[str(words[0][1:].casefold())]
+                    command = xKIExtChatCommands.xChatExtendedChat[str(words[0][1:].lower())]
                     if isinstance(command, str):
-                        # Retrieved command is just a plain string
                         args = message[len(words[0]):]
                         PtConsole(command + args)
                     else:
-                        # Retrieved command is not a string (it's a function)
                         try:
-                            # Get remaining message string after chat command
                             args = message[len(words[0]) + 1:]
                             if args:
                                 try:
                                     retDisp = command(args)
                                 except TypeError:
                                     retDisp = command()
-
-                                    # Command took no args, so return args as new message
-                                    if args == "" or args.isspace():
-                                        return None
                                     return args
                             else:
                                 retDisp = command()
-
-                            # Check type of return value from command and display appropriately
                             if isinstance(retDisp, str):
                                 self.chatMgr.DisplayStatusMessage(retDisp)
                             elif isinstance(retDisp, tuple):
@@ -994,53 +966,12 @@ class CommandsProcessor:
                         except:
                             PtDebugPrint("xKIChat.commandsProcessor(): Chat command function did not run.", command, level=kErrorLevel)
                 except LookupError:
-                    firstWordLower = words[0].casefold()
-                    if firstWordLower in xKIExtChatCommands.xChatSpecialHandledCommands:
-                        # Get remaining message string after special chat command
-                        remainingMsg = message[len(words[0]):]
-
-                        # If remaining message is empty, try to do mousefree KI folder selection instead
-                        if remainingMsg == "" or remainingMsg.isspace():
-                            userListBox = ptGUIControlListBox(KIMini.dialog.getControlFromTag(kGUI.PlayerList))
-                            caret = ptGUIControlTextBox(KIMini.dialog.getControlFromTag(kGUI.ChatCaretID))
-                            privateChbox = ptGUIControlCheckBox(KIMini.dialog.getControlFromTag(kGUI.miniPrivateToggle))
-
-                            # Handling for selecting Age Players, Buddies, or Neighbors
-                            if firstWordLower == PtGetLocalizedString("KI.Commands.ChatAge"):
-                                folderName = xLocTools.FolderIDToFolderName(PtVaultStandardNodes.kAgeMembersFolder)
-                                caretValue = ">"
-                            elif firstWordLower == PtGetLocalizedString("KI.Commands.ChatBuddies"):
-                                folderName = xLocTools.FolderIDToFolderName(PtVaultStandardNodes.kBuddyListFolder)
-                                caretValue = PtGetLocalizedString("KI.Chat.TOPrompt") + folderName + " >"
-                            elif firstWordLower == PtGetLocalizedString("KI.Commands.ChatNeighbors"):
-                                folderName = xLocTools.FolderIDToFolderName(PtVaultStandardNodes.kHoodMembersFolder)
-                                caretValue = PtGetLocalizedString("KI.Chat.TOPrompt") + folderName + " >"
-
-                            # Only try to find in list if it was one of the 3 expected folders, not a reply command
-                            if folderName is not None:
-                                try:
-                                    folderIdx = next((i for i in range(userListBox.getNumElements()) if userListBox.getElement(i).casefold() == folderName.casefold()))
-                                except StopIteration:
-                                    # Indicate an error to the user here because the KI folder was not found for some reason.
-                                    self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Errors.CommandError", [message]), kChat.SystemMessage)
-                                    pass
-                                else:
-                                    userListBox.setSelection(folderIdx)
-                                    caret.setStringW(caretValue)
-                                    privateChbox.setChecked(False)
-                                
-                            # Don't send an actual message because it was just a command with nothing after it
-                            return None
-
-                        # Return full message with special command still prefixed
+                    if str(words[0].lower()) in xKIExtChatCommands.xChatSpecialHandledCommands:
                         return message
                     else:
                         self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Errors.CommandError", [message]), kChat.SystemMessage)
                 return None
 
-        # Prevent sending blank/whitespace message
-        if message == "" or message.isspace():
-            return None
         return message
 
     ## Extract the player ID from a chat's params.
@@ -1053,8 +984,8 @@ class CommandsProcessor:
         except ValueError:
             for player in self.chatMgr.BKPlayerList:
                 if isinstance(player, ptPlayer):
-                    plyrName = player.getPlayerName().casefold()
-                    if params.casefold() == plyrName:
+                    plyrName = player.getPlayerName()
+                    if params == plyrName:
                         return player.getPlayerID()
             return 0
 
@@ -1084,8 +1015,11 @@ class CommandsProcessor:
 
     ## Clear the chat.
     def ClearChat(self, params):
-        self.chatMgr.miniChatArea.clearBuffer()
-        self.chatMgr.microChatArea.clearBuffer()
+
+        chatAreaU = ptGUIControlMultiLineEdit(KIMicro.dialog.getControlFromTag(kGUI.ChatDisplayArea))
+        chatAreaM = ptGUIControlMultiLineEdit(KIMini.dialog.getControlFromTag(kGUI.ChatDisplayArea))
+        chatAreaU.clearBuffer()
+        chatAreaM.clearBuffer()
 
     ## Ignores a player.
     def IgnorePlayer(self, player):
@@ -1544,7 +1478,7 @@ class CommandsProcessor:
             return
         targetKey = None;
         for player in PtGetPlayerList():
-            if player.getPlayerName().casefold() == name.casefold():
+            if player.getPlayerName().lower() == name.lower():
                 name = player.getPlayerName()
                 targetKey = PtGetAvatarKeyFromClientID(player.getPlayerID())
                 break
@@ -1584,13 +1518,13 @@ class CommandsProcessor:
             return
 
         # Handle special dice types
-        if dice_str.casefold() == "fate":
+        if dice_str.lower() == "fate":
             fate = [random.randint(-1, 1) for x in range(4)]
             PtSendKIMessage(kKIChatStatusMsg, "{} rolled fate values of {} for a total of {}.".format(PtGetLocalPlayer().getPlayerName(), fate, sum(fate)))
             return
 
         # Parse common dice notation
-        dice_opt = re.match(r"^(\d+)d(\d+)$", dice_str)
+        dice_opt = re.match("^(\d+)d(\d+)$", dice_str)
         if not dice_opt:
             self.chatMgr.AddChatLine(None, "I'm sorry, I don't know how to roll {}.".format(dice_str), kChat.SystemMessage)
             return
@@ -1639,6 +1573,7 @@ class CommandsProcessor:
         cFlags.toSelf = True
         cFlags.status = True
         if params:
-            xKiBot.Do(self.chatMgr.xKI, PtGetLocalPlayer(), params, cFlags)
+            #xKiBot.Do(self.chatMgr.xKI, PtGetLocalPlayer(), params, cFlags)
+            xKiBot.Do(PtGetLocalPlayer(), params, cFlags)
         else:
             self.chatMgr.DisplayStatusMessage("No command given.")

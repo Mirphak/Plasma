@@ -288,7 +288,7 @@ def AddBud(idplayer):
 
 # Get buddies (from xPlayerKiCmds)
 def GetPeople(kind = "buddy", listedPlayers = []):
-    #self.chatMgr.AddChatLine(None, "> GetPeople", 3)
+    #print("> GetPeople")
     selPlyrList = []
     #agePlayers = PtGetPlayerList()
     vault = ptVault()

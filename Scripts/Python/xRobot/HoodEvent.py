@@ -24,7 +24,7 @@ from . import Fog2
                     try:
                         bDrawOn = bool(int(bDrawOn))
                     except:
-                        self.chatMgr.AddChatLine(None, "Err: the 3rd parameter must be a boolean! (0 = False, 1 = True)", 3)
+                        PtSendKIMessage(kKILocalChatStatusMsg, "Err: the 3rd parameter must be a boolean! (0 = False, 1 = True)")
                         return
                 if bPhysicsOn == "":
                     bPhysicsOn = False
@@ -32,9 +32,9 @@ from . import Fog2
                     try:
                         bPhysicsOn = bool(int(bPhysicsOn))
                     except:
-                        self.chatMgr.AddChatLine(None, "Err: the 4th parameter must be a boolean! (0 = False, 1 = True)", 3)
+                        PtSendKIMessage(kKILocalChatStatusMsg, "Err: the 4th parameter must be a boolean! (0 = False, 1 = True)")
                         return
-                self.chatMgr.AddChatLine(None, "toggle %s %s %s %s" % (name, age, str(bDrawOn), str(bPhysicsOn)), 3)
+                PtSendKIMessage(kKILocalChatStatusMsg, "toggle %s %s %s %s" % (name, age, str(bDrawOn), str(bPhysicsOn)))
                 xBotAge.ToggleSceneObjects(name, age, bDrawOn, bPhysicsOn)
             return None
 """

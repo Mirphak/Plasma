@@ -43,7 +43,7 @@ To stop the slide show : slideshow off
 
 #
 def SaveStruct(self, cFlags, args):
-    self.chatMgr.AddChatLine(None, "> SaveStruct", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> SaveStruct")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -54,7 +54,7 @@ def SaveStruct(self, cFlags, args):
         return 0
     nomAvatar = GetPtPlayerAlphaNumName(player)
     nomFichier = args[1]
-    self.chatMgr.AddChatLine(None, ">> SaveStruct", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">> SaveStruct")
     jalak.SaveColumns(nomFichier, nomAvatar)
     jalak.SaveCubes(nomFichier, nomAvatar)
     return 1
@@ -74,7 +74,7 @@ class WaitAndLoadCubes:
 
 #
 def LoadStruct(self, cFlags, args):
-    self.chatMgr.AddChatLine(None, "> LoadStruct", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> LoadStruct")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -85,7 +85,7 @@ def LoadStruct(self, cFlags, args):
         return 0
     nomAvatar = GetPtPlayerAlphaNumName(player)
     nomFichier = args[1]
-    self.chatMgr.AddChatLine(None, ">> LoadStruct", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">> LoadStruct")
     maxDeltaHauteur = jalak.LoadColumns(nomFichier, nomAvatar)
     if maxDeltaHauteur < 0:
         #Le fichier des colonnes n'a pas ete charge
@@ -97,7 +97,7 @@ def LoadStruct(self, cFlags, args):
 
 #
 def SaveColumns(self, cFlags, args):
-    self.chatMgr.AddChatLine(None, "> SaveColumns", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> SaveColumns")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -108,13 +108,13 @@ def SaveColumns(self, cFlags, args):
         return 0
     nomAvatar = GetPtPlayerAlphaNumName(player)
     nomFichier = args[1]
-    self.chatMgr.AddChatLine(None, ">> SaveColumns", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">> SaveColumns")
     jalak.SaveColumns(nomFichier, nomAvatar)
     return 1
 
 #
 def LoadColumns(self, cFlags, args):
-    self.chatMgr.AddChatLine(None, "> LoadColumns", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> LoadColumns")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -125,13 +125,13 @@ def LoadColumns(self, cFlags, args):
         return 0
     nomAvatar = GetPtPlayerAlphaNumName(player)
     nomFichier = args[1]
-    self.chatMgr.AddChatLine(None, ">> LoadColumns", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">> LoadColumns")
     jalak.LoadColumns(nomFichier, nomAvatar)
     return 1
 
 #
 def SaveCubes(self, cFlags, args):
-    self.chatMgr.AddChatLine(None, "> SaveCubes", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> SaveCubes")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -142,13 +142,13 @@ def SaveCubes(self, cFlags, args):
         return 0
     nomAvatar = GetPtPlayerAlphaNumName(player)
     nomFichier = args[1]
-    self.chatMgr.AddChatLine(None, ">> SaveCubes", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">> SaveCubes")
     jalak.SaveCubes(nomFichier, nomAvatar)
     return 1
 
 #
 def LoadCubes(self, cFlags, args):
-    self.chatMgr.AddChatLine(None, "> LoadCubes", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> LoadCubes")
     if len(args) < 2:
         return 0
     myself = PtGetLocalPlayer()
@@ -159,7 +159,7 @@ def LoadCubes(self, cFlags, args):
         return 0
     nomAvatar = GetPtPlayerAlphaNumName(player)
     nomFichier = args[1]
-    self.chatMgr.AddChatLine(None, ">> LoadCubes", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">> LoadCubes")
     jalak.LoadCubes(nomFichier, nomAvatar)
     return 1
 
@@ -171,7 +171,7 @@ To take off widgets and down columns : ResetStruct
 
 #
 def ResetCubes(self, cFlags, args):
-    self.chatMgr.AddChatLine(None, "> ResetCubes", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> ResetCubes")
     ageName = PtGetAgeName()
     if ageName != 'Jalak':
         #return [0, "The bot must be in Jalak to use this command."]
@@ -181,7 +181,7 @@ def ResetCubes(self, cFlags, args):
 
 #
 def ResetColumns(self, cFlags, args):
-    self.chatMgr.AddChatLine(None, "> ResetColumns", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> ResetColumns")
     ageName = PtGetAgeName()
     if ageName != 'Jalak':
         #return [0, "The bot must be in Jalak to use this command."]

@@ -8,6 +8,7 @@
 
 
 from Plasma import *
+from . import xBoat
 
 # Find the KI number of a player you know his exact name (case insensitive)
 def FindPlayerByName(playerName):
@@ -384,11 +385,10 @@ def PageInTLATestChamber():
 # Page out the Mystitech's TLALoft
 def PageOutTLATestChamber():
     PtConsoleNet("Nav.PageOutNode TLATestChamber_Default", True)
-#TLATestChamber_Default
 
 # Page in the cityofdimensions Boat
 def PageInBoat():
-    PtConsoleNet("Nav.PageInNode cityofdimensions_Boat", True)
+    xBoat.AddCoDBoat()
 
 # Page out the cityofdimensions Boat
 def PageOutBoat():

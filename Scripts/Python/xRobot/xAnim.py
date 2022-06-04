@@ -2,6 +2,7 @@
 from Plasma import *
 
 animDict = {'danse'      : ['Dance'],
+            'danseretro' : ['DanceRetro'],
             'fou'        : ['Crazy'],
             'echelle'    : ['LadderUpOn', 'LadderUp', 'LadderUp', 'LadderUp', 'LadderUpOff'],
             'ladderup2'  : ['LadderUpOn', 'LadderUp', 'LadderUpOff'],

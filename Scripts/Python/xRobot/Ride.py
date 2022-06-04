@@ -11,6 +11,16 @@ Corrections et adaptations par P.-A. Grorod
 from Plasma import *
 import math
 
+pages = ["psnlMYSTII", "Desert", "clftSceneBahro", "tldnHarvest", "DrnoExterior", "kemoGarden", "Jungle", "Pod", "giraCanyon", "bahroFlyers_arch", "bahroFlyers_city1", "bahroFlyers_city2", "bahroFlyers_city3", "bahroFlyers_city4", "bahroFlyers_city5", "bahroFlyers_city6"]
+bRideUsed = False
+
+def DelPrpLocal():
+    """Remove the pages used in the ride command."""
+    global bRideUsed
+    if bRideUsed:
+        for page in pages:
+            PtPageOutNode(page)
+        bRideUsed = False
 
 def SCOJoueur(nom):
     """Retourne un SCO joueur a partir de son nom ou son numero d'ID de KI """

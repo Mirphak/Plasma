@@ -141,7 +141,7 @@ def LinkPlayerTo(age, playerID=None, spawnPointNumber=None):
             ageSpawPoint = age[4]
         if ageSpawPoint != "":
             spawnPt = ageSpawPoint
-    #self.chatMgr.AddChatLine(None, "sp=\""+spawnPt+"\"", 3)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "sp=\""+spawnPt+"\"")
     spawnPoint = ptSpawnPointInfo()
     spawnPoint.setName(spawnPt)
     ageLink.setSpawnPoint(spawnPoint)

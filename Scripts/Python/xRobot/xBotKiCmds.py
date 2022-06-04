@@ -15,6 +15,7 @@ from . import xRelto
 from . import xDelin
 from . import xTsogal
 from . import Columns2
+from . import Ride
 
 #Ages de Mirphak et de Mir-o-Bot (d'autres viendront peut-etre)
 from . import ages
@@ -26,7 +27,6 @@ linkDic = ages.linkDic
 # link yourself to an age instance
 # type /linkto <ageName> in chat
 #(the message is transformed in lowercase in xKI.py near line 7000)
-#self.chatMgr.DisplayStatusMessage("Linking to " + ageName + " ...")
 def LinkToAge(self, linkName):
     myself = PtGetLocalPlayer()
     linkName = linkName.lower().replace(" ", "").replace("'", "").replace("eder", "")
@@ -40,7 +40,7 @@ def LinkToAge(self, linkName):
         xBotAge.currentBotAge = list(link)
         if len(link) > 4:
             xBotAge.SetBotAgeSP(link[4])
-            self.chatMgr.AddChatLine(None, ",".join(xBotAge.currentBotAge), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, ",".join(xBotAge.currentBotAge))
         xBotAge.LinkPlayerTo(self, link)
 #    elif (linkName in ages.MirphakAgeDict.keys()):
 #        link = ages.MirphakAgeDict[linkName]
@@ -51,20 +51,19 @@ def LinkToAge(self, linkName):
         xBotAge.currentBotAge = list(link)
         if len(link) > 4:
             xBotAge.SetBotAgeSP(link[4])
-            self.chatMgr.AddChatLine(None, ",".join(xBotAge.currentBotAge), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, ",".join(xBotAge.currentBotAge))
         xBotAge.LinkPlayerTo(self, link)
     elif (linkName in list(ages.MagicbotAgeDict.keys())):
         link = ages.MagicbotAgeDict[linkName]
         xBotAge.currentBotAge = list(link)
         if len(link) > 4:
             xBotAge.SetBotAgeSP(link[4])
-            self.chatMgr.AddChatLine(None, ",".join(xBotAge.currentBotAge), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, ",".join(xBotAge.currentBotAge))
         xBotAge.LinkPlayerTo(self, link)
     else:
         #pass
         msg = "Available links: " + str(list(linkDic.keys())) + " ** " + str(list(age.MirobotAgeDict.keys()))
-        #self.chatMgr.DisplayStatusMessage(msg)
-        self.chatMgr.AddChatLine(None, msg, 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, msg)
 
 #
 def WarpToSpawnPoint(self, spNum=None):
@@ -79,11 +78,11 @@ def WarpToSpawnPoint(self, spNum=None):
             soAvatar = PtGetLocalAvatar()
             soAvatar.netForce(1)
             soAvatar.physics.warp(pos)
-            self.chatMgr.AddChatLine(None, "You are warping to {}".format(spName), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "You are warping to {}".format(spName))
         else:
-            self.chatMgr.AddChatLine(None, "Unknown spawn point! #{0}:{1}".format(spawnPointNumber, spName), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "Unknown spawn point! #{0}:{1}".format(spawnPointNumber, spName))
     else:
-        self.chatMgr.AddChatLine(None, "spawnPointNumber is None!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "spawnPointNumber is None!")
 
 #
 def WarpToSceneObject(self, name):
@@ -95,29 +94,29 @@ def WarpToSceneObject(self, name):
         soAvatar.netForce(1)
         soAvatar.physics.warp(pos)
         msg = so.getName() + " found at (" + str(int(pos.getX())) + ", " + str(int(pos.getY())) + ", " + str(int(pos.getZ())) + ")"
-        #self.chatMgr.AddChatLine(None, msg, 3)
+        #PtSendKIMessage(kKILocalChatStatusMsg, msg)
         return [1, msg]
     else:
         msg = name + " not found!"
-        #self.chatMgr.AddChatLine(None, msg, 3)
+        #PtSendKIMessage(kKILocalChatStatusMsg, msg)
         return [0, msg]
 
 def ShowSceneObjects(self, name):
     msg = xBotAge.ShowSOWithNameLike(name)
-    self.chatMgr.AddChatLine(None, msg, 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, msg)
 
 def ShowSceneObjectsInAge(self, name, age):
     msg = xBotAge.ShowSOWithNameLikeInAge(name, age)
-    self.chatMgr.AddChatLine(None, msg, 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, msg)
 
 def ShowSceneObjectsWithCoords(self, name):
     msg = xBotAge.ShowSOWithCoords(name)
-    self.chatMgr.AddChatLine(None, msg, 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, msg)
 
 #
 def ShowSceneObjectsInAgeWithCoords(self, name, age):
     msg = xBotAge.ShowSOWithNameLikeInAgeWithCoords(name, age)
-    self.chatMgr.AddChatLine(None, msg, 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, msg)
 
 #
 def SearchAvatarNameLike(name):
@@ -149,29 +148,29 @@ def WarpToPlayer(self, name):
         soMe.physics.warp(pos)
         pos = soAvatar.position()
         msg = avatar.getPlayerName() + " found at (" + str(int(pos.getX())) + ", " + str(int(pos.getY())) + ", " + str(int(pos.getZ())) + ")"
-        #self.chatMgr.AddChatLine(None, msg, 3)
+        #PtSendKIMessage(kKILocalChatStatusMsg, msg)
         return [1, msg]
     else:
         msg = name + " not found!"
-        #self.chatMgr.AddChatLine(None, msg, 3)
+        #PtSendKIMessage(kKILocalChatStatusMsg, msg)
         return [0, msg]
 
 #
 def GetCoord(self, name = None):
-    self.chatMgr.AddChatLine(None, "> GetCoord", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "> GetCoord")
     if name is None:
         player = PtGetLocalPlayer()
     else:
         player = GetAgePlayerByName(name)
     if player is None:
-        self.chatMgr.AddChatLine(None, "> No player like {} found in this age".format(name), 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "> No player like {} found in this age".format(name))
         return 1
     else:
         soAvatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
         pos = soAvatar.position()
         params = [int(round(pos.getX())), int(round(pos.getY())),  int(pos.getZ()) + 1]
         msg = player.getPlayerName() + " found at (" + str(params[0]) + ", " + str(params[1]) + ", " + str(params[2]) + ")"
-        self.chatMgr.AddChatLine(None, msg, 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, msg)
         return 1
 
 #
@@ -200,7 +199,7 @@ def LoadNewDesert(self):
 #
 def DisablePanicLinks(self):
     xBotAge.DisablePanicLinks()
-    self.chatMgr.AddChatLine(None, "Panic links are disabled!", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, "Panic links are disabled!")
 
 #
 def RemovePrpToLocal(self):
@@ -211,15 +210,16 @@ def RemovePrpToLocal(self):
     #xPub.DelPrpLocal()
     #xRelto.DelPrpLocal()
     #xSpy.DelPrpLocal()
+    Ride.DelPrpLocal()
 
 #
 def Ring(self, color, bOn, height=4, dist=3):
-    self.chatMgr.AddChatLine(None, ">Ring ", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">Ring ")
     color = color.lower()
     bOn = bOn.lower()
     #if not (color in ("yellow", "blue", "red", "white", "white2", "white3", "white4")):
     if not (color in ("yellow", "blue", "red", "white")):
-        self.chatMgr.AddChatLine(None, "Err: the optional 1st parameter (color) must be yellow, blue, red or white!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Err: the optional 1st parameter (color) must be yellow, blue, red or white!")
         color = "white"
     if bOn == "off":
         bOn = 0
@@ -228,25 +228,25 @@ def Ring(self, color, bOn, height=4, dist=3):
     try:
         height = float(height)
     except:
-        self.chatMgr.AddChatLine(None, "Err: the optional 3rd parameter (height) must be a number!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Err: the optional 3rd parameter (height) must be a number!")
         height = 4
     try:
         dist = float(dist)
     except:
-        self.chatMgr.AddChatLine(None, "Err: the optional 3rd parameter (dist) must be a number!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Err: the optional 3rd parameter (dist) must be a number!")
         dist = 3
 
     if len(xBotAge.currentBotAge) > 1:
         if xBotAge.currentBotAge[1] == "Neighborhood":
-            self.chatMgr.AddChatLine(None, "ring " + color + ", " + str(bOn), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "ring " + color + ", " + str(bOn))
             #xHood.Entourer(3, 4, color, 9, PtGetLocalAvatar(), bOn)
             xHood.Entourer(dist, height, color, 9, PtGetLocalAvatar(), bOn)
-            self.chatMgr.AddChatLine(None, "=> nb clones: " + str(len(xHood.lstClones)), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "=> nb clones: " + str(len(xHood.lstClones)))
         else:
-            self.chatMgr.AddChatLine(None, "=> Je ne suis pas dans un Hood!", 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "=> Je ne suis pas dans un Hood!")
             xHood.Entourer(dist, height, color, 9, PtGetLocalAvatar(), bOn)
     else:
-        self.chatMgr.AddChatLine(None, "=> Je ne sais pas dans quel age je suis!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "=> Je ne sais pas dans quel age je suis!")
 
 # To open or close a Bahro door (in Eder Delin and Eder Tsogal currently)
 def OpenOrCloseBahroDoor(self, sOpenOrClose):
@@ -256,61 +256,61 @@ def OpenOrCloseBahroDoor(self, sOpenOrClose):
     elif sOpenOrClose == "close":
         action = 1
     else:
-        self.chatMgr.AddChatLine(None, "=> I don't know how to %s a door!" % (sOpenOrClose), 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "=> I don't know how to %s a door!" % (sOpenOrClose))
         return
     # age cases
     if len(xBotAge.currentBotAge) > 1:
         if xBotAge.currentBotAge[1] == "EderDelin":
-            self.chatMgr.AddChatLine(None, "OpenOrCloseBahroDoor %s, %s" % (xBotAge.currentBotAge[1], action), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "OpenOrCloseBahroDoor %s, %s" % (xBotAge.currentBotAge[1], action))
             xDelin.Door(action)
         elif xBotAge.currentBotAge[1] == "EderTsogal":
-            self.chatMgr.AddChatLine(None, "OpenOrCloseBahroDoor %s, %s" % (xBotAge.currentBotAge[1], action), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "OpenOrCloseBahroDoor %s, %s" % (xBotAge.currentBotAge[1], action))
             xTsogal.Door(action)
         #elif xBotAge.currentBotAge[1] == "Garden":
-        #    self.chatMgr.AddChatLine(None, "OpenOrCloseBahroDoor %s, %s" % (xBotAge.currentBotAge[1], action), 3)
+        #    PtSendKIMessage(kKILocalChatStatusMsg, "OpenOrCloseBahroDoor %s, %s" % (xBotAge.currentBotAge[1], action))
         #    import xGarden
         #    xGarden.Door(action)
         else:
-            self.chatMgr.AddChatLine(None, "=> Cette fonction ne fonctionne pas dans cet age!", 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "=> Cette fonction ne fonctionne pas dans cet age!")
     else:
-        self.chatMgr.AddChatLine(None, "=> Je ne sais pas dans quel age je suis!", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "=> Je ne sais pas dans quel age je suis!")
 
 """
     NEW
 """
 #
 def DisableFog(self):
-    self.chatMgr.AddChatLine(None, ">DisableFog ", 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">DisableFog ")
     try:
         xBotAge.NoFog()
-        self.chatMgr.AddChatLine(None, "==> done.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "==> done.")
         return 1
     except:
         return 0
 
 #
 def SetRendererStyle(self, vstyle="default"):
-    self.chatMgr.AddChatLine(None, ">SetRendererStyle {}".format(vstyle), 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">SetRendererStyle {}".format(vstyle))
     try:
         xBotAge.SetRenderer(style = vstyle)
-        self.chatMgr.AddChatLine(None, "==> done.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "==> done.")
         return 1
     except:
         return 0
 
 #
 def SetRendererFogLinear(self, vstart=None, vend=None, vdensity=None):
-    self.chatMgr.AddChatLine(None, ">SetRendererFogLinear {}, {}, {}".format(vstart, vend, vdensity), 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">SetRendererFogLinear {}, {}, {}".format(vstart, vend, vdensity))
     try:
         xBotAge.SetRenderer(style = None, start = vstart, end = vend, density = vdensity)
-        self.chatMgr.AddChatLine(None, "==> done.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "==> done.")
         return 1
     except:
         return 0
 
 #
 def SetRendererFogColor(self, vr=None, vg=None, vb=None):
-    self.chatMgr.AddChatLine(None, ">SetRendererFogColor {}, {}, {}".format(vr, vg, vb), 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">SetRendererFogColor {}, {}, {}".format(vr, vg, vb))
     try:
         vr = float(vr)
     except:
@@ -325,14 +325,14 @@ def SetRendererFogColor(self, vr=None, vg=None, vb=None):
         pass
     try:
         xBotAge.SetRenderer(style = None, r = vr, g = vg, b = vb)
-        self.chatMgr.AddChatLine(None, "==> done. {}, {}, {}".format(vr, vg, vb), 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "==> done. {}, {}, {}".format(vr, vg, vb))
         return 1
     except:
         return 0
 
 #
 def SetRendererClearColor(self, vcr=None, vcg=None, vcb=None):
-    self.chatMgr.AddChatLine(None, ">SetRendererClearColor {}, {}, {}".format(vcr, vcg, vcb), 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">SetRendererClearColor {}, {}, {}".format(vcr, vcg, vcb))
     strCol = None
     numero = None
     dicColors = {
@@ -349,7 +349,7 @@ def SetRendererClearColor(self, vcr=None, vcg=None, vcb=None):
                 }
     if isinstance(vcr, float):
         vcr = float(vcr)
-        self.chatMgr.AddChatLine(None, ">SetRendererClearColor vcr = {}".format(vcr), 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, ">SetRendererClearColor vcr = {}".format(vcr))
     else:
         strCol = str(vcr).lower()
         numero = 1
@@ -358,7 +358,7 @@ def SetRendererClearColor(self, vcr=None, vcg=None, vcb=None):
             items = match.groups()
             strCol = items[0]
             numero = int(items[1])
-            self.chatMgr.AddChatLine(None, ">SetRendererClearColor match: strCol = {}, numero = {}".format(strCol, numero), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, ">SetRendererClearColor match: strCol = {}, numero = {}".format(strCol, numero))
         # nom de couleur connu?
         if strCol in list(dicColors.keys()):
             #vcr = float(dicColors[strCol][0]) * (6. - float(numero)) / 5.
@@ -367,12 +367,12 @@ def SetRendererClearColor(self, vcr=None, vcg=None, vcb=None):
             vcr = float(dicColors[strCol][0]) * ((6. - float(numero)) / 5.) ** 2
             vcg = float(dicColors[strCol][1]) * ((6. - float(numero)) / 5.) ** 2
             vcb = float(dicColors[strCol][2]) * ((6. - float(numero)) / 5.) ** 2
-            self.chatMgr.AddChatLine(None, ">SetRendererClearColor color found and converted: ({}, {}, {}).".format(vcr, vcg, vcb), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, ">SetRendererClearColor color found and converted: ({}, {}, {}).".format(vcr, vcg, vcb))
         else:
             vcr = None
             vcg = None
             vcb = None
-            self.chatMgr.AddChatLine(None, ">SetRendererClearColor color not found, converted in: ({}, {}, {}).".format(vcr, vcg, vcb), 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, ">SetRendererClearColor color not found, converted in: ({}, {}, {}).".format(vcr, vcg, vcb))
     if strCol is None:
         if isinstance(vcg, float):
             vcg = float(vcg)
@@ -384,14 +384,14 @@ def SetRendererClearColor(self, vcr=None, vcg=None, vcb=None):
             vcb = None
     try:
         xBotAge.SetRenderer(style = None, cr = vcr, cg = vcg, cb = vcb)
-        self.chatMgr.AddChatLine(None, "==> done. Back color changed to {} {} ==> ({}, {}, {}).".format(strCol, numero, vcr, vcg, vcb), 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "==> done. Back color changed to {} {} ==> ({}, {}, {}).".format(strCol, numero, vcr, vcg, vcb))
         return 1
     except:
         return 0
 
 # 
 def ReltoNight(self, onoff="on", scale=None):
-    self.chatMgr.AddChatLine(None, ">ReltoNight {} {}".format(onoff, scale), 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">ReltoNight {} {}".format(onoff, scale))
     
     bOn = True
     if onoff == "off":
@@ -401,26 +401,26 @@ def ReltoNight(self, onoff="on", scale=None):
         # age cases
         if len(xBotAge.currentBotAge) > 1:
             if xBotAge.currentBotAge[1] == "Personal":
-                #self.chatMgr.AddChatLine(None, ">>ReltoNight xRelto.CreateNightSky(7.5, {})".format(bOn), 3)
+                #PtSendKIMessage(kKILocalChatStatusMsg, ">>ReltoNight xRelto.CreateNightSky(7.5, {})".format(bOn))
                 if scale is None:
                     scale = 7.5
-                self.chatMgr.AddChatLine(None, ">>ReltoNight {}".format(msg), 3)
+                PtSendKIMessage(kKILocalChatStatusMsg, ">>ReltoNight {}".format(msg))
             elif xRelto.bPagesAdded:
-                #self.chatMgr.AddChatLine(None, ">>ReltoNight xRelto.CreateNightSky(100, {})".format(bOn), 3)
+                #PtSendKIMessage(kKILocalChatStatusMsg, ">>ReltoNight xRelto.CreateNightSky(100, {})".format(bOn))
                 #msg = xRelto.CreateNightSky(100, bOn)
                 if scale is None:
                     scale = 100
-                self.chatMgr.AddChatLine(None, ">>ReltoNight {}".format(msg), 3)
+                PtSendKIMessage(kKILocalChatStatusMsg, ">>ReltoNight {}".format(msg))
             else:
                 if scale is None:
                     scale = 50
         else:
-            self.chatMgr.AddChatLine(None, "=> Je ne sais pas dans quel age je suis!", 3)
+            PtSendKIMessage(kKILocalChatStatusMsg, "=> Je ne sais pas dans quel age je suis!")
             if scale is None:
                 scale = 75
-        self.chatMgr.AddChatLine(None, ">>ReltoNight xRelto.CreateNightSky({}, {})".format(scale, bOn), 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, ">>ReltoNight xRelto.CreateNightSky({}, {})".format(scale, bOn))
         msg = xRelto.CreateNightSky(scale, bOn)
-        self.chatMgr.AddChatLine(None, "==> done.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "==> done.")
         return 1
     except:
         return 0
@@ -435,7 +435,7 @@ def ReltoDay(self, bOn=True):
 
 # 
 def SkyOnOff(self, bOn=True):
-    self.chatMgr.AddChatLine(None, ">SkyOnOff {}".format(bOn), 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">SkyOnOff {}".format(bOn))
     #bOn = True
     #if len(args) > 1:
     #    if args[1] == "off":
@@ -446,7 +446,7 @@ def SkyOnOff(self, bOn=True):
         xBotAge.ToggleSceneObjects("StarGlobe", age = "Minkata", bDrawOn = bOn, bPhysicsOn = bOn)
         #xBotAge.ToggleSceneObjects("Constellation", age = "Minkata", bDrawOn = bOn, bPhysicsOn = bOn)
         #xBotAge.ToggleSceneObjects("Galaxy", age = "Minkata", bDrawOn = bOn, bPhysicsOn = bOn)
-        self.chatMgr.AddChatLine(None, "==> done.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "==> done.")
         return 1
     except:
         return 0
@@ -457,14 +457,14 @@ def DisableSky(self, bOn=False):
 
 # 
 def DustOnOff(self, bOn=True):
-    self.chatMgr.AddChatLine(None, ">DustOnOff {}".format(bOn), 3)
+    PtSendKIMessage(kKILocalChatStatusMsg, ">DustOnOff {}".format(bOn))
     #bOn = True
     #if len(args) > 1:
     #    if args[1] == "off":
     #        bOn = False
     try:
         xBotAge.ToggleSceneObjects("Dust", age = "Minkata", bDrawOn = bOn, bPhysicsOn = bOn)
-        self.chatMgr.AddChatLine(None, "==> done.", 3)
+        PtSendKIMessage(kKILocalChatStatusMsg, "==> done.")
         return 1
     except:
         return 0
