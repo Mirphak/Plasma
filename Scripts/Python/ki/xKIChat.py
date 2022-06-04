@@ -45,7 +45,6 @@ import re
 import time
 import random
 import inspect
-import traceback
 
 # Plasma Engine.
 from Plasma import *
@@ -63,12 +62,14 @@ from . import xKIExtChatCommands
 from .xKIConstants import *
 from .xKIHelpers import *
 
-# Robot commands
-import xKiBot
-
 # Other new commands
 from . import xReadWritePosition
 from . import xMystitech
+
+import traceback
+
+# Robot commands
+import xKiBot
 
 ## A class to process all the RT Chat functions of the KI.
 class xKIChat(object):
