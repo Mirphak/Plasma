@@ -40,19 +40,25 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include "HeadSpin.h"
-#include "pfCrashHandler/plCrashSrv.h"
+#include "plClient.h"
+#include "plClientLoader.h"
 
-int main(int argc, const char* argv[])
+#include "plPipeline/hsG3DDeviceSelector.h"
+#include "plProgressMgr/plProgressMgr.h"
+
+// Stub all of these on non-Windows for now
+void plClient::IResizeNativeDisplayDevice(int width, int height, bool windowed) {}
+void plClient::IChangeResolution(int width, int height) {}
+void plClient::IUpdateProgressIndicator(plOperationProgress* progress) {}
+void plClient::InitDLLs() {}
+void plClient::ShutdownDLLs() {}
+void plClient::ShowClientWindow() {}
+void plClient::FlashWindow() {}
+
+static plClientLoader gClient;
+
+// Stub main function so it compiles on non-Windows
+int main(int argc, const char** argv)
 {
-    // Parse command line arguments. We MUST have the file argument
-    if (argc != 2)
-    {
-        hsMessageBox("You should never run this manually.", "Error", hsMessageBoxNormal, hsMessageBoxIconExclamation);
-        return 1;
-    }
-
-    plCrashSrv srv(argv[1]);
-    srv.HandleCrash();
     return 0;
 }

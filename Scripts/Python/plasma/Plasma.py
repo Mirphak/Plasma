@@ -42,7 +42,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
  *==LICENSE==* """
 
 from __future__ import annotations
-from typing import Callable, Tuple, Union
+from PlasmaConstants import *
+from typing import Callable, Optional, Tuple, Union
 
 def PtAcceptInviteInGame(friendName,inviteKey):
     """Sends a VaultTask to the server to perform the invite"""
@@ -635,7 +636,7 @@ def PtLocalAvatarRunKeyDown():
     """Returns true if the run key is being held down for the local avatar"""
     pass
 
-def PtLocalizedYesNoDialog(cb: Union[None, Callable, ptKey], path: str, *args, /, *, dialogType: int = PtConfirmationType.YesNo) -> None:
+def PtLocalizedYesNoDialog(cb: Union[None, Callable, ptKey], path: str, *args, dialogType: int = PtConfirmationType.YesNo) -> None:
     """This will display a confirmation dialog to the user with the localized text `path`
        with any optional localization `args` applied. This dialog _has_ to be answered by the user,
        and their answer will be returned in a Notify message or callback given by `cb`."""
@@ -1275,6 +1276,10 @@ class ptAudioControl:
         """None"""
         pass
 
+    def areSubtitlesEnabled(self):
+        """Are subtitles for the audio enabled? Returns 1 if true otherwise returns 0."""
+        pass
+
     def canSetMicLevel(self):
         """Can the microphone level be set? Returns 1 if true otherwise returns 0."""
         pass
@@ -1283,8 +1288,16 @@ class ptAudioControl:
         """Disabled audio"""
         pass
 
+    def disableSubtitles(self):
+        """Disables subtitles for audio."""
+        pass
+
     def enable(self):
         """Enables audio"""
+        pass
+
+    def enableSubtitles(self):
+        """Enables subtitles for audio."""
         pass
 
     def enableVoiceChat(self,state):
@@ -1588,6 +1601,10 @@ Such as a game master, only running on the client that owns a particular object"
 
     def saveClothingToFile(self,filename):
         """Save avatar clothing to a file"""
+        pass
+
+    def setDontPanicLink(self, value: bool) -> None:
+        """Disables panic linking to Personal Age (warps the avatar back to the start instead)"""
         pass
 
     def setMorph(self,clothing_name,layer,value):
@@ -4271,6 +4288,10 @@ class ptGUIControlMultiLineEdit(ptGUIControl):
         """Returns the ptKey for this GUI control"""
         pass
 
+    def getMargins(self) -> Tuple[int, int, int, int]:
+        """Returns a tuple of (top, left, bottom, right) margins"""
+        pass
+
     def getObjectCenter(self):
         """Returns ptPoint3 of the center of the GUI control object"""
         pass
@@ -4402,6 +4423,10 @@ class ptGUIControlMultiLineEdit(ptGUIControl):
 
     def setForeColor(self,r,g,b,a):
         """Sets the foreground color"""
+        pass
+
+    def setMargins(self, top: Optional[int] = None, left: Optional[int] = None, bottom: Optional[int] = None, right: Optional[int] = None) -> None:
+        """Sets the control's margins"""
         pass
 
     def setNotifyOnInteresting(self,state):
@@ -6614,7 +6639,7 @@ class ptVaultNode:
         """Adds 'node'(ptVaultNode) as a child to this node."""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -6797,7 +6822,7 @@ class ptVaultFolderNode(ptVaultNode):
         """Adds 'node'(ptVaultNode) as a child to this node."""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -7028,7 +7053,7 @@ class ptVaultAgeInfoListNode(ptVaultFolderNode):
         """Adds 'node'(ptVaultNode) as a child to this node."""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -7267,7 +7292,7 @@ class ptVaultAgeInfoNode(ptVaultNode):
         """Returns this ptVaultAgeInfoNode as a ptAgeInfoStruct"""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -7558,7 +7583,7 @@ class ptVaultAgeLinkNode(ptVaultNode):
         """Returns this ptVaultAgeLinkNode as a ptAgeLinkStruct"""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -7797,7 +7822,7 @@ class ptVaultChronicleNode(ptVaultNode):
         """LEGACY: Sets the chronicle to a value that is a string"""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -8004,7 +8029,7 @@ class ptVaultImageNode(ptVaultNode):
         """Adds 'node'(ptVaultNode) as a child to this node."""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -8239,7 +8264,7 @@ class ptVaultMarkerGameNode(ptVaultNode):
         """Adds 'node'(ptVaultNode) as a child to this node."""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -8488,7 +8513,7 @@ class ptVaultPlayerInfoListNode(ptVaultFolderNode):
         """Adds playerID player to this player info list node."""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -8747,7 +8772,7 @@ class ptVaultPlayerInfoNode(ptVaultNode):
         """Adds 'node'(ptVaultNode) as a child to this node."""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -8974,7 +8999,7 @@ class ptVaultSDLNode(ptVaultNode):
         """Adds 'node'(ptVaultNode) as a child to this node."""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -9177,7 +9202,7 @@ class ptVaultSystemNode(ptVaultNode):
         """Adds 'node'(ptVaultNode) as a child to this node."""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -9360,7 +9385,7 @@ class ptVaultTextNoteNode(ptVaultNode):
         """Adds 'node'(ptVaultNode) as a child to this node."""
         pass
 
-    def findNode(self,templateNode):
+    def findNode(self, templateNode: ptVaultNode, /, maxDepth: int = 1) -> Optional[ptVaultNode]:
         """Returns ptVaultNode if child node found matching template, or None"""
         pass
 
@@ -9420,16 +9445,20 @@ class ptVaultTextNoteNode(ptVaultNode):
         """Returns ptVaultNodeRef if is a child node, or None"""
         pass
 
+    def getNoteSubType(self):
+        """Returns the subtype of this text note node."""
+        pass
+
+    def getNoteType(self):
+        """Returns the type of text note for this text note node."""
+        pass
+
     def getOwnerNode(self):
         """Returns a ptVaultNode of the owner of this node"""
         pass
 
     def getOwnerNodeID(self):
         """Returns the node ID of the owner of this node"""
-        pass
-
-    def getSubType(self):
-        """Returns the subtype of this text note node."""
         pass
 
     def getText(self):
@@ -9446,10 +9475,6 @@ class ptVaultTextNoteNode(ptVaultNode):
 
     def getTitleW(self):
         """Unicode version of getTitle"""
-        pass
-
-    def getType(self):
-        """Returns the type of text note for this text note node."""
         pass
 
     def hasNode(self,id):
@@ -9540,12 +9565,16 @@ Sets the type of text note for this text note node."""
         """Sets ID of this ptVaultNode."""
         pass
 
-    def setOwnerNodeID(self,id):
-        """Set node ID of the owner of this node"""
+    def setNoteType(self,type):
+        """Sets the type of text note for this text note node."""
         pass
 
-    def setSubType(self,subType):
+    def setNoteSubType(self,subType):
         """Sets the subtype of the this text note node."""
+        pass
+
+    def setOwnerNodeID(self,id):
+        """Set node ID of the owner of this node"""
         pass
 
     def setText(self,text):
@@ -9562,10 +9591,6 @@ Sets the type of text note for this text note node."""
 
     def setTitleW(self,title):
         """Unicode version of setTitle"""
-        pass
-
-    def setType(self,type):
-        """Sets the type of text note for this text note node."""
         pass
 
     def upcastToAgeInfoListNode(self):

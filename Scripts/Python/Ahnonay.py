@@ -72,6 +72,7 @@ class Ahnonay(ptResponder):
 
     def OnServerInitComplete(self):
         agevault = ptAgeVault()
+        vault = ptVault()
         ageinfo = agevault.getAgeInfo()
         guid = ageinfo.getAgeInstanceGuid()
         linkid = None
@@ -82,9 +83,22 @@ class Ahnonay(ptResponder):
         myID = str(PtGetClientIDFromAvatarKey(PtGetLocalAvatar().getKey()))
 
         ageStruct = ptAgeInfoStruct()
+        ageStruct.setAgeFilename("AhnonayCathedral")
+        ageLinkNode = agevault.getSubAgeLink(ageStruct)
+        if ageLinkNode:
+            localCathedralGuid = ageLinkNode.getAgeInfo().getAgeInstanceGuid()
+
+        folder = vault.getAgesIOwnFolder()
+        cathedralInfoTemplate = ptVaultAgeInfoNode(0)
+        cathedralInfoTemplate.setAgeFilename("AhnonayCathedral")
+        if cathedralInfo := folder.findNode(cathedralInfoTemplate, 2):
+            personalCathedralGuid = cathedralInfo.upcastToAgeInfoNode().getAgeInstanceGuid()
+        else:
+            personalCathedralGuid = None
+
+        ageStruct = ptAgeInfoStruct()
         ageStruct.setAgeFilename("Personal")
 
-        vault = ptVault()
         ageLinkNode = vault.getOwnedAgeLink(ageStruct)
         if ageLinkNode:
             ageInfoNode = ageLinkNode.getAgeInfo()
@@ -110,12 +124,12 @@ class Ahnonay(ptResponder):
                         elif chron and chron.getName() == "AhnonaySpawnPoints":
                             spawn = chron
                             PtDebugPrint("Ahnonay.OnServerInitComplete(): Spawn Chron already exists: %s" % (spawn.getValue()))
-                        elif chron and chron.getName() == "AhnonayOwner":
+                        elif chron and chron.getName() == "AhnonayOwner" and personalCathedralGuid and personalCathedralGuid == localCathedralGuid:
                             owner = chron
                     break
 
         if owner == None:
-            PtDebugPrint("I am not the age owner, and I don't have my own Ahnonay")
+            PtDebugPrint("I am not the age owner")
         elif owner.getValue() == myID:
             if linkid == None:
                 PtDebugPrint("Ahnonay.OnServerInitComplete(): Link Chron not found, creating")
@@ -152,9 +166,6 @@ class Ahnonay(ptResponder):
                     locked.setValue("1")
                     volatile.setValue("0")
                     spawn.setValue("Default,LinkInPointDefault")
-        else:
-            PtDebugPrint("I am not the age owner, but I do have my own Ahnonay")
-
 
         ageSDL = PtGetAgeSDL()
         sphere = ageSDL["ahnyCurrentSphere"][0]

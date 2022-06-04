@@ -1,9 +1,13 @@
 name: CI
 on: [push, pull_request]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   windows:
-    runs-on: windows-latest
+    runs-on: windows-2019
     name: ${{ matrix.platform.str }}-${{ matrix.cfg.str }}
     strategy:
       matrix:
@@ -17,13 +21,13 @@ jobs:
 
     steps:
       - name: Checkout Plasma
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: true
 
       - name: Checkout MaxSDK
         continue-on-error: true
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: H-uruMachineUser/3dsMaxSDK
           token: ${{ secrets.MACHINE_USER_REPO_READ }}
@@ -61,7 +65,7 @@ jobs:
           cmake --build build --target INSTALL --config "${{ matrix.cfg.type }}" -j 2
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         with:
           name: plasma-${{ matrix.platform.str }}-${{ matrix.cfg.str }}
           path: build/install
@@ -91,12 +95,12 @@ jobs:
     needs: ["max-secrets"]
     if: needs.max-secrets.outputs.HAS_MACHINE_USER_TOKEN == 'true'
 
-    runs-on: windows-latest
+    runs-on: windows-2019
     name: maxplugin-${{ matrix.cfg.str }}
     strategy:
       matrix:
         cfg:
-          # Max 7 and 2020 are tested in the x86 and x64 windows build jobs, respectively.
+          # Max 7 and 2022 are tested in the x86 and x64 windows build jobs, respectively.
           - { sdk-version: 2008, generator: Visual Studio 16 2019, arch: Win32, str: 2008-windows-x86 }
           - { sdk-version: 2012, generator: Visual Studio 16 2019, arch: Win32, str: 2012-windows-x86 }
           - { sdk-version: 2013, generator: Visual Studio 16 2019, arch: x64, str: 2013-windows-x64 }
@@ -106,12 +110,12 @@ jobs:
 
     steps:
       - name: Checkout Plasma
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: true
 
       - name: Checkout MaxSDK
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: H-uruMachineUser/3dsMaxSDK
           token: ${{ secrets.MACHINE_USER_REPO_READ }}
@@ -138,7 +142,7 @@ jobs:
           cmake --build build --target INSTALL --config Release -j 2
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         with:
           name: max-${{ matrix.cfg.str }}
           path: build/install
@@ -157,7 +161,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: true
 
@@ -211,35 +215,34 @@ jobs:
           - { str: macos-x64 }
         cfg:
           - { external: OFF, type: RelWithDebInfo, str: internal-release }
+          - { external: OFF, type: Debug, str: internal-debug }
+          - { external: ON, type: RelWithDebInfo, str: external-release }
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: true
 
       - name: Install dependencies
         run: |
-          brew install \
-              autoconf \
-              automake \
-              cairo \
-              libtool \
-              nasm \
-              qt5
+          brew bundle
 
       - name: Configure
         run: |
           cmake \
-            -DUSE_VCPKG=ON \
             -DCMAKE_BUILD_TYPE=${{ matrix.cfg.type }} \
+            -DCMAKE_FIND_FRAMEWORK=LAST \
             -DPLASMA_BUILD_TESTS=ON \
             -DPLASMA_BUILD_TOOLS=ON \
             -DPLASMA_EXTERNAL_RELEASE=${{ matrix.cfg.external }} \
-            -DPLASMA_VCPKG_NUGET_SOURCE="https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-            -DPLASMA_VCPKG_NUGET_OWNER="${{ github.repository_owner }}" \
-            -DPLASMA_VCPKG_NUGET_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
-            -DPLASMA_VCPKG_NUGET_RW=TRUE \
-            -DQt5_DIR=$(brew --prefix qt5)/lib/cmake/Qt5 \
+            -DQt5_ROOT=$(brew --prefix qt@5) \
+            -DCURL_ROOT=$(brew --prefix curl) \
+            -Dexpat_ROOT=$(brew --prefix expat) \
+            -DOpenSSL_ROOT=$(brew --prefix openssl@1.1) \
+            -DOpenAL_ROOT=$(brew --prefix openal-soft) \
+            -DPython3_ROOT=$(brew --prefix python@3.10) \
+            -DZLIB_ROOT=$(brew --prefix zlib) \
             -S . -B build
 
       - name: Build
@@ -253,3 +256,9 @@ jobs:
       - name: Install
         run: |
           cmake --build build --target install -j 2
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: plasma-${{ matrix.platform.str }}-${{ matrix.cfg.str }}
+          path: build/install

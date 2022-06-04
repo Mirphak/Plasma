@@ -52,6 +52,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pnUUID/pnUUID.h"
 #include "hsLockGuard.h"
 #include <mutex>
+#include <string>
 
 //#define NCCLI_DEBUGGING
 #ifdef NCCLI_DEBUGGING
@@ -71,7 +72,7 @@ struct NetLogMessage_Header
     unsigned    m_size;
 };
 
-#define HURU_PIPE_NAME "\\\\.\\pipe\\H-Uru_NetLog"
+#define HURU_PIPE_NAME L"\\\\.\\pipe\\H-Uru_NetLog"
 
 static std::recursive_mutex s_pipeCritical;
 static HANDLE               s_netlog = nullptr;
@@ -216,7 +217,7 @@ static void PutBufferOnWire (NetCli * cli, void * data, unsigned bytes) {
 
 //============================================================================
 static void FlushSendBuffer (NetCli * cli) {
-    const unsigned bytes = cli->sendCurr - cli->sendBuffer;
+    const unsigned bytes = (unsigned)(cli->sendCurr - cli->sendBuffer);
     ASSERT(bytes <= std::size(cli->sendBuffer));
     PutBufferOnWire(cli, cli->sendBuffer, bytes);
     cli->sendCurr = cli->sendBuffer;
@@ -242,7 +243,7 @@ static void AddToSendBuffer (
         for (;;) {
             // calculate the space left in the output buffer and use it
             // to determine the maximum number of bytes that will fit
-            unsigned const left = &cli->sendBuffer[std::size(cli->sendBuffer)] - cli->sendCurr;
+            unsigned const left = (unsigned)(&cli->sendBuffer[std::size(cli->sendBuffer)] - cli->sendCurr);
             unsigned const copy = std::min(bytes, left);
 
             // copy the data into the buffer
@@ -355,13 +356,13 @@ static void BufferedSendData (
             case kNetMsgFieldString: {
                 // Use less-than instead of less-or-equal because
                 // we reserve one space for the NULL terminator
-                const uint16_t length = (uint16_t) wcslen((const wchar_t *) *msg);
+                const uint16_t length = (uint16_t) std::char_traits<char16_t>::length((const char16_t *) *msg);
                 ASSERT_MSG_VALID(length < cmd->count);
                 // Write actual string length
                 uint16_t size = hsToLE16(length);
                 AddToSendBuffer(cli, sizeof(uint16_t), (const void*)&size);
                 // Write string data
-                AddToSendBuffer(cli, length * sizeof(wchar_t), (const void *) *msg);
+                AddToSendBuffer(cli, length * sizeof(char16_t), (const void *) *msg);
             }
             break;
 
@@ -558,7 +559,7 @@ static bool DispatchData (NetCli * cli, void * param) {
                         uint16_t length;
                         if (!cli->input.Get(sizeof(uint16_t), &length))
                             goto NEED_MORE_DATA;
-                        cli->recvFieldBytes = hsToLE16(length) * sizeof(wchar_t);
+                        cli->recvFieldBytes = hsToLE16(length) * sizeof(char16_t);
 
                         // Validate size. Use >= instead of > to leave room for the NULL terminator.
                         if (cli->recvFieldBytes >= cli->recvField->count * cli->recvField->size)
@@ -576,7 +577,7 @@ static bool DispatchData (NetCli * cli, void * param) {
                     }
 
                     // Insert NULL terminator
-                    * (wchar_t *)(data + cli->recvFieldBytes) = 0;
+                    * (char16_t *)(data + cli->recvFieldBytes) = 0;
 
                     // IDEA: fill the remainder with a freaky uint8_t pattern
 
@@ -924,8 +925,8 @@ static NetCli * ConnCreate (
 #if !defined(PLASMA_EXTERNAL_RELEASE) && defined(HS_BUILD_FOR_WIN32)
     // Network debug pipe
     if (!s_netlog) {
-        WaitNamedPipeA(HURU_PIPE_NAME, NMPWAIT_WAIT_FOREVER);
-        s_netlog = CreateFileA(
+        WaitNamedPipeW(HURU_PIPE_NAME, NMPWAIT_WAIT_FOREVER);
+        s_netlog = CreateFileW(
             HURU_PIPE_NAME,
             GENERIC_READ | GENERIC_WRITE,
             0,

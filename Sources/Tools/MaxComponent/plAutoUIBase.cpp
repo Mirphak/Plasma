@@ -57,31 +57,8 @@ plAutoUIBase::plAutoUIBase() :
 
 plAutoUIBase::~plAutoUIBase()
 {
-    if (fDesc)
-    {
-        // The internal names are just pointers Max keeps to OUR copy of the string.
-        // We'll free them here to prevent leaks
-        uint16_t count = fDesc->Count();
-        for (uint16_t i = 0; i < count; i++)
-        {
-            ParamID id = fDesc->IndextoID(i);
-            ParamDef& def = fDesc->GetParamDef(id);
-
-            auto name = def.int_name;
-            def.int_name = nullptr;
-            delete [] name;
-
-            if (def.type == TYPE_STRING)
-            {
-                auto defVal = def.def.s;
-                def.def.s = nullptr;
-                delete [] defVal;
-            }
-        }
-
-        delete fDesc;
-        fDesc = nullptr;
-    }
+    delete fDesc;
+    fDesc = nullptr;
 
     uint32_t count = fParams.size();
     for (uint32_t i = 0; i < count; i++)
@@ -523,7 +500,17 @@ void plAutoUIBase::ICreateControls()
 
     RECT rect;
     GetWindowRect(fhDlg, &rect);
-    MoveWindow(fhDlg, rect.left, rect.top, rect.right - rect.left, yOffset+5, FALSE);
+
+    // This used to use MoveWindow() to resize the rollup, but in Max 2022,
+    // that does not seem to work anymore. So, we now do the same thing
+    // that WM_SIZE_PANEL does.
+    IRollupWindow* rollup = GetCOREInterface()->GetCommandPanelRollup();
+    int index = rollup->GetPanelIndex(fhDlg);
+
+    if (index >= 0)
+        rollup->SetPageDlgHeight(index, yOffset + 5);
+
+    InvalidateRect(fhDlg, nullptr, TRUE);
 }
 
 void plAutoUIBase::CreateAutoRollup(IParamBlock2 *pb)

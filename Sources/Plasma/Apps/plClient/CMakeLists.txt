@@ -66,14 +66,25 @@ set(plClient_SOURCES
     plClient.cpp
     plClientLoader.cpp
     pnAllCreatables.cpp
-    winmain.cpp
 )
+
+if(WIN32)
+    list(APPEND plClient_SOURCES
+        plClient_Win.cpp
+        winmain.cpp
+    )
+else()
+    list(APPEND plClient_SOURCES
+        main.cpp
+    )
+endif()
 
 set(plClient_TEXT
     ${Plasma_SOURCE_DIR}/Docs/ReleaseNotes/ReleaseNotes.txt
 )
 
 set(plClient_RESOURCES
+    res/plClient.exe.manifest
     res/plClient.rc
     res/resource.h
     res/banner.bmp
@@ -137,7 +148,7 @@ target_link_libraries(
         pfCharacter
         pfConsole
         pfConsoleCore
-        pfCrashHandler
+        $<$<PLATFORM_ID:Windows>:pfCrashHandler>
         pfGameGUIMgr
         pfJournalBook
         pfLocalizationMgr

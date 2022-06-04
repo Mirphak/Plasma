@@ -333,7 +333,7 @@ bool plAvBrainClimb::IProcessExitStage(double time, float elapsed)
 
     float curBlend = ai->GetBlend();
     
-    if(curBlend > .99)      // reached peak strength
+    if(fCurStage && curBlend > .99)      // reached peak strength
     {
         fCurStage->Detach(fAvMod);  // remove the (now completely masked) underlying anim
         fCurStage = nullptr;
@@ -714,8 +714,8 @@ void plAvBrainClimb::ICalcProbeLengths()
 {
     // we assume that the up and down climbs go the same distance;
     // same for the left and right climbs
-    plAGAnim *up = fAvMod->FindCustomAnim("ClimbUp");
-    plAGAnim *left = fAvMod->FindCustomAnim("ClimbLeft");
+    plAGAnim *up = fAvMod->FindCustomAnim("WallClimbUp");
+    plAGAnim *left = fAvMod->FindCustomAnim("WallClimbLeft");
 
     hsMatrix44 upMove, leftMove;
 

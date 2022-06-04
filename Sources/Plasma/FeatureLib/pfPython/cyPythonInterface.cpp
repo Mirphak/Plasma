@@ -724,9 +724,9 @@ public:
         PyErr_Display(except, val, tb);
 
         // Send to the log server
-        wchar_t* wdata = hsStringToWString(fData.c_str());
-        NetCliAuthLogPythonTraceback(wdata);
-        delete [] wdata;
+        ST::utf16_buffer wdata = ST::utf8_to_utf16(fData.c_str(), fData.size(),
+                                                   ST::substitute_invalid);
+        NetCliAuthLogPythonTraceback(wdata.data());
 
         if (fLog)
             fData.clear();
@@ -904,6 +904,7 @@ void PythonInterface::initPython()
     PyWideStringList_Append(&config.module_search_paths, L"./python");
     PyWideStringList_Append(&config.module_search_paths, L"./python/plasma");
     PyWideStringList_Append(&config.module_search_paths, L"./python/system");
+    PyWideStringList_Append(&config.module_search_paths, L"./python/system/lib-dynload");
     config.module_search_paths_set = 1;
 #endif
 
@@ -1537,7 +1538,7 @@ bool PythonInterface::DumpObject(PyObject* pyobj, char** pickle, int32_t* size)
     if (s != nullptr)
     {
         // yes, then get the size and the string address
-        *size = PyBytes_Size(s);
+        *size = (int32_t)PyBytes_Size(s);
         *pickle = PyBytes_AsString(s);
         return true;
     }

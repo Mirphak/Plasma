@@ -527,13 +527,14 @@ INT_PTR plGUITagProc::DlgProc(TimeValue t, IParamMap2 *pmap, HWND hWnd, UINT msg
 
             // Set the edit control of the combo box to only accept number characters
             edit = GetEditCtrlFromComboBox( GetDlgItem( hWnd, IDC_GUI_TAGCOMBO ) );
-            SetWindowLong( edit, GWL_STYLE, GetWindowLong( edit, GWL_STYLE ) | ES_WANTRETURN );
+            SetWindowLongPtr( edit, GWL_STYLE, GetWindowLongPtr( edit, GWL_STYLE ) | ES_WANTRETURN );
             sOriginalProc = (WNDPROC)SetWindowLongPtr(edit, GWLP_WNDPROC, (LONG_PTR)SubclassedEditProc);
             
             return TRUE;
 
         case WM_DESTROY:
-            SetWindowLongPtr(GetDlgItem(hWnd, IDC_GUI_TAGCOMBO), GWLP_WNDPROC, (LONG_PTR)sOriginalProc);
+            edit = GetEditCtrlFromComboBox(GetDlgItem(hWnd, IDC_GUI_TAGCOMBO));
+            SetWindowLongPtr(edit, GWLP_WNDPROC, (LONG_PTR)sOriginalProc);
             break;
 
         case WM_COMMAND:
@@ -1468,8 +1469,8 @@ INT_PTR plGUIDialogProc::DlgProc(TimeValue t, IParamMap2 *pmap, HWND hWnd, UINT 
                 {
                     ST::string ageName = ageFile.GetFileNameNoExt();
 
-                    idx = ComboBox_AddString( ageCombo, ageName.c_str() );
-                    if( ageName.compare_i( pmap->GetParamBlock()->GetStr( plGUIDialogComponent::kRefAgeName ) ) == 0 )
+                    idx = ComboBox_AddString( ageCombo, ST2T(ageName) );
+                    if( ageName.compare_i( M2ST( pmap->GetParamBlock()->GetStr( plGUIDialogComponent::kRefAgeName ) ) ) == 0 )
                     {
                         selIdx = idx;
                     }
@@ -3288,7 +3289,7 @@ bool plGUITextBoxComponent::Convert(plMaxNode *node, plErrorMsg *pErrMsg)
 
     pfGUITextBoxMod *ctrl = (pfGUITextBoxMod *)fControl;
 
-    ctrl->SetText( fCompPB->GetStr( kRefInitText ) );
+    ctrl->SetText(M2ST(fCompPB->GetStr(kRefInitText)));
 
     if( fCompPB->GetInt( kRefXparentBgnd ) )
         ctrl->SetFlag( pfGUITextBoxMod::kXparentBgnd );
@@ -3303,7 +3304,7 @@ bool plGUITextBoxComponent::Convert(plMaxNode *node, plErrorMsg *pErrMsg)
         ctrl->SetFlag( pfGUIControlMod::kScaleTextWithResolution );
 
     ctrl->SetUseLocalizationPath( fCompPB->GetInt( kRefUseLocalization ) != 0 );
-    ctrl->SetLocalizationPath( fCompPB->GetStr( kRefLocalizationPath ) );
+    ctrl->SetLocalizationPath(M2ST(fCompPB->GetStr(kRefLocalizationPath)));
 
     return true;
 }
