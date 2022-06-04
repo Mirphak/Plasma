@@ -269,7 +269,7 @@ class xDialogStartUp(ptResponder):
         elif id == GUIDiag4b.id:
             if event == kAction or event == kValueChanged:
                 if  tagID == k4bExploreID: ## Explore Uru ##
-                    if gSelectedSlot:
+                    if gSelectedSlot and gPlayerList[gSelectedSlot-gMinusExplorer]:
                         PtShowDialog("GUIDialog06a")
                         PtDebugPrint("Player selected.")
 
@@ -284,7 +284,7 @@ class xDialogStartUp(ptResponder):
                     PtLocalizedYesNoDialog(None, "KI.Messages.LeaveGame", dialogType=PtConfirmationType.ConfirmQuit)
 
                 elif  tagID == k4bDeleteID: ## Delete Explorer ##
-                    if gSelectedSlot:
+                    if gSelectedSlot and gPlayerList[gSelectedSlot-gMinusExplorer]:
                         deleteString = "Would you like to delete the EXPLORER " + str(gPlayerList[gSelectedSlot-gMinusExplorer][0]) + "?"
                         ptGUIControlTextBox(GUIDiag4c.dialog.getControlFromTag(k4cStaticID)).setStringW(deleteString)
                         self.PlayerListNotify(GUIDiag4b, gExp_HotSpot, 0)
@@ -306,7 +306,7 @@ class xDialogStartUp(ptResponder):
         #################################
         elif id == GUIDiag4c.id:
             if event == kAction or event == kValueChanged:
-                if  tagID == k4cYesID: ## Confirm Delete ##
+                if  tagID == k4cYesID and gPlayerList[gSelectedSlot-gMinusExplorer]: ## Confirm Delete ##
                     playerID = 0
                     playerID = gPlayerList[gSelectedSlot-gMinusExplorer][1]
                     PtDeletePlayer(playerID)
@@ -339,22 +339,15 @@ class xDialogStartUp(ptResponder):
                 elif  tagID == k6BackID: ## Back To Player Select ##
                     PtHideDialog("GUIDialog06")
                     PtShowDialog("GUIDialog04b")
+                    # if no explorers, unselect all slots so any of them can be clicked again
+                    if not gPlayerList or not gPlayerList[1]:
+                        self.SelectSlot(GUIDiag4b, 0)
 
                 elif  tagID == k6PlayID: ## Play ##
-                    playerName = ptGUIControlEditBox(GUIDiag6.dialog.getControlFromTag(k6NameID)).getString()  #                 <---
-                    playerNameW = ptGUIControlEditBox(GUIDiag6.dialog.getControlFromTag(k6NameID)).getStringW()  #                 <---
-
-                    try:
-                        playerName == playerNameW
-                    except:
-                        errorString = PtGetLocalizedString("GUI.Dialog04d.InvalidName")
-                        ptGUIControlTextBox(GUIDiag4d.dialog.getControlFromTag(k4dTextID)).setStringW(errorString)
-                        PtShowDialog("GUIDialog04d")
-                        self.ToggleColor(GUIDiag4b, k4bPlayer03)
-                        return
-
+                    playerName = ptGUIControlEditBox(GUIDiag6.dialog.getControlFromTag(k6NameID)).getStringW()
                     playerGender = ""
                     playerStart = ""
+
                     if ptGUIControlCheckBox(GUIDiag6.dialog.getControlFromTag(k6MaleID)).isChecked():
                         playerGender = "male"
                     if ptGUIControlCheckBox(GUIDiag6.dialog.getControlFromTag(k6FemaleID)).isChecked():
@@ -511,8 +504,9 @@ class xDialogStartUp(ptResponder):
             PtSetActivePlayer(playerInt)
 
         elif opType == PtAccountUpdateType.kDeletePlayer:
-            self.SelectSlot(GUIDiag4b, 0)
             self.InitPlayerList(GUIDiag4b, gExp_HotSpot, gExp_TxtBox, gExp_HiLite)
+            # unselect all slots so any of them can be clicked again
+            self.SelectSlot(GUIDiag4b, 0)
             self.ToggleColor(GUIDiag4b, k4bPlayer03)
 
             PtHideDialog("GUIDialog04c")
