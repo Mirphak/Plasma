@@ -34,6 +34,7 @@ function(plasma_executable TARGET)
         list(APPEND addexe_args EXCLUDE_FROM_ALL)
     endif()
     add_executable(${TARGET} ${addexe_args} ${_pex_SOURCES})
+    set_target_properties(${TARGET} PROPERTIES XCODE_GENERATE_SCHEME TRUE)
 
     if(_pex_CLIENT)
         set(install_destination client)
@@ -66,7 +67,7 @@ function(plasma_executable TARGET)
 
     if(DEFINED install_destination)
         install(TARGETS ${TARGET} DESTINATION ${install_destination})
-        if(_pex_INSTALL_PDB AND WIN32)
+        if(_pex_INSTALL_PDB AND WIN32 AND NOT MINGW)
             if(MSVC)
                 set(stripped_pdb_path "$<TARGET_PDB_FILE_DIR:${TARGET}>/${TARGET}.stripped.pdb")
                 target_link_options(${TARGET} PRIVATE "/PDBSTRIPPED:${stripped_pdb_path}")
@@ -88,13 +89,19 @@ endfunction()
 
 function(plasma_library TARGET)
     cmake_parse_arguments(PARSE_ARGV 1 _plib
-        "UNITY_BUILD;SHARED;NO_SANITIZE"
+        "UNITY_BUILD;OBJECT;SHARED;NO_SANITIZE"
         ""
         "PRECOMPILED_HEADERS;SOURCES"
     )
 
+    if(_plib_SHARED AND _plib_OBJECT)
+        message(AUTHOR_WARNING "Library ${TARGET} is both an OBJECT and SHARED library. These options are mutually exclusive.")
+    endif()
+
     if(_plib_SHARED)
         set(libtype SHARED)
+    elseif(_plib_OBJECT)
+        set(libtype OBJECT)
     else()
         set(libtype STATIC)
     endif()

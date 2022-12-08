@@ -56,9 +56,21 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #   include <fnmatch.h>
 #   include <dirent.h>
 #   include <limits.h>
+#   include <sys/param.h>
 #   include <sys/types.h>
 #   include <unistd.h>
 #endif
+
+#ifdef HS_BUILD_FOR_APPLE
+#   ifdef HAVE_SYSDIR
+#       include <sysdir.h>
+#   endif
+#
+#   include <CoreFoundation/CoreFoundation.h>
+#   include <mach-o/dyld.h>
+#   include <NSSystemDirectories.h>
+#endif
+
 #include <sys/stat.h>
 
 
@@ -459,8 +471,46 @@ plFileName plFileSystem::GetUserDataPath()
             return "";
 
         _userData = plFileName::Join(ST::string::from_wchar(path), plProduct::LongName());
+#elif HS_BUILD_FOR_APPLE
+        char path[PATH_MAX] {};
+#if defined(HAVE_BUILTIN_AVAILABLE) && defined(HAVE_SYSDIR)
+        if (__builtin_available(macOS 10.12, *)) {
+            sysdir_search_path_enumeration_state state;
+            state = sysdir_start_search_path_enumeration(SYSDIR_DIRECTORY_APPLICATION_SUPPORT, SYSDIR_DOMAIN_MASK_USER);
+            state = sysdir_get_next_search_path_enumeration(state, path);
+        }
+        else
+#endif
+        {
+            IGNORE_WARNINGS_BEGIN("deprecated-declarations")
+
+            NSSearchPathEnumerationState state;
+            state = NSStartSearchPathEnumeration(NSApplicationSupportDirectory, NSUserDomainMask);
+            state = NSGetNextSearchPathEnumeration(state, path);
+
+            IGNORE_WARNINGS_END
+        }
+
+        if (path[0] == '~') {
+            char home[PATH_MAX] {};
+            strlcat(home, getenv("HOME"), sizeof(home));
+            strlcat(home, &path[1], sizeof(home));
+
+            _userData = plFileName::Join(home, plProduct::LongName());
+        } else {
+            _userData = plFileName::Join(path, plProduct::LongName());
+        }
 #else
-        _userData = plFileName::Join(getenv("HOME"), "." + plProduct::LongName());
+        const char* homedir = getenv("XDG_CONFIG_HOME");
+        if (homedir) {
+            _userData = plFileName::Join(homedir, plProduct::LongName());
+        } else {
+            homedir = getenv("HOME");
+            if (!homedir)
+                return "";
+
+            _userData = plFileName::Join(homedir, ".config", plProduct::LongName());
+        }
 #endif
         plFileSystem::CreateDir(_userData);
     }
@@ -521,6 +571,21 @@ plFileName plFileSystem::GetCurrentAppPath()
         appPath = ST::string::from_wchar(path);
     }
 
+    return appPath;
+#elif HS_BUILD_FOR_MACOS
+    CFBundleRef myBundle = CFBundleGetMainBundle();
+    if (!myBundle) {
+        char path[MAXPATHLEN];
+        uint32_t pathLen = MAXPATHLEN;
+        _NSGetExecutablePath(path, &pathLen);
+        appPath = ST::string::from_utf8(path, pathLen);
+    } else {
+        CFURLRef url = CFBundleCopyBundleURL(myBundle);
+        CFStringRef path = CFURLCopyPath(url);
+        appPath = ST::string::from_utf8(CFStringGetCStringPtr(path, kCFStringEncodingUTF8));
+        CFRelease(path);
+        CFRelease(url);
+    }
     return appPath;
 #else
     // Look for /proc/self/exe (Linux), /proc/curproc/file (FreeBSD / Mac),

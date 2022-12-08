@@ -173,7 +173,7 @@ class plGraphPlate : public plPlate
         void    SetDataRange( uint32_t min, uint32_t max, uint32_t width );
         void    SetDataLabels( uint32_t min, uint32_t max );
         void    SetLabelText(const char *text1, const char *text2 = nullptr, const char *text3 = nullptr, const char *text4 = nullptr);
-        void    SetLabelText( const std::vector<std::string> & text );
+        void    SetLabelText(std::vector<std::string> text) { fLabelText = std::move(text); }
         void    ClearData();
 
         void    AddData( int32_t value, int32_t value2 = -1, int32_t value3 = -1, int32_t value4 = -1 );
@@ -185,8 +185,8 @@ class plGraphPlate : public plPlate
 
         const char      *GetLabelText( int i ) { return fLabelText[ i ].c_str(); }
         uint32_t        GetDataColor( int i ) { return fDataHexColors[ i ]; }
-        uint32_t        GetNumLabels() { return fLabelText.size(); }
-        uint32_t        GetNumColors() { return fDataHexColors.size(); }
+        uint32_t        GetNumLabels() { return (uint32_t)fLabelText.size(); }
+        uint32_t        GetNumColors() { return (uint32_t)fDataHexColors.size(); }
 };
 
 //// plPlateManager Class Definition /////////////////////////////////////////

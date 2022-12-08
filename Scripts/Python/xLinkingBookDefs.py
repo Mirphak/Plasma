@@ -271,6 +271,8 @@ else:
         "Serene":               ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpanelserene' + LinkEnd ),
         "Tiam":                 ( 1, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + ShareHolder + LinkStart + 'xlinkpaneltiam' + LinkEnd ),
         "Elonin":               ( 1, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + ShareHolder + LinkStart + 'xlinkpanelelonin' + LinkEnd ),
+        "EderNaybree":          ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpaneledernaybree' + LinkEnd ),
+        "FahetsHighgarden":     ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpanelhighgarden' + LinkEnd ),
 }
 
 # cross-references the book name with the age and spawn point it links to
@@ -348,6 +350,8 @@ xLinkDestinations = {\
     "Serene":                 ( "Serene", "LinkInPointDefault" ),
     "Tiam":                   ( "Tiam", "LinkInPointDefault" ),
     "Elonin":                 ( "Elonin", "LinkInPointDefault" ),
+    "EderNaybree":            ( "EderNaybree", "LinkInPointDefault" ),
+    "FahetsHighgarden":       ( "FahetsHighgarden", "LinkInPointDefault" ),
 }
 
 #
