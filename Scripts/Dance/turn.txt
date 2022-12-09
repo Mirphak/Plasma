@@ -1,0 +1,4 @@
+Tourner tous ensemble (YodaMysti [KI: 8391512], MystiMir [KI: 7445803], MT Korovyev 1 [KI: 7597526], MorganLapahie [KI: 117437], GabeJo [KI: 3152317], Cassis [KI: 73148], BeatriceLang [KI: 47259], Alex Graham [KI: 229897])
+group|8391512,7445803,7597526,117437,3152317,73148,47259,229897,8504631,469004,6763494,22134
+turnright|0.5
+ENDE

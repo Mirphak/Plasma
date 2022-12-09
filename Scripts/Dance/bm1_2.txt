@@ -1,0 +1,25 @@
+#MystiMir 			[KI: 7445803]	r3, c
+#YodaMysti 			[KI: 8391512]	
+#NikiMay 			[KI: 43542]		r2
+#Alex Graham 		[KI: 229897]	r5
+#Lu-MystiT 			[KI: 8384818]	r7
+#MorganLapahie 		[KI: 117437]	b1
+#GabeJo 			[KI: 3152317]	r1
+#RyudoSkye_delta 	[KI: 3823664]	b2
+#MT Korovyev 1 		[KI: 7597526]	
+Bahro Massacre 1 (test, groups will have to be determined, 14 bahros needed)
+definegroup|r1:3152317,r2:43542,r3:7445803,r4:,b1:117437,b2:3823664,b3:,b4:,c:7445803
+#group|7445803,43542,117437,8577929,7597526,1707647,3152317
+ws|1|2.00
+#group|3152317
+aliasgroup|
+walk|9|3.00
+#group|117437
+aliasgroup|
+turn|-143|0.50
+walk|7|3.00
+turn|-18|0.50
+#group|3152317
+aliasgroup|
+turn|-5|0.50
+END

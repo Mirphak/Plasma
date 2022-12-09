@@ -1,0 +1,12 @@
+Bahro Massacre 1 (test, groups will have to be determined, 14 bahros needed)
+group|7445803,43542,117437,8577929,7597526,1707647,3152317
+ws|1|2.00
+group|3152317
+walk|9|3.00
+group|117437
+turn|-143|0.50
+walk|7|3.00
+turn|-18|0.50
+group|3152317
+turn|-5|0.50
+END

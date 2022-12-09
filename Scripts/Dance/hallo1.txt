@@ -1,0 +1,23 @@
+halloween1 - Anordnung beliebig
+group|5667000,7132841,254640,60590,49430,6551797,7996663,191657,7087621,60279,59273,7004783,7517653,7227499,137998,9445,133403,124468,4082721,1448872,21552,407208,4502269,115763,7060111,6583813,177149,7327507,537336,7853705,7172637,24418,6961947,7939982
+float|0|0.50
+stepleft|2|2.10
+stepright|2|2.10
+treadwaterturnleft|1|4.00
+stepright|2|2.10
+stepleft|2|2.10
+sideswimleft|1|2.34
+sideswimright|1|2.34
+stop|2|5.62
+thumbsdown2|1|3.46
+stop|2|5.62
+stepleft|2|2.10
+stepright|2|2.10
+treadwaterturnleft|1|4.00
+stepright|2|2.10
+stepleft|2|2.10
+sideswimleft|1|2.34
+sideswimright|1|2.34
+land|0.50
+cheer|1|3.30
+ENDE

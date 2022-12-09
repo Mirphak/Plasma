@@ -1,0 +1,7 @@
+definegroup|lu:9216981,moi:7445803
+aliasgroup|lu
+back|1|0.0
+aliasgroup|moi
+walk|1|0.5
+aliasgroup|lu
+back|1|0.5

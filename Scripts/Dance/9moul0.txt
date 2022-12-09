@@ -1,0 +1,27 @@
+9moul0 - showstart - Tänzer ankleiden und auf die Bühne - Moderator in den Hintergrund
+group|137998,7881034,8068100,8315178,127131,7060111,6961947,5667000,7939982,115763
+ws|99|0.5
+group|6961947
+restoreme|9moul1ca|0.00
+group|8068100
+restoreme|9moul1et|0.00
+group|7939982
+restoreme|9moul1cl|0.00
+group|8315178
+restoreme|9moul1ro|0.00
+group|7881034,115763
+restoreme|9moul1wi|0.00
+group|127131
+restoreme|9moul1lu|0.00
+group|137998
+restoreme|9moul1ma|0.00
+group|7060111,5667000
+restoreme|9moul1ae|4.00
+group|137998,7881034,8068100,8315178,127131,7060111,6961947,5667000,7939982,115763,7132841
+ws|1|7.00
+bow|1|5.00
+group|7132841
+ws|2|0.50
+ENDE
+
+

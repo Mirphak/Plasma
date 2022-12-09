@@ -1,0 +1,98 @@
+MabeRebus
+
+group|all
+fogshape|99|20000|35|2.00
+loadstruct|000 Jalak_Fahne|15.00
+loadstruct|000 Jalak_Fahne_off|2.00
+loadstruct|001 Hello|20.00
+loadstruct|001 Hello_off|2.00
+loadstruct|002 Zahl 09|8.0
+loadstruct|003 Zahl 06|8.0
+loadstruct|004 Zahl 04|8.0
+loadstruct|005 Zahl 00|8.0
+loadstruct|006 Zahl 08|8.0
+loadstruct|007 Zahl 05|8.0
+loadstruct|008 Zahl 01|8.0
+loadstruct|009 Zahl 10|8.0
+loadstruct|010 Zahl 03|8.0
+loadstruct|011 Zahl 07|8.0
+loadstruct|012 Zahl 02|8.0
+loadstruct|050 Zahl_off|3.00
+loadstruct|013 Maintainer|15.0
+loadstruct|013 Maintainer_off|3.0
+loadstruct|014 Cartographers|15.0
+loadstruct|014 Cartographers_off|3.0
+loadstruct|015 Writters|15.0
+loadstruct|015 Writters_off|3.0
+loadstruct|016 Watchers|15.0
+loadstruct|016 Watchers_off|3.0
+loadstruct|017 Hand|15.0
+loadstruct|017 Hand_off|3.0
+loadstruct|018 Reltobook|15.0
+loadstruct|018 Reltobook_off|3.0
+loadstruct|019 Reltoseite Holz|15.0
+loadstruct|019 Reltoseite Holz_off|3.0
+
+loadstruct|020 Age Aegura|15.0
+loadstruct|020 Age Aegura_off|3.0
+loadstruct|021 Age Eder Kemo|15.0
+loadstruct|021 Age Eder Kemo_off|3.0
+loadstruct|022 Age Ahnonay|15.0
+loadstruct|022 Age Ahnonay_off|3.0
+loadstruct|023 Age Eder Delin|15.0
+loadstruct|023 Age Eder Delin_off|3.0
+loadstruct|024 Age Cleft|25.0
+loadstruct|024 Age Cleft_off|3.0
+loadstruct|025 Age Eder Tsogal|15.0
+loadstruct|025 Age Eder Tsogal_off|3.0
+loadstruct|027 Age Gahreesen|15.0
+loadstruct|027 Age Gahreesen_off|3.0
+loadstruct|046 Age Gira Basket|15.0
+loadstruct|046 Age Gira Basket_off|3.0
+loadstruct|028 Age Kadish|15.0
+loadstruct|028 Age Kadish_off|3.0
+loadstruct|029 Age Eder Gira|15.0
+loadstruct|029 Age Eder Gira_off|3.0
+loadstruct|030 Age Kveer|15.0
+loadstruct|030 Age Kveer_off|3.0
+loadstruct|031 Age Hood Ship|15.0
+loadstruct|031 Age Hood Ship_off|3.0
+loadstruct|032 Age Myst|15.0
+loadstruct|032 Age Myst_off|3.0
+loadstruct|033 Age Ercana Pellet|15.0
+loadstruct|033 Age Ercana Pellet_off|3.0
+loadstruct|034 Age Spyroom|15.0
+loadstruct|034 Age Spyroom_off|3.0
+loadstruct|035 Age Minkata|15.0
+loadstruct|035 Age Minkata_off|3.0
+loadstruct|036 Age Pod|15.0
+loadstruct|036 Age Pod_off|3.0
+loadstruct|037 Age Ercana Harvester|15.0
+loadstruct|037 Age Ercana Harvester_off|3.0
+loadstruct|038 Age HoodClock|15.0
+loadstruct|038 Age HoodClock_off|3.0
+loadstruct|039 Age Relto Brunnen|15.0
+loadstruct|039 Age Relto Brunnen_off|3.0
+loadstruct|040 Age Teled Aquarium|15.0
+loadstruct|040 Age Teled Aquarium_off|3.0
+loadstruct|041 Age Cleft Windrad|20.0
+loadstruct|041 Age Cleft Windrad_off|3.0
+loadstruct|042 Age Ercana Ofen|20.0
+loadstruct|042 Age Ercana Ofen_off|3.0
+loadstruct|043 Age Relto|15.0
+loadstruct|043 Age Relto_off|3.0
+loadstruct|044 Age Teledahn|20.0
+loadstruct|044 Age Teledahn_off|3.0
+loadstruct|045 Age Ercana Silo|15.0
+loadstruct|045 Age Ercana Silo_off|5.0
+loadstruct|047 Age GZ|20.0
+loadstruct|047 Age GZ_off|3.0
+loadstruct|Sym 06 Dagger|25.0
+loadstruct|Sym 06 Dagger_off|3.0
+loadstruct|Sym 07 Riven|20.0
+loadstruct|Sym 07 Riven_off|3.0
+loadstruct|Sym 14 Riven Teleskop|15.0
+loadstruct|Sym 14 Riven Teleskop_off|5.0
+loadstruct|073 Bodenmuster|15.0
+
+ENDE

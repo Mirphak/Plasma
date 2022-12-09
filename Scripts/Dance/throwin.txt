@@ -1,0 +1,12 @@
+Fire meets Water Battle Throw-in (Mabe, Eternal Seeker, Minasunda) mm:ss
+group|137998,254640,5667000
+ws|1|0.50
+col|87|10.00
+group|5667000
+ws|2|0.50
+ring|red|0|0|3.00
+ring|yellow|off|3.00
+ring|blue|off|3.00
+ring|white|off|3.00
+ring|red|off|3.00
+ENDE throwin

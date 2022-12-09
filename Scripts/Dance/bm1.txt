@@ -1,0 +1,16 @@
+Bahro Massacre 1 (test, groups will have to be determined, 14 bahros needed)
+#definegroup|r1:3152317,r2:43542,r3:3823664,r4:73148,r5:7445803,r6:229897,r7:8384818,b1:117437,b2:7597526,b3:1707647,b4:46116,b6:8391512
+definegroup|r1:3152317,r2:8670726,r3:3823664,r4:8669466,r5:7445803,r6:229897,r7:8384818,b1:117437,b2:7597526,b3:43542,b4:46116,b6:6402640
+aliasgroup|r1,r2,r3,r4,b1,b2,b3,b4,b5,b6
+ws|1|0.00
+aliasgroup|r5,r6,r7
+ws|2|2.00
+aliasgroup|r1
+walk|9|3.00
+aliasgroup|b1
+turn|-143|0.50
+walk|7|3.00
+turn|-18|0.50
+aliasgroup|r1
+turn|-5|0.50
+END

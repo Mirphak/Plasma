@@ -1,0 +1,6 @@
+#Cassis 			[KI: 73148]		r4
+#MystiMir 			[KI: 7445803]	r5
+definegroup|r4:73148,r5:7445803
+aliasgroup|r4,r5
+ws|1|0.00
+end

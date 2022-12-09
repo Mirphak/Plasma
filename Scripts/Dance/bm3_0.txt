@@ -1,0 +1,17 @@
+#Bahro Massacre 3 (the bombing and bahros death)
+group|3152317
+ws|3|0.50
+group|43542,3823664,73148
+ws|2|0.50
+group|7445803,229897,8384818
+ws|2|0.00
+vis|off|1.00
+group|117437,7597526,7445803
+ws|3|1.00
+group|117437,1707647
+rot|x|90|0.50
+group|7597526,46116
+rot|x|-90|0.50
+group|7445803,229897,8384818
+ws|1|0.00
+END

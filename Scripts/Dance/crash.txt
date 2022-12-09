@@ -1,0 +1,15 @@
+crash for Mabe
+
+definegroup|m:7132841,t1:137998
+aliasgroup|t1
+ws|0|2.00
+restoreme|ever1m|1.00
+aliasgroup|m
+float|1.00
+onlake|4.00
+ws|1|1.00
+fog|off|1.00
+event|10|1.00
+ws|0|1.00
+
+ENDE

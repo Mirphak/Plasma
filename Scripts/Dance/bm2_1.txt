@@ -1,0 +1,6 @@
+Bahro Massacre 2 (just bow)
+group|3152317
+bow|1|1.00
+group|117437
+bow|1|1.00
+END

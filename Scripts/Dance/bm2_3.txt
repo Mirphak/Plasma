@@ -1,0 +1,21 @@
+#GabeJo 			[KI: 3152317]	r1
+#NikiMay 			[KI: 43542]		r2
+#RyudoSkye_delta 	[KI: 3823664]	r3
+#Cassis 			[KI: 73148]		r4
+#MystiMir 			[KI: 7445803]	r5
+#Alex Graham 		[KI: 229897]	r6
+#Lu-MystiT 			[KI: 8384818]	r7
+#MorganLapahie 		[KI: 117437]	b1
+#MT Korovyev 1 		[KI: 7597526]	b2
+#Lucas,Ben 			[KI: 1707647]	b3
+#Korov'ev 			[KI: 46116]		b4
+#YodaMysti 			[KI: 8391512]	b6
+Bahro Massacre 2 (just bow)
+definegroup|r1:3152317,r2:43542,r3:3823664,r4:73148,r5:7445803,r6:229897,r7:8384818,b1:117437,b2:7597526,b3:1707647,b4:46116,b6:8391512
+#group|3152317
+aliasgroup|
+bow|1|1.00
+#group|117437
+aliasgroup|
+bow|1|1.00
+END

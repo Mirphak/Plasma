@@ -1,0 +1,5 @@
+#Kahnop 			[KI: 4184466]		k
+definegroup|k:4184466
+aliasgroup|k
+walk|1|0.00
+end

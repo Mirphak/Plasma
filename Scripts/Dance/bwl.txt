@@ -1,0 +1,41 @@
+#bwr - Aegura - 
+#MystiMir [KI: 7445803]
+#Mys.Take [KI: 8670726]
+#MT Korovyev 1 [KI: 7597526]
+#GabeJo 3152317
+#Mystified [KI: 8669466]
+#Lukas1 [KI: 469004]
+#Lukas Gruber [KI: 6763494]
+
+#Mysti2 [KI: 8504631]
+
+#NikiMay [KI: 43542]
+#MystiKay [KI: 6413581]
+#MysTeri [KI: 8577929]
+#MystiKaya [KI: 6402640]
+
+#Lucas,Ben [KI: 1707647]
+#
+group|7445803,8670726,7597526,3152317,8669466,469004,6763494,8504631,43542,6413581,8577929,6402640,1707647
+stepleft|3|2.00
+rot|z|10|0.50
+stepleft|3|2.00
+rot|z|10|0.50
+stepleft|3|2.00
+rot|z|10|0.50
+stepleft|3|2.00
+rot|z|10|0.50
+stepleft|3|2.00
+rot|z|10|0.50
+stepleft|3|2.00
+rot|z|10|0.50
+ENDE
+
+
+
+
+
+
+
+
+

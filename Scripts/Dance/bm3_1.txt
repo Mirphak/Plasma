@@ -1,0 +1,23 @@
+#Bahro Massacre 3 (the bombing and bahros death)
+#Lucas,Ben [KI: 1707647]
+#GabeJo [KI: 3152317]
+#MT Korovyev 1 [KI: 7597526]
+#MystiMir [KI: 7445803]
+#MorganLapahie [KI: 117437]
+#Mystified [KI: 8669466]
+#NikiMay [KI: 43542]
+#MysTeri [KI: 8577929]
+#group|7445803,43542,117437,8577929,7597526,1707647,3152317,8669466
+#MT Korovyev 1 is a bomber
+group|7597526
+ws|2|2.00
+#!vis 0
+group|3152317,7597526
+ws|3|2.00
+group|117437,8577929,7597526,1707647
+rot|x|-90|0.50
+group|7445803,8669466
+rot|y|-90|1.00
+group|3152317,43542
+rot|y|90|0.00
+END

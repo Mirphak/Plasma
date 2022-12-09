@@ -1,0 +1,73 @@
+# m1 : YodaMysti     [KI: 8391512]
+# m2 : OrinMcB       [KI: 118401 ]
+# m3 : Lucas,Ben     [KI: 1707647]
+# b1 : NikiMay       [KI: 43542  ]
+# b2 : MystiMir      [KI: 7445803]
+# b3 : MystiKay      [KI: 6413581]
+# b4 : Mystified     [KI: 8669466]
+# b5 : MysTeri       [KI: 8577929]
+# b6 : Mys.Take      [KI: 8670726]
+# b7 : MT Korovyev 1 [KI: 7597526]
+# b8 : Lu-MystiT     [KI: 8384818]
+# b9 : GabeJo        [KI: 3152317]
+definegroup|b1=43542,b2=7445803,b3=6413581,b4=8669466,b5=8577929,b6=8670726,b7=7597526,b8=8384818,b9=3152317,m1=8391512,m2=118401,m3=1707647
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9
+stepright|1|b|0.00
+aliasgroup|m2,m3
+stepright|1|0.60
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9,m2,m3
+rot|z|3.016|0.20
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9
+stepright|1|b|0.00
+aliasgroup|m2,m3
+stepright|1|0.60
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9,m2,m3
+rot|z|3.016|0.20
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9
+stepright|1|b|0.00
+aliasgroup|m2,m3
+stepright|1|0.60
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9,m2,m3
+rot|z|3.016|0.20
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9
+stepright|1|b|0.00
+aliasgroup|m2,m3
+stepright|1|0.60
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9,m2,m3
+rot|z|3.016|0.20
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9
+stepright|1|b|0.00
+aliasgroup|m2,m3
+stepright|1|0.60
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9,m2,m3
+rot|z|3.016|0.20
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9
+stepright|1|b|0.00
+aliasgroup|m2,m3
+stepright|1|0.60
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9,m2,m3
+rot|z|3.016|0.20
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9
+stepright|1|b|0.00
+aliasgroup|m2,m3
+stepright|1|0.60
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9,m2,m3
+rot|z|3.016|0.20
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9
+stepright|1|b|0.00
+aliasgroup|m2,m3
+stepright|1|0.60
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9,m2,m3
+rot|z|3.016|0.20
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9
+stepright|1|b|0.00
+aliasgroup|m2,m3
+stepright|1|0.60
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9,m2,m3
+rot|z|3.016|0.20
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9
+stepright|1|b|0.00
+aliasgroup|m2,m3
+stepright|1|0.60
+aliasgroup|b1,b2,b3,b4,b5,b6,b7,b8,b9,m2,m3
+rot|z|3.016|0.20

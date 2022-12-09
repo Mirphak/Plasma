@@ -1,0 +1,56 @@
+#Bahro Massacre 3 (the bombing and bahros death)
+#GabeJo 			[KI: 3152317]	r1		1 = start point, 2 = end of walk, 3 = off screen link away (should be established already)
+##NikiMay 			[KI: 43542]		r2		1 = start point, 2 = off screen link away
+#Myst.Take 			8670726			r2	*	1 = start point, 2 = off screen link away
+#RyudoSkye_delta 	[KI: 3823664]	r3		1 = start point, 2 = off screen link away
+##Cassis 			[KI: 73148]		r4		1 = start point, 2 = off screen link away
+#Mystified 			8669466			R4	*	1 = start point, 2 = off screen link away
+#MystiMir 			[KI: 7445803]	r5		1 = off screen start/return point, 2 = link in to next to R1 and B1 with bomb
+#Alex Graham 		[KI: 229897]	r6		1 = off screen start/return point, 2 = link in near B2-4 with bomb
+#Lu-MystiT 			[KI: 8384818]	r7		1 = off screen start/return point, 2 = link in near B4-6 with bomb
+#MysTeri 			[KI: 8577929]	r8		1 = off screen start/return point, 2 = link in near B2-4 with bomb
+#MorganLapahie 		[KI: 117437]	b1		1 = start point, 2 = after left turn -143 deg, 3 = after 7 steps and -18 turn opposite R1
+#MT Korovyev 1 		[KI: 7597526]	b2		1 = start point (no further marks needed as will end up as corpse!)
+##Lucas,Ben 			[KI: 1707647]	b3		1 = start point (no further marks needed as will end up as corpse!)
+#NikiMay 			[KI: 43542]		b3	*	1 = start point (no further marks needed as will end up as corpse!)
+#Korov'ev 			[KI: 46116]		b4		1 = start point (no further marks needed as will end up as corpse!)
+									b5
+##YodaMysti 			[KI: 8391512]	b6		1 = start point (no further marks needed as will end up as corpse!)
+#MystiKaya 			[KI: 6402640]	b6	*	1 = start point (no further marks needed as will end up as corpse!)
+#MystiMir 			[KI: 7445803]	c(hamp)	1 = link in, 2 = end of wandering, should be near corpse of B1
+
+definegroup|r1:3152317,r2:8670726,r3:3823664,r4:8669466,r5:7445803,r6:229897,r7:8384818,r8:8577929,b1:117437,b2:7597526,b3:43542,b4:46116,b6:6402640
+#Bombers are r5,r6,r7,r8
+#
+aliasgroup|r5,r6
+ws|4|0.50
+vis|off|0.50
+#
+aliasgroup|r2,r3,r4
+ws|2|0.50
+#
+aliasgroup|r7,r8
+ws|4|0.50
+vis|off|0.50
+#
+aliasgroup|r5,r6,r7
+ws|2|0.00
+aliasgroup|r8
+ws|1|0.50
+#
+aliasgroup|r1
+ws|3|0.50
+#
+aliasgroup|b1,b2
+rot|x|-90|0.50
+#
+aliasgroup|b3,b4
+rot|y|-90|0.50
+#
+aliasgroup|b5,b6
+rot|y|90|0.00
+#
+aliasgroup|r1,r2,r3,r4,r5,r6,r7,r8
+vis|on|0.00
+#
+END

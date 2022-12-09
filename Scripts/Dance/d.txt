@@ -1,0 +1,2 @@
+aliasgroup|b6
+rot|y|-90|0.00

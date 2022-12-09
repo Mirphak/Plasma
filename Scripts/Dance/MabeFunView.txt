@@ -1,0 +1,59 @@
+MabeFunView
+
+group|all
+fogshape|99|20000|35|2.00
+loadstruct|000 Jalak_Fahne|15.00
+loadstruct|000 Jalak_Fahne_off|2.00
+loadstruct|001 Hello|20.00
+loadstruct|001 Hello_off|2.00
+loadstruct|Sym 01|15.0
+loadstruct|Sym 01_off|3.0
+loadstruct|Sym 02|15.0
+loadstruct|Sym 02_off|3.0
+loadstruct|Sym 03|15.0
+loadstruct|Sym 03_off|3.0
+loadstruct|Sym 04|15.0
+loadstruct|Sym 04_off|3.0
+loadstruct|Sym 05 Pentagram|25.0
+loadstruct|Sym 05 Pentagram_off|3.0
+loadstruct|Sym 08 Gestell|25.0
+loadstruct|Sym 08 Gestell_off|3.00
+loadstruct|Sym 09 Blume|15.0
+loadstruct|sym 09 Blume_off|3.0
+loadstruct|Sym 10 Kaefer|25.0
+loadstruct|Sym 10 Kaefer_off|3.0
+loadstruct|Sym 11 Scorpion|15.0
+loadstruct|Sym 11 Scorpionoff|10.0
+loadstruct|Sym 12 Lok|25.0
+loadstruct|Sym 12 Lok_off|3.0
+loadstruct|Sym 13 Windmuehle|15.0
+loadstruct|Sym 13 Windmuehle_off|10.0
+loadstruct|Sym 15 Gestell|20.0
+loadstruct|Sym 15 Gestell_off|3.0
+loadstruct|Sym 16 Boden|15.0
+loadstruct|Sym 16 Boden_off|3.0
+
+loadstruct|Sym 17 Gestell|15.0
+loadstruct|Sym 17 Gestell_off|10.0
+loadstruct|Sym 18 Blechmann|25.0
+loadstruct|Sym 18 Blechmann_off|10.0
+loadstruct|Sym 20 Sanduhr|15.0
+loadstruct|Sym 20 Sanduhr_off|3.0
+loadstruct|Sym 22 Domino|22.0
+loadstruct|Sym 22 Domino_off|10.0
+loadstruct|Sym 23a Pyramide|20.0
+loadstruct|Sym 23a Pyramide_off|3.0
+loadstruct|Sym 23b Pyramide|20.0
+loadstruct|Sym 23b Pyramide_off|3.0
+loadstruct|Sym 23c Pyramide|15.0
+loadstruct|Sym 23c Pyramide_off|3.0
+loadstruct|Sym 23d Pyramide|15.0
+loadstruct|Sym 23d Pyramide_off|3.0
+loadstruct|Sym 24a Dominoraster|22.0
+loadstruct|Sym 24b Dominoraster|29.0
+loadstruct|Sym 24c Dominoraster|22.0
+loadstruct|Sym 25 Domino|30.0
+loadstruct| 072 Age ZZZ END|20.0
+loadstruct|073 Bodenmuster|15.0
+
+ENDE

@@ -1,0 +1,30 @@
+#Bahro Massacre 3 (the bombing and bahros death)
+#MystiMir 			[KI: 7445803]	r3, c
+#YodaMysti 			[KI: 8391512]	
+#NikiMay 			[KI: 43542]		r2
+#Alex Graham 		[KI: 229897]	r5
+#Lu-MystiT 			[KI: 8384818]	r7
+#MorganLapahie 		[KI: 117437]	b1
+#GabeJo 			[KI: 3152317]	r1
+#RyudoSkye_delta 	[KI: 3823664]	b2
+#MT Korovyev 1 		[KI: 7597526]	
+#group|7445803,43542,117437,8577929,7597526,1707647,3152317,8669466
+#MT Korovyev 1 is not a bomber as he is filming!
+definegroup|r1:3152317,r2:43542,r3:7445803,r4:,b1:117437,b2:3823664,b3:,b4:,c:7445803
+#group|7597526
+aliasgroup|r1
+ws|2|2.00
+vis|off|2.00
+#group|3152317,7597526
+aliasgroup|b3,r1
+ws|3|2.00
+#group|117437,8577929,7597526,1707647
+aliasgroup|r4,b1,b2
+rot|x|-90|0.50
+#group|7445803,8669466
+aliasgroup|r2,b4
+rot|y|-90|1.00
+#group|3152317,43542
+aliasgroup|b3,r1
+rot|y|90|0.00
+END
