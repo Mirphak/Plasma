@@ -377,6 +377,16 @@ def PageInTLALoft():
 def PageOutTLALoft():
     PtConsoleNet("Nav.PageOutNode TLALoft_Default", True)
 
+# Page in the Mystitech's TLALoft Edit
+def PageInTLALoftEdit():
+    PtConsoleNet("Nav.PageInNode TLALoftEdit_Default", True)
+    #WarpPlayerToXyz(None, 22.23, -0.53, 0.00)
+    WarpPlayerToXyz(None, 492.08, -796.92, 79.00)
+
+# Page out the Mystitech's TLALoft EDit
+def PageOutTLALoftEdit():
+    PtConsoleNet("Nav.PageOutNode TLALoftEdit_Default", True)
+
 # Page in the Mystitech's TLATestChamber
 def PageInTLATestChamber():
     PtConsoleNet("Nav.PageInNode TLATestChamber_Default", True)
@@ -393,6 +403,15 @@ def PageInBoat():
 # Page out the cityofdimensions Boat
 def PageOutBoat():
     PtConsoleNet("Nav.PageOutNode cityofdimensions_Boat", True)
+
+# Page in the Mystitech's GameRoom
+def PageInGameRoom():
+    PtConsoleNet("Nav.PageInNode GameRoom_mainRoom", True)
+    WarpPlayerToXyz(None, 211.09, -849.12, 49946.63)
+
+# Page out the Mystitech's GameRoom
+def PageOutGameRoom():
+    PtConsoleNet("Nav.PageOutNode GameRoom_mainRoom", True)
 
 """ Methods for Mintata """
 

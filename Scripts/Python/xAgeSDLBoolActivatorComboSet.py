@@ -48,12 +48,13 @@ solvedVariableName = ptAttribString(1, "SDL: Boolean Solved Variable")
 butsInUseVariableName = ptAttribString(2, "SDL: Button Lock Variable")
 numCorrectVariableName = ptAttribString(3, "SDL: Number of correct entries")
 combination = ptAttribString(4, "Combination")
-resetOnEmpty = ptAttribBoolean(5, "Reset when the Age shuts down", default=False)
-disableOnSolve = ptAttribBoolean(6, "Disable activators on solve", default=True)
+resetOnEmpty = ptAttribBoolean(5, "Reset when the Age shuts down", default=0)
+disableOnSolve = ptAttribBoolean(6, "Disable activators on solve", default=1)
 actButtons = ptAttribActivatorList(7, "Act: Buttons")
 respButtonPush = ptAttribResponder(8, "Resp: Button Push")
+allowSlidingSolution = ptAttribBoolean(9, "Allow solving by sliding solution rather than needing feedback on failure", default=False)
 
-class xAgeSDLBoolActivatorComboSet(ptResponder):
+class xAgeSDLBoolActivatorComboSet(ptResponder, object):
     def __init__(self):
         ptResponder.__init__(self)
         self.version = 1
@@ -73,19 +74,23 @@ class xAgeSDLBoolActivatorComboSet(ptResponder):
 
     def OnServerInitComplete(self):
         ageSDL = PtGetAgeSDL()
-        ageSDL.setFlags(solvedVariableName.value, True, True)
+        ageSDL.setFlags(solvedVariableName.value, 1, 1)
         ageSDL.sendToClients(solvedVariableName.value)
         ageSDL.setNotify(self.key, solvedVariableName.value, 0.0)
-        ageSDL.setFlags(butsInUseVariableName.value, True, True)
+        ageSDL.setFlags(butsInUseVariableName.value, 1, 1)
         ageSDL.sendToClients(butsInUseVariableName.value)
         ageSDL.setNotify(self.key, butsInUseVariableName.value, 0.0)
-        ageSDL.setFlags(numCorrectVariableName.value, True, True)
+        ageSDL.setFlags(numCorrectVariableName.value, 1, 1)
         ageSDL.sendToClients(numCorrectVariableName.value)
+        self.SDL.sendToClients("attemptCombo")
+        self.SDL.setFlags("attemptCombo", True, True)
 
         if not PtGetPlayerList():
-            self._butsInUse = False
+            self._butsInUse = 0
+            if allowSlidingSolution.value:
+                self._attemptCombo = []
             if resetOnEmpty.value:
-                self._solved = (False, "fastforward")
+                self._solved = (0, "fastforward")
                 self._numCorrect = (0, "fastforward")
 
         if self._butsInUse:
@@ -108,7 +113,7 @@ class xAgeSDLBoolActivatorComboSet(ptResponder):
             return
         handler = self._NotifyHandlers.get(id, None)
         if handler is None:
-            PtDebugPrint(f"xAgeSDLBoolActComboSet.OnNotify():\tUnhandled notify {id=} {events=}", level=kDebugDumpLevel)
+            PtDebugPrint("xAgeSDLBoolActComboSet.OnNotify():\tUnhandled notify id=%d events=%s" % (id, events), level=kDebugDumpLevel)
         else:
             handler(events)
 
@@ -125,50 +130,59 @@ class xAgeSDLBoolActivatorComboSet(ptResponder):
         ageSDL.setTagString(attr.value, hint)
         ageSDL.setIndexNow(attr.value, 0, state)
 
-    @property
-    def _butsInUse(self):
+    def _GetScriptSDL(self, name):
+        return self.SDL[name]
+    def _SetScriptSDL(self, name, value):
+        self.SDL[name] = tuple(value)
+
+    def _get_butsInUse(self):
         return self._GetAgeSDL(butsInUseVariableName)
-
-    @_butsInUse.setter
-    def _butsInUse(self, value):
+    def _set_butsInUse(self, value):
         self._SetAgeSDL(butsInUseVariableName, value)
+    _butsInUse = property(_get_butsInUse, _set_butsInUse)
 
-    @property
-    def _solved(self):
+    def _get_solved(self):
         return self._GetAgeSDL(solvedVariableName)
-
-    @_solved.setter
-    def _solved(self, value):
+    def _set_solved(self, value):
         self._SetAgeSDL(solvedVariableName, value)
+    _solved = property(_get_solved, _set_solved)
 
-    @property
-    def _numCorrect(self):
+    def _get_numCorrect(self):
         return self._GetAgeSDL(numCorrectVariableName)
-
-    @_numCorrect.setter
-    def _numCorrect(self, value):
+    def _set_numCorrect(self, value):
         self._SetAgeSDL(numCorrectVariableName, value)
+    _numCorrect = property(_get_numCorrect, _set_numCorrect)
+
+    def _get_attemptCombo(self):
+        return list(self._GetScriptSDL("attemptCombo"))
+    def _set_attemptCombo(self, value):
+        self._SetScriptSDL("attemptCombo", value)
+    _attemptCombo = property(_get_attemptCombo, _set_attemptCombo)
 
     # ======================================================================
 
     def _GetPickedActID(self, events):
-        try:
-            pickedSOKey = next((i[3].getKey() for i in events if i[0] == kPickedEvent))
-            return next((i for i, actKey in enumerate(actButtons.value) if actKey.getParentKey() == pickedSOKey))
-        except:
-            PtDebugPrint("xAgeSDLBoolActivatorComboSet._GetPickedActID():\tUnable to determine picked activator ID")
-            raise
+        for i in events:
+            if i[0] != kPickedEvent:
+                continue
+            pickedSOKey = i[3].getKey()
+            for j in xrange(len(actButtons.value)):
+                if actButtons.value[j].getParentKey() == pickedSOKey:
+                    return j
+        # Still here - error
+        PtDebugPrint("xAgeSDLBoolActivatorComboSet._GetPickedActID():\tUnable to determine picked activator ID")
+        return None
 
     def _PickButton(self, events):
         # Run if there is no push responder
         actId = self._GetPickedActID(events)
-        PtDebugPrint(f"xAgeSDLBoolActivatorComboSet._PickedButton():\tPicked button {actId}", level=kWarningLevel)
+        PtDebugPrint("xAgeSDLBoolActivatorComboSet._PickedButton():\tPicked button %d" % actId, level=kWarningLevel)
         self._TriggerButton(actId)
 
     def _RunPushResp(self, events):
         self._HitActId = self._GetPickedActID(events)
-        PtDebugPrint(f"xAgeSDLBoolActivatorComboSet._RunPushResp():\tPushing button {self._HitActId}", level=kWarningLevel)
-        self._butsInUse = True
+        PtDebugPrint("xAgeSDLBoolActivatorComboSet._RunPushResp():\tPushing button %d" % self._HitActId, level=kWarningLevel)
+        self._butsInUse = 1
 
         # Responders can't be fired by integer index, so we'll have to do this the hard way...
         notify = ptNotify(self.key)
@@ -177,8 +191,8 @@ class xAgeSDLBoolActivatorComboSet(ptResponder):
                 notify.addReceiver(i)
         else:
             notify.addReceiver(respButtonPush.value)
-        notify.netPropagate(True)
-        notify.netForce(True)
+        notify.netPropagate(1)
+        notify.netForce(1)
         avKey = PtGetLocalAvatar().getKey()
         notify.addCollisionEvent(1, avKey, avKey)
         notify.setActivate(1.0)
@@ -187,16 +201,34 @@ class xAgeSDLBoolActivatorComboSet(ptResponder):
         notify.send()
 
     def _RespPushComplete(self, events):
-        self._butsInUse = False
+        self._butsInUse = 0
 
         # Proxy over to the "wait, there is no responder" method
         self._TriggerButton(self._HitActId)
         self._HitActId = None
 
     def _TriggerButton(self, actId):
+        self._AddToAttempt(actId)
+
         if self._solved:
             PtDebugPrint("xAgeSDLBoolActComboSet._TriggerButton():\tYou just unsolved it, moron.", level=kWarningLevel)
-            self._solved = False
+            self._solved = 0
+            self._attemptCombo = [actId]
+            return
+
+        if allowSlidingSolution.value:
+            attempt = self._attemptCombo
+            # find the subset of the attempt array that matches the start of the combination, if it exists.
+            # the length of this matching attempt subset is the current number of correct values, otherwise 0 are correct.
+            # next((len(attempt) - i for i in range(len(attempt)) if self._IsAttemptCorrectAtIndex(i)), 0)
+            self._numCorrect = 0
+            for i in xrange(len(attempt)):
+                if self._IsAttemptCorrectAtIndex(i):
+                    self._numCorrect = len(attempt) - i
+                    break
+
+            PtDebugPrint("xAgeSDLBoolActComboSet._TriggerButton():\t Sliding attempt %s has %d correct." % (attempt, self._numCorrect), level=kWarningLevel)
+            self._CheckSolved()
             return
 
         try:
@@ -208,14 +240,10 @@ class xAgeSDLBoolActivatorComboSet(ptResponder):
         if desiredActId == actId:
             PtDebugPrint("xAgeSDLBoolActComboSet._TriggerButton():\tThat's right!", level=kWarningLevel)
             self._numCorrect += 1
-            if self._numCorrect == len(self._combination):
-                PtDebugPrint("xAgeSDLBoolActComboSet._TriggerButton():\tWoohoo! You have solved the puzzle!", level=kWarningLevel)
-                self._solved = True
-                if disableOnSolve.value:
-                    self._butsInUse = True
+            self._CheckSolved()
         else:
             PtDebugPrint("xAgeSDLBoolActComboSet._TriggerButton():\tWRONG! THAT'S ***WRONG***!", level=kWarningLevel)
-            self._solved = False
+            self._solved = 0
             self._numCorrect = 0
 
     def _ValidateCombination(self):
@@ -224,3 +252,20 @@ class xAgeSDLBoolActivatorComboSet(ptResponder):
         if ',' not in combination.value:
             PtDebugPrint("xAgeSDLBoolActComboSet._ValidateCombination():\tCombination does not have separation delimiters")
         self._combination = [int(i) for i in combination.value.split(',')]
+
+    def _CheckSolved(self):
+        if self._numCorrect == len(self._combination):
+            PtDebugPrint("xAgeSDLBoolActComboSet._CheckSolved():\tWoohoo! You have solved the puzzle!", level=kWarningLevel)
+            self._solved = True
+            if disableOnSolve.value:
+                self._butsInUse = True
+
+    def _AddToAttempt(self, actId):
+        attempt = self._attemptCombo
+        attempt.append(actId)
+        attempt = attempt[-len(self._combination):]
+        self._attemptCombo = attempt
+
+    def _IsAttemptCorrectAtIndex(self, i):
+        attempt = self._attemptCombo
+        return attempt[i:] == self._combination[:len(attempt)-i]

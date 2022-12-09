@@ -99,11 +99,15 @@ xYeeshaPage23 = ( "YeeshaPage23", '<pb><img src="xYeeshaPageAlphaSketchErcaPlant
 xYeeshaPage24 = ( "YeeshaPage24", '<pb><img src="xYeeshaPageAlphaSketchStorm*1#0.hsm" align=center check=00ff18,00800c,%d link=25>' )
 xYeeshaPage25 = ( "YeeshaPage25", '<pb><img src="xYeeshaPageAlphaSketch14*1#0.hsm" align=center check=00ff18,00800c,%d link=26>' )
 xYeeshaPage26 = ( "YeeshaPage26", '<pb><img src="xYeeshaPageVeelay7.dds" align=center check=00ff18,00800c,%d link=27>' )
+xYeeshaPage27 = ( "YeeshaPage27", '<pb><img src="xYeeshaPageOcean.dds" align=center check=00ff18,00800c,%d link=28>' )
+xYeeshaPage28 = ( "YeeshaPage28", '<pb><img src="xYeeshaPageBlueFlower.dds" align=center check=00ff18,00800c,%d link=29>' )
+xYeeshaPage29 = ( "YeeshaPage29", '<pb><img src="xYeeshaPageTiamCrystal.dds" align=center check=00ff18,00800c,%d link=30>' )
 
 
 xYeeshaPages = [ xYeeshaPage1, xYeeshaPage2, xYeeshaPage3, xYeeshaPage4, xYeeshaPage5, xYeeshaPage6, xYeeshaPage7,\
                 xYeeshaPage8, xYeeshaPage9, xYeeshaPage10, xYeeshaPage12, xYeeshaPage13, xYeeshaPage14, xYeeshaPage15,\
-                xYeeshaPage16, xYeeshaPage17, xYeeshaPage18, xYeeshaPage19, xYeeshaPage20, xYeeshaPage21, xYeeshaPage22, xYeeshaPage23, xYeeshaPage24, xYeeshaPage25, xYeeshaPage26 ]
+                xYeeshaPage16, xYeeshaPage17, xYeeshaPage18, xYeeshaPage19, xYeeshaPage20, xYeeshaPage21, xYeeshaPage22,\
+                xYeeshaPage23, xYeeshaPage24, xYeeshaPage25, xYeeshaPage26, xYeeshaPage27, xYeeshaPage28, xYeeshaPage29 ]
 
 
 
@@ -235,8 +239,9 @@ else:
         "Cleft":                ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xLinkPanelCleftDesert' + LinkEnd ),
         "CleftWithTomahna":     ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + LinkStart + 'xLinkPanelTomahnaDesert' + LinkEndPage + PageStart + LinkStart + 'xLinkPanelCleftDesert' + LinkEndPage ),
         "TomahnaFromCleft":     ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xLinkPanelTomahnaDesert' + LinkEnd ),
-        "grsnTeamRmPurple":     ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xLinkPanelCleftDesert' + LinkEnd ),
-        "grsnTeamRmYellow":     ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xLinkPanelTomahnaDesert' + LinkEnd ),
+        "grsnTeamRmPurple":     ( 'xLinkPanelGarrisonPurpleControlRoom' ),
+        "grsnTeamRmYellow":     ( 'xLinkPanelGarrisonYellowControlRoom' ),
+        "grsnTrnCtrlRm":       ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xLinkPanelGarrisonControlRoom' + LinkEnd ),
         "grtzGrtZeroLinkRm":    ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xLinkPanelGrtZeroLinkRm' + LinkEnd + YeeshaStamp ),
         "Ercana":     		  ( 1, 1.0, 1.0, DRCStamp1+DRCPos2, BookStart1 + DRCStampHolder + ShareHolder + LinkStart + 'xLinkPanelErcanaDefault' + LinkEnd + YeeshaStamp ),
         "Ahnonay":     		  ( 0, 1.0, 1.0, DRCStamp2+DRCPos1, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xLinkPanelAhnonayVortex' + LinkEnd + YeeshaStamp ),
@@ -272,6 +277,7 @@ else:
         "Tiam":                 ( 1, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + ShareHolder + LinkStart + 'xlinkpaneltiam' + LinkEnd ),
         "Elonin":               ( 1, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + ShareHolder + LinkStart + 'xlinkpanelelonin' + LinkEnd ),
         "EderNaybree":          ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpaneledernaybree' + LinkEnd ),
+        "EderBahvahnter":       ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpanelederbahvahnter' + LinkEnd ),
         "FahetsHighgarden":     ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpanelhighgarden' + LinkEnd ),
 }
 
@@ -316,8 +322,9 @@ xLinkDestinations = {\
     "Cleft":                    ( "Cleft", "LinkInPointDefault" ),
     "CleftWithTomahna":         ( "", "" ),
     "TomahnaFromCleft":         ( "", "" ),
-    "grsnTeamRmPurple":         ( "Garrison", "" ),
-    "grsnTeamRmYellow":         ( "Garrison", "" ),
+    "grsnTeamRmPurple":         ( "Garrison", "LinkInPointCtrlRm02" ),
+    "grsnTeamRmYellow":         ( "Garrison", "LinkInPointCtrlRm01" ),
+    "grsnTrnCtrlRm":           ( "Garrison", "LinkInPointControlCenter" ),
     "Ercana":     		  ( "Ercana", "LinkInPointDefault" ),
     "Ahnonay":     		  ( "Ahnonay", "LinkInPointDefault" ),
     "AhnonayCathedral":   ( "AhnonayCathedral", "LinkInPointDefault" ),
@@ -351,7 +358,8 @@ xLinkDestinations = {\
     "Tiam":                   ( "Tiam", "LinkInPointDefault" ),
     "Elonin":                 ( "Elonin", "LinkInPointDefault" ),
     "EderNaybree":            ( "EderNaybree", "LinkInPointDefault" ),
-    "FahetsHighgarden":       ( "FahetsHighgarden", "LinkInPointDefault" ),
+    "EderBahvahnter":         ( "EderBahvahnter", "LinkInPointDefault" ),
+    "FahetsHighgarden":      ( "FahetsHighgarden", "LinkInPointDefault" ),
 }
 
 #
@@ -378,6 +386,10 @@ xLinkingPages = {\
     "islmGreatTree":        ( PageStart + NoShare + LinkStart + 'xLinkPanelCityGreatTree' + LinkEndPage),
     "BahroCaveUpper":       ( PageStart + NoShare + LinkStart + 'xLinkPanelBahroCaveUpper' + LinkEndPage ),
     "BahroCaveLower":       ( PageStart + NoShare + LinkStart + 'xLinkPanelBahroCaveLower' + LinkEndPage ),
+    # Garrison Wall Control Room Pages
+    "grsnTeamRmPurple":     ( PageStart + NoShare + LinkStart + 'xLinkPanelGarrisonPurpleControlRoom' + LinkEndPage ),
+    "grsnTeamRmYellow":     ( PageStart + NoShare + LinkStart + 'xLinkPanelGarrisonYellowControlRoom' + LinkEndPage ),
+    "grsnTrnCtrlRm":       ( PageStart + NoShare + LinkStart + 'xLinkPanelGarrisonControlRoom' + LinkEndPage ),
 }
 
 CityBookLinks = ["islmPalaceBalcony02", "islmPalaceBalcony03", "islmDakotahRoof", "KadishGallery", "BaronCityOffice", "dsntShaftFall", "grtzGrtZeroLinkRm", "Spyroom", "islmGreatTree", "Kveer"]

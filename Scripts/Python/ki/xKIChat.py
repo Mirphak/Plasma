@@ -45,6 +45,7 @@ import re
 import time
 import random
 import inspect
+#import traceback
 
 # Plasma Engine.
 from Plasma import *
@@ -62,19 +63,20 @@ from . import xKIExtChatCommands
 from .xKIConstants import *
 from .xKIHelpers import *
 
+# Robot commands
+import xKiBot
+
 # Other new commands
 from . import xReadWritePosition
 from . import xMystitech
-
-import traceback
-
-# Robot commands
-import xKiBot
 
 ## A class to process all the RT Chat functions of the KI.
 class xKIChat(object):
 
     ## Set up the chat manager's default state.
+    # The parameter self (xKI) was added at the end in xKIChat.__init__ for xRobot and in xMarkerEditor
+    # Now xRobot uses PtSendKIMessage instead of self.chatMgr.DisplayStatusMessage to avoid needing it.
+    # xMarkerEditor can be modified the same way.
     #def __init__(self, StartFadeTimer, ResetFadeState, FadeCompletely, GetCensorLevel, xKI):
     def __init__(self, StartFadeTimer, ResetFadeState, FadeCompletely, GetCensorLevel):
 
@@ -118,9 +120,6 @@ class xKIChat(object):
         self.MessageHistoryIs = -1 # Current position in message history (up/down key)
         self.MessageHistoryList = [] # Contains our message history
         self.MessageCurrentLine = "" # Hold current line while navigating message history
-
-        # Was used in xRobot and in xMarkerEditor
-        #self.xKI = xKI
 
     @property
     def chatArea(self):
@@ -518,12 +517,12 @@ class xKIChat(object):
                     # PM Processing: Save playerID and flash client window
                     if cFlags.private:
                         self.lastPrivatePlayerID = (player.getPlayerName(), player.getPlayerID(), 1)
-                        PtFlashWindow()
+                        #PtFlashWindow()    # The game window and taskbar icon blink all the time, which annoys me, especially with the robot.
                     # Are we mentioned in the message?
                     elif self._chatMentionRegex.search(message) is not None:
                         hasMention = True
                         contextPrefix = PtGetLocalizedString("KI.Chat.MentionContextPrefix")
-                        PtFlashWindow()
+                        #PtFlashWindow()    # The game window and taskbar icon blink all the time, which annoys me, especially with the robot.
 
             # Is it a ccr broadcast?
             elif cFlags.ccrBcast:
@@ -550,7 +549,7 @@ class xKIChat(object):
                     # PM Processing: Save playerID and flash client window
                     self.lastPrivatePlayerID = (player.getPlayerName(), player.getPlayerID(), 0)
                     self.AddPlayerToRecents(player.getPlayerID())
-                    PtFlashWindow()
+                    #PtFlashWindow()    # The game window and taskbar icon blink all the time, which annoys me, especially with the robot.
                 else:
                     headerColor = kColors.ChatHeaderAdmin
                     contextPrefix = PtGetLocalizedString("KI.Chat.AdminContextPrefix")
@@ -571,7 +570,7 @@ class xKIChat(object):
                         hasMention = True
                         contextPrefix = PtGetLocalizedString("KI.Chat.MentionContextPrefix")
                         forceKI = True
-                        PtFlashWindow()
+                        #PtFlashWindow()    # The game window and taskbar icon blink all the time, which annoys me, especially with the robot.
 
             # Is it a private message?
             elif cFlags.private:
@@ -590,7 +589,7 @@ class xKIChat(object):
                     # PM Processing: Save playerID and flash client window
                     self.lastPrivatePlayerID = (player.getPlayerName(), player.getPlayerID(), 0)
                     self.AddPlayerToRecents(player.getPlayerID())
-                    PtFlashWindow()
+                    #PtFlashWindow()    # The game window and taskbar icon blink all the time, which annoys me, especially with the robot.
 
         # Otherwise, cFlags is just a number.
         else:
@@ -961,6 +960,7 @@ class CommandsProcessor:
         # Mirphak : Is it a robot command?
         for command, function in kCommands.Robot.items():
             if msg.startswith(command):
+                # It's working with that
                 theMessage = message[len(command):].strip()
                 if len(theMessage) > 0:
                     params = theMessage
@@ -968,16 +968,44 @@ class CommandsProcessor:
                     params = None
                 getattr(self, function)(params)
                 return None
+                # But not this that because there is only one chat command for all the robot's commandes that takes the real command and its parameters in parameters
+                """
+                callableCommandFn = getattr(self, function)
+                numParams = len(inspect.signature(callableCommandFn).parameters)
+                PtDebugPrint(f"xKI.CommandsProcessor: Processing robot {command} function {function} with {numParams} parameters", level=kWarningLevel)
+                PtDebugPrint(f"xKI.CommandsProcessor: parameters : {inspect.signature(callableCommandFn).parameters}", level=kWarningLevel)
+                theMessage = message.split(" ", numParams)
+                PtDebugPrint(f"xKI.CommandsProcessor: theMessage : {theMessage}", level=kWarningLevel)
+                if len(theMessage) > 1 and theMessage[1]:
+                    callableCommandFn(*theMessage[1:])
+                else:
+                    callableCommandFn(None)
+                return None
+                """
 
         # Mirphak : Is it a Mystitech command?
         for command, function in kCommands.Mystitech.items():
             if msg.startswith(command):
+                
                 params = message[len(command):].strip()
                 if len(params) > 0:
                     getattr(xMystitech, function)(params)
                 else:
                     getattr(xMystitech, function)()
                 return None
+                """
+                # TODO : Compare the number of parameters in the signature and the number of parameters space separated in the message
+                # If they not match we crash
+                callableCommandFn = getattr(xMystitech, function)
+                numParams = len(inspect.signature(callableCommandFn).parameters)
+                PtDebugPrint(f"xKI.CommandsProcessor: Processing MystiTech {command} function with {numParams} parameters", level=kWarningLevel)
+                theMessage = message.split(" ", numParams)
+                if len(theMessage) > 1 and theMessage[1]:
+                    callableCommandFn(*theMessage[1:])
+                else:
+                    callableCommandFn(None)
+                return None
+                """
 
         # Is it another text-based easter-egg command?
         if msg.startswith("/get "):
@@ -1004,11 +1032,10 @@ class CommandsProcessor:
             try:
                 command = message[1:]
                 xKiBot.SetCommand(self, command)
-                return None
             except Exception as ex:
-                PtDebugPrint(u"xKIChat.commandsProcessor(): Robot command function did not run.", command, level=kErrorLevel)
-                tb = repr(traceback.format_exception(*sys.exc_info()))
-                PtDebugPrint("StackTrace :\n{}".format(tb))
+                PtDebugPrint("xKIChat.commandsProcessor(): Robot command function did not run.", command, level=kErrorLevel)
+                #traceback.print_exc()
+            return None
 
         # Is it an emote, a "/me" or invalid command?
         if message.startswith("/"):
@@ -1827,7 +1854,6 @@ class CommandsProcessor:
         cFlags.toSelf = True
         cFlags.status = True
         if params:
-            #xKiBot.Do(self.chatMgr.xKI, PtGetLocalPlayer(), params, cFlags)
             xKiBot.Do(PtGetLocalPlayer(), params, cFlags)
         else:
             self.chatMgr.DisplayStatusMessage("No command given.")

@@ -1034,6 +1034,9 @@ class xKI(ptModifier):
                         xKiBot.Do(player, message, cFlags)
                     except Exception as ex:
                         PtDebugPrint("xKI.OnRTChat(): ERROR IN xKiBot.Do(\"{}\").".format(message))
+                        #traceback.print_exc()
+                        #print(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+                        #tb = repr(traceback.format_exception(exc_type, exc_value, exc_traceback))
                         tb = repr(traceback.format_exception(*sys.exc_info()))
                         PtDebugPrint("StackTrace :\n{}".format(tb))
                         self.chatMgr.AddChatLine(None, "StackTrace :\n{}".format(tb), kChat.SystemMessage)
@@ -2058,8 +2061,12 @@ class xKI(ptModifier):
                 if self.CanMakeMarker():
                     markerName = "{} marker".format(self.markerGameManager.game_name)
                     avaCoord = PtGetLocalAvatar().position()
-                    self.markerGameManager.AddMarker(PtGetAgeName(), avaCoord, markerName)
-                    PtDebugPrint("xKI.CreateAMarker(): Creating marker at: ({}, {}, {}).".format(avaCoord.getX(), avaCoord.getY(), avaCoord.getZ()))
+                    PtDebugPrint("xKI.CreateAMarker(): Game : {} => Trying to create a marker in {} at: ({}, {}, {}).".format(markerName, PtGetAgeName(), avaCoord.getX(), avaCoord.getY(), avaCoord.getZ()))
+                    try :
+                        self.markerGameManager.AddMarker(PtGetAgeName(), avaCoord, markerName)
+                        PtDebugPrint("xKI.CreateAMarker(): Creating marker at: ({}, {}, {}).".format(avaCoord.getX(), avaCoord.getY(), avaCoord.getZ()))
+                    except :
+                        self.ShowKIFullErrorMsg("Error while creating a new marker!")
                 else:
                     self.ShowKIFullErrorMsg("FullMarkers")
 
@@ -2435,12 +2442,14 @@ class xKI(ptModifier):
     # By default, it's set at PG, but it fetches the real value from the
     # chronicle. If it is not found in the chronicle, it will set it to PG.
     def DetermineCensorLevel(self):
-        # Hack used when I changed my avatar into a quab, what a bad idea!
-        # try:
-            # PtChangeAvatar("Male")
-            # print "xKi.__Init__.DetermineCensorLevel => Turn avatar into male."
-        # except:
-            # print "xKi.__Init__.DetermineCensorLevel => Can't change avatar here!"
+        """
+        # I have done that after changing my avatar into quab that cause crash on login
+        try:
+            PtChangeAvatar("Male")
+            print "xKi.__Init__.DetermineCensorLevel => Turn avatar into male."
+        except:
+            print "xKi.__Init__.DetermineCensorLevel => Can't change avatar here!"
+        """
 
         self.censorLevel = xCensor.xRatedPG
         vault = ptVault()
@@ -4357,6 +4366,9 @@ class xKI(ptModifier):
         for removeidx in removeList:
             del self.BKContentList[removeidx]
 
+        """
+        # Mirphak : I removed that because Mir-o-Bot has a lot of marker games in his inbox folder from too many people.
+        # That cause lag while buddies folder is updating for something I don't care. 
         if self.BKFolderListOrder[self.BKFolderSelected] == xLocTools.FolderIDToFolderName(PtVaultStandardNodes.kInboxFolder):
             recentsList = ptVault().getPeopleIKnowAboutFolder()
             if recentsList and (remRecents := kLimits.MaxRecentPlayerListSize - len(recentsList.getChildNodeRefList())) > 0:
@@ -4367,6 +4379,7 @@ class xKI(ptModifier):
                 # add only one then stop because addition triggers BK refresh again that will add next one, etc.
                 inboxRef = next(itertools.dropwhile(cannotAdd, self.BKContentList), None)
                 PtDebugPrint(f"xKI.BigKIProcessContentList(): Added {xKIHelpers.GetSaverID(inboxRef)} ({inboxRef}) to recents.", level=kWarningLevel)
+        """
 
     ## Refresh the display of the selected content list.
     def BigKIRefreshContentListDisplay(self):

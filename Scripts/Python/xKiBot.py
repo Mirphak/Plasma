@@ -90,6 +90,7 @@ def Do(player, message, cFlags):
         #Mister Magic inform you that bots will rest Thursday 2 and Friday 3 April.They will be back in the cave on Saturday April 4th. Thanks.
         #msg += "Mirphak's holydays will begin on Thursday April 2nd, I will rest until Sunday April 12th. Thanks."
         #msg += "Mirphak informs you that Mir-o-Bot will rest from Thursday September 9th to Wednesday September 22nd. Thanks."
+        #msg += "Mirphak informs you that Mir-o-Bot will rest from Saturday Jully 2nd to Sunday Jully 17th. Thanks."
         #C'est mieux d'envoyer un message en statut interage plutot qu'en prive
         PtSendRTChat(myself, plist, msg, 24)
     else:
@@ -134,7 +135,8 @@ def Do(player, message, cFlags):
                 
                 if CheckPlayersArrival.isActive and cmdName in ("link", "meet"):
                     #CheckPlayersArrival.StartChecking(self, player, method=DoNothing, params=[])
-                    CheckPlayersArrival.StartChecking(self, player)
+                    #CheckPlayersArrival.StartChecking(self, player)
+                    CheckPlayersArrival.StartChecking(player)
                     PtSendKIMessage(kKILocalChatStatusMsg, "** CheckPlayersArrival executed. **")
                     print("** CheckPlayersArrival executed. **")
 
@@ -334,6 +336,14 @@ class SurveyBotAge:
             return
         #print "SurveyBotAge:call WhereAmI"
         self.WhereAmI()
+        #Check age player positions to see why I have Collision error crash
+        agePlayers = PtGetPlayerList()
+        for player in agePlayer:
+            so = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            pos = so.position()
+            #PtDebugPrint(f">> Check position of {so.getName()}: {round(pos.getX(), 2)}, {round(pos.getY(), 2)}, {round(pos.getZ())}")
+            print(f">> Check position of {player.getPlayerName()}: {round(pos.getX(), 2)}, {round(pos.getY(), 2)}, {round(pos.getZ())}")
+        #
         PtSetAlarm(15, self, 1)
         
     def Start(self, xKiSelf):
@@ -348,6 +358,51 @@ class SurveyBotAge:
         self._running = False
 
 surveyBot = SurveyBotAge()
+
+
+#==========================#
+# CheckPos
+#==========================#
+class CheckPos:
+    _running = False
+    _xKiSelf = None
+    _nbTry   = 0
+    
+    def __init__(self):
+        print("CheckPos:")
+    
+    def onAlarm(self, param=1):
+        #print("CheckPos:onalarm")
+        if not self._running:
+            print("CheckPos:not running")
+            return
+        #Check age player positions to see why I have Collision error crash
+        agePlayers = PtGetPlayerList()
+        #print(f"CheckPos : Nb players = {len(agePlayers)}")
+        PtDebugPrint(f"CheckPos : Nb players = {len(agePlayers)}")
+        
+        for player in agePlayers:
+            so = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            pos = so.position()
+            #PtDebugPrint(f">> Check position of {so.getName()}: {round(pos.getX(), 2)}, {round(pos.getY(), 2)}, {round(pos.getZ())}")
+            #print(f">> Check position of {so.getName()}: {round(pos.getX(), 2)}, {round(pos.getY(), 2)}, {round(pos.getZ())}")
+            PtDebugPrint(f">> Check position of {player.getPlayerName()}: {round(pos.getX(), 2)}, {round(pos.getY(), 2)}, {round(pos.getZ())}")
+        
+        PtSetAlarm(5, self, 1)
+    
+    def Start(self, xKiSelf):
+        self._xKiSelf = xKiSelf
+        if not self._running:
+            self._running = True
+            print("CheckPos:start")
+            self.onAlarm()
+    
+    def Stop(self):
+        print("CheckPos:stop")
+        self._running = False
+
+checkPos = CheckPos()
+
 #************************************************************************#
 """
 # IsAllowed Version 1
@@ -432,6 +487,20 @@ def ToggleBlockCmds(self):
         msg = f"{msg}UNLOCKED"
     PtSendKIMessage(kKIChatStatusMsg, msg)
 
+bCheckPos = False
+# checkPos
+def ToggleCheckPos(self):
+    global bCheckPos
+    bCheckPos = not bCheckPos
+    msg = f"{PtGetLocalPlayer().getPlayerName()} : CheckPos is "
+    if bCheckPos:
+        msg = f"{msg}ON"
+        checkPos.Start(self)
+    else:
+        msg = f"{msg}OFF"
+        checkPos.Stop()
+    PtSendKIMessage(kKIChatStatusMsg, msg)
+
 # 
 def ResetAdminList(self):
     xPlayerKiCmds.adminList = ['32319L', '31420L']
@@ -484,6 +553,11 @@ def SetCommand(self, chatmessage):
     # (un)lock bot commands for users (but W/ONBOT)
     elif chatmessage.lower() == "lock":
         ToggleBlockCmds(self)
+        return None
+    
+    # start/stop check pos
+    elif chatmessage.lower() == "checkpos":
+        ToggleCheckPos(self)
         return None
     
     # (un)check player's arrival, optionaly method name, parameters

@@ -94,6 +94,9 @@ kYeeshaPage23 = 223
 kYeeshaPage24 = 224
 kYeeshaPage25 = 225
 kYeeshaPage26 = 226
+kYeeshaPage27 = 227
+kYeeshaPage28 = 228
+kYeeshaPage29 = 229
 kYeeshaPageCancel = 299
 
 isOpen = 0
@@ -227,7 +230,11 @@ class clftYeeshaPage08(ptModifier):
             ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage24)).hide()
             ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage25)).hide()
             ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage26)).hide()
+            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage27)).hide()
+            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage28)).hide()
+            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage29)).hide()
 
             ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage08)).show()
 
             GUIDialogObject.value.draw.disable()
+

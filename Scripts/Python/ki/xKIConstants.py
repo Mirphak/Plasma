@@ -377,12 +377,16 @@ class kCommands:
         "/pageoutoffice" : "PageOutOffice", # PageOut the Mystitech's Office
         "/pageinredoffice" : "PageInOfficeRed", # PageIn the Mystitech's Office Red
         "/pageoutredoffice" : "PageOutOfficeRed", # PageOut the Mystitech's Office Red
-        "/pageintlaloft" : "PageInTLALoft", # PageIn the Mystitech's TLALoft
-        "/pageouttlaloft" : "PageOutTLALoft", # PageOut the Mystitech's TLALoft
+        "/pageintlaloftold" : "PageInTLALoft", # PageIn the Mystitech's TLALoft
+        "/pageouttlaloftold" : "PageOutTLALoft", # PageOut the Mystitech's TLALoft
+        "/pageintlaloft" : "PageInTLALoftEdit", # PageIn the Mystitech's TLALoft Edit
+        "/pageouttlaloft" : "PageOutTLALoftEdit", # PageOut the Mystitech's TLALoft Edit
         "/pageintlachamber" : "PageInTLATestChamber", # PageIn the Mystitech's TLATestChamber
         "/pageouttlachamber" : "PageOutTLATestChamber", # PageOut the Mystitech's TLATestChamber
         "/pageinboat" : "PageInBoat", # PageIn the CoD Boat
         "/pageoutboat" : "PageOutBoat", # PageOut the CoD Boat
+        "/pageingameroom" : "PageInGameRoom", # PageIn the Mystitech's GameRoom
+        "/pageoutgameroom" : "PageOutGameRoom", # PageOut the Mystitech's GameRoom
         "/minkatahide" : "MinkataHide", # To hide some objects of Minkata 
         "/minkatarestore" : "MinkataRestore", # To restore some objects of Minkata
         "/tokiva4" : "WarpMeToKiva4", # To move you to Kiva4

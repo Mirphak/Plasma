@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 """ *==LICENSE==*
 
 CyanWorlds.com Engine - MMOG client, server and tools
-Copyright (C) 2011 Cyan Worlds, Inc.
+Copyright (C) 2011  Cyan Worlds, Inc.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -10,11 +11,11 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Additional permissions under GNU GPL version 3 section 7
 
@@ -47,32 +48,27 @@ actSwitch01 = ptAttribActivator(1, "act: Podium Button")
 respButtonOneshot = ptAttribResponder(2, "resp: Push Podium oneshot")
 respList = ptAttribResponderList(3, "ResponderList", byObject=1)
 stringFormat = ptAttribString(4, "Responder name format string")
-stringVarName = ptAttribString(5, "Age SDL variable name")
 
-class xPodium(ptResponder):
+class krelPodium(ptResponder):
 
     def __init__(self):
         ptResponder.__init__(self)
-        self.id = 6245
+        self.id = 5245
         version = 2
         self.version = version
-        PtDebugPrint("__init__xPodium v.", version, ".0")
-
-    def OnFirstUpdate(self):
-        if not stringVarName.value:
-            PtDebugPrint("ERROR: xPodium.OnFirstUpdate():\tERROR: missing SDL var name")
+        PtDebugPrint("__init__krelPodium v.", version, ".0")
 
     def OnServerInitComplete(self):
         ageSDL = PtGetAgeSDL()
         if not PtGetPlayerList():
-            ageSDL[stringVarName.value] = (0,)
-        ageSDL.setNotify(self.key, stringVarName.value, 0.0)
-        ageSDL.sendToClients(stringVarName.value)
-        ageSDL.setFlags(stringVarName.value, 1, 1)
+            ageSDL["nb01CmnRmSpeech"] = (0,)
+        ageSDL.setNotify(self.key, "nb01CmnRmSpeech", 0.0)
+        ageSDL.sendToClients("nb01CmnRmSpeech")
+        ageSDL.setFlags("nb01CmnRmSpeech", 1, 1)
 
     def OnNotify(self, state, id, events):
         ageSDL = PtGetAgeSDL()
-        xPodiumSpeech = ageSDL[stringVarName.value][0]
+        nb01CmnRmSpeech = ageSDL["nb01CmnRmSpeech"][0]
 
         if not state:
             return
@@ -82,24 +78,24 @@ class xPodium(ptResponder):
             return
 
         elif id == respButtonOneshot.id and self.sceneobject.isLocallyOwned():
-            xPodiumSpeech -= 1
-            if xPodiumSpeech < 0:
-                xPodiumSpeech = len(respList.byObject) - 1
-            respName = (stringFormat.value % xPodiumSpeech)
+            nb01CmnRmSpeech -= 1
+            if nb01CmnRmSpeech < 0:
+                nb01CmnRmSpeech = len(respList.byObject) - 1
+            respName = (stringFormat.value % nb01CmnRmSpeech)
             if respName in respList.byObject:
-                ageSDL[stringVarName.value] = (xPodiumSpeech,)
+                ageSDL["nb01CmnRmSpeech"] = (nb01CmnRmSpeech,)
             else:
-                PtDebugPrint("ERROR: xPodium Invalid speech %d selected!" % xPodiumSpeech)
-                ageSDL[stringVarName.value] = (0,)
+                PtDebugPrint(f"ERROR: krelPodium Invalid speech {nb01CmnRmSpeech} selected!")
+                ageSDL["nb01CmnRmSpeech"] = (0,)
 
     def OnSDLNotify(self, VARname, SDLname, PlayerID, tag):
-        if VARname != stringVarName.value:
+        if VARname != "nb01CmnRmSpeech":
             return
 
         ageSDL = PtGetAgeSDL()
-        xPodiumSpeech = ageSDL[stringVarName.value][0]
-        respName = (stringFormat.value % xPodiumSpeech)
+        nb01CmnRmSpeech = ageSDL["nb01CmnRmSpeech"][0]
+        respName = (stringFormat.value % nb01CmnRmSpeech)
 
-        if xPodiumSpeech >= 0 and respName in respList.byObject:
-            PtDebugPrint("xPodium: Playing speech", respName)
+        if nb01CmnRmSpeech >= 0 and respName in respList.byObject:
+            PtDebugPrint("krelPodium: Playing speech", respName)
             respList.run(self.key, objectName=respName)
