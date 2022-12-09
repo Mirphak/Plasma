@@ -3,6 +3,7 @@ from Plasma import *
 import math
 from . import xBotAge
 from . import BahroCaveFloor
+from . import xJMD
 import traceback
     
 # Default method that does nothing.
@@ -39,6 +40,7 @@ def NoLadder(player=None, params=[]):
     #xBotAge.ToggleSceneObjects("Ladder", age=None, bDrawOn=True, bPhysicsOn=False)
     #xBotAge.ToggleSceneObjects("ladder", age=None, bDrawOn=True, bPhysicsOn=False)
     xBotAge.ToggleSceneObjects("cliimbTrigger", age=ageName, bDrawOn=True, bPhysicsOn=False)
+    WarpToMe(player, params)
 
 #
 def PageInAllCaves():
@@ -52,7 +54,6 @@ def PageInJalak():
     for page in pages:
         PtConsoleNet("Nav.PageInNode {0}".format(page), 1)
 
-
 #
 def Cave(player=None, params=[]):
     PageInAllCaves()
@@ -60,6 +61,30 @@ def Cave(player=None, params=[]):
     PtConsoleNet("Avatar.Spawn.DontPanic", 1)
     BahroCaveFloor.Floor(en=True)
     WarpToMe(player, params)
+
+#
+def Tiwah(player=None, params=[]):
+    #print(f"CheckPlayersArrival.Tiwah({player.getPlayerName()},{params})")
+    print("CheckPlayersArrival.Tiwah")
+    ageName = PtGetAgeInfo().getAgeFilename()
+    #PtSendKIMessage(kKILocalChatStatusMsg, f"CheckPlayersArrival.Tiwah({player.getPlayerName()},{params})")
+    print("CheckPlayersArrival.Tiwah : PageInJalak")
+    PageInJalak()
+    #tSendKIMessage(kKILocalChatStatusMsg, "    > PageInJalak")
+    #PtConsoleNet("Avatar.Spawn.DontPanic", 1)
+    print("CheckPlayersArrival.Tiwah : Cam")
+    xBotAge.ToggleSceneObjects("Cam", age=ageName, bDrawOn=False, bPhysicsOn=False)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "    > Cam")
+    print("CheckPlayersArrival.Tiwah : Panic")
+    xBotAge.ToggleSceneObjects("Panic", age=ageName, bDrawOn=False, bPhysicsOn=False)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "    > Panic")
+    print("CheckPlayersArrival.Tiwah : platform")
+    xJMD.platform(where=6, bAttachOn=False)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "    > platform")
+    print("CheckPlayersArrival.Tiwah : WarpToMe")
+    WarpToMe(player, params)
+    #PtSendKIMessage(kKILocalChatStatusMsg, "    > warp")
+    print("CheckPlayersArrival.Tiwah : END")
 
 #************************************************************************#
 # When a new player is arriving in my age,
@@ -72,7 +97,7 @@ def Cave(player=None, params=[]):
 class CheckPlayersArrival:
     _running = False
     _nbTry   = 0
-    _xKiSelf = None
+    #_xKiSelf = None
     _player  = None
     _playerList = []
     _method = None
@@ -159,14 +184,15 @@ class CheckPlayersArrival:
             #pass
             self._method(self._player, self._params)
         
-    def Start(self, xKiSelf, player, method=DoNothing, params=[]):
-        if xKiSelf is None:
-            print("CheckPlayersArrival : Error : self._xKiSelf is none")
-            return
+    #def Start(self, xKiSelf, player, method=DoNothing, params=[]):
+    def Start(self, player, method=DoNothing, params=[]):
+        #if xKiSelf is None:
+        #    print("CheckPlayersArrival : Error : self._xKiSelf is none")
+        #    return
         if not isinstance(player, ptPlayer):
             print("CheckPlayersArrival : not player")
             return
-        self._xKiSelf = xKiSelf
+        #self._xKiSelf = xKiSelf
         self._player = player
         self._method = method
         self._params = params
@@ -218,6 +244,8 @@ def stringToMethodParams(strArgs=""):
                 function = NoLadder
             elif fct == "cave":
                 function = Cave
+            elif fct == "tiwah" or fct == "descent":
+                function = Tiwah
             else:
                 print("unknown fct {}".format(fct))
     else:
@@ -231,10 +259,12 @@ def StopChecking():
 
 #
 #def StartChecking(xKiSelf, player, method=DoNothing, params=[]):
-def StartChecking(xKiSelf, player):
+#def StartChecking(xKiSelf, player):
+def StartChecking(player):
     global checkArrivals
     #stopchecking()
     checkArrivals = CheckPlayersArrival()
-    checkArrivals.Start(xKiSelf, player, method=function, params=parameters)
+    #checkArrivals.Start(xKiSelf, player, method=function, params=parameters)
+    checkArrivals.Start(player, method=function, params=parameters)
 
 #

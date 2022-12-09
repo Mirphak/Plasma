@@ -114,7 +114,8 @@ adminList += [
 allowedAgeInstanceGuids = {
 }
 
-lastLinkTime = datetime.datetime.now()
+#lastLinkTime = datetime.datetime.now()
+lastLinkTime = datetime.datetime.now(datetime.timezone.utc)
 
 #----------------------------------------------------------------------------#
 #   Methodes
@@ -565,7 +566,8 @@ def RemovePrpToLocal(self):
 def LinkBotTo(self, cFlags, args = []):
     global lastLinkTime
     #PtSendKIMessage(kKILocalChatStatusMsg, "> LinkBotTo")
-    now = datetime.datetime.now()
+    #now = datetime.datetime.now()
+    now = datetime.datetime.now(datetime.timezone.utc)
     minDiff = 1 * 60
     
     if len(args) < 2:
@@ -597,15 +599,20 @@ def LinkBotTo(self, cFlags, args = []):
     # Trying Mir-o-Bot ages
     elif (linkName in ages.MirobotAgeDict.keys()):
     """
+    
     if linkName == "ahnonay":
         msg = "Sorry, I can't go to Ahnonay. I'm crashing too often there!"
         SendChatMessage(self, myself, [player], msg, cFlags.flags)
         return 0
-    #elif linkName == "mobelonin":
-    #    msg = "Sorry, I can't go to Mob's Elonin."
-    #    SendChatMessage(self, myself, [player], msg, cFlags.flags)
-    #    return 0
-    elif linkName == "pedia":
+    
+    """
+    elif linkName == "mobelonin":
+        msg = "Sorry, I can't go to Mob's Elonin."
+        SendChatMessage(self, myself, [player], msg, cFlags.flags)
+        return 0
+    """
+    #elif linkName == "pedia":
+    if linkName == "pedia":
         msg = "Sorry, I can't go to Myspedia."
         SendChatMessage(self, myself, [player], msg, cFlags.flags)
         return 0
@@ -617,6 +624,18 @@ def LinkBotTo(self, cFlags, args = []):
     #if (linkName in list(ages.MirobotAgeDict.keys())):
     elif (linkName in list(ages.MirobotAgeDict.keys())):
         link = ages.MirobotAgeDict[linkName]
+        #if linkName == "ndgelonin":
+        #    start_dt_1 = datetime.datetime(2022, 8, 1, 13+6, 0, 0, tzinfo=datetime.timezone.utc)
+        #    end_dt_1 = datetime.datetime(2022, 8, 1, 15+6, 0, 0, tzinfo=datetime.timezone.utc)
+        #    start_dt_2 = datetime.datetime(2022, 8, 5, 12+6, 30, 0, tzinfo=datetime.timezone.utc)
+        #    end_dt_2 = datetime.datetime(2022, 8, 5, 14+6, 30, 0, tzinfo=datetime.timezone.utc)
+        #    if (start_dt_1 < now and now < end_dt_1) or (start_dt_2 < now and now < end_dt_2):
+        #        link = ages.MirobotAgeDict[linkName]
+        #    else:
+        #        msg = "Sorry, NDG Elonin is not available at the momant."
+        #        SendChatMessage(self, myself, [player], msg, cFlags.flags)
+        #else:
+        #    link = ages.MirobotAgeDict[linkName]
 #        xBotAge.currentBotAge = list(link)
 #        if len(link) > 4:
 #            xBotAge.SetBotAgeSP(link[4])
@@ -672,7 +691,8 @@ def LinkBotTo(self, cFlags, args = []):
                 # Decharger les ages clones
                 # Liaison
                 xBotAge.LinkPlayerTo(self, link)
-                lastLinkTime = datetime.datetime.now()
+                #lastLinkTime = datetime.datetime.now()
+                lastLinkTime = datetime.datetime.now(datetime.timezone.utc)
                 
                 buds = GetPeople("buddy", agePlayers)
                 pList = agePlayers + buds
@@ -3609,8 +3629,11 @@ def Help(self, cFlags, args = []):
     title1 = myself.getPlayerName() + "'s help"
     msg = "Shorah!\n"
     msg += "I'm an automated avatar created by Mirphak.\n"
-    msg += "I'm not a magic bot, the commands you can PM to me are different.\n"
-    msg += "Here the list of available commands (last update 2017-08-13):\n"
+    #msg += "I'm not a magic bot, the commands you can PM to me are different.\n"
+    msg += "\n"
+    msg += "*** Please remember to log out after using the bot. ***\n"
+    msg += "\n"
+    msg += "Here the list of available commands (last update 2022-06-19):\n"
     msg += "------------------------------------------------------------\n\n"
     msg += "help : sends you this text note.\n"
     msg += "help [command name]: PM you a specific help on a command.\n\n"
@@ -3619,7 +3642,8 @@ def Help(self, cFlags, args = []):
     msg += "to {city/library/ferry/dakotah/tokotah/concert/palace} : links YOU to different points of the public city\n"
     msg += "or some public ages {gog/gome/kirel/kveer/phil/chiso/messengerspub/veelay}\n"
     #msg += "or a Mir-o-Bot age {Ae'gura/Ahnonay Cathedral/Cleft/Relto/Eder Gira/Eder Kemo/Er'cana/Gahreesen/Hood/Kadish/Pellet Cave/Teledahn}.\n"
-    msg += "or a Mir-o-Bot age {aegura/ahnonay/cathedral/cleft/dereno/descent/ercana/gahreesen/gz/gira/hood/jalak/kadish/kemo/minkata/myst/negilahn/office/payiferen/pelletcave/relto/silo/spyroom/teledahn/tetsonot/mobkveer/mobgomepub}.\n"
+    #msg += "or Mir-o-Bot's private ages {aegura/ahnonay/cathedral/cleft/dereno/descent/ercana/gahreesen/gz/gira/hood/jalak/kadish/kemo/minkata/myst/negilahn/office/payiferen/pelletcave/relto/silo/spyroom/teledahn/tetsonot/mobkveer/mobgomepub}.\n"
+    msg += "or Mir-o-Bot's private ages {aegura/ahnonay/cathedral/cleft/dereno/descent/...}.\n"
     #msg += "or a Magic age: to {MBCity/MBRelto/MBErcana/MBTeledahn/MBOffice/MBKadish/MBKveer/MBHood/MBDereno/MBRudenna}.\n\n"
     #msg += "linkbotto {fh/fhci/fhde/fhga/fhte/fhka/fhgi/fhcl/mbe/mcl/mre/mkv/mka/scl}: links Mir-o-Bot to the specified Age.\n"
     msg += "linkbotto [age name]: links Mir-o-Bot to the specified Age.\n"
@@ -3639,13 +3663,55 @@ def Help(self, cFlags, args = []):
     msg += "   linkbotto mka = Magic Tolesa\n"
     #msg += "   linkbotto scl = Stone5's Cleft\n\n"
     """
+    """
+    msg += "aegura, ahnonay, cathedral, cleft, delin, dereno, \n"
+    msg += "descent, edercave, ercana, gahreesen, gira, \n"
+    msg += "gz, hood, jalak, kadish, \n"
+    msg += "kemo, minkata, \n"
+    msg += "\n"
+    msg += "myst, negilahn, office, payiferen, \n"
+    msg += "pelletcave, podscave, primecave, \n"
+    msg += "relto, silo, spyroom, \n"
+    msg += "teledahn, tetsonot, tiam, \n"
+    msg += "training, tsogal.\n"
+    
+    cleft1, cleft2, 
+    gctrl, gctrl2, gear, gnexus, pinnacle, prison, 
+    greatshaft, tiwah, 
+    greattreepub, 
+    greatzero, 
+    mobchiso, mobelonin, mobgahreesen, mobgomepub, mobgz, 
+    mobkemo, mobkveer, mobrelto, mobserene, mobtiam, mobtrebivdil, 
+    mobveelay, mobvothol, 
+    myst1, 
+    oven, 
+    pellet1, pellet2, 
+    teledahn2, 
+    team, team2, 
+    purple, purpleteam, 
+    teampurple, teamyellow, 
+    , veranda, yellow, yellowteam
+    """
+    msg += "\n"
     #msg += "   Mir-o-Bot's ages are available too :Ae'gura, Ahnonay, Ahnonay Cathedral, Cleft, Eder Gira, Eder Kemo, Eder Tsogal, Eder Delin, Er'cana, Gahreesen, Hood, Jalak, Kadish, Minkata, Pellet Cave, Relto, Teledahn\n"
     msg += "   Available Mir-o-Bots ages:\n"
-    msg += "   aegura, ahnonay, cathedral, cleft, dereno, descent, ercana, gahreesen, gira, gz, hood, jalak, kadish, kemo, minkata, mobkveer, myst, negilahn, office, payiferen, pelletcave, relto, silo, spyroom, teledahn, tetsonot, mobkveer, mobgomepub\n\n"
+    msg += "   aegura, ahnonay, cathedral, cleft, delin, dereno, descent, \n"
+    msg += "   edercave, ercana, gahreesen, gira, gz, hood, jalak, kadish, \n"
+    msg += "   kemo, minkata, myst, negilahn, office, payiferen, pelletcave, \n"
+    msg += "   podscave, primecave, relto, rudenna, silo, spyroom, teledahn, \n"
+    msg += "   tetsonot, tiam, tsogal, mobgahreesen, mobgz, mobkemo, mobkveer, mobrelto.\n"
+    msg += "   Aliases : tiwah, greatzero\n"
+    msg += "   New ages:\n"
+    msg += "   mobchiso, mobelonin, mobgomepub, mobserene, mobtiam, \n"
+    msg += "   mobtrebivdil, mobveelay, mobvothol.\n"
+    msg += "\n"
     msg += "   Some more arrival points in Mir-o-Bots ages that works with the to and linkbotto commands:\n"
     msg += "   Cleft : cleft1, cleft2.\n"
     msg += "   Er'cana : oven.\n"
-    msg += "   Gahrissen : gear, pinnacle, training, team, prison, veranda, gctrl, gnexus.\n"
+    msg += "   Gahreesen : gear, pinnacle, training, team, team2, prison, veranda, gctrl, gctrl2, gnexus.\n"
+    msg += "      For the Wall games, you can acces to your team control room with:\n"
+    msg += "         yellowteam, teamyellow or yellow\n"
+    msg += "         purpleteam, teampurple or purple\n"
     msg += "   \n"
     msg1 = msg
 
@@ -3655,7 +3721,7 @@ def Help(self, cFlags, args = []):
     msg += "onlake: Adds an invisible floor and warps you on it.\n"
     msg += "  /!\ Once added by a player all others visiting will have the invisible floor.\n\n"
     msg += "      It will follow you in other ages til you quit the game.\n\n"
-    msg += "nolake: Removes the invisible floor, maybe ...\n"
+    msg += "nolake: Removes the invisible floor, maybe ... (Seems not working anymore)\n"
     msg += "warp or warp [avatar name] or warp [x] [y] [z] : see onbot, find and rgoto.\n (the avatar name can be incomplete).\n\n"
     msg += "wd : warps your avatar to the default linkin point.\n\n"
     msg += " You can save and return to 10 positions in each age with:\n"
@@ -3678,7 +3744,7 @@ def Help(self, cFlags, args = []):
     #msg += "        Great Stairs Roof = GSR (= kahlo pub roof)\n"
     #msg += "        Palace Balcony = PB (= palace roof)\n"
     msg += "    Er'cana specific spots (sp or e 0 to 14)\n"
-    msg += "    Gahreesen specific spots (sp or g 0 to 34)\n"
+    msg += "    Gahreesen specific spots (sp or g 0 to 34); for wall games : yellowteam, purpleteam)\n"
     msg += "    Kadish specific spots (sp or k 0 to 19)\n"
     msg += "    Minkata specific spots (sp, cave, k, kiva or m 0 to 5)\n"
     msg += "    Teledahn specific spots (sp or t 0 to 19)\n\n"
@@ -4267,7 +4333,7 @@ def RetreaveSPCmd(altCmdName):
             "g", "g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8", "g9", 
             "g10", "g11", "g12", "g13", "g14", "g15", "g16", "g17", "g18", "g19", 
             "g20", "g21", "g22", "g23", "g24", "g25", "g26", "g27", "g28", "g29", 
-            "g30", "g31", "g32", "g33", "g34"
+            "g30", "g31", "g32", "g33", "g34", "g35", "yellowteam", "teamyellow", "yellow", "purpleteam", "teampurple", "purple"
             ],
     }
     ageInfo = PtGetAgeInfo()

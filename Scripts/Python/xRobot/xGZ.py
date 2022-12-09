@@ -240,7 +240,59 @@ Oh, I did forget one effect for the Great Zero –
 we need an onlake effect so we can run around outside the calibration chamber where the neutrino collection towers are. 
 But again, that’s nothing new.
 
-
+=================================================================================================
+    Version 4 : 22/10/2022
+    De Larry : CT
+    1 - Start out in the antechamber / observation chamber as usual.
+            !to gz
+            
+    2 - Warp to the courtyard.
+            !sp 1
+            !warpall
+            
+    3 - Turn the neutrino machine on and off when requested.
+            import xRobot.xGZ as g
+            g.EnableGZ(0)
+            g.EnableGZ(1)
+            
+    4 - Build a Jalak platform under the machine so that the guests can see the details in the well.
+            Ctrl+p
+            //ws 2 : sous le protractor
+            g.platform2()
+            Ctrl+p
+            !warpall
+            !toggle column jalak 0 1
+            
+    5 - Find out if it’s possible for you to change the images in the corridor viewer to ones used in the past. 
+        In URU: CC the image is concept art of Tokotah Alley, 
+        and in Live that viewer was used to show restoration progress reports.
+            Not possible : the imager is not working and no image found.
+            
+    6 - When we get to the calibration room, 
+        turn the neutrino machine on and off when requested so we can see the light beam activate.
+            import xRobot.xGZ as g
+            g.EnableGZ(0)
+            g.EnableGZ(1)
+            
+    7 - Build an on-lake effect or platform outside the calibration room so the guests can run around on the pond 
+        and see the neutrino collection pillars up close.
+            Ctrl+p
+            //ws 7 : colonnes oranges
+            g.platform2()
+            !warpall
+            g.Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True)
+            Ctrl+p
+            !toggle Pillar  0 1
+            g.EnableGZ(0)
+            g.EnableGZ(1)
+            
+    8 - We also want to let them run around the entire model, 
+        so an on-lake effect using Minkata or the Cleft desert will work for that.
+            //onlake
+    
+    + Mirphak, we’re going to be talking about Victor Laxman during the tour, 
+        so it would be good if you made his avatar appear when we do.
+            /change v
 """
 
 # Python/fun/mystitech/gzSDL.py

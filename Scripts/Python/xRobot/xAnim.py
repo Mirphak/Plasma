@@ -241,12 +241,34 @@ def Play(player, animName, nbTimes, gender=""):
         gender = "Male"
     else:
         gender = "Female"
+    
+    """
+    if gender == "Male":
+        if animName == "secretwallbutton":
+            #PtConsoleNet("Nav.PageInNode Teledahn_MaleSecretWallButton", 1)
+            PtConsoleNet("Nav.PageInNode MaleSecretWallButton", 1)
+        elif animName == "vertblastlevel01":
+            #PtConsoleNet("Nav.PageInNode Gira_MaleVertBlastLevel01", 1)
+            PtConsoleNet("Nav.PageInNode MaleVertBlastLevel01", 1)
+    elif gender == "Female":
+        if animName == "secretwallbutton":
+            #PtConsoleNet("Nav.PageInNode Teledahn_FemaleSecretWallButton", 1)
+            PtConsoleNet("Nav.PageInNode FemaleSecretWallButton", 1)
+        elif animName == "vertblastlevel01":
+            #PtConsoleNet("Nav.PageInNode Gira_FemaleVertBlastLevel01", 1)
+            PtConsoleNet("Nav.PageInNode FemaleVertBlastLevel01", 1)
+    """
+    pages = [f'{gender}{x}' for x in set(animDict[animName])]
+    PtDebugPrint(f'Loading animation pages : {pages}')
+    for page in pages:
+        PtConsoleNet(f'Nav.PageInNode {page}', 1)
+    
     gAnimSeq = []
     try:
         animSeq = animDict[animName]
-        gAnimSeq = [gender+x for x in animSeq]
+        gAnimSeq = [gender + x for x in animSeq]
     except KeyError:
-        gAnimSeq = [gender+animName]
+        gAnimSeq = [gender + animName]
     except:
         return 0
     

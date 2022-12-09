@@ -6,6 +6,7 @@ from Plasma import *
 from PlasmaKITypes import *
 from PlasmaVaultConstants import *
 
+import datetime
 import re
 
 from . import xBotAge
@@ -48,6 +49,20 @@ def LinkToAge(self, linkName):
 #        xBotAge.LinkPlayerTo(self, link)
     elif (linkName in list(ages.MirobotAgeDict.keys())):
         link = ages.MirobotAgeDict[linkName]
+        #if linkName == "ndgelonin":
+        #    now = datetime.datetime.now(datetime.timezone.utc)
+        #    start_dt_1 = datetime.datetime(2022, 8, 1, 13+6, 0, 0, tzinfo=datetime.timezone.utc)
+        #    end_dt_1 = datetime.datetime(2022, 8, 1, 15+6, 0, 0, tzinfo=datetime.timezone.utc)
+        #    start_dt_2 = datetime.datetime(2022, 8, 5, 12+6, 30, 0, tzinfo=datetime.timezone.utc)
+        #    end_dt_2 = datetime.datetime(2022, 8, 5, 14+6, 30, 0, tzinfo=datetime.timezone.utc)
+        #    if (start_dt_1 < now and now < end_dt_1) or (start_dt_2 < now and now < end_dt_2):
+        #        link = ages.MirobotAgeDict[linkName]
+        #    else:
+        #        msg = "NDG Elonin is not available at the moment!"
+        #        PtSendKIMessage(kKILocalChatStatusMsg, msg)
+        #else:
+        #    link = ages.MirobotAgeDict[linkName]
+        
         xBotAge.currentBotAge = list(link)
         if len(link) > 4:
             xBotAge.SetBotAgeSP(link[4])
@@ -61,7 +76,6 @@ def LinkToAge(self, linkName):
             PtSendKIMessage(kKILocalChatStatusMsg, ",".join(xBotAge.currentBotAge))
         xBotAge.LinkPlayerTo(self, link)
     else:
-        #pass
         msg = "Available links: " + str(list(linkDic.keys())) + " ** " + str(list(age.MirobotAgeDict.keys()))
         PtSendKIMessage(kKILocalChatStatusMsg, msg)
 

@@ -6,12 +6,44 @@
     V2 - 12/02/2016 : Ajouts pour le Cavern Tour 2015-2016
     V3 - 12/11/2016 : Ajouts pour le Cavern Tour 2016-2017
     V4 - 05/01/2020 : Ajouts pour le Cavern Tour 2020-2021
+    V5 - 25/06/2022 : Ajouts pour le Cavern Tour 2022-2024
+        La visite du Cleft n'a pas besoin de beaucoup d'effets. 
+        Il s'agit surtout de se promener en parlant de l'histoire et des personnages. 
+        Nous avons surtout besoin de la déformation habituelle des avatars pour empêcher les gens de monter sur les échelles. 
+        Nous n'irons pas dans la grotte sous l'arbre, puisque cela fait partie de la visite de la grotte de Bahro.
+
+        Lorsque nous parlerons de la Fente elle-même, nous voudrons faire descendre le groupe dans la salle de la bibliothèque. 
+        Je montrerai une carte étiquetée des pièces pour expliquer à quoi chacune d'elles sert.
+
+        Je parlerai du Zandoni comme d'habitude, donc nous devrons nous y rendre à ce moment-là. 
+        Si nous trouvons un moyen de le faire fonctionner, ce sera quelque chose que nous n'avons jamais fait auparavant.
+
+        Une autre chose que nous n'avons jamais faite auparavant est de chevaucher les faucons lorsqu'ils volent, 
+        bien que je ne sois pas sûr que cela en vaille la peine puisqu'ils ne font que voler en petits cercles.
+
+        Comme les âges de Myst V n'ont pas encore été convertis pour le Live, 
+        la visite de la caldeira du volcan devra se faire en streaming uniquement, 
+        donc aucun effet n'est nécessaire pour cela.
+
+        Je ne sais pas combien de temps la conférence va prendre, mais je prévois qu'elle va probablement utiliser deux dates de visite. 
+        Je n'ai pas eu de nouvelles de R'Tay concernant des ajouts qu'il souhaiterait faire. 
+        Je lui ai envoyé une copie de mes notes pour qu'il les examine.
+        
+        !to cleft 1
+        !lock
+        !check noladder
+        
+        !sp 5
 """
+
+from math import *
 
 from Plasma import *
 from PlasmaTypes import *
 from PlasmaKITypes import *
 from xPsnlVaultSDL import *
+
+from . import Ride
 
 age = "Cleft"
 
@@ -392,31 +424,35 @@ def Attach(so1, so2, bOn=True):
     so2.netForce(1)
 
 # Zandoni "ride"
-def Ride(bOn=True):
+def RideZ(bOn=True):
     #objName = "ZandiMobileRegion"
     ageName = "Cleft"
-    objName = "ZandiMobile-Root"
+    #objName = "ZandiMobile-Root"
+    objName = "ZandiTrailerPlayerWarp"
+    objNames = ["ZandiMobile-Root", "ZMWheel01", "ZMWheel02", "ZMWheel03", "ZMWheel04"]
     so = PtFindSceneobject(objName, ageName)
+    for oName in objNames:
+        Attach(PtFindSceneobject(oName, ageName), so, bOn)
     me = PtGetLocalAvatar()
     #attacher la zandoni a moi
     Attach(so, me, bOn)
-    me.physics.enable()
     me.physics.netForce(1)
-    so.physics.disable()
+    me.physics.enable()
     so.physics.netForce(1)
-    #recuperer tous les joueurs
-    playerList = PtGetPlayerList()
-    soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
-    for soavatar in soAvatarList:
-        #cacher tout le monde
-        #soavatar.draw.enable(0)
-        #soavatar.netForce(1)
-        #faire flotter tout le monde
-        #soavatar.physics.disable()
-        #soavatar.netForce(1)
-        Attach(soavatar, me, bOn)
-        soavatar.draw.enable(1)
-        soavatar.netForce(1)
+    so.physics.disable()
+    ##recuperer tous les joueurs
+    #playerList = PtGetPlayerList()
+    #soAvatarList = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in playerList]
+    #for soavatar in soAvatarList:
+    #    #cacher tout le monde
+    #    #soavatar.draw.enable(0)
+    #    #soavatar.netForce(1)
+    #    #faire flotter tout le monde
+    #    #soavatar.physics.disable()
+    #    #soavatar.netForce(1)
+    #    Attach(soavatar, me, bOn)
+    #    soavatar.netForce(1)
+    #    soavatar.draw.enable(1)
 
     """
     #et les roues? ... no physics for them!
@@ -439,3 +475,50 @@ def Ride(bOn=True):
 def ToggleBoolSDL(name="clftSceneBahroUnseen"):
     sdl=PtGetAgeSDL()
     sdl[name]=(not sdl[name][0],)
+
+
+#========================================================
+dicBot = {}
+#
+def CercleV(coef=2.0, avCentre=None):
+    if avCentre is None:
+        avCentre = PtGetLocalAvatar()
+    #agePlayers = GetAllAgePlayers()
+    # ne pas tenir compte des robots
+    agePlayers = [pl for pl in PtGetPlayerList() if not(pl.getPlayerID() in list(dicBot.keys()))]
+    i = 0
+    n = len(agePlayers)
+    print("nb de joueurs: %s" % (n))
+    dist = float(coef * n) / (2.0 * math.pi)
+    print("distance: %s" % (dist))
+    for i in range(n):
+        player = agePlayers[i]
+        avatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+        angle = (float(i) * 2.0 * math.pi) / float(n)
+        print("angle(%s): %s" % (i, angle))
+        dx = float(dist)*math.cos(angle)
+        #dy = float(dist)*math.sin(angle)
+        dy = 0
+        dz = float(dist)*math.sin(angle)
+        matrix = avCentre.getLocalToWorld()
+        matrix.translate(ptVector3(dx, dy, dz))
+        avatar.netForce(1)
+        avatar.physics.warp(matrix)
+
+#
+class CircleAlarm:
+    def onAlarm(self, en):
+        CercleV(coef=2.0, avCentre=None)
+
+
+# In Cleft we can ride:
+# "oiseauc1", "oiseauc2" or "bahroc1", "bahroc2", "bahroc3", "bahroc4", "bahroc5"
+def ride(soName="oiseauc1", t=30.0):
+    #recuperer tous les joueurs
+    playerList = PtGetPlayerList()
+    #playerList.append(PtGetLocalPlayer())
+    for player in playerList:
+        playerName = player.getPlayerName()
+        Ride.Suivre(objet=soName, Avatar=playerName, duree=t)
+    #CercleV(coef=2.0, avCentre=None)
+    PtSetAlarm(2, CircleAlarm(), 0)

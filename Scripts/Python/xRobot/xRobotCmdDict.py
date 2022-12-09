@@ -103,7 +103,8 @@ def GetMagicbotGuids():
 MagicbotAgeGuids = GetMagicbotGuids()
 
         
-lastLinkTime = datetime.datetime.now()
+#lastLinkTime = datetime.datetime.now()
+lastLinkTime = datetime.datetime.now(datetime.timezone.utc)
 
 #----------------------------------------------------------------------------#
 #   Methodes
@@ -355,7 +356,8 @@ def RemoveCleftLocal(self):
 def LinkBotTo(self, cFlags, args = []):
     global lastLinkTime
     PtSendKIMessage(kKILocalChatStatusMsg, "> LinkBotTo")
-    now = datetime.datetime.now()
+    #now = datetime.datetime.now()
+    now = datetime.datetime.now(datetime.timezone.utc)
     minDiff = 10 * 60
     
     if len(args) < 2:
@@ -379,6 +381,18 @@ def LinkBotTo(self, cFlags, args = []):
     # Trying Mir-o-Bot ages
     elif (linkName in list(ages.MirobotAgeDict.keys())):
         link = ages.MirobotAgeDict[linkName]
+        #if linkName == "ndgelonin":
+        #    start_dt_1 = datetime.datetime(2022, 8, 1, 13+6, 0, 0, tzinfo=datetime.timezone.utc)
+        #    end_dt_1 = datetime.datetime(2022, 8, 1, 15+6, 0, 0, tzinfo=datetime.timezone.utc)
+        #    start_dt_2 = datetime.datetime(2022, 8, 5, 12+6, 30, 0, tzinfo=datetime.timezone.utc)
+        #    end_dt_2 = datetime.datetime(2022, 8, 5, 14+6, 30, 0, tzinfo=datetime.timezone.utc)
+        #    if (start_dt_1 < now and now < end_dt_1) or (start_dt_2 < now and now < end_dt_2):
+        #        link = ages.MirobotAgeDict[linkName]
+        #    else:
+        #        PtSendRTChat(myself, [player], "NDG Elonin is not available at the moment.", 16)
+        #        return 1
+        #else:
+        #    link = ages.MirobotAgeDict[linkName]
 #        xBotAge.currentBotAge = list(link)
 #        if len(link) > 4:
 #            xBotAge.SetBotAgeSP(link[4])
@@ -411,7 +425,8 @@ def LinkBotTo(self, cFlags, args = []):
                 xBotAge.SetBotAgeSP(link[4])
                 PtSendKIMessage(kKILocalChatStatusMsg, ",".join(xBotAge.currentBotAge))
             xBotAge.LinkPlayerTo(self, link)
-            lastLinkTime = datetime.datetime.now()
+            #lastLinkTime = datetime.datetime.now()
+            lastLinkTime = datetime.datetime.now(datetime.timezone.utc)
             
             buds = GetPeople("buddy", agePlayers)
             pList = agePlayers + buds

@@ -91,6 +91,7 @@ def Suivre(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
         #defobjet = ("Cleft,clftSceneBahro,DCSoarBird03,0,0,180")
         #defobjet = ("city,bahroFlyers_city1,B01_BoneSpine3,90,0,90")
         defobjet = ("Cleft,clftSceneBahro,BahroA_Head,0,0,0")
+        sdl=PtGetAgeSDL()
         sdl["clftSceneBahroUnseen"]=(1,)
         
     elif (objet.lower()) == 'bahroc2' :

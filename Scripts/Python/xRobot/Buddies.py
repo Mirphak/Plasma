@@ -370,7 +370,7 @@ def SaveBuddyList():
     #myName = me.getPlayerName()
     myId = me.getPlayerID()
     fileName = "{0}_{1}".format(myId, now)
-    with open('Buddies/' + fileName + '.csv', 'wb') as f:
+    with open('Buddies/' + fileName + '.csv', 'w') as f:
         #yaml.dump(obj, f, default_flow_style=None, default_style='"')
         wr = csv.writer(f, quoting=csv.QUOTE_ALL)
         #for bud in GetBuddyList():

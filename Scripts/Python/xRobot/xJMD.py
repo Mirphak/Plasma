@@ -192,7 +192,8 @@ def Cercle(coef=5.0, h=10.0, avCentre=None):
 def platform(where=None, bAttachOn=False):
     matPos = None
     #if where is None or where not in range(1, 5):
-    if where is None or where not in list(range(1, 6)):
+    #if where is None or where not in list(range(1, 6)):
+    if where is None:
         matPos = PtGetLocalAvatar().getLocalToWorld()
     else:
         """

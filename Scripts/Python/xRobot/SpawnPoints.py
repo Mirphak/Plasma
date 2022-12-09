@@ -428,4 +428,12 @@ aliasGarrisonSP = {
     "g32":"exitWellSubRgn01",               # = sp 32
     "g33":"exitWellSubRgn02",               # = sp 33
     "g34":"SubworldEnterRegionTemp",        # = sp 34
+    #
+    "g35":"LinkInPointWall",                # = sp 35
+    "yellowteam":"LinkInPointCtrlRm01",     # = sp 26
+    "teamyellow":"LinkInPointCtrlRm01",     # = sp 26
+    "yellow":"LinkInPointCtrlRm01",         # = sp 26
+    "purpleteam":"LinkInPointCtrlRm02",     # = sp 27
+    "teampurple":"LinkInPointCtrlRm02",     # = sp 27
+    "purple":"LinkInPointCtrlRm02",         # = sp 27
 }
