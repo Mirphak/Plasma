@@ -46,6 +46,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //////////////////////////////////////////////////////////////////////
 
 #include <Python.h>
+#include <string_theory/format>
+
 #include "plPipeline.h"
 #include "hsResMgr.h"
 
@@ -96,26 +98,13 @@ pyVaultImageNode::~pyVaultImageNode () {
         fMipmapKey->UnRefObject();
 }
 
-
-//==================================================================
-// class RelVaultNode : public plVaultNode
-//
-void pyVaultImageNode::Image_SetTitle( const char * text )
+void pyVaultImageNode::Image_SetTitle(const ST::string& text)
 {
     if (!fNode)
         return;
 
     VaultImageNode image(fNode);
     image.SetImageTitle(text);
-}
-
-void pyVaultImageNode::Image_SetTitleW( const wchar_t* text )
-{
-    if (!fNode)
-        return;
-
-    VaultImageNode image(fNode);
-    image.SetImageTitle(ST::string::from_wchar(text));
 }
 
 ST::string pyVaultImageNode::Image_GetTitle() const

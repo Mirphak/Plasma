@@ -52,6 +52,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pyGlueHelpers.h"
 
 class plUUID;
+namespace ST { class string; }
 
 class pyVaultPlayerInfoNode : public pyVaultNode
 {
@@ -60,8 +61,6 @@ protected:
     pyVaultPlayerInfoNode();
 
 public:
-    ~pyVaultPlayerInfoNode() { }
-
     // required functions for PyObject interoperability
     PYTHON_CLASS_NEW_FRIEND(ptVaultPlayerInfoNode);
     PYTHON_CLASS_VAULT_NODE_NEW_DEFINITION;
@@ -70,9 +69,6 @@ public:
 
     static void AddPlasmaClasses(PyObject *m);
 
-//==================================================================
-// class plVaultPlayerInfoNode : public plVaultNode
-//
     void    Player_SetPlayerID( uint32_t plyrid );
     uint32_t  Player_GetPlayerID();
     void    Player_SetPlayerName(const ST::string& name);
@@ -81,7 +77,7 @@ public:
     // age the player is currently in, if any.
     void    Player_SetAgeInstanceName(const ST::string& name);
     ST::string Player_GetAgeInstanceName() const;
-    void    Player_SetAgeGuid( const char * guidtext);
+    void    Player_SetAgeGuid(const ST::string& guidtext);
     plUUID  Player_GetAgeGuid() const;
     // online status
     void    Player_SetOnline( bool b );

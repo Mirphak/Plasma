@@ -46,6 +46,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //////////////////////////////////////////////////////////////////////
 
 #include <Python.h>
+#include <string_theory/string>
 
 #include "pyVaultSDLNode.h"
 #include "plSDL/plSDL.h"
@@ -96,7 +97,7 @@ PyObject * pyVaultSDLNode::GetStateDataRecord() const
     PYTHON_RETURN_NONE;
 }
 
-void pyVaultSDLNode::InitStateDataRecord( const char* agename, int flags)
+void pyVaultSDLNode::InitStateDataRecord(const ST::string& agename, int flags)
 {
     if (fNode) {
         VaultSDLNode sdl(fNode);

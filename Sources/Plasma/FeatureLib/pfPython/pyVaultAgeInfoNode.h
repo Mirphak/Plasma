@@ -50,14 +50,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "HeadSpin.h"
 #include "pyGlueHelpers.h"
-#include <string>
 #include "pyVaultNode.h"
 
-struct RelVaultNode;
-class pyVaultSDLNode;
-class pyAgeInfoStruct;
 class plUUID;
-
+namespace ST { class string; }
 
 class pyVaultAgeInfoNode : public pyVaultNode
 {
@@ -74,9 +70,6 @@ public:
 
     static void AddPlasmaClasses(PyObject *m);
 
-//==================================================================
-// class RelVaultNode : public plVaultNode
-//
     PyObject *  GetCanVisitFolder() const; // returns pyVaultPlayerInfoListNode
     PyObject * GetAgeOwnersFolder() const; // returns pyVaultPlayerInfoListNode
     PyObject* GetChildAgesFolder(); // returns pyVaultFolderNode
@@ -95,7 +88,7 @@ public:
     void     SetAgeUserDefinedName(const ST::string& v);
 
     plUUID  GetAgeInstanceGuid() const;
-    void    SetAgeInstanceGuid( const char * guid );
+    void    SetAgeInstanceGuid(const ST::string& guid);
 
     ST::string GetAgeDescription() const;
     void     SetAgeDescription(const ST::string& v);

@@ -67,12 +67,14 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plInputCore/plInputManager.h"
 #include "plNetClient/plNetClientMgr.h"
 #include "plNetGameLib/plNetGameLib.h"
+#include "plMessage/plDisplayScaleChangedMsg.h"
 #include "plPhysX/plPXSimulation.h"
 #include "plPipeline/hsG3DDeviceSelector.h"
 #include "plResMgr/plLocalization.h"
 #include "plResMgr/plResManager.h"
 #include "plResMgr/plVersion.h"
 #include "plStatusLog/plStatusLog.h"
+#include "plWinDpi/plWinDpi.h"
 
 #include "pfConsoleCore/pfConsoleEngine.h"
 #include "pfCrashHandler/plCrashCli.h"
@@ -121,12 +123,6 @@ static const plCmdArgDef s_cmdLineArgs[] = {
     { kCmdArgFlagged  | kCmdTypeBool,       "SkipIntroMovies", kArgSkipIntroMovies },
     { kCmdArgFlagged  | kCmdTypeString,     "Renderer",        kArgRenderer },
 };
-
-/// Made globals now, so we can set them to zero if we take the border and 
-/// caption styles out ala fullscreen (8.11.2000 mcn)
-int gWinBorderDX    = GetSystemMetrics( SM_CXSIZEFRAME );
-int gWinBorderDY    = GetSystemMetrics( SM_CYSIZEFRAME );
-int gWinMenuDY      = GetSystemMetrics( SM_CYCAPTION );
 
 plClientLoader  gClient;
 bool            gPendingActivate = false;
@@ -177,11 +173,23 @@ static void AuthFailedStrings (ENetError authError,
 
 void DebugMsgF(const char* format, ...);
 
+static void HandleDpiChange(HWND hWnd, UINT dpi, float scale, const RECT& rect)
+{
+    // Inform the engine about the new DPI.
+    auto* msg = new plDisplayScaleChangedMsg(scale, plDisplayScaleChangedMsg::ConvertRect(rect));
+    msg->Send();
+}
+
 // Handles all the windows messages we might receive
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static bool gDragging = false;
     static uint8_t mouse_down = 0;
+
+    // DPI Helper can eat messages.
+    auto result = plWinDpi::Instance().WndProc(hWnd, message, wParam, lParam, HandleDpiChange);
+    if (result.has_value())
+        return result.value();
 
     // Messages we registered for manually (no const value)
     if (message == s_WmTaskbarList)
@@ -347,6 +355,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 RECT r;
                 ::GetClientRect(hWnd, &r);
                 gClient->GetPipeline()->Resize(r.right - r.left, r.bottom - r.top);
+                gClient->GetPipeline()->SetBackingScale(plWinDpi::Instance().GetScale(hWnd));
             }
             break;
 
@@ -720,8 +729,9 @@ static size_t CurlCallback(void *buffer, size_t size, size_t nmemb, void *param)
 
     HWND hwnd = (HWND)param;
 
-    strncpy(status, (const char *)buffer, std::min<size_t>(size * nmemb, 256));
-    status[255] = 0;
+    size_t count = std::min<size_t>(size * nmemb, std::size(status) - 1);
+    memcpy(status, buffer, count);
+    status[count] = 0;
     PostMessage(hwnd, WM_USER_SETSTATUSMSG, 0, (LPARAM) status);
     return size * nmemb;
 }
@@ -789,9 +799,18 @@ INT_PTR CALLBACK UruLoginDialogProc( HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
             SendMessage(GetDlgItem(hwndDlg, IDC_PRODUCTSTRING), WM_SETTEXT, 0,
                         (LPARAM)plProduct::ProductString().c_str());
 
-            for (int i = 0; i < plLocalization::GetNumLocales(); i++)
-            {
-                SendMessage(GetDlgItem(hwndDlg, IDC_LANGUAGE), CB_ADDSTRING, 0, (LPARAM)plLocalization::GetLanguageName((plLocalization::Language)i));
+            for (auto lang : plLocalization::GetAllLanguages()) {
+                ST::string langName = plLocalization::GetLanguageName(lang);
+                if (!plLocalization::IsLanguageUsable(lang)) {
+#if defined(PLASMA_EXTERNAL_RELEASE)
+                    // External clients only allow selecting usable languages.
+                    continue;
+#else
+                    // Internal clients allow choosing unsupported languages as well.
+                    langName += ST_LITERAL(" (unsupported)");
+#endif
+                }
+                SendMessageW(GetDlgItem(hwndDlg, IDC_LANGUAGE), CB_ADDSTRING, 0, (LPARAM)langName.to_wchar().c_str());
             }
             SendMessage(GetDlgItem(hwndDlg, IDC_LANGUAGE), CB_SETCURSEL, (WPARAM)plLocalization::GetLanguage(), 0);
 
@@ -919,28 +938,30 @@ INT_PTR CALLBACK SplashDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
     switch (uMsg)
     {
     case WM_INITDIALOG:
+        ST::string message;
         switch (plLocalization::GetLanguage())
         {
         case plLocalization::kFrench:
-            ::SetDlgItemText(hwndDlg, IDC_STARTING_TEXT, "D�marrage d'URU. Veuillez patienter...");
+            message = ST_LITERAL("Démarrage d'URU. Veuillez patienter...");
             break;
         case plLocalization::kGerman:
-            ::SetDlgItemText(hwndDlg, IDC_STARTING_TEXT, "Starte URU, bitte warten ...");
+            message = ST_LITERAL("Starte URU, bitte warten ...");
             break;
         case plLocalization::kSpanish:
-            ::SetDlgItemText(hwndDlg, IDC_STARTING_TEXT, "Iniciando URU, por favor espera...");
+            message = ST_LITERAL("Iniciando URU, por favor espera...");
             break;
         case plLocalization::kItalian:
-            ::SetDlgItemText(hwndDlg, IDC_STARTING_TEXT, "Avvio di URU, attendere...");
+            message = ST_LITERAL("Avvio di URU, attendere...");
+            break;
+        case plLocalization::kRussian:
+            message = ST_LITERAL("Запуск URU. Пожалуйста, подождите...");
             break;
             // default is English
-        case plLocalization::kJapanese:
-            ::SetDlgItemText(hwndDlg, IDC_STARTING_TEXT, "...");
-            break;
         default:
-            ::SetDlgItemText(hwndDlg, IDC_STARTING_TEXT, "Starting URU. Please wait...");
+            message = ST_LITERAL("Starting URU. Please wait...");
             break;
         }
+        SetDlgItemTextW(hwndDlg, IDC_STARTING_TEXT, message.to_wchar().c_str());
         return true;
 
     }
@@ -1007,6 +1028,9 @@ PF_CONSOLE_LINK_ALL()
 
 bool WinInit(HINSTANCE hInst)
 {
+    // Initialize the DPI helpers
+    plWinDpi::Instance();
+
     // Fill out WNDCLASS info
     WNDCLASS wndClass;
     wndClass.style = CS_DBLCLKS;   // CS_HREDRAW | CS_VREDRAW;
@@ -1025,13 +1049,17 @@ bool WinInit(HINSTANCE hInst)
     if (!RegisterClass(&wndClass))
         return false;
 
+    int winBorderDX = plWinDpi::Instance().GetSystemMetrics(SM_CXSIZEFRAME);
+    int winBorderDY = plWinDpi::Instance().GetSystemMetrics(SM_CYSIZEFRAME);
+    int winMenuDY = plWinDpi::Instance().GetSystemMetrics(SM_CYCAPTION);
+
     // Create a window
     HWND hWnd = CreateWindow(
         CLASSNAME, plProduct::LongName().c_str(),
         WS_OVERLAPPEDWINDOW,
         0, 0,
-        800 + gWinBorderDX * 2,
-        600 + gWinBorderDY * 2 + gWinMenuDY,
+        800 + winBorderDX * 2,
+        600 + winBorderDY * 2 + winMenuDY,
         nullptr, nullptr, hInst, nullptr
         );
     HDC hDC = GetDC(hWnd);
@@ -1137,25 +1165,37 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
     HANDLE hOneInstance = CreateMutex(nullptr, FALSE, "UruExplorer");
     if (WaitForSingleObject(hOneInstance,0) != WAIT_OBJECT_0)
     {
+        ST::string caption;
+        ST::string message;
         switch (plLocalization::GetLanguage())
         {
             case plLocalization::kFrench:
-                hsMessageBox("Une autre copie d'URU est d�j� en cours d'ex�cution", "Erreur", hsMessageBoxNormal);
+                caption = ST_LITERAL("Erreur");
+                message = ST_LITERAL("Une autre copie d'URU est déjà en cours d'exécution");
                 break;
             case plLocalization::kGerman:
-                hsMessageBox("URU wird bereits in einer anderen Instanz ausgef�hrt", "Fehler", hsMessageBoxNormal);
+                caption = ST_LITERAL("Fehler");
+                message = ST_LITERAL("URU wird bereits in einer anderen Instanz ausgeführt");
                 break;
             case plLocalization::kSpanish:
-                hsMessageBox("En estos momentos se est� ejecutando otra copia de URU", "Error", hsMessageBoxNormal);
+                caption = ST_LITERAL("Error");
+                message = ST_LITERAL("En estos momentos se está ejecutando otra copia de URU");
                 break;
             case plLocalization::kItalian:
-                hsMessageBox("Un'altra copia di URU � gi� aperta", "Errore", hsMessageBoxNormal);
+                caption = ST_LITERAL("Errore");
+                message = ST_LITERAL("Un'altra copia di URU è già aperta");
+                break;
+            case plLocalization::kRussian:
+                caption = ST_LITERAL("Ошибка");
+                message = ST_LITERAL("Другая копия URU уже запущена");
                 break;
             // default is English
             default:
-                hsMessageBox("Another copy of URU is already running", "Error", hsMessageBoxNormal);
+                caption = ST_LITERAL("Error");
+                message = ST_LITERAL("Another copy of URU is already running");
                 break;
         }
+        hsMessageBox(message.to_wchar().c_str(), caption.to_wchar().c_str(), hsMessageBoxNormal);
         return PARABLE_NORMAL_EXIT;
     }
 #endif
@@ -1242,6 +1282,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
         HWND splashDialog = ::CreateDialog(hInst, MAKEINTRESOURCE(IDD_LOADING), nullptr, SplashDialogProc);
         gClient.Wait();
         ::DestroyWindow(splashDialog);
+    }
+
+    // Tell everybody about the current display scaling
+    {
+        plDisplayScaleChangedMsg* msg = new plDisplayScaleChangedMsg(plWinDpi::Instance().GetScale());
+        msg->Send();
     }
 
     // Main loop

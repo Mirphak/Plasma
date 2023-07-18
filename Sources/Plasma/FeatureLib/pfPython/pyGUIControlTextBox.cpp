@@ -40,7 +40,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
+#include <string_theory/string>
+
 #include "pyKey.h"
 
 #include "pfGameGUIMgr/pfGUITextBoxMod.h"
@@ -60,9 +61,9 @@ pyGUIControlTextBox::pyGUIControlTextBox(plKey objkey) : pyGUIControl(std::move(
 }
 
 
-bool pyGUIControlTextBox::IsGUIControlTextBox(pyKey& gckey)
+bool pyGUIControlTextBox::IsGUIControlTextBox(const plKey& key)
 {
-    if ( gckey.getKey() && pfGUITextBoxMod::ConvertNoRef(gckey.getKey()->ObjectIsLoaded()) )
+    if ( key && pfGUITextBoxMod::ConvertNoRef(key->ObjectIsLoaded()) )
         return true;
     return false;
 }
@@ -120,21 +121,6 @@ void pyGUIControlTextBox::SetForeColor( pyColor& color )
         }
     }
 
-}
-
-PyObject* pyGUIControlTextBox::GetForeColor() const
-{
-    if ( fGCkey )
-    {
-        // get the pointer to the modifier
-        pfGUITextBoxMod* ptbmod = pfGUITextBoxMod::ConvertNoRef(fGCkey->ObjectIsLoaded());
-        if ( ptbmod )
-        {
-            pfGUIColorScheme* colorscheme = ptbmod->GetColorScheme();
-            return pyColor::New(colorscheme->fForeColor);
-        }
-    }
-    PYTHON_RETURN_NONE;
 }
 
 void pyGUIControlTextBox::SetBackColor( pyColor& color )

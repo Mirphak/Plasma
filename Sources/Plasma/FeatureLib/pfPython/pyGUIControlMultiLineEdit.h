@@ -54,7 +54,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <tuple>
 
+class plKey;
 class pyColor;
+class pyKey;
+namespace ST { class string; }
 
 class pyGUIControlMultiLineEdit : public pyGUIControl
 {
@@ -74,48 +77,42 @@ public:
     static void AddPlasmaClasses(PyObject *m);
     static void AddPlasmaConstantsClasses(PyObject *m);
 
-    static bool IsGUIControlMultiLineEdit(pyKey& gckey);
+    static bool IsGUIControlMultiLineEdit(const plKey& key);
 
-    virtual void    Clickable();
-    virtual void    Unclickable();
-    virtual void    SetScrollPosition( int32_t topLine );
-    virtual int32_t GetScrollPosition();
-    virtual bool    IsAtEnd();
-    virtual void    MoveCursor( int32_t dir );
+    void Clickable();
+    void Unclickable();
+    void SetScrollPosition(int32_t topLine);
+    int32_t GetScrollPosition();
+    bool IsAtEnd();
+    void MoveCursor(int32_t dir);
     int32_t GetCursor() const;
-    virtual void    ClearBuffer();
-    virtual void    SetText( const char *asciiText );
-    virtual void    SetTextW( const wchar_t *asciiText );
-    virtual const char* GetText();        // returns a python string object
-    virtual const wchar_t* GetTextW();
-    virtual void    SetEncodedBuffer( PyObject* buffer_object );
-    virtual void    SetEncodedBufferW( PyObject* buffer_object );
-    virtual const char* GetEncodedBuffer();
-    virtual const wchar_t* GetEncodedBufferW();
-    size_t  GetBufferSize() const;
+    void ClearBuffer();
+    void SetText(const ST::string& text);
+    ST::string GetText();
+    void SetEncodedBuffer(PyObject* buffer_object);
+    ST::string GetEncodedBuffer();
+    size_t GetBufferSize() const;
 
-    virtual void    SetBufferLimit(int32_t limit);
-    virtual int32_t   GetBufferLimit();
+    void SetBufferLimit(int32_t limit);
+    int32_t GetBufferLimit();
     int16_t GetCurrentLink() const;
 
-    virtual void    InsertChar( char c );
-    virtual void    InsertCharW( wchar_t c );
-    virtual void    InsertString( const char *string );
-    virtual void    InsertStringW( const wchar_t *string );
-    virtual void    InsertColor( pyColor& color );
-    virtual void    InsertStyle( uint8_t fontStyle );
+    void InsertChar(wchar_t c);
+    void InsertString(const ST::string& string);
+    void InsertColor(pyColor& color);
+    void InsertStyle(uint8_t fontStyle);
     void InsertLink(int16_t linkId);
     void ClearLink();
-    virtual void    DeleteChar();
+    void DeleteChar();
 
-    virtual void    Lock();
-    virtual void    Unlock();
-    virtual bool    IsLocked();
+    void Lock();
+    void Unlock();
+    bool IsLocked();
 
-    virtual void    EnableScrollControl();
-    virtual void    DisableScrollControl();
+    void EnableScrollControl();
+    void DisableScrollControl();
 
-    virtual void    DeleteLinesFromTop( int lines );
+    void DeleteLinesFromTop(int lines);
 
     uint32_t  GetFontSize() const override;
     void    SetFontSize(uint32_t fontsize) override;

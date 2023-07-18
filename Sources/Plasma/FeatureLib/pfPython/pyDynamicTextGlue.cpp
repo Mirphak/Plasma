@@ -41,6 +41,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include <Python.h>
+#include <string_theory/string>
+#include <utility>
 #include "pyKey.h"
 
 #include "pyDynamicText.h"
@@ -179,14 +181,14 @@ PYTHON_METHOD_DEFINITION(ptDynamicMap, setTextColor, args)
 
 PYTHON_METHOD_DEFINITION(ptDynamicMap, setFont, args)
 {
-    char* faceName;
+    ST::string faceName;
     short fontSize;
-    if (!PyArg_ParseTuple(args, "sh", &faceName, &fontSize))
+    if (!PyArg_ParseTuple(args, "O&h", PyUnicode_STStringConverter, &faceName, &fontSize))
     {
         PyErr_SetString(PyExc_TypeError, "setFont expects a string and a short int");
         PYTHON_RETURN_ERROR;
     }
-    self->fThis->SetFont(faceName, fontSize);
+    self->fThis->SetFont(std::move(faceName), fontSize);
     PYTHON_RETURN_NONE;
 }
 

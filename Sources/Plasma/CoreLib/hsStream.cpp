@@ -155,12 +155,7 @@ ST::string hsStream::ReadSafeString()
     ST::char_buffer name;
     uint16_t numChars = ReadLE16();
 
-#ifndef REMOVE_ME_SOON
-    // Backward compat hack - remove in a week or so (from 6/30/03)
-    bool oldFormat = !(numChars & 0xf000);
-    if (oldFormat)
-        (void)ReadLE16();
-#endif
+    hsAssert(numChars & 0xf000, "SafeString in old (pre-2003) format");
 
     numChars &= ~0xf000;
     hsAssert(numChars <= GetSizeLeft(), "Bad string");
@@ -230,7 +225,7 @@ bool hsStream::AtEnd()
 
 bool hsStream::IsTokenSeparator(char c)
 {
-    return (isspace(c) || c==',' || c=='=');
+    return (isspace(static_cast<unsigned char>(c)) || c==',' || c=='=');
 }
 
 bool hsStream::GetToken(char *s, uint32_t maxLen, const char beginComment, const char endComment)
@@ -263,21 +258,6 @@ bool hsStream::GetToken(char *s, uint32_t maxLen, const char beginComment, const
             s[k++] = c;
     }
     s[k] = 0;
-
-
-    if( (k > 0)&&!stricmp(s, "skip") )
-    {
-        int depth = 1;
-        while( depth && GetToken(s, maxLen, beginComment, endCom) )
-        {
-            if( !stricmp(s, "skip") )
-                depth++;
-            else
-            if( !stricmp(s, "piks") )
-                depth--;
-        }
-        return GetToken(s, maxLen, beginComment, endCom);
-    }
 
     return true;
 }
@@ -313,62 +293,34 @@ bool hsStream::ReadLn(char *s, uint32_t maxLen, const char beginComment, const c
     }
     s[k] = 0;
 
-
-    if( (k > 0)&&!stricmp(s, "skip") )
-    {
-        int depth = 1;
-        while( depth && ReadLn(s, maxLen, beginComment, endCom) )
-        {
-            if( !stricmp(s, "skip") )
-                depth++;
-            else
-            if( !stricmp(s, "piks") )
-                depth--;
-        }
-        return ReadLn(s, maxLen, beginComment, endCom);
-    }
-
     return true;
 }
 
 bool hsStream::ReadLn(ST::string& s, const char beginComment, const char endComment)
 {
-    {
-        ST::string_stream ss;
-        char c;
-        char endCom = endComment;
+    ST::string_stream ss;
+    char c;
+    char endCom = endComment;
 
-        while (true) {
-            while (!AtEnd() && strchr("\r\n", c = ReadByte()))
-                /* empty */;
+    while (true) {
+        while (!AtEnd() && strchr("\r\n", c = ReadByte()))
+            /* empty */;
 
-            if (AtEnd())
-                return false;
+        if (AtEnd())
+            return false;
 
-            if (beginComment != c)
-                break;
+        if (beginComment != c)
+            break;
 
-            // skip to end of comment
-            while (!AtEnd() && (endCom != (c = ReadByte())))
-                /* empty */;
-        }
+        // skip to end of comment
+        while (!AtEnd() && (endCom != (c = ReadByte())))
+            /* empty */;
+    }
 
+    ss.append_char(c);
+    while (!AtEnd() && !strchr("\r\n", c = ReadByte()))
         ss.append_char(c);
-        while (!AtEnd() && !strchr("\r\n", c = ReadByte()))
-            ss.append_char(c);
-        s = ss.to_string();
-    }
-
-    if (s.compare_i("skip") == 0) {
-        int depth = 1;
-        while (depth && ReadLn(s, beginComment, endComment)) {
-            if (s.compare_i("skip") == 0)
-                depth++;
-            if (s.compare_i("piks") == 0)
-                depth--;
-        }
-        return ReadLn(s, beginComment, endComment);
-    }
+    s = ss.to_string();
 
     return true;
 }
@@ -835,7 +787,7 @@ uint32_t hsReadOnlyStream::Read(uint32_t byteCount, void* buffer)
         byteCount = GetSizeLeft();
     }
 
-    HSMemory::BlockMove(fData, buffer, byteCount);
+    memmove(buffer, fData, byteCount);
     fData += byteCount;
     fBytesRead += byteCount;
     fPosition += byteCount;
@@ -872,7 +824,7 @@ void hsReadOnlyStream::Truncate()
 void hsReadOnlyStream::CopyToMem(void* mem)
 {
     if (fData < fStop)
-        HSMemory::BlockMove(fData, mem, fStop-fData);
+        memmove(mem, fData, fStop-fData);
 }
 
 
@@ -887,7 +839,7 @@ uint32_t hsWriteOnlyStream::Write(uint32_t byteCount, const void* buffer)
 {
     if (fData + byteCount > fStop)
         hsThrow("Write past end of stream");
-    HSMemory::BlockMove(buffer, fData, byteCount);
+    memmove(fData, buffer, byteCount);
     fData += byteCount;
     fBytesRead += byteCount;
     fPosition += byteCount;
@@ -917,7 +869,7 @@ uint32_t hsQueueStream::Read(uint32_t byteCount, void * buffer)
     
     limit = fWriteCursor >= fReadCursor ? fWriteCursor : fSize;
     length = std::min(limit-fReadCursor, byteCount);
-    HSMemory::BlockMove(fQueue+fReadCursor,buffer,length);
+    memmove(buffer, fQueue+fReadCursor, length);
     fReadCursor += length;
     fReadCursor %= fSize;
     total = length;
@@ -926,7 +878,7 @@ uint32_t hsQueueStream::Read(uint32_t byteCount, void * buffer)
     {
         limit = fWriteCursor;
         length = std::min(limit, static_cast<int32_t>(byteCount)-length);
-        HSMemory::BlockMove(fQueue,static_cast<char*>(buffer)+total,length);
+        memmove(static_cast<char*>(buffer)+total, fQueue, length);
         fReadCursor = length;
         total += length;
     }
@@ -942,7 +894,7 @@ uint32_t hsQueueStream::Write(uint32_t byteCount, const void* buffer)
     int32_t length;
 
     length = std::min(fSize-fWriteCursor, byteCount);
-    HSMemory::BlockMove(buffer,fQueue+fWriteCursor,length);
+    memmove(fQueue+fWriteCursor, buffer, length);
     if (fReadCursor > fWriteCursor)
     {
 #if 0

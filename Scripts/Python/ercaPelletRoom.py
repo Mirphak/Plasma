@@ -153,10 +153,10 @@ class ercaPelletRoom(ptResponder):
         vault = ptVault()
         entry = vault.findChronicleEntry("GotPellet")
         if entry is not None:
-            entryValue = entry.chronicleGetValue()
+            entryValue = entry.getValue()
             oldGotPellet = int(entryValue)
             if oldGotPellet != 0:
-                entry.chronicleSetValue("%d" % (0))
+                entry.setValue("%d" % (0))
                 entry.save()
                 PtDebugPrint("ercaPelletRoom.OnServerInitComplete(): chron entry GotPellet still contained a recipe, setting to 0")
 
@@ -282,14 +282,14 @@ class ercaPelletRoom(ptResponder):
             if boolMachine:
                 PtDebugPrint("We shouldn't get here.  Just in case some states got hosed.")
                 RespMachineMode.run(self.key,state="Close",fastforward=1)
-                if not len(PtGetPlayerList()):
+                if PtIsSolo():
                     ageSDL[SDLMachine.value] = (0,)
                     ageSDL[SDLChamber.value] = (0,)
                 boolMachine = 0
                 byteChamber = 0
             else:
                 RespMachineMode.run(self.key,state="Close",fastforward=1)
-                if not len(PtGetPlayerList()):
+                if PtIsSolo():
                     ageSDL[SDLChamber.value] = (0,)
                 byteChamber = 0
 
@@ -549,7 +549,7 @@ class ercaPelletRoom(ptResponder):
             vault = ptVault()
             entry = vault.findChronicleEntry("GotPellet")
             if entry is not None:
-                entry.chronicleSetValue("%d" % (Recipe))
+                entry.setValue("%d" % (Recipe))
                 entry.save()
                 PtDebugPrint("Chronicle entry GotPellet already added, setting to Recipe value of %d" % (Recipe))
             else:
@@ -581,7 +581,7 @@ class ercaPelletRoom(ptResponder):
             elif byteChamber == 5:
                 ageSDL[SDLPellet5.value] = (0,)
                 RespHidePellet.run(self.key,state="pellet5")
-                if LastPellet or not len(PtGetPlayerList()):
+                if LastPellet or PtIsSolo():
                     ageSDL[SDLMachine.value] = (0,)
                     LastPellet = 0
         
@@ -743,7 +743,7 @@ class ercaPelletRoom(ptResponder):
         for ageInfoChildRef in ageInfoChildren:
             ageInfoChild = ageInfoChildRef.getChild()
             folder = ageInfoChild.upcastToFolderNode()
-            if folder and folder.folderGetName() == "AgeData":
+            if folder and folder.getFolderName() == "AgeData":
                 ageDataChildren = folder.getChildNodeRefList()
                 for ageDataChildRef in ageDataChildren:
                     ageDataChild = ageDataChildRef.getChild()

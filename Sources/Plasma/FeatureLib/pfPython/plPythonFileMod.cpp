@@ -48,14 +48,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //////////////////////////////////////////////////////////////////////////
 
 #include <Python.h>
-#include <locale>
+
 #include "HeadSpin.h"
 #include "plgDispatch.h"
 #include "pyGeometry3.h"
 #include "pyKey.h"
 #include "pyObjectRef.h"
 #include "plPythonCallable.h"
-#include "plPythonConvert.h"
 #include "hsResMgr.h"
 #include "hsStream.h"
 
@@ -82,6 +81,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pnMessage/plPlayerPageMsg.h"
 #include "plNetClient/plNetClientMgr.h"
 #include "plNetTransport/plNetTransportMember.h"
+#include "pnMessage/plNotifyMsg.h"
 #include "pnMessage/plSDLNotificationMsg.h"
 #include "plMessage/plNetOwnershipMsg.h"
 #include "plSDL/plSDL.h"
@@ -89,7 +89,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plMessage/plCCRMsg.h"
 #include "plMessage/plVaultNotifyMsg.h"
 #include "plInputCore/plInputInterfaceMgr.h"
-#include "plInputCore/plInputDevice.h"
 #include "pfMessage/pfMarkerMsg.h"
 #include "pfMessage/pfBackdoorMsg.h"
 #include "plMessage/plAvatarMsg.h"
@@ -98,7 +97,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pfMessage/pfMovieEventMsg.h"
 #include "plMessage/plClimbEventMsg.h"
 #include "plMessage/plCaptureRenderMsg.h"
-#include "plGImage/plMipmap.h"
 #include "plMessage/plAccountUpdateMsg.h"
 #include "plAgeLoader/plAgeLoader.h"
 #include "plMessage/plAIMsg.h"
@@ -110,21 +108,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plProfile.h"
 
 #include "cyPythonInterface.h"
-#include "cyDraw.h"
-#include "cyPhysics.h"
 #include "pySceneObject.h"
-#include "cyMisc.h"
-#include "cyCamera.h"
-#include "pyNotify.h"
-#include "cyAvatar.h"
 #include "pyVault.h"
 #include "pyVaultNode.h"
 #include "pyVaultNodeRef.h"
 #include "pyVaultAgeLinkNode.h"
 #include "pyPlayer.h"
-#include "pyNetLinkingMgr.h"
 #include "pyAgeInfoStruct.h"
-#include "pyAgeLinkStruct.h"
 #include "pyImage.h"
 #include "pyCritterBrain.h"
 
@@ -1161,64 +1151,10 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
         pyObjectRef pyControl;
         if (pGUIMsg->GetControlKey()) {
             // now create the control... but first we need to find out what it is
-            pyObjectRef pyCtrlKey = pyKey::New(pGUIMsg->GetControlKey());
-            uint32_t control_type = pyGUIDialog::WhatControlType(*(pyKey::ConvertFrom(pyCtrlKey.Get())));
-
-            switch (control_type) {
-                case pyGUIDialog::kDialog:
-                    pyControl = pyGUIDialog::New(pGUIMsg->GetControlKey());
-                    break;
-
-                case pyGUIDialog::kButton:
-                    pyControl = pyGUIControlButton::New(pGUIMsg->GetControlKey());
-                    break;
-
-                case pyGUIDialog::kListBox:
-                    pyControl = pyGUIControlListBox::New(pGUIMsg->GetControlKey());
-                    break;
-
-                case pyGUIDialog::kTextBox:
-                    pyControl = pyGUIControlTextBox::New(pGUIMsg->GetControlKey());
-                    break;
-
-                case pyGUIDialog::kEditBox:
-                    pyControl = pyGUIControlEditBox::New(pGUIMsg->GetControlKey());
-                    break;
-
-                case pyGUIDialog::kUpDownPair:
-                case pyGUIDialog::kKnob:
-                    pyControl = pyGUIControlValue::New(pGUIMsg->GetControlKey());
-                    break;
-
-                case pyGUIDialog::kCheckBox:
-                    pyControl = pyGUIControlCheckBox::New(pGUIMsg->GetControlKey());
-                    break;
-
-                case pyGUIDialog::kRadioGroup:
-                    pyControl = pyGUIControlRadioGroup::New(pGUIMsg->GetControlKey());
-                    break;
-
-                case pyGUIDialog::kDynamicText:
-                    pyControl = pyGUIControlDynamicText::New(pGUIMsg->GetControlKey());
-                    break;
-
-                case pyGUIDialog::kMultiLineEdit:
-                    pyControl = pyGUIControlMultiLineEdit::New(pGUIMsg->GetControlKey());
-                    break;
-
-                case pyGUIDialog::kPopUpMenu:
-                    pyControl = pyGUIPopUpMenu::New(pGUIMsg->GetControlKey());
-                    break;
-
-                case pyGUIDialog::kClickMap:
-                    pyControl = pyGUIControlClickMap::New(pGUIMsg->GetControlKey());
-                    break;
-
-                default:
-                    // we don't know what it is... just send 'em the pyKey
-                    pyControl = pyKey::New(pGUIMsg->GetControlKey());
-                    break;
-
+            pyControl = pyGUIDialog::ConvertControl(pGUIMsg->GetControlKey());
+            if (!pyControl) {
+                // we don't know what it is... just send 'em the pyKey
+                pyControl = pyKey::New(pGUIMsg->GetControlKey());
             }
         }
         // Need to determine which of the GUIDialogs sent this plGUINotifyMsg
@@ -1358,17 +1294,14 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
     // are they looking for a CCR communication message?
     auto ccrmsg = IScriptWantsMsg<plCCRCommunicationMsg>(kfunc_OnCCRMsg, msg);
     if (ccrmsg) {
-        const char* textmessage = ccrmsg->GetMessage();
-        if (!textmessage)
-            textmessage = "";
-        ICallScriptMethod(kfunc_OnCCRMsg, (int)ccrmsg->GetType(), textmessage, ccrmsg->GetCCRPlayerID());
+        ICallScriptMethod(kfunc_OnCCRMsg, (int)ccrmsg->GetType(), ccrmsg->GetMessageText(), ccrmsg->GetCCRPlayerID());
         return true;
     }
 
     // are they looking for a VaultNotify message?
     auto vaultNotifyMsg = IScriptWantsMsg<plVaultNotifyMsg>(kfunc_OnVaultNotify, msg);
     if (vaultNotifyMsg) {
-        if (hsSucceeded(vaultNotifyMsg->GetResultCode())) {
+        if (IS_NET_SUCCESS(vaultNotifyMsg->GetResultCode())) {
             // Create a tuple for second argument according to msg type.
             // Default to an empty tuple.
             pyObjectRef ptuple;
@@ -1454,8 +1387,8 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
 
     auto sn = IScriptWantsMsg<plSDLNotificationMsg>(kfunc_SDLNotify, msg);
     if (sn) {
-        ICallScriptMethod(kfunc_SDLNotify, sn->fVar->GetName().c_str(), sn->fSDLName.c_str(),
-                          sn->fPlayerID, sn->fHintString.c_str());
+        ICallScriptMethod(kfunc_SDLNotify, sn->fVar->GetName(), sn->fSDLName,
+                          sn->fPlayerID, sn->fHintString);
         return true;
     }
 
@@ -1490,7 +1423,7 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
     // are they looking for a pfBackdoorMsg message?
     auto dt = IScriptWantsMsg<pfBackdoorMsg>(kfunc_OnBackdoorMsg, msg);
     if (dt) {
-        ICallScriptMethod(kfunc_OnBackdoorMsg, dt->GetTarget().c_str(), dt->GetString().c_str());
+        ICallScriptMethod(kfunc_OnBackdoorMsg, dt->GetTarget(), dt->GetString());
         return true;
     }
 #endif  //PLASMA_EXTERNAL_RELEASE
@@ -1543,7 +1476,7 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
     // are they looking for a pfMovieEventMsg message?
     auto moviemsg = IScriptWantsMsg<pfMovieEventMsg>(kfunc_OnMovieEvent, msg);
     if (moviemsg) {
-        ICallScriptMethod(kfunc_OnMovieEvent, moviemsg->fMovieName.AsString().c_str(),
+        ICallScriptMethod(kfunc_OnMovieEvent, moviemsg->fMovieName.AsString(),
                           (int)moviemsg->fReason);
         return true;
     }
@@ -1635,7 +1568,7 @@ bool plPythonFileMod::MsgReceive(plMessage* msg)
             kfunc_OnAIMsg,
             std::move(brainObj),
             msgType,
-            aiMsg->BrainUserString().c_str(),
+            aiMsg->BrainUserString(),
             std::move(args)
         );
         return true;
@@ -1673,7 +1606,7 @@ void plPythonFileMod::ReportError()
     ST::string objectName = this->GetKeyName();
     objectName += " - ";
 
-    PythonInterface::WriteToStdErr(objectName.c_str());
+    PythonInterface::WriteToStdErr(objectName);
 
     PyErr_Print();      // make sure the error is printed
     PyErr_Clear();      // clear the error
@@ -1699,9 +1632,9 @@ void plPythonFileMod::DisplayPythonOutput()
 //
 //  PURPOSE    : get the Output to the error file to be displayed
 //
-int  plPythonFileMod::getPythonOutput(std::string* line)
+ST::string plPythonFileMod::getPythonOutput()
 {
-     return PythonInterface::getOutputAndReset(line);
+     return PythonInterface::getOutputAndReset();
 }
 
 

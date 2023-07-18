@@ -7,11 +7,11 @@ target_link_libraries(pfFeatureInc
         pfAnimation
         pfAudio
         pfCamera
-        pfCCR
         pfCharacter
         pfConditional
         pfConsole
         pfGameGUIMgr
+        pfGameMgr
         pfJournalBook
         pfMessage
         pfPython

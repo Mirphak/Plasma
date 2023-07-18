@@ -65,6 +65,7 @@ from PlasmaNetConstants import *
 import xLinkingBookDefs
 from xPsnlVaultSDL import *
 import time
+import re
 
 
 # define the attributes that will be entered in max
@@ -271,7 +272,7 @@ class xLinkingBookGUIPopup(ptModifier):
                         BookOfferer = event[1]
                         PtDebugPrint("xLinkingBookGUIPopup: offered book by %s" % (BookOfferer.getName()),level=kDebugDumpLevel)
                         avID = PtGetClientIDFromAvatarKey(BookOfferer.getKey())
-                        if ptVault().getIgnoreListFolder().playerlistHasPlayer(avID):
+                        if ptVault().getIgnoreListFolder().hasPlayer(avID):
                             OfferedBookMode = False
                             PtNotifyOffererLinkRejected(avID) 
                             BookOfferer = None
@@ -296,7 +297,13 @@ class xLinkingBookGUIPopup(ptModifier):
                                 PtSetShareAgeInstanceGuid(pelletCaveGUID)
                             ClosedBookToShare = 1
                             self.HideBook()
-
+                        elif event[2] == xLinkingBookDefs.kShareBookDeleteID and not OfferedBookMode:
+                            ageName = self.IGetAgeFilename()
+                            PtDebugPrint(f"xLinkingBookGUIPopup:Book: hit delete bookmark for age '{ageName}'")
+                            if ageName == "Neighborhood":
+                                PtYesNoDialog(self.key, PtGetLocalizedString("Personal.Bookshelf.DeleteNeighborhoodBook"))
+                            else:
+                                PtYesNoDialog(self.key, PtGetLocalizedString("Personal.Bookshelf.DeleteBook"))
                         elif event[2] >= xLinkingBookDefs.kFirstLinkPanelID or event[2] == xLinkingBookDefs.kBookMarkID:
                             PtDebugPrint("xLinkingBookGUIPopup:Book: hit linking panel %s" % (event[2]))
 
@@ -331,7 +338,7 @@ class xLinkingBookGUIPopup(ptModifier):
                                         #PtDebugPrint("agePanel = ",agePanel)
                                         if agePanel in xLinkingBookDefs.CityBookLinks:
                                             self.IDoCityLinksChron(agePanel)
-                                        respLinkResponder.run(self.key,avatar=PtGetLocalAvatar())
+                                        respLinkResponder.run(self.key,avatar=PtGetLocalAvatar(),netPropagate=0)
 
                                 else:  #Bookshelf Book
                                     if ptVault().amOwnerOfCurrentAge():
@@ -347,9 +354,9 @@ class xLinkingBookGUIPopup(ptModifier):
                                         entry = vault.findChronicleEntry("TomahnaLoad")
                                         if entry is not None:
                                             if linkTitle == "Tomahna":
-                                                entry.chronicleSetValue("yes")
+                                                entry.setValue("yes")
                                             else:
-                                                entry.chronicleSetValue("no")
+                                                entry.setValue("no")
                                     
                                     # this book was taken off the personal age bookshelf. Send a note telling to link
                                     note = ptNotify(self.key)
@@ -409,6 +416,41 @@ class xLinkingBookGUIPopup(ptModifier):
                     elif event[1] == PtBookEventTypes.kNotifyCheckUnchecked:
                         PtDebugPrint("xLinkingBookGUIPopup:Book: NotifyCheckUncheck",level=kDebugDumpLevel)
                         pass
+                elif event[0] == kVariableEvent:
+                    if event[1] == "YesNo" and event[3] == 1:
+                        ageName = self.IGetAgeFilename()
+                        vault = ptVault()
+                        ageStruct = ptAgeInfoStruct()
+                        ageStruct.setAgeFilename(ageName)
+
+                        if link := vault.getOwnedAgeLink(ageStruct):
+                            PtDebugPrint(f"xLinkingBookGUIPopup.OnNotify():\tfound Owned link for deletion {ageName=}", level=kDebugDumpLevel)
+
+                            if ageName in {"Ahnonay", "AhnonayCathedral"}:
+                                ahnonayAgeStruct = ptAgeInfoStruct()
+                                ahnonayAgeStruct.setAgeFilename("Personal")
+
+                                if ageLinkNode := vault.getOwnedAgeLink(ahnonayAgeStruct):
+                                    if ageInfoNode := ageLinkNode.getAgeInfo():
+                                        ageDataTemplate = ptVaultFolderNode()
+                                        ageDataTemplate.setFolderName("AgeData")
+                                        if ageDataFolder := ageInfoNode.findNode(ageDataTemplate):
+                                            chronTemplate = ptVaultChronicleNode()
+                                            chronTemplate.setName("AhnonayVolatile")
+                                            if (chron := ageDataFolder.findNode(chronTemplate)) and (chron := chron.upcastToChronicleNode()):
+                                                chron.setValue("1")
+                                            else:
+                                                PtDebugPrint(f"xLinkingBookGUIPopup.OnNotify():\tHmmm... The AhnonayVolatile chronicle is missing! This deletion may cause oddness.")
+                                        else:
+                                            PtDebugPrint(f"xLinkingBookGUIPopup.OnNotify():\tHmmm... The AgeData chronicle is missing! This deletion may cause oddness.")
+                                else:
+                                    PtDebugPrint("xLinkingBookGUIPopup.OnNotify():\tHmmm... The Relto AgeLink is missing!")
+                            if ageName != "Ahnonay":
+                                PtDebugPrint(f"xLinkingBookGUIPopup.OnNotify():\tMarking {ageName=} volatile.", level=kWarningLevel)
+                                link.setVolatile(True)
+                                link.save()
+                        else:
+                            PtDebugPrint(f"xLinkingBookGUIPopup.OnNotify():\tHmmm... The {ageName=} AgeLink is missing!")
 
 
     def IShowBookNoTreasure(self):
@@ -440,7 +482,7 @@ class xLinkingBookGUIPopup(ptModifier):
                 vault = ptVault()
                 entry = vault.findChronicleEntry("TomahnaLoad")
                 if entry is not None:
-                    entry.chronicleSetValue("yes")
+                    entry.setValue("yes")
                     entry.save()
                     PtDebugPrint("Chronicle entry TomahnaLoad already added, setting to yes")
                 else:
@@ -448,7 +490,7 @@ class xLinkingBookGUIPopup(ptModifier):
                     sdl["CleftVisited"] = (1,)
                     vault.addChronicleEntry("TomahnaLoad",1,"yes")
                     PtDebugPrint("Chronicle entry TomahnaLoad not present, adding entry and setting to yes")
-                respLinkResponder.run(self.key,avatar=PtGetLocalAvatar())
+                respLinkResponder.run(self.key,avatar=PtGetLocalAvatar(),netPropagate=0)
                 return
             elif agePanel == "grsnTeamRmPurple" or agePanel == "grsnTeamRmYellow":
                 PtAtTimeCallback(self.key,5,kGrsnTeamBook)
@@ -600,7 +642,11 @@ class xLinkingBookGUIPopup(ptModifier):
                     PtDebugPrint("xLinkingBookGUIPopup: sorry, don't recognize your bookmark spawn point title")
             else:
                 bookmark = ''
-            
+
+            if fromBookshelf and agePanel in xLinkingBookDefs.CityBookLinks:
+                PtDebugPrint("xLinkingBookGUIPopup: add yeesha stamps to first city link page")
+                bookdef = re.sub(r'<font size=10>(.*?)(?:<img src="xYeeshaBookStampVSquish\*1#0\.hsm" pos=140,255 resize=no blend=alpha>)?$', r'<font size=10>\1<img src="xYeeshaBookStampVSquish*1#0.hsm" pos=140,255 resize=no blend=alpha>', bookdef)
+
             if sharable:
                 try:
                     allPagesDef = bookdef % (bookmark, stampdef,self.IAddShare())
@@ -753,16 +799,16 @@ class xLinkingBookGUIPopup(ptModifier):
         vault = ptVault()
         entryCityLinks = vault.findChronicleEntry("CityBookLinks")
         if entryCityLinks is not None:
-            valCityLinks = entryCityLinks.chronicleGetValue()
+            valCityLinks = entryCityLinks.getValue()
             PtDebugPrint("valCityLinks = ",valCityLinks)
             CityLinks = valCityLinks.split(",")
             PtDebugPrint("CityLinks = ",CityLinks)
             if agePanel not in CityLinks:
                 NewLinks = valCityLinks + "," + agePanel
-                entryCityLinks.chronicleSetValue(NewLinks)
+                entryCityLinks.setValue(NewLinks)
                 entryCityLinks.save()
                 PtDebugPrint("xLinkingBookGUIPopup.IDoCityLinksChron():  setting citylinks chron entry to include: ",agePanel)
-                valCityLinks = entryCityLinks.chronicleGetValue()
+                valCityLinks = entryCityLinks.getValue()
                 CityLinks = valCityLinks.split(",")
                 PtDebugPrint("xLinkingBookGUIPopup.IDoCityLinksChron():  citylinks now = ",CityLinks)
             else:
@@ -783,7 +829,7 @@ class xLinkingBookGUIPopup(ptModifier):
         vault = ptVault()
         entryCityLinks = vault.findChronicleEntry("CityBookLinks")
         if entryCityLinks is not None:
-            valCityLinks = entryCityLinks.chronicleGetValue()
+            valCityLinks = entryCityLinks.getValue()
             PtDebugPrint("xLinkingBookGUIPopup.IGetCityLinksChron(): valCityLinks = ",valCityLinks)
             CityLinks = valCityLinks.split(",")
         return CityLinks	
@@ -853,7 +899,7 @@ class xLinkingBookGUIPopup(ptModifier):
             for ageInfoChildRef in ageInfoChildren:
                 ageInfoChild = ageInfoChildRef.getChild()
                 folder = ageInfoChild.upcastToFolderNode()
-                if folder and folder.folderGetName() == "AgeData":
+                if folder and folder.getFolderName() == "AgeData":
                     ageDataChildren = folder.getChildNodeRefList()
                     for ageDataChildRef in ageDataChildren:
                         ageDataChild = ageDataChildRef.getChild()
@@ -1050,7 +1096,7 @@ class xLinkingBookGUIPopup(ptModifier):
             for ageInfoChildRef in ageInfoChildren:
                 ageInfoChild = ageInfoChildRef.getChild()
                 folder = ageInfoChild.upcastToFolderNode()
-                if folder and folder.folderGetName() == "AgeData":
+                if folder and folder.getFolderName() == "AgeData":
                     ageDataFolder = folder
                     ageDataChildren = folder.getChildNodeRefList()
                     for ageDataChildRef in ageDataChildren:
@@ -1080,14 +1126,14 @@ class xLinkingBookGUIPopup(ptModifier):
                 PtDebugPrint("got ageLinkNode, created AgeData folder")
                 ageInfoNode = ageLinkNode.getAgeInfo()
                 ageDataFolder = ptVaultFolderNode(0)
-                ageDataFolder.folderSetName("AgeData")
+                ageDataFolder.setFolderName("AgeData")
                 ageInfoNode.addNode(ageDataFolder)
 
         if not GUIDChronFound:
             PtDebugPrint("creating PelletCave GUID chron")
             newNode = ptVaultChronicleNode(0)
-            newNode.chronicleSetName("PelletCaveGUID")
-            newNode.chronicleSetValue(pelletCaveGUID)
+            newNode.setName("PelletCaveGUID")
+            newNode.setValue(pelletCaveGUID)
             ageDataFolder.addNode(newNode)
             PtDebugPrint("created pelletCaveGUID age chron, = ",pelletCaveGUID)
 
@@ -1100,7 +1146,7 @@ class xLinkingBookGUIPopup(ptModifier):
         for ageInfoChildRef in ageInfoChildren:
             ageInfoChild = ageInfoChildRef.getChild()
             folder = ageInfoChild.upcastToFolderNode()
-            if folder and folder.folderGetName() == "AgeData":
+            if folder and folder.getFolderName() == "AgeData":
                 ageDataChildren = folder.getChildNodeRefList()
                 for ageDataChildRef in ageDataChildren:
                     ageDataChild = ageDataChildRef.getChild()
@@ -1122,7 +1168,7 @@ class xLinkingBookGUIPopup(ptModifier):
             for ageInfoChildRef in ageInfoChildren:
                 ageInfoChild = ageInfoChildRef.getChild()
                 folder = ageInfoChild.upcastToFolderNode()
-                if folder and folder.folderGetName() == "AgeData":
+                if folder and folder.getFolderName() == "AgeData":
                     ageDataChildren = folder.getChildNodeRefList()
                     for ageDataChildRef in ageDataChildren:
                         ageDataChild = ageDataChildRef.getChild()

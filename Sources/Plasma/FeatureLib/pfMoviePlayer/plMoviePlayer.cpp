@@ -43,8 +43,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plMoviePlayer.h"
 
 #ifdef USE_WEBM
-#   include <mkvreader.hpp>
-#   include <mkvparser.hpp>
+#   include <mkvparser/mkvreader.h>
+#   include <mkvparser/mkvparser.h>
 
 #   define VPX_CODEC_DISABLE_COMPAT 1
 #   include <vpx/vpx_decoder.h>
@@ -181,13 +181,13 @@ plMoviePlayer::plMoviePlayer()
       fTexture(),
 #ifdef USE_WEBM
       fReader(),
+      fLastImg(),
 #endif
       fMovieTime(),
       fLastFrameTime(),
       fPosition(),
       fPlaying(),
-      fPaused(),
-      fLastImg()
+      fPaused()
 {
     fScale.Set(1.0f, 1.0f);
 }
@@ -469,10 +469,12 @@ bool plMoviePlayer::Stop()
         fAudioSound->Stop();
     if (fPlate)
         fPlate->SetVisible(false);
+#ifdef USE_WEBM
     if (fLastImg) {
         vpx_img_free(fLastImg);
         fLastImg = nullptr;
     }
+#endif
 
     for (auto cb : fCallbacks)
         cb->Send();

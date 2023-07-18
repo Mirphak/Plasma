@@ -40,7 +40,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
+#include <string_theory/string>
+
 #include "pyKey.h"
 
 #include "pfGameGUIMgr/pfGUIEditBoxMod.h"
@@ -57,9 +58,9 @@ pyGUIControlEditBox::pyGUIControlEditBox(plKey objkey) : pyGUIControl(std::move(
 }
 
 
-bool pyGUIControlEditBox::IsGUIControlEditBox(pyKey& gckey)
+bool pyGUIControlEditBox::IsGUIControlEditBox(const plKey& key)
 {
-    if ( gckey.getKey() && pfGUIEditBoxMod::ConvertNoRef(gckey.getKey()->ObjectIsLoaded()) )
+    if ( key && pfGUIEditBoxMod::ConvertNoRef(key->ObjectIsLoaded()) )
         return true;
     return false;
 }
@@ -75,8 +76,7 @@ void pyGUIControlEditBox::SetBufferSize( uint32_t size )
     }
 }
 
-
-std::string pyGUIControlEditBox::GetBuffer()
+ST::string pyGUIControlEditBox::GetBuffer()
 {
     if ( fGCkey )
     {
@@ -85,19 +85,7 @@ std::string pyGUIControlEditBox::GetBuffer()
         if ( pebmod )
             return pebmod->GetBuffer();
     }
-    return "";
-}
-
-std::wstring pyGUIControlEditBox::GetBufferW()
-{
-    if ( fGCkey )
-    {
-        // get the pointer to the modifier
-        pfGUIEditBoxMod* pebmod = pfGUIEditBoxMod::ConvertNoRef(fGCkey->ObjectIsLoaded());
-        if ( pebmod )
-            return pebmod->GetBufferW();
-    }
-    return L"";
+    return {};
 }
 
 void pyGUIControlEditBox::ClearBuffer()
@@ -111,18 +99,7 @@ void pyGUIControlEditBox::ClearBuffer()
     }
 }
 
-void pyGUIControlEditBox::SetText( const char *str )
-{
-    if ( fGCkey )
-    {
-        // get the pointer to the modifier
-        pfGUIEditBoxMod* pebmod = pfGUIEditBoxMod::ConvertNoRef(fGCkey->ObjectIsLoaded());
-        if ( pebmod )
-            pebmod->SetText(str);
-    }
-}
-
-void pyGUIControlEditBox::SetTextW( const wchar_t *str )
+void pyGUIControlEditBox::SetText( const ST::string& str )
 {
     if ( fGCkey )
     {

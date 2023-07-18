@@ -46,17 +46,28 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //////////////////////////////////////////////////////////////////////
 
 #include <Python.h>
+#include <string_theory/string>
+
 #include "pyGeometry3.h"
 
 #include "pyVaultMarkerGameNode.h"
 #include "plVault/plVault.h"
-#include "pnUUID/pnUUID.h"
 
 //create from the Python side
 pyVaultMarkerGameNode::pyVaultMarkerGameNode()
     : pyVaultNode()
 {
     fNode->SetNodeType(plVault::kNodeType_MarkerGame);
+}
+
+ST::string pyVaultMarkerGameNode::GetGameGuid() const
+{
+    if (fNode) {
+        VaultMarkerGameNode access(fNode);
+        return access.GetGameGuid().AsString();
+    }
+
+    return plUUID().AsString();
 }
 
 ST::string pyVaultMarkerGameNode::GetGameName () const
@@ -66,6 +77,16 @@ ST::string pyVaultMarkerGameNode::GetGameName () const
         return access.GetGameName();
     }
     return ST::string();
+}
+
+void pyVaultMarkerGameNode::SetGameGuid(const ST::string& guid)
+{
+    if (fNode) {
+        plUUID uuid;
+        uuid.FromString(guid.c_str());
+        VaultMarkerGameNode access(fNode);
+        access.SetGameGuid(uuid);
+    }
 }
 
 void pyVaultMarkerGameNode::SetGameName (const ST::string& name)

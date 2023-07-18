@@ -46,34 +46,24 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //////////////////////////////////////////////////////////////////////
 
 #include <Python.h>
-#include "pnNetCommon/plNetApp.h"
+#include <string_theory/string>
+
+#include "pnNetBase/pnNbError.h"
 
 #include "pyAgeVault.h"
-#include "pyVault.h"
-#include "pyVaultNodeRef.h"
 #include "pyVaultFolderNode.h"
-#include "pyVaultPlayerInfoListNode.h"
-#include "pyVaultPlayerInfoNode.h"
 #include "pyVaultAgeInfoNode.h"
 #include "pyVaultAgeLinkNode.h"
 #include "pyVaultChronicleNode.h"
 #include "pyVaultTextNoteNode.h"
-#include "pyNetLinkingMgr.h"
 #include "pyAgeInfoStruct.h"
 #include "pySDL.h"
 
 
 #include "plVault/plVault.h"
-#include "plNetClient/plNetClientMgr.h"
-#include "plNetClient/plNetLinkingMgr.h"
-#include "plNetTransport/plNetTransport.h"
-#include "plNetTransport/plNetTransportMember.h"
 #include "plSDL/plSDL.h"
 
 pyAgeVault::pyAgeVault() {
-}
-
-pyAgeVault::~pyAgeVault() {
 }
 
 //////////////////////////////////////////////////
@@ -188,7 +178,7 @@ void pyAgeVault::AddChronicleEntry( const ST::string& name, uint32_t type, const
 
 // AGE DEVICES. AKA IMAGERS, WHATEVER.
 // Add a new device.
-void pyAgeVault::AddDevice( const char * deviceName, PyObject * cbObject, uint32_t cbContext )
+void pyAgeVault::AddDevice(const ST::string& deviceName, PyObject * cbObject, uint32_t cbContext)
 {
     pyVaultNode::pyVaultNodeOperationCallback * cb = new pyVaultNode::pyVaultNodeOperationCallback( cbObject );
     cb->VaultOperationStarted( cbContext );
@@ -196,22 +186,23 @@ void pyAgeVault::AddDevice( const char * deviceName, PyObject * cbObject, uint32
     if (hsRef<RelVaultNode> rvn = VaultAgeAddDeviceAndWait(deviceName))
         cb->SetNode(rvn);
 
-    cb->VaultOperationComplete( cbContext, cb->GetNode() ? hsOK : hsFail);  // cbHolder deletes itself here.
+    // cb deletes itself here.
+    cb->VaultOperationComplete(cbContext, cb->GetNode() ? kNetSuccess : kNetErrInternalError);
 }
 
 // Remove a device.
-void pyAgeVault::RemoveDevice( const char * deviceName )
+void pyAgeVault::RemoveDevice(const ST::string& deviceName)
 {
     VaultAgeRemoveDevice(deviceName);
 }
 
 // True if device exists in age.
-bool pyAgeVault::HasDevice( const char * deviceName )
+bool pyAgeVault::HasDevice(const ST::string& deviceName)
 {
     return VaultAgeHasDevice(deviceName);
 }
 
-PyObject * pyAgeVault::GetDevice( const char * deviceName )
+PyObject * pyAgeVault::GetDevice(const ST::string& deviceName)
 {
     if (hsRef<RelVaultNode> rvn = VaultAgeGetDevice(deviceName))
         return pyVaultTextNoteNode::New(rvn);
@@ -220,7 +211,7 @@ PyObject * pyAgeVault::GetDevice( const char * deviceName )
 }
 
 // Sets the inbox associated with a device.
-void pyAgeVault::SetDeviceInbox( const char * deviceName, const char * inboxName, PyObject * cbObject, uint32_t cbContext )
+void pyAgeVault::SetDeviceInbox(const ST::string& deviceName, const ST::string& inboxName, PyObject * cbObject, uint32_t cbContext)
 {
     pyVaultNode::pyVaultNodeOperationCallback * cb = new pyVaultNode::pyVaultNodeOperationCallback( cbObject );
     cb->VaultOperationStarted( cbContext );
@@ -228,10 +219,11 @@ void pyAgeVault::SetDeviceInbox( const char * deviceName, const char * inboxName
     if (hsRef<RelVaultNode> rvn = VaultAgeSetDeviceInboxAndWait(deviceName, inboxName))
         cb->SetNode(rvn);
 
-    cb->VaultOperationComplete( cbContext, cb->GetNode() ? hsOK : hsFail ); // cbHolder deletes itself here.
+    // cb deletes itself here.
+    cb->VaultOperationComplete(cbContext, cb->GetNode() ? kNetSuccess : kNetErrInternalError);
 }
 
-PyObject * pyAgeVault::GetDeviceInbox( const char * deviceName )
+PyObject * pyAgeVault::GetDeviceInbox(const ST::string& deviceName)
 {
     if (hsRef<RelVaultNode> rvn = VaultAgeGetDeviceInbox(deviceName))
         return pyVaultTextNoteNode::New(rvn);

@@ -73,27 +73,11 @@ pfGUIMenuItem::pfGUIMenuItem()
 pfGUIMenuItem::~pfGUIMenuItem()
 {
     SetSkin(nullptr, kTop);
-    delete [] fName;
 }
 
-void    pfGUIMenuItem::SetName( const char *name )
+void    pfGUIMenuItem::SetName(ST::string name)
 {
-    wchar_t *wName = hsStringToWString(name);
-    SetName(wName);
-    delete [] wName;
-}
-
-void    pfGUIMenuItem::SetName( const wchar_t *name )
-{
-    delete [] fName;
-    if (name != nullptr)
-    {
-        fName = new wchar_t[wcslen(name)+1];
-        wcscpy(fName,name);
-    }
-    else
-        fName = nullptr;
-
+    fName = std::move(name);
     IUpdate();
 }
 
@@ -313,7 +297,7 @@ void    pfGUIMenuItem::IUpdate()
 
     fDynTextMap->SetJustify( plDynamicTextMap::kLeftJustify );
 
-    if (fName != nullptr)
+    if (!fName.empty())
     {
         uint16_t ht;
         fDynTextMap->CalcStringWidth( fName, &ht );
@@ -358,7 +342,7 @@ void    pfGUIMenuItem::IUpdate()
             else
             {
                 fDynTextMap->SetJustify( plDynamicTextMap::kRightJustify );
-                fDynTextMap->DrawString( x + fDynTextMap->GetVisibleWidth() - 2, y, ">>" );
+                fDynTextMap->DrawString(x + fDynTextMap->GetVisibleWidth() - 2, y, L">>");
             }
         }
     }
@@ -377,10 +361,7 @@ void pfGUIMenuItem::PurgeDynaTextMapImage()
 
 void    pfGUIMenuItem::GetTextExtents( uint16_t &width, uint16_t &height )
 {
-    if (fName == nullptr)
-        width = height = 0;
-    else
-        width = fDynTextMap->CalcStringWidth( fName, &height );
+    width = fDynTextMap->CalcStringWidth( fName, &height );
 }
 
 //// MsgReceive //////////////////////////////////////////////////////////////

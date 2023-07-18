@@ -13,7 +13,6 @@ set(plPipeline_SOURCES
     plRenderTarget.cpp
     plStatusLogDrawer.cpp
     plTextFont.cpp
-    plTextGenerator.cpp
     plTransitionMgr.cpp
 )
 
@@ -39,7 +38,6 @@ set(plPipeline_HEADERS
     plStatusLogDrawer.h
     plStencil.h
     plTextFont.h
-    plTextGenerator.h
     plTransitionMgr.h
 )
 
@@ -73,6 +71,10 @@ target_link_libraries(plPipeline
         plSurface
         pfCamera # plCaptureRender, plDynamicEnvMap, plDXPipeline
         pfGameGUIMgr # plCaptureRender
+        $<$<PLATFORM_ID:Windows>:plWinDpi>
+        freetype
+        "$<$<PLATFORM_ID:Darwin>:-framework CoreText>"
+        $<$<AND:$<NOT:$<PLATFORM_ID:Windows>>,$<NOT:$<PLATFORM_ID:Darwin>>>:Fontconfig::Fontconfig>
     INTERFACE
         pnFactory
 )

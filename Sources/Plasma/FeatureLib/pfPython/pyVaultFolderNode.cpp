@@ -47,6 +47,9 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 
 #include "pyVaultFolderNode.h"
+
+#include <string_theory/string>
+
 #include "plVault/plVault.h"
 
 //create from the Python side
@@ -77,19 +80,11 @@ int pyVaultFolderNode::Folder_GetType()
     return folder.GetFolderType();
 }
 
-void pyVaultFolderNode::Folder_SetName(const char* name)
+void pyVaultFolderNode::Folder_SetName(const ST::string& name)
 {
     if (fNode) {
         VaultFolderNode folder(fNode);
         folder.SetFolderName(name);
-    }
-}
-
-void pyVaultFolderNode::Folder_SetNameW(const wchar_t* name)
-{
-    if (fNode) {
-        VaultFolderNode folder(fNode);
-        folder.SetFolderName(ST::string::from_wchar(name));
     }
 }
 

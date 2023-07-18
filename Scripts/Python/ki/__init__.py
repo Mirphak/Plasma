@@ -365,7 +365,7 @@ class xKI(ptModifier):
         PtLoadDialog("YeeshaPageGUI")
         PtLoadDialog("KIMiniMarkers", self.key)
 
-        self.markerGameManager = xMarkerMgr.MarkerGameManager()
+        self.markerGameManager = xMarkerMgr.MarkerGameManager(self)
         self.chatMgr.markerGameManager = self.markerGameManager
 
         # Pass the newly-initialized key to the modules.
@@ -504,7 +504,7 @@ class xKI(ptModifier):
                 elif event[2] == 999:
                     self.bookOfferer = event[1]
                     avID = PtGetClientIDFromAvatarKey(self.bookOfferer.getKey())
-                    if ptVault().getIgnoreListFolder().playerlistHasPlayer(avID):
+                    if ptVault().getIgnoreListFolder().hasPlayer(avID):
                         self.offeredBookMode = kGUI.NotOffering
                         PtNotifyOffererLinkRejected(avID)
                         self.bookOfferer = None
@@ -926,11 +926,11 @@ class xKI(ptModifier):
                 vault = ptVault()
                 entry = vault.findChronicleEntry(kChronicleGZMarkersAquired)
                 if entry is not None:
-                    markers = entry.chronicleGetValue()
+                    markers = entry.getValue()
                     if len(markers) < value:
                         # Need to increase the capacity of the markers; start as active.
                         markers += kGZMarkerAvailable * (value - len(markers))
-                        entry.chronicleSetValue(markers)
+                        entry.setValue(markers)
                         entry.save()
                 else:
                     # If there are none, then just add another entry; start as active.
@@ -1013,7 +1013,7 @@ class xKI(ptModifier):
             # Is the message from an ignored player?
             vault = ptVault()
             ignores = vault.getIgnoreListFolder()
-            if ignores is not None and ignores.playerlistHasPlayer(player.getPlayerID()):
+            if ignores is not None and ignores.hasPlayer(player.getPlayerID()):
                 return
 
             if cFlags.lockey:
@@ -1230,7 +1230,7 @@ class xKI(ptModifier):
                     playerlist.setSelection(pidx)
                     # Set the caret for the chat.
                     caret = ptGUIControlTextBox(KIMini.dialog.getControlFromTag(kGUI.ChatCaretID))
-                    caret.setStringW(PtGetLocalizedString("KI.Chat.TOPrompt") + str(player.getPlayerName()) + " >")
+                    caret.setString(PtGetLocalizedString("KI.Chat.TOPrompt") + str(player.getPlayerName()) + " >")
                     privateChbox = ptGUIControlCheckBox(KIMini.dialog.getControlFromTag(kGUI.miniPrivateToggle))
                     privateChbox.setChecked(1)
                     break
@@ -1455,7 +1455,7 @@ class xKI(ptModifier):
             # Not found, set to 0 by default.
             vault.addChronicleEntry(kChron.OnlyPMs, kChron.OnlyPMsType, str(int(self.onlyGetPMsFromBuddies)))
         else:
-            self.onlyGetPMsFromBuddies = int(entry.chronicleGetValue())
+            self.onlyGetPMsFromBuddies = int(entry.getValue())
 
         # Only allow the player to be buddied on request.
         entry = vault.findChronicleEntry(kChron.BuddiesOnRequest)
@@ -1463,7 +1463,7 @@ class xKI(ptModifier):
             # Not found, set to 0 by default.
             vault.addChronicleEntry(kChron.BuddiesOnRequest, kChron.BuddiesOnRequestType, str(int(self.onlyAllowBuddiesOnRequest)))
         else:
-            self.onlyAllowBuddiesOnRequest = int(entry.chronicleGetValue())
+            self.onlyAllowBuddiesOnRequest = int(entry.getValue())
 
     ## Save the KI Flags to the Chronicle.
     def SaveKIFlags(self):
@@ -1472,7 +1472,7 @@ class xKI(ptModifier):
         # Only get PMs and KI Mails from Buddies.
         entry = vault.findChronicleEntry(kChron.OnlyPMs)
         if entry is not None:
-            entry.chronicleSetValue(str(int(self.onlyGetPMsFromBuddies)))
+            entry.setValue(str(int(self.onlyGetPMsFromBuddies)))
             entry.save()
         else:
             vault.addChronicleEntry(kChron.OnlyPMs, kChron.OnlyPMsType, str(int(self.onlyGetPMsFromBuddies)))
@@ -1480,7 +1480,7 @@ class xKI(ptModifier):
         # Only allow the player to be buddied on request.
         entry = vault.findChronicleEntry(kChron.BuddiesOnRequest)
         if entry is not None:
-            entry.chronicleSetValue(str(int(self.onlyAllowBuddiesOnRequest)))
+            entry.setValue(str(int(self.onlyAllowBuddiesOnRequest)))
             entry.save()
         else:
             vault.addChronicleEntry(kChron.BuddiesOnRequest, kChron.BuddiesOnRequestType, str(int(self.onlyAllowBuddiesOnRequest)))
@@ -1509,7 +1509,7 @@ class xKI(ptModifier):
         vault = ptVault()
         entry = vault.findChronicleEntry("KILightStop")
         if entry is not None:
-            entryValue = entry.chronicleGetValue()
+            entryValue = entry.getValue()
             remaining = int(entryValue)
             return remaining
         else:
@@ -1522,12 +1522,12 @@ class xKI(ptModifier):
         vault = ptVault()
         entry = vault.findChronicleEntry("KILightStop")
         if entry is not None:
-            entryValue = entry.chronicleGetValue()
+            entryValue = entry.getValue()
             oldVal = int(entryValue)
             if remaining == oldVal:
                 return
             PtDebugPrint("xKI.SetKILightChron(): Set KI light chron to: ", remaining, level=kDebugDumpLevel)
-            entry.chronicleSetValue(str(int(remaining)))
+            entry.setValue(str(int(remaining)))
             entry.save()
 
     ## Manages the KI light.
@@ -1630,11 +1630,11 @@ class xKI(ptModifier):
     ## Auto-completes the text for a given editing control.
     def Autocomplete(self, control):
 
-        text = control.getStringW()
+        text = control.getString()
 
         proposition = self.autocompleteState.pickNext(text)
         if proposition is not None:
-            control.setStringW(proposition)
+            control.setString(proposition)
             control.end()
             control.refresh()
             return
@@ -1653,7 +1653,7 @@ class xKI(ptModifier):
         proposition = self.autocompleteState.pickFirst(text, players)
 
         if proposition is not None:
-            control.setStringW(proposition)
+            control.setString(proposition)
             control.end()
             control.refresh()
 
@@ -1669,18 +1669,18 @@ class xKI(ptModifier):
                 if (self.chatMgr.MessageHistoryIs == -1):
                     self.chatMgr.MessageCurrentLine = control.getString()
                 self.chatMgr.MessageHistoryIs = self.chatMgr.MessageHistoryIs +1
-                control.setStringW(self.chatMgr.MessageHistoryList[self.chatMgr.MessageHistoryIs])
+                control.setString(self.chatMgr.MessageHistoryList[self.chatMgr.MessageHistoryIs])
                 control.end()
                 control.refresh()
         elif (set == "down"):
             if (self.chatMgr.MessageHistoryIs > 0):
                 self.chatMgr.MessageHistoryIs = self.chatMgr.MessageHistoryIs -1
-                control.setStringW(self.chatMgr.MessageHistoryList[self.chatMgr.MessageHistoryIs])
+                control.setString(self.chatMgr.MessageHistoryList[self.chatMgr.MessageHistoryIs])
                 control.end()
                 control.refresh()
             elif (self.chatMgr.MessageHistoryIs == 0):
                 self.chatMgr.MessageHistoryIs = -1
-                control.setStringW(self.chatMgr.MessageCurrentLine)
+                control.setString(self.chatMgr.MessageCurrentLine)
                 control.end()
                 control.refresh()
 
@@ -1694,7 +1694,7 @@ class xKI(ptModifier):
         vault = ptVault()
         entry = vault.findChronicleEntry(kChronicleKITextColor)
         if entry is not None:
-            if colorStr := entry.chronicleGetValue():
+            if colorStr := entry.getValue():
                 PtDebugPrint(f"xKI.DetermineTextColor(): KI Text Color is: \"{colorStr}\".", level=kWarningLevel)
                 args = colorStr.split(",")
                 try:
@@ -1724,7 +1724,7 @@ class xKI(ptModifier):
                 entry = vault.findChronicleEntry(kChronicleGZGames)
                 error = 0
                 if entry is not None:
-                    gameString = entry.chronicleGetValue()
+                    gameString = entry.getValue()
                     PtDebugPrint("xKI.DetermineGZ(): Game string is: \"{}\".".format(gameString), level=kWarningLevel)
                     args = gameString.split()
                     if len(args) == 3:
@@ -1829,7 +1829,7 @@ class xKI(ptModifier):
         vault = ptVault()
         entry = vault.findChronicleEntry(kChronicleGZGames)
         if entry is not None:
-            if gameString == entry.chronicleGetValue():
+            if gameString == entry.getValue():
                 PtDebugPrint("xKI.GZFlashUpdate(): Vault corrupted: trying to gracefully reset to a default state.", level=kErrorLevel)
                 import grtzKIMarkerMachine
                 grtzKIMarkerMachine.ResetMarkerGame()
@@ -1844,7 +1844,7 @@ class xKI(ptModifier):
             entry = vault.findChronicleEntry(kChronicleGZGames)
             upString = "{} {}:{} {}:{}".format(self.gGZPlaying, self.gMarkerGottenColor, self.gMarkerToGetColor, self.gMarkerGottenNumber, self.gMarkerToGetNumber)
             if entry is not None:
-                entry.chronicleSetValue(upString)
+                entry.setValue(upString)
                 entry.save()
             else:
                 vault.addChronicleEntry(kChronicleGZGames, kChronicleGZGamesType, upString)
@@ -1857,14 +1857,14 @@ class xKI(ptModifier):
             vault = ptVault()
             entry = vault.findChronicleEntry(kChronicleGZMarkersAquired)
             if entry is not None:
-                markers = entry.chronicleGetValue()
+                markers = entry.getValue()
                 markerIdx = self.gGZMarkerInRange - 1
                 if markerIdx >= 0 and markerIdx < len(markers):
                     if len(markers) - (markerIdx + 1) != 0:
                         markers = markers[:markerIdx] + kGZMarkerCaptured + markers[-(len(markers) - (markerIdx + 1)):]
                     else:
                         markers = markers[:markerIdx] + kGZMarkerCaptured
-                    entry.chronicleSetValue(markers)
+                    entry.setValue(markers)
                     entry.save()
                     # Update the "marker gotten" count.
                     totalGotten = markers.count(kGZMarkerCaptured)
@@ -1958,7 +1958,7 @@ class xKI(ptModifier):
 
         gameName = xLocTools.CreatePossessiveString(PtGetLocalPlayer().getPlayerName(), PtGetLocalizedString("KI.MarkerGame.DefaultGameTitle"))
 
-        ptGUIControlEditBox(KICreateMarkerGameGUI.dialog.getControlFromTag(kGUI.CreateMarkerGameNameEB)).setStringW(gameName)
+        ptGUIControlEditBox(KICreateMarkerGameGUI.dialog.getControlFromTag(kGUI.CreateMarkerGameNameEB)).setString(gameName)
 
     ## Begin the creation of a new Marker Game.
     def CreateMarkerGame(self):
@@ -1979,7 +1979,7 @@ class xKI(ptModifier):
             return
 
         # The player cannot create a game if one is already in progress.
-        if self.markerGameManager.playing:
+        if self.markerGameManager.am_playing:
             PtDebugPrint("xKI.CreateMarkerGame(): Aborting Marker Game creation request, a game is already in progress.", level=kDebugDumpLevel)
             self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.MarkerGame.createErrorExistingGame"), kChat.SystemMessage)
             return
@@ -2303,7 +2303,7 @@ class xKI(ptModifier):
             # Not found, set to MicroKI by default.
             vault.addChronicleEntry(kChronicleKILevel, kChronicleKILevelType, str(self.KILevel))
         else:
-            oldLevel = int(entry.chronicleGetValue())
+            oldLevel = int(entry.getValue())
             if oldLevel >= kLowestKILevel and oldLevel <= kHighestKILevel:
                 self.KILevel = oldLevel
             elif oldLevel < kLowestKILevel:
@@ -2320,10 +2320,10 @@ class xKI(ptModifier):
             vault.addChronicleEntry(kChronicleKIMarkerLevel, kChronicleKIMarkerLevelType, str(self.gKIMarkerLevel))
         else:
             try:
-                self.gKIMarkerLevel = int(entry.chronicleGetValue())
+                self.gKIMarkerLevel = int(entry.getValue())
             except:
                 PtDebugPrint("xKI.DetermineKILevel(): Chronicle entry error with the KI's Marker Level, resetting to the default value.", level=kErrorLevel)
-                entry.chronicleSetValue(str(self.gKIMarkerLevel))
+                entry.setValue(str(self.gKIMarkerLevel))
                 entry.save()
         PtDebugPrint("xKI.DetermineKILevel(): The KI Marker Level is {}.".format(self.gKIMarkerLevel), level=kWarningLevel)
 
@@ -2332,7 +2332,7 @@ class xKI(ptModifier):
             self.chatMgr.gFeather = 0
         else:
             try:
-                self.chatMgr.gFeather = int(entry.chronicleGetValue())
+                self.chatMgr.gFeather = int(entry.getValue())
             except ValueError:
                 self.chatMgr.gFeather = 0
 
@@ -2349,7 +2349,7 @@ class xKI(ptModifier):
                 vault.addChronicleEntry(kChronicleKIMarkerLevel, kChronicleKIMarkerLevelType, str(self.gKIMarkerLevel))
             else:
                 PtDebugPrint("xKI.UpgradeKIMarkerLevel(): Upgrading existing KI Marker Level to {}.".format(self.gKIMarkerLevel), level=kWarningLevel)
-                entry.chronicleSetValue(str(self.gKIMarkerLevel))
+                entry.setValue(str(self.gKIMarkerLevel))
                 entry.save()
 
     ## Updates the KI level's Chronicle value.
@@ -2358,7 +2358,7 @@ class xKI(ptModifier):
         vault = ptVault()
         entry = vault.findChronicleEntry(kChronicleKILevel)
         if entry is not None:
-            entry.chronicleSetValue(str(self.KILevel))
+            entry.setValue(str(self.KILevel))
             entry.save()
         else:
             vault.addChronicleEntry(kChronicleKILevel, kChronicleKILevelType, str(self.KILevel))
@@ -2457,7 +2457,7 @@ class xKI(ptModifier):
         if entry is None:
             vault.addChronicleEntry(kChronicleCensorLevel, kChronicleCensorLevelType, str(self.censorLevel))
         else:
-            self.censorLevel = int(entry.chronicleGetValue())
+            self.censorLevel = int(entry.getValue())
         PtDebugPrint("xKI.DetermineCensorLevel(): The censor level is {}.".format(self.censorLevel), level=kWarningLevel)
 
     def GetCensorLevel(self):
@@ -2477,7 +2477,7 @@ class xKI(ptModifier):
             # Not found, add the current size to the Chronicle.
             vault.addChronicleEntry(kChron.FontSize, kChron.FontSizeType, str(fontSize))
         else:
-            fontSize = int(entry.chronicleGetValue())
+            fontSize = int(entry.getValue())
             self.SetFontSize(fontSize)
         PtDebugPrint("xKI.DetermineFontSize(): The saved font size is {}.".format(fontSize), level=kWarningLevel)
 
@@ -2488,7 +2488,7 @@ class xKI(ptModifier):
         vault = ptVault()
         entry = vault.findChronicleEntry(kChron.FontSize)
         if entry is not None:
-            entry.chronicleSetValue(str(fontSize))
+            entry.setValue(str(fontSize))
             entry.save()
         else:
             vault.addChronicleEntry(kChron.FontSize, kChron.FontSizeType, str(fontSize))
@@ -2549,7 +2549,7 @@ class xKI(ptModifier):
             # Not found, add the current fade time to the Chronicle.
             vault.addChronicleEntry(kChron.FadeTime, kChron.FadeTimeType, str(self.chatMgr.ticksOnFull))
         else:
-            self.chatMgr.ticksOnFull = int(entry.chronicleGetValue())
+            self.chatMgr.ticksOnFull = int(entry.getValue())
             if self.chatMgr.ticksOnFull == kChat.FadeTimeMax:
                 # Disable the fade altogether.
                 self.chatMgr.fadeEnableFlag = False
@@ -2565,7 +2565,7 @@ class xKI(ptModifier):
         vault = ptVault()
         entry = vault.findChronicleEntry(kChron.FadeTime)
         if entry is not None:
-            entry.chronicleSetValue(str(self.chatMgr.ticksOnFull))
+            entry.setValue(str(self.chatMgr.ticksOnFull))
             entry.save()
         else:
             vault.addChronicleEntry(kChron.FadeTime, kChron.FadeTimeType, str(self.chatMgr.ticksOnFull))
@@ -2782,7 +2782,7 @@ class xKI(ptModifier):
 
         self.BKPlayerSelected = None
         sendToField = ptGUIControlTextBox(BigKI.dialog.getControlFromTag(kGUI.BKIPlayerLine))
-        sendToField.setStringW("<" + str(message) + ">")
+        sendToField.setString("<" + str(message) + ">")
         sendToButton = ptGUIControlButton(BigKI.dialog.getControlFromTag(kGUI.BKIToPlayerButton))
         sendToButton.hide()
 
@@ -2803,8 +2803,8 @@ class xKI(ptModifier):
 
         localPlayer = PtGetLocalPlayer()
         invite = ptVaultTextNoteNode(0)
-        invite.noteSetText(PtGetLocalizedString(message, [ageName, localPlayer.getPlayerName()]))
-        invite.noteSetTitle(PtGetLocalizedString(title, [ageName]))
+        invite.setText(PtGetLocalizedString(message, [ageName, localPlayer.getPlayerName()]))
+        invite.setTitle(PtGetLocalizedString(title, [ageName]))
         invite.sendTo(playerID)
 
     #~~~~~~~~~~~~~~~~~#
@@ -2993,7 +2993,7 @@ class xKI(ptModifier):
                 PLR = PLR.upcastToPlayerInfoNode()
                 if PLR is not None and PLR.getType() == PtVaultNodeTypes.kPlayerInfoNode:
                     if PLR.playerIsOnline():
-                        if not ignores.playerlistHasPlayer(PLR.playerGetID()):
+                        if not ignores.hasPlayer(PLR.playerGetID()):
                             onlineList.append(plyr)
         return onlineList
 
@@ -3010,7 +3010,7 @@ class xKI(ptModifier):
         for plyr in self.BKPlayerList:
             if isinstance(plyr, DeviceFolder):
                 playerlist.closeBranch()
-                playerlist.addBranchW(plyr.name.upper(), 1)
+                playerlist.addBranch(plyr.name.upper(), 1)
             elif isinstance(plyr, Device):
                 playerlist.addStringWithColor(plyr.name, kColors.DniSelectable, kSelectUseGUIColor)
             elif isinstance(plyr, ptVaultNodeRef):
@@ -3039,21 +3039,21 @@ class xKI(ptModifier):
                         playerlist.addStringWithColor(preText + "?unknown user?" + postText, kColors.DniSelectable, kSelectDetermined)
             elif isinstance(plyr, KIFolder):
                 playerlist.closeBranch()
-                playerlist.addBranchW(plyr.name.upper(), 1)
+                playerlist.addBranch(plyr.name.upper(), 1)
             elif isinstance(plyr, ptVaultPlayerInfoListNode):
                 # It's a player list, display its name.
-                fldrType = plyr.folderGetType()
+                fldrType = plyr.getFolderType()
                 if fldrType == PtVaultStandardNodes.kAgeOwnersFolder:
                     fldrType = PtVaultStandardNodes.kHoodMembersFolder
                 playerlist.closeBranch()
-                playerlist.addBranchW(xLocTools.FolderIDToFolderName(fldrType).upper(), 1)
+                playerlist.addBranch(xLocTools.FolderIDToFolderName(fldrType).upper(), 1)
             elif isinstance(plyr, ptVaultMarkerGameNode):
                 # its a marker list, display its name
                 playerlist.closeBranch()
-                playerlist.addBranchW(plyr.folderGetName(), 1)
+                playerlist.addBranch(plyr.getFolderName(), 1)
             elif isinstance(plyr, str):
                 playerlist.closeBranch()
-                playerlist.addBranchW(plyr, 1)
+                playerlist.addBranch(plyr, 1)
             else:
                 PtDebugPrint("xKI.RefreshPlayerListDisplay(): Unknown list type ", plyr, level=kErrorLevel)
             # Is it the selected player?
@@ -3209,10 +3209,10 @@ class xKI(ptModifier):
                 makepublicBtn.disable()
                 makepublicTB.hide()
                 makepublicTB.setString(" ")
-                status.setStringW(PtGetLocalizedString("KI.Neighborhood.AgeOwnedStatus", [str(numowners), str(osess), str(numvisitors), str(vsess)]))
+                status.setString(PtGetLocalizedString("KI.Neighborhood.AgeOwnedStatus", [str(numowners), str(osess), str(numvisitors), str(vsess)]))
                 descript = ptGUIControlMultiLineEdit(KIAgeOwnerExpanded.dialog.getControlFromTag(kGUI.BKAgeOwnerDescription))
                 encoded = myAge.getAgeDescription()
-                descript.setStringW(encoded)
+                descript.setString(encoded)
 
     #~~~~~~~~#
     # miniKI #
@@ -3288,7 +3288,7 @@ class xKI(ptModifier):
                     selectedMarker = self.markerGameManager.selected_marker_id
                 except :
                     selectedMarker = -1
-                if self.markerGameManager.playing:
+                if self.markerGameManager.am_playing:
                     btnmgNewMarker.hide()
                     btnmgNewGame.hide()
                     btnmgInactive.show()
@@ -3453,10 +3453,9 @@ class xKI(ptModifier):
     def ShowBigKI(self):
 
         self.waitingForAnimation = True
-        curBrainMode = PtGetLocalAvatar().avatar.getCurrentMode()
         toggleCB = ptGUIControlCheckBox(KIMini.dialog.getControlFromTag(kGUI.miniToggleBtnID))
         toggleCB.disable()
-        if curBrainMode == PtBrainModes.kNonGeneric:
+        if PtIsCurrentBrainHuman():
             PtDebugPrint("xKI.ShowBigKI(): Entering LookingAtKI mode.", level=kDebugDumpLevel)
             PtAvatarEnterLookingAtKI()
             self.isPlayingLookingAtKIMode = True
@@ -3695,7 +3694,7 @@ class xKI(ptModifier):
         folder = content.getParent()
         if folder:
             folder = folder.upcastToFolderNode()
-        if folder is not None and folder.folderGetType() == PtVaultStandardNodes.kInboxFolder:
+        if folder is not None and folder.getFolderType() == PtVaultStandardNodes.kInboxFolder:
             sender = content.getSaver()
             if sender is not None and sender.getType() == PtVaultNodeTypes.kPlayerInfoNode:
                 sendToField = ptGUIControlTextBox(BigKI.dialog.getControlFromTag(kGUI.BKIPlayerLine))
@@ -3723,23 +3722,23 @@ class xKI(ptModifier):
             return False
 
         # Check for the incoming folder.
-        if folder.folderGetType() == PtVaultStandardNodes.kInboxFolder:
+        if folder.getFolderType() == PtVaultStandardNodes.kInboxFolder:
             return False
 
         # Check against the AgeMembers folder.
-        if folder.folderGetType() == PtVaultStandardNodes.kAgeMembersFolder:
+        if folder.getFolderType() == PtVaultStandardNodes.kAgeMembersFolder:
             return False
 
         # Check for the neighborhood members folder.
-        if folder.folderGetType() == PtVaultStandardNodes.kHoodMembersFolder:
+        if folder.getFolderType() == PtVaultStandardNodes.kHoodMembersFolder:
             return False
 
         # Oh hayll no, you can't change AllPlayers
-        if folder.folderGetType() == PtVaultStandardNodes.kAllPlayersFolder:
+        if folder.getFolderType() == PtVaultStandardNodes.kAllPlayersFolder:
             return False
 
         # Check for neighborhood CanVisit folder (actually half-mutable, they can delete).
-        if folder.folderGetType() == PtVaultStandardNodes.kAgeOwnersFolder:
+        if folder.getFolderType() == PtVaultStandardNodes.kAgeOwnersFolder:
             return False
 
         # It's not a special folder, so it's mutable.
@@ -3748,7 +3747,7 @@ class xKI(ptModifier):
     ## Determines whether this is a hidden folder.
     def IsFolderHidden(self, ageFolder):
 
-        if ageFolder.folderGetName() == "Hidden":
+        if ageFolder.getFolderName() == "Hidden":
             return True
         return False
 
@@ -3768,7 +3767,7 @@ class xKI(ptModifier):
                 if creatorID != PtGetLocalClientID():
                     return False
                 if folder := folder.upcastToFolderNode():
-                    if folder.folderGetType() == PtVaultStandardNodes.kGlobalInboxFolder:
+                    if folder.getFolderType() == PtVaultStandardNodes.kGlobalInboxFolder:
                         return False
         return True
 
@@ -3780,7 +3779,7 @@ class xKI(ptModifier):
             if (folder := self.BKCurrentContent.getParent()) and (item := self.BKCurrentContent.getChild()):
                 if folder := folder.upcastToFolderNode():
                     # Global inbox items should *not* be able to be deleted or moved
-                    if folder.folderGetType() == PtVaultStandardNodes.kGlobalInboxFolder:
+                    if folder.getFolderType() == PtVaultStandardNodes.kGlobalInboxFolder:
                         return False
         return True
 
@@ -3796,9 +3795,9 @@ class xKI(ptModifier):
         PtDebugPrint("xKI.BigKISetStatics(): Displaying age name of {}.".format(ageName), level=kDebugDumpLevel)
         #Gahreesen Maintainer Nexii use private chat channels 6 and 7
         if self.chatMgr.privateChatChannel == kBlackNexus or self.chatMgr.privateChatChannel == kWhiteNexus:
-            ageText.setStringW(PtGetLocalizedString("Gahreesen.Wall.Nexus"))
+            ageText.setString(PtGetLocalizedString("Gahreesen.Wall.Nexus"))
         else:
-            ageText.setStringW(ageName)
+            ageText.setString(ageName)
         playerText = ptGUIControlTextBox(BigKI.dialog.getControlFromTag(kGUI.BKPlayerName))
         IDText = ptGUIControlTextBox(BigKI.dialog.getControlFromTag(kGUI.BKPlayerID))
         localPlayer = PtGetLocalPlayer()
@@ -3818,9 +3817,9 @@ class xKI(ptModifier):
             neighborName = xLocTools.LocalizeAgeName(neighborhood.getDisplayName())
             if neighborName == "":
                 neighborName = PtGetLocalizedString("KI.Neighborhood.NoName")
-            neighborText.setStringW(PtGetLocalizedString("KI.Neighborhood.BottomLine", [xLocTools.MemberStatusString(), neighborName]))
+            neighborText.setString(PtGetLocalizedString("KI.Neighborhood.BottomLine", [xLocTools.MemberStatusString(), neighborName]))
         else:
-            neighborText.setStringW(PtGetLocalizedString("KI.Neighborhood.None"))
+            neighborText.setString(PtGetLocalizedString("KI.Neighborhood.None"))
 
     ## Sets some global changing values for the KI.
     def BigKISetChanging(self):
@@ -3839,7 +3838,7 @@ class xKI(ptModifier):
             curTime = PtGetLocalizedString("KI.Errors.TimeBroke")
         if curTime != self.previousTime:
             timeText = ptGUIControlTextBox(BigKI.dialog.getControlFromTag(kGUI.BKICurTimeID))
-            timeText.setStringW(curTime)
+            timeText.setString(curTime)
             self.previousTime = curTime
         # Set the D'ni GPS coordinates.
         gps1 = ptGUIControlTextBox(BigKI.dialog.getControlFromTag(kGUI.BKIGPS1TextID))
@@ -3869,13 +3868,13 @@ class xKI(ptModifier):
             content = content.getChild()
         if isinstance(content, ptVaultNode):
             if imageNode := content.upcastToImageNode():
-                return xCensor.xCensor(imageNode.getTitleW(), self.censorLevel)
+                return xCensor.xCensor(imageNode.getTitle(), self.censorLevel)
             if markerNode := content.upcastToMarkerGameNode():
                 return xCensor.xCensor(markerNode.getGameName(), self.censorLevel)
             if playerInfoNode := content.upcastToPlayerInfoNode():
                 return xCensor.xCensor(playerInfoNode.playerGetName(), self.censorLevel)
             if textNode := content.upcastToTextNoteNode():
-                return xCensor.xCensor(textNode.getTitleW(), self.censorLevel)
+                return xCensor.xCensor(textNode.getTitle(), self.censorLevel)
         # Any other types of content? Implement it yourself.
         return "<unknown>"
 
@@ -3950,7 +3949,7 @@ class xKI(ptModifier):
                 ageFolder = ageFolder.upcastToFolderNode()
                 if ageFolder is not None:
                     if not self.IsFolderHidden(ageFolder):
-                        ageFolderName = ageFolder.folderGetName()
+                        ageFolderName = ageFolder.getFolderName()
                         if ageFolderName == "":
                             ageFolderName = "[invalid]"
                         ageFolderName = FilterAgeName(ageFolderName)
@@ -3977,7 +3976,7 @@ class xKI(ptModifier):
                     entry = vault.findChronicleEntry("CleftSolved")
                     cleftSolved = False
                     if entry is not None:
-                        if entry.chronicleGetValue() == "yes":
+                        if entry.getValue() == "yes":
                             cleftSolved = True
                     if self.GetAgeInstanceName() != "D'ni-Riltagamin" or cleftSolved:
                         instAgeName = self.GetAgeInstanceName()
@@ -3987,15 +3986,15 @@ class xKI(ptModifier):
                         for ageFolderRef in ageFolderRefs:
                             ageFolder = ageFolderRef.getChild()
                             ageFolder = ageFolder.upcastToFolderNode()
-                            if ageFolder is not None and ageFolder.getFolderNameW() == instAgeName:
+                            if ageFolder is not None and ageFolder.getFolderName() == instAgeName:
                                 createAgeFolder = False
                                 break
 
                         if instAgeName and createAgeFolder:
                             nFolder = ptVaultFolderNode(0)
                             if nFolder is not None:
-                                nFolder.setFolderNameW(self.GetAgeInstanceName())
-                                nFolder.folderSetType(PtVaultStandardNodes.kAgeTypeJournalFolder)
+                                nFolder.setFolderName(self.GetAgeInstanceName())
+                                nFolder.setFolderType(PtVaultStandardNodes.kAgeTypeJournalFolder)
                                 # Add to the master Age folder folder.
                                 masterAgeFolder.addNode(nFolder)
                             else:
@@ -4233,8 +4232,8 @@ class xKI(ptModifier):
                     else:
                         folderField.setForeColor(kColors.DniSelectable)
                         longFolderField.setForeColor(kColors.DniSelectable)
-                folderField.setStringW(folderName)
-                longFolderField.setStringW(folderName)
+                folderField.setString(folderName)
+                longFolderField.setString(folderName)
                 ID += 1
                 if ID > kGUI.BKIFolderLineLast:
                     break
@@ -4282,7 +4281,7 @@ class xKI(ptModifier):
                     for idx in range(len(self.BKContentList)):
                         player = self.BKContentList[idx]
                         if isinstance(player, ptPlayer):
-                            if ignores.playerlistHasPlayer(player.getPlayerID()):
+                            if ignores.hasPlayer(player.getPlayerID()):
                                 # Remove ignored player.
                                 removeList.insert(0, idx)
                         else:
@@ -4302,14 +4301,14 @@ class xKI(ptModifier):
                                     # Put them in reverse order in the removeList.
                                     removeList.insert(0, idx)
                                 # Check if they are in the ignore list.
-                                elif ignores.playerlistHasPlayer(elem.playerGetID()):
+                                elif ignores.hasPlayer(elem.playerGetID()):
                                     # Get parent; in some folders the player has to be still visible.
                                     parent = ref.getParent()
                                     if parent:
                                         parent = parent.upcastToFolderNode()
                                     if parent is None:
                                         # Make sure this is not the IgnoreList.
-                                        if parent.folderGetType() != PtVaultStandardNodes.kIgnoreListFolder:
+                                        if parent.getFolderType() != PtVaultStandardNodes.kIgnoreListFolder:
                                             # Put in them in reverse order in the removeList.
                                             removeList.insert(0, idx)
                             else:
@@ -4329,7 +4328,7 @@ class xKI(ptModifier):
                     if ref.getSaver() is None or ref.getSaverID() == 0:
                         continue
 
-                    if (self.onlyGetPMsFromBuddies and not buddies.playerlistHasPlayer(ref.getSaverID())) or ignores.playerlistHasPlayer(ref.getSaverID()):
+                    if (self.onlyGetPMsFromBuddies and not buddies.hasPlayer(ref.getSaverID())) or ignores.hasPlayer(ref.getSaverID()):
                         PtDebugPrint("xKI.BigKIProcessContentList(): Remove from inbox because it's from {}.".format(ref.getSaver().playerGetName()), level=kWarningLevel)
                         # Remove from the list.
                         removeList.insert(0, idx)
@@ -4375,7 +4374,7 @@ class xKI(ptModifier):
                 PtDebugPrint(f"xKI.BigKIProcessContentList(): {remRecents} remaining recents slots.", level=kWarningLevel)
                 # add Inbox senders (sorted by most recent) to Recents folder
                 # but don't overload Recents or refresh triggers infinitely due to Recents node additions/removals
-                cannotAdd = lambda ref: not (s := xKIHelpers.GetSaverID(ref)) or recentsList.playerlistHasPlayer(s) or not self.chatMgr.AddPlayerToRecents(s)
+                cannotAdd = lambda ref: not (s := xKIHelpers.GetSaverID(ref)) or recentsList.hasPlayer(s) or not self.chatMgr.AddPlayerToRecents(s)
                 # add only one then stop because addition triggers BK refresh again that will add next one, etc.
                 inboxRef = next(itertools.dropwhile(cannotAdd, self.BKContentList), None)
                 PtDebugPrint(f"xKI.BigKIProcessContentList(): Added {xKIHelpers.GetSaverID(inboxRef)} ({inboxRef}) to recents.", level=kWarningLevel)
@@ -4390,7 +4389,7 @@ class xKI(ptModifier):
             try:
                 if self.BKFolderLineDict is self.BKPlayerFolderDict:
                     if self.BKFolderListOrder[self.BKFolderSelected] == xLocTools.FolderIDToFolderName(PtVaultStandardNodes.kBuddyListFolder):
-                        createField.setStringW(PtGetLocalizedString("KI.Player.CreateBuddyTitle"))
+                        createField.setString(PtGetLocalizedString("KI.Player.CreateBuddyTitle"))
                         createBtn.show()
                     else:
                         createField.setString(" ")
@@ -4449,7 +4448,7 @@ class xKI(ptModifier):
                                     contentIconAva.hide()
                                     if contentIconP.getNumMaps() > 0:
                                         dynMap = contentIconP.getMap(0)
-                                        image = element.imageGetImage()
+                                        image = element.getImage()
                                         dynMap.clearToColor(ptColor(.1, .1, .1, .1))
                                         if image is not None:
                                             dynMap.drawImage(kGUI.BKIImageStartX, kGUI.BKIImageStartY, image, 0)
@@ -4496,9 +4495,9 @@ class xKI(ptModifier):
                                         contentDate.setForeColor(kColors.DniSelectable)
 
                                     if isinstance(element, ptVaultImageNode):
-                                        contentTitle.setString(xCensor.xCensor(element.imageGetTitle(), self.censorLevel))
+                                        contentTitle.setString(xCensor.xCensor(element.getTitle(), self.censorLevel))
                                     elif isinstance(element, ptVaultTextNoteNode):
-                                        contentTitle.setString(xCensor.xCensor(element.noteGetTitle(), self.censorLevel))
+                                        contentTitle.setString(xCensor.xCensor(element.getTitle(), self.censorLevel))
                                     elif isinstance(element, ptVaultMarkerGameNode):
                                         contentTitle.setString(xCensor.xCensor(element.getGameName(), self.censorLevel))
                                     else:
@@ -4625,10 +4624,10 @@ class xKI(ptModifier):
         jrnDate.setString(curTime)
         jrnDate.show()
         if not self.BKInEditMode or self.BKEditField != kGUI.BKEditFieldJRNTitle:
-            jrnTitle.setStringW(xCensor.xCensor(element.getTitleW(), self.censorLevel))
+            jrnTitle.setString(xCensor.xCensor(element.getTitle(), self.censorLevel))
             jrnTitle.show()
         if not self.BKInEditMode or self.BKEditField != kGUI.BKEditFieldJRNNote:
-            jrnNote.setStringW(element.getTextW(), censorLevel=self.censorLevel)
+            jrnNote.setString(element.getText(), censorLevel=self.censorLevel)
             jrnNote.show()
         self.BigKISetSeen(self.BKCurrentContent)
         # If it came from someone else, add them to the SendTo field.
@@ -4650,8 +4649,8 @@ class xKI(ptModifier):
 
                 # Create the note.
                 note = ptVaultTextNoteNode(0)
-                note.setTextW(PtGetLocalizedString("KI.Journal.InitialMessage"))
-                note.setTitleW(PtGetLocalizedString("KI.Journal.InitialTitle"))
+                note.setText(PtGetLocalizedString("KI.Journal.InitialMessage"))
+                note.setTitle(PtGetLocalizedString("KI.Journal.InitialTitle"))
 
                 self.BKCurrentContent = journal.addNode(note)
                 return self.BKCurrentContent
@@ -4701,11 +4700,11 @@ class xKI(ptModifier):
         picDate.setString(curTime)
         picDate.show()
         if not self.BKInEditMode or self.BKEditField != kGUI.BKEditFieldPICTitle:
-            picTitle.setString(xCensor.xCensor(element.imageGetTitle(), self.censorLevel))
+            picTitle.setString(xCensor.xCensor(element.getTitle(), self.censorLevel))
             picTitle.show()
         if picImage.getNumMaps() > 0:
             dynMap = picImage.getMap(0)
-            image = element.imageGetImage()
+            image = element.getImage()
             dynMap.clearToColor(ptColor(.1, .1, .1, .3))
             if image is not None:
                 dynMap.drawImage(kGUI.BKIImageStartX, kGUI.BKIImageStartY, image, 0)
@@ -4735,8 +4734,8 @@ class xKI(ptModifier):
                 if useScreenShot:
                     imgElem.setImageFromScrShot()
                 else:
-                    imgElem.imageSetImage(image)
-                imgElem.setTitleW(PtGetLocalizedString("KI.Image.InitialTitle"))
+                    imgElem.setImage(image)
+                imgElem.setTitle(PtGetLocalizedString("KI.Image.InitialTitle"))
                 self.BKCurrentContent = journal.addNode(imgElem)
                 return self.BKCurrentContent
             else:
@@ -4760,7 +4759,7 @@ class xKI(ptModifier):
         plyDeleteBtn.hide()
         # Is the player asking for a player ID number?
         if self.BKGettingPlayerID:
-            plyName.setStringW(PtGetLocalizedString("KI.Player.EnterID"))
+            plyName.setString(PtGetLocalizedString("KI.Player.EnterID"))
             plyName.show()
             plyIDedit.setString("")
             plyIDedit.show()
@@ -4777,7 +4776,7 @@ class xKI(ptModifier):
             IDText = "{:08d}".format(self.BKCurrentContent.getPlayerID())
             plyID.setString(IDText)
             plyID.show()
-            plyDetail.setStringW(PtGetLocalizedString("KI.Player.InAge", [GetAgeName()]))
+            plyDetail.setString(PtGetLocalizedString("KI.Player.InAge", [GetAgeName()]))
             plyDetail.show()
             sendToField = ptGUIControlTextBox(BigKI.dialog.getControlFromTag(kGUI.BKIPlayerLine))
             self.BKPlayerSelected = self.BKCurrentContent
@@ -4800,13 +4799,13 @@ class xKI(ptModifier):
         plyID.show()
         if element.playerIsOnline():
             if element.playerGetAgeInstanceName() == "Cleft":
-                plyDetail.setStringW(PtGetLocalizedString("KI.Player.InCleft"))
+                plyDetail.setString(PtGetLocalizedString("KI.Player.InCleft"))
             elif element.playerGetAgeInstanceName() == "AvatarCustomization":
-                plyDetail.setStringW(PtGetLocalizedString("KI.Player.InCloset"))
+                plyDetail.setString(PtGetLocalizedString("KI.Player.InCloset"))
             else:
-                plyDetail.setStringW(PtGetLocalizedString("KI.Player.InAge", [FilterAgeName(element.playerGetAgeInstanceName())]))
+                plyDetail.setString(PtGetLocalizedString("KI.Player.InAge", [FilterAgeName(element.playerGetAgeInstanceName())]))
         else:
-            plyDetail.setStringW(PtGetLocalizedString("KI.Player.Offline"))
+            plyDetail.setString(PtGetLocalizedString("KI.Player.Offline"))
         plyDetail.show()
         # Determine if this player can be removed from this folder.
         folder = self.BKCurrentContent.getParent()
@@ -4833,24 +4832,24 @@ class xKI(ptModifier):
                         vault = ptVault()
                         buddies = vault.getBuddyListFolder()
                         if buddies is not None:
-                            if buddies.playerlistHasPlayer(ID):
+                            if buddies.hasPlayer(ID):
                                 plyDetail = ptGUIControlTextBox(KIPlayerExpanded.dialog.getControlFromTag(kGUI.BKIPLYDetail))
-                                plyDetail.setStringW(PtGetLocalizedString("KI.Player.AlreadyAdded"))
+                                plyDetail.setString(PtGetLocalizedString("KI.Player.AlreadyAdded"))
                                 plyDetail.show()
                                 self.BKGettingPlayerID = True
                             else:
-                                buddies.playerlistAddPlayer(ID)
+                                buddies.addPlayer(ID)
                                 self.chatMgr.DisplayStatusMessage(PtGetLocalizedString("KI.Player.Added"))
                         if not self.BKGettingPlayerID:
                             self.ChangeBigKIMode(kGUI.BKListMode)
                     else:
                         plyDetail = ptGUIControlTextBox(KIPlayerExpanded.dialog.getControlFromTag(kGUI.BKIPLYDetail))
-                        plyDetail.setStringW(PtGetLocalizedString("KI.Player.NotYourself"))
+                        plyDetail.setString(PtGetLocalizedString("KI.Player.NotYourself"))
                         plyDetail.show()
                         self.BKGettingPlayerID = True
                 else:
                     plyDetail = ptGUIControlTextBox(KIPlayerExpanded.dialog.getControlFromTag(kGUI.BKIPLYDetail))
-                    plyDetail.setStringW(PtGetLocalizedString("KI.Player.NumberOnly"))
+                    plyDetail.setString(PtGetLocalizedString("KI.Player.NumberOnly"))
                     plyDetail.show()
                     self.BKGettingPlayerID = True
             else:
@@ -4863,12 +4862,10 @@ class xKI(ptModifier):
         # Save some typing.
         mgr = self.markerGameManager
         getControl = KIMarkerFolderExpanded.dialog.getControlFromTag
-        mbtnDelete = ptGUIControlButton(getControl(kGUI.MarkerFolderDeleteBtn))
 
         # Make sure that the player can view this game.
         if self.gKIMarkerLevel < kKIMarkerNormalLevel:
             self.BigKIDisplayMarkerGameMessage(PtGetLocalizedString("KI.MarkerGame.pendingActionUpgradeKI"))
-            mbtnDelete.show()
             return
 
         # Initialize the markerGameDisplay to the currently selected game.
@@ -4890,12 +4887,21 @@ class xKI(ptModifier):
         ## This was previously BigKIFinishDisplayMarkerGame()
         questGameFinished = False
 
-        # A game is in progress, restrict access.
-        if mgr.AmIPlaying(element):
+        # Check to see if the current element is the active game brain.
+        elementIsActive = mgr.IsActive(element)
+
+        # Is the game still loading?
+        if elementIsActive and not mgr.is_game_loaded:
+            msg = f"---- {PtGetLocalizedString('KI.MarkerGame.pendingActionLoading')} ----"
+            self.BigKIDisplayMarkerGameMessage(msg)
+            return
+
+        # THIS game is in progress, restrict access.
+        elif elementIsActive and mgr.am_playing:
             self.MFdialogMode = kGames.MFPlaying
 
         # Are we editing this game? If so, how?
-        elif mgr.IsActive(element) and mgr.edit_mode:
+        elif elementIsActive and mgr.edit_mode:
             if mgr.selected_marker_id != -1:
                 self.MFdialogMode = kGames.MFEditingMarker
             else:
@@ -4916,6 +4922,7 @@ class xKI(ptModifier):
         mtbInvitePlayer.setForeColor(kColors.Clear)
         mtbInvitePlayer.setString(" ")
 
+        mbtnDelete = ptGUIControlButton(getControl(kGUI.MarkerFolderDeleteBtn))
         mbtnEditStart = ptGUIControlButton(getControl(kGUI.MarkerFolderEditStartGame))
         mbtnPlayEnd = ptGUIControlButton(getControl(kGUI.MarkerFolderPlayEndGame))
         mrkfldOwner = ptGUIControlTextBox(getControl(kGUI.MarkerFolderOwner))
@@ -4933,7 +4940,7 @@ class xKI(ptModifier):
         mbtnGameTypeArrow.hide()
         mtbGameTime = ptGUIControlTextBox(getControl(kGUI.MarkerFolderGameTimeTB))
         mtbGameTimeTitle = ptGUIControlTextBox(getControl(kGUI.MarkerFolderGameTimeTitleTB))
-        mtbGameTimeTitle.setStringW(PtGetLocalizedString("KI.MarkerGame.Time"))
+        mtbGameTimeTitle.setString(PtGetLocalizedString("KI.MarkerGame.Time"))
         mlbMarkerList = ptGUIControlListBox(getControl(kGUI.MarkerFolderMarkListbox))
         mlbMarkerTextTB = ptGUIControlTextBox(getControl(kGUI.MarkerFolderMarkerTextTB))
         mbtnMarkerText = ptGUIControlTextBox(getControl(kGUI.MarkerFolderMarkerTextBtn))
@@ -4949,7 +4956,7 @@ class xKI(ptModifier):
         mtbVSpan = ptGUIControlTextBox(getControl(kGUI.MarkerFolderVSpanTB))
 
         ## FIXME: non quest game types
-        mtbGameType.setStringW(PtGetLocalizedString("KI.MarkerGame.NameQuest").title())
+        mtbGameType.setString(PtGetLocalizedString("KI.MarkerGame.NameQuest").title())
 
         mbtnEditStart.show()
         mbtnPlayEnd.show()
@@ -4960,17 +4967,21 @@ class xKI(ptModifier):
             mbtnDelete.show()
             mbtnGameTimePullD.hide()
             mbtnGameTimeArrow.hide()
-            if element.getCreatorNodeID() == PtGetLocalClientID():
+            if elementIsActive and element.getCreatorNodeID() == PtGetLocalClientID():
                 mbtnEditStart.show()
                 mtbEditStart.setForeColor(kColors.DniShowBtn)
             else:
                 mbtnEditStart.hide()
                 mtbEditStart.setForeColor(kColors.DniGhostBtn)
-            mtbEditStart.setStringW(PtGetLocalizedString("KI.MarkerGame.EditButton"))
+            if elementIsActive:
+                mtbPlayEnd.setForeColor(kColors.DniShowBtn)
+                mbtnPlayEnd.show()
+            else:
+                mtbPlayEnd.setForeColor(kColors.DniGhostBtn)
+                mbtnPlayEnd.hide()
+            mtbEditStart.setString(PtGetLocalizedString("KI.MarkerGame.EditButton"))
             mtbEditStart.show()
-            mbtnPlayEnd.show()
-            mtbPlayEnd.setForeColor(kColors.DniShowBtn)
-            mtbPlayEnd.setStringW(PtGetLocalizedString("KI.MarkerGame.PlayButton"))
+            mtbPlayEnd.setString(PtGetLocalizedString("KI.MarkerGame.PlayButton"))
             mtbPlayEnd.show()
             mlbMarkerList.hide()
             self.BigKIMarkerListScrollVis(False)
@@ -4995,9 +5006,9 @@ class xKI(ptModifier):
             mtbPlayEnd.setForeColor(kColors.DniShowBtn)
             # Is the player editing the entire game?
             if self.MFdialogMode == kGames.MFEditing:
-                mtbEditStart.setStringW(PtGetLocalizedString("KI.MarkerGame.DoneEditButton"))
+                mtbEditStart.setString(PtGetLocalizedString("KI.MarkerGame.DoneEditButton"))
                 mtbEditStart.show()
-                mtbPlayEnd.setStringW(PtGetLocalizedString("KI.MarkerGame.AddMarkerButton"))
+                mtbPlayEnd.setString(PtGetLocalizedString("KI.MarkerGame.AddMarkerButton"))
                 mtbPlayEnd.show()
                 mlbMarkerList.clearAllElements()
                 mlbMarkerList.show()
@@ -5010,7 +5021,7 @@ class xKI(ptModifier):
                     torans = coord.getTorans()
                     hSpans = coord.getHSpans()
                     vSpans = coord.getVSpans()
-                    mlbMarkerList.addStringW("[{}:{},{},{}] {}".format(FilterAgeName(age), torans, hSpans, vSpans, xCensor.xCensor(desc, self.censorLevel)))
+                    mlbMarkerList.addString("[{}:{},{},{}] {}".format(FilterAgeName(age), torans, hSpans, vSpans, xCensor.xCensor(desc, self.censorLevel)))
                 mlbMarkerList.unlock()
 
                 # Refresh the scroll position
@@ -5032,15 +5043,15 @@ class xKI(ptModifier):
                     idx, age, pos, desc = selectedMarker
 
                     # Must be editing a Marker.
-                    mtbEditStart.setStringW(PtGetLocalizedString("KI.MarkerGame.MarkerListButton"))
+                    mtbEditStart.setString(PtGetLocalizedString("KI.MarkerGame.MarkerListButton"))
                     mtbEditStart.show()
-                    mtbPlayEnd.setStringW(PtGetLocalizedString("KI.MarkerGame.RemoveMarkerButton"))
+                    mtbPlayEnd.setString(PtGetLocalizedString("KI.MarkerGame.RemoveMarkerButton"))
                     mtbPlayEnd.show()
                     mlbMarkerList.hide()
                     self.BigKIMarkerListScrollVis(False)
                     mlbMarkerTextTB.show()
                     # don't censor here... we don't want censored stuff saved to the vault
-                    mlbMarkerTextTB.setStringW(desc)
+                    mlbMarkerTextTB.setString(desc)
                     mbtnToran.show()
                     mbtnHSpan.show()
                     mbtnVSpan.show()
@@ -5060,7 +5071,7 @@ class xKI(ptModifier):
                 else:
                     # Error...
                     PtDebugPrint("xKI.BigKIFinishDisplayMarkerGame(): Could not find selected marker.", level=kErrorLevel)
-                    mtbEditStart.setStringW(PtGetLocalizedString("KI.MarkerGame.GoBackButton"))
+                    mtbEditStart.setString(PtGetLocalizedString("KI.MarkerGame.GoBackButton"))
                     mtbEditStart.show()
                     mtbPlayEnd.setString(" ")
                     mtbPlayEnd.show()
@@ -5088,11 +5099,11 @@ class xKI(ptModifier):
             mbtnMarkerText.disable()
             mbtnEditStart.show()
             mtbEditStart.setForeColor(kColors.DniShowBtn)
-            mtbEditStart.setStringW(PtGetLocalizedString("KI.MarkerGame.StopPlayingButton"))
+            mtbEditStart.setString(PtGetLocalizedString("KI.MarkerGame.StopPlayingButton"))
             mtbEditStart.show()
             mbtnPlayEnd.show()
             mtbPlayEnd.setForeColor(kColors.DniShowBtn)
-            mtbPlayEnd.setStringW(PtGetLocalizedString("KI.MarkerGame.ResetGameButton"))
+            mtbPlayEnd.setString(PtGetLocalizedString("KI.MarkerGame.ResetGameButton"))
             mtbPlayEnd.show()
             mlbMarkerList.clearAllElements()
             mlbMarkerList.show()
@@ -5108,7 +5119,7 @@ class xKI(ptModifier):
                     torans = coord.getTorans()
                     hSpans = coord.getHSpans()
                     vSpans = coord.getVSpans()
-                    mlbMarkerList.addStringW("[{}:{},{},{}] {}".format(FilterAgeName(age), torans, hSpans, vSpans, xCensor.xCensor(desc, self.censorLevel)))
+                    mlbMarkerList.addString("[{}:{},{},{}] {}".format(FilterAgeName(age), torans, hSpans, vSpans, xCensor.xCensor(desc, self.censorLevel)))
                 else:
                     questGameFinished = False
 
@@ -5121,7 +5132,7 @@ class xKI(ptModifier):
         mtbEditStart.refresh()
         mtbPlayEnd.refresh()
         # Display the content on the screen.
-        mrkfldTitle.setStringW(xCensor.xCensor(element.getGameName(), self.censorLevel))
+        mrkfldTitle.setString(xCensor.xCensor(element.getGameName(), self.censorLevel))
         mrkfldTitle.show()
 
         count = mgr.marker_total
@@ -5137,7 +5148,7 @@ class xKI(ptModifier):
                 statusLine = PtGetLocalizedString("KI.MarkerGame.StatusAllFound")
             else:
                 statusLine = PtGetLocalizedString("KI.MarkerGame.StatusNotAllFound")
-        mrkfldStatus.setStringW(statusLine)
+        mrkfldStatus.setString(statusLine)
         mrkfldStatus.show()
 
         creatorID = element.getCreatorNodeID()
@@ -5150,7 +5161,7 @@ class xKI(ptModifier):
         except:
             creatorName = ""
 
-        mrkfldOwner.setStringW(PtGetLocalizedString("KI.MarkerGame.OwnerTitle") + " {} [ID:{:08d}]".format(creatorName, creatorID))
+        mrkfldOwner.setString(PtGetLocalizedString("KI.MarkerGame.OwnerTitle") + " {} [ID:{:08d}]".format(creatorName, creatorID))
         mrkfldOwner.show()
         # TODO: time limit
         mtbGameTime.hide()
@@ -5179,7 +5190,7 @@ class xKI(ptModifier):
         ptGUIControlTextBox(getControl(kGUI.MarkerFolderPlayEndGameTB)).hide()
 
         ptGUIControlButton(getControl(kGUI.MarkerFolderTitleBtn)).hide()
-        ptGUIControlButton(getControl(kGUI.MarkerFolderDeleteBtn)).hide()
+        ptGUIControlButton(getControl(kGUI.MarkerFolderDeleteBtn)).enable()
         ptGUIControlButton(getControl(kGUI.MarkerFolderTimePullDownBtn)).hide()
         ptGUIControlButton(getControl(kGUI.MarkerFolderTypePullDownBtn)).hide()
         ptGUIControlButton(getControl(kGUI.MarkerFolderTypePullDownBtn)).disable()
@@ -5191,15 +5202,15 @@ class xKI(ptModifier):
         ptGUIControlListBox(getControl(kGUI.MarkerFolderMarkListbox)).hide()
         ptGUIControlTextBox(getControl(kGUI.MarkerFolderMarkerTextTB)).hide()
         ptGUIControlTextBox(getControl(kGUI.MarkerFolderMarkerTextBtn)).hide()
-        ptGUIControlButton(getControl(kGUI.MarkerFolderToranIcon)).disable()
-        ptGUIControlButton(getControl(kGUI.MarkerFolderHSpanIcon)).disable()
-        ptGUIControlButton(getControl(kGUI.MarkerFolderVSpanIcon)).disable()
+        ptGUIControlButton(getControl(kGUI.MarkerFolderToranIcon)).enable()
+        ptGUIControlButton(getControl(kGUI.MarkerFolderHSpanIcon)).enable()
+        ptGUIControlButton(getControl(kGUI.MarkerFolderVSpanIcon)).enable()
         ptGUIControlTextBox(getControl(kGUI.MarkerFolderToranTB)).hide()
         ptGUIControlTextBox(getControl(kGUI.MarkerFolderHSpanTB)).hide()
         ptGUIControlTextBox(getControl(kGUI.MarkerFolderVSpanTB)).hide()
 
         # Show the status.
-        mrkfldTitle.setStringW(msg)
+        mrkfldTitle.setString(msg)
         mrkfldTitle.show()
         mrkfldTitle.refresh()
 
@@ -5264,11 +5275,11 @@ class xKI(ptModifier):
                 # Set the edit box and display it.
                 if self.BKEditField == kGUI.BKEditFieldJRNTitle:
                     edElement = edElement.upcastToTextNoteNode()
-                    editBox.setStringW(edElement.getTitleW())
+                    editBox.setString(edElement.getTitle())
                     KIJournalExpanded.dialog.setFocus(editBox.getKey())
                 elif self.BKEditField == kGUI.BKEditFieldPICTitle:
                     edElement = edElement.upcastToImageNode()
-                    editBox.setStringW(edElement.getTitleW())
+                    editBox.setString(edElement.getTitle())
                     KIPictureExpanded.dialog.setFocus(editBox.getKey())
                 else:
                     editBox.setString("")
@@ -5292,7 +5303,7 @@ class xKI(ptModifier):
                 # But we need to change the content over to the non-censored version without
                 # active hyperlinks. Otherwise we get interesting results where the URLs become
                 # censored and offset.
-                self.journalNoteArea.setStringW(self.BKEditContent.getChild().upcastToTextNoteNode().getTextW(), urlDetection=False)
+                self.journalNoteArea.setString(self.BKEditContent.getChild().upcastToTextNoteNode().getText(), urlDetection=False)
 
     ## Save what the player was editing to the right place.
     def BigKISaveEdit(self, noExitEditMode=False):
@@ -5322,31 +5333,31 @@ class xKI(ptModifier):
                     if edElement is not None:
                         if editBox is not None:
                             if not editBox.wasEscaped():
-                                textBox.setStringW(xCensor.xCensor(editBox.getStringW(), self.censorLevel))
+                                textBox.setString(xCensor.xCensor(editBox.getString(), self.censorLevel))
                                 if self.BKEditField == kGUI.BKEditFieldJRNTitle:
                                     edElement = edElement.upcastToTextNoteNode()
-                                    jTitle = editBox.getStringW()
+                                    jTitle = editBox.getString()
                                     if jTitle[:len(PtGetLocalizedString("KI.Journal.InitialTitle"))] == PtGetLocalizedString("KI.Journal.InitialTitle"):
                                         # Make sure that the player actually added something (so as not to get a blank title).
                                         if jTitle != PtGetLocalizedString("KI.Journal.InitialTitle"):
                                             jTitle = jTitle[len(PtGetLocalizedString("KI.Journal.InitialTitle")):]
-                                    edElement.setTitleW(jTitle)
+                                    edElement.setTitle(jTitle)
                                 elif self.BKEditField == kGUI.BKEditFieldPICTitle:
                                     edElement = edElement.upcastToImageNode()
-                                    pTitle = editBox.getStringW()
+                                    pTitle = editBox.getString()
                                     if pTitle[:len(PtGetLocalizedString("KI.Image.InitialTitle"))] == PtGetLocalizedString("KI.Image.InitialTitle"):
                                         # Make sure that the player actually added something (so as not to get a blank title).
                                         if pTitle != PtGetLocalizedString("KI.Image.InitialTitle"):
                                             pTitle = pTitle[len(PtGetLocalizedString("KI.Image.InitialTitle")):]
-                                    edElement.setTitleW(pTitle)
+                                    edElement.setTitle(pTitle)
                                 edElement.save()
                         else:
                             if self.BKEditField == kGUI.BKEditFieldJRNNote:
-                                buf = textBox.getStringW()
+                                buf = textBox.getString()
                                 if buf[:len(PtGetLocalizedString("KI.Journal.InitialMessage"))] == PtGetLocalizedString("KI.Journal.InitialMessage"):
                                     buf = buf[len(PtGetLocalizedString("KI.Journal.InitialMessage")):]
                                 edElement = edElement.upcastToTextNoteNode()
-                                edElement.setTextW(buf)
+                                edElement.setText(buf)
                                 edElement.save()
                 if self.BKEditField != kGUI.BKEditFieldJRNNote:
                     # Put the fields back into no-edit mode.
@@ -5393,9 +5404,9 @@ class xKI(ptModifier):
             myAge = self.BKConfigFolderDict[self.BKConfigListOrder[self.BKFolderSelected]]
             if not control.wasEscaped():
                 # Set the new title.
-                myAge.setAgeUserDefinedName(control.getStringW())
+                myAge.setAgeUserDefinedName(control.getString())
                 myAge.save()
-                PtDebugPrint("xKI.SaveAgeNameFromEdit(): Updating title to \"{}\".".format(control.getStringW()), level=kDebugDumpLevel )
+                PtDebugPrint("xKI.SaveAgeNameFromEdit(): Updating title to \"{}\".".format(control.getString()), level=kDebugDumpLevel )
             else:
                 PtDebugPrint("xKI.SaveAgeNameFromEdit(): Escape hit.", level=kDebugDumpLevel )
             newTitle = myAge.getDisplayName()
@@ -5405,7 +5416,7 @@ class xKI(ptModifier):
         control.hide()
         # Re-enable the button and text.
         title = ptGUIControlTextBox(KIAgeOwnerExpanded.dialog.getControlFromTag(kGUI.BKAgeOwnerTitleTB))
-        title.setStringW(newTitle)
+        title.setString(newTitle)
         title.show()
         titlebtn = ptGUIControlButton(KIAgeOwnerExpanded.dialog.getControlFromTag(kGUI.BKAgeOwnerTitleBtn))
         titlebtn.enable()
@@ -5422,7 +5433,7 @@ class xKI(ptModifier):
                 if dataType == PtVaultNodeTypes.kMarkerGameNode:
                     element = element.upcastToMarkerGameNode()
                     if element is not None:
-                        if not control.wasEscaped() and (controlText := control.getStringW()):
+                        if not control.wasEscaped() and (controlText := control.getString()):
                             # Set the new title.
                             newText = xCensor.xCensor(controlText, self.censorLevel)
                             element.setGameName(controlText)
@@ -5449,9 +5460,12 @@ class xKI(ptModifier):
                 if dataType == PtVaultNodeTypes.kMarkerGameNode:
                     element = element.upcastToMarkerGameNode()
                     if element is not None:
-                        name = control.getStringW()
+                        name = control.getString()
                         if not control.wasEscaped() and name:
-                            self.markerGameManager.selected_marker_name = name
+                            self.markerGameManager.RenameMarker(
+                                self.markerGameManager.selected_marker_id,
+                                name
+                            )
                         else:
                             PtDebugPrint("xKI.SaveMarkerTextFromEdit(): escape hit!", level=kDebugDumpLevel )
         control.hide()
@@ -5591,8 +5605,8 @@ class xKI(ptModifier):
         elif event == kAction:
             ctrlID = control.getTagID()
             if ctrlID == kGUI.ChatEditboxID:
-                if not control.wasEscaped() and control.getStringW() != "":
-                    self.chatMgr.SendMessage(control.getStringW())
+                if not control.wasEscaped() and control.getString() != "":
+                    self.chatMgr.SendMessage(control.getString())
                 self.chatMgr.ToggleChatMode(0)
             elif ctrlID == kGUI.ChatDisplayArea:
                 self.chatMgr.microChatArea.openLink()
@@ -5690,8 +5704,8 @@ class xKI(ptModifier):
         elif event == kAction or event == kValueChanged:
             ctrlID = control.getTagID()
             if ctrlID == kGUI.ChatEditboxID:
-                if not control.wasEscaped() and control.getStringW() != "":
-                    self.chatMgr.SendMessage(control.getStringW())
+                if not control.wasEscaped() and control.getString() != "":
+                    self.chatMgr.SendMessage(control.getString())
                 self.chatMgr.ToggleChatMode(0)
                 self.StartFadeTimer()
             elif ctrlID == kGUI.ChatDisplayArea:
@@ -5726,24 +5740,24 @@ class xKI(ptModifier):
                         if plyrInfo is not None:
                             sendToField.setString(plyrInfo.playerGetName())
                             # Set private caret.
-                            caret.setStringW(PtGetLocalizedString("KI.Chat.TOPrompt") + str(plyrInfo.playerGetName()) + " >")
+                            caret.setString(PtGetLocalizedString("KI.Chat.TOPrompt") + str(plyrInfo.playerGetName()) + " >")
                             privateChbox.setChecked(1)
                         else:
                             self.BKPlayerSelected = None
                     # Is it a specific player?
                     elif isinstance(self.BKPlayerSelected, ptPlayer):
                         sendToField.setString(self.BKPlayerSelected.getPlayerName())
-                        caret.setStringW(PtGetLocalizedString("KI.Chat.TOPrompt") + str(self.BKPlayerSelected.getPlayerName()) + " >")
+                        caret.setString(PtGetLocalizedString("KI.Chat.TOPrompt") + str(self.BKPlayerSelected.getPlayerName()) + " >")
                         privateChbox.setChecked(1)
                     # Is it a list of players?
                     elif isinstance(self.BKPlayerSelected, ptVaultPlayerInfoListNode):
-                        fldrType = self.BKPlayerSelected.folderGetType()
+                        fldrType = self.BKPlayerSelected.getFolderType()
                         # Is it not the All Players folder?
                         if fldrType != PtVaultStandardNodes.kAgeMembersFolder:
                             # If it's a list of age owners, it's a list of neighbors.
                             if fldrType == PtVaultStandardNodes.kAgeOwnersFolder:
                                 fldrType = PtVaultStandardNodes.kHoodMembersFolder
-                            caret.setStringW(PtGetLocalizedString("KI.Chat.TOPrompt") + xLocTools.FolderIDToFolderName(fldrType) + " >")
+                            caret.setString(PtGetLocalizedString("KI.Chat.TOPrompt") + xLocTools.FolderIDToFolderName(fldrType) + " >")
                         # It's not private and no player is selected.
                         privateChbox.setChecked(0)
                         self.BKPlayerSelected = None
@@ -5904,7 +5918,7 @@ class xKI(ptModifier):
                                 if newFolder.getType() == PtVaultNodeTypes.kAgeInfoNode:
                                     self.InviteToVisit(playerID, newFolder)
                                 elif newFolder.getType() == PtVaultNodeTypes.kPlayerInfoListNode:
-                                    newFolder.playerlistAddPlayer(playerID)
+                                    newFolder.addPlayer(playerID)
                         except (IndexError, KeyError):
                             # If there was an error, display whatever was already selected.
                             toFolderNum = self.BKFolderSelected
@@ -5926,7 +5940,7 @@ class xKI(ptModifier):
                                         theElement = theElement.upcastToPlayerInfoNode()
                                         if theElement is not None and theElement.playerGetID() != localPlayerID:
                                             theElement = theElement.upcastToPlayerInfoNode()
-                                            newFolder.playerlistAddPlayer(theElement.playerGetID())
+                                            newFolder.addPlayer(theElement.playerGetID())
                                     else:
                                         self.BKCurrentContent = newFolder.addNode(theElement)
                                         if oldFolder is not None:
@@ -6028,7 +6042,7 @@ class xKI(ptModifier):
                 if shortTB.getStringJustify() == kRightJustify and control.isInteresting():
                     # Switch to long versions.
                     longTB.setForeColor(shortTB.getForeColor())
-                    longTB.setStringW(shortTB.getStringW())
+                    longTB.setString(shortTB.getString())
                     shortTB.hide()
                     longTB.show()
                 else:
@@ -6176,13 +6190,13 @@ class xKI(ptModifier):
         if event == kShowHide:
             if control.isEnabled():
                 tfield = ptGUIControlTextBox(KISettings.dialog.getControlFromTag(kGUI.BKIKISettingsText))
-                tfield.setStringW(PtGetLocalizedString("KI.Config.Settings"))
+                tfield.setString(PtGetLocalizedString("KI.Config.Settings"))
                 tfield = ptGUIControlTextBox(KISettings.dialog.getControlFromTag(kGUI.BKIKIFontSizeText))
-                tfield.setStringW(PtGetLocalizedString("KI.Config.FontSize"))
+                tfield.setString(PtGetLocalizedString("KI.Config.FontSize"))
                 tfield = ptGUIControlTextBox(KISettings.dialog.getControlFromTag(kGUI.BKIKIFadeTimeText))
-                tfield.setStringW(PtGetLocalizedString("KI.Config.ChatFadeTime"))
+                tfield.setString(PtGetLocalizedString("KI.Config.ChatFadeTime"))
                 tfield = ptGUIControlTextBox(KISettings.dialog.getControlFromTag(kGUI.BKIKIOnlyPMText))
-                tfield.setStringW(PtGetLocalizedString("KI.Config.OnlyBuddies"))
+                tfield.setString(PtGetLocalizedString("KI.Config.OnlyBuddies"))
                 self.RefreshKISettings()
             else:
                 self.SaveFontSize()
@@ -6255,7 +6269,7 @@ class xKI(ptModifier):
         if event == kShowHide:
             if control.isEnabled():
                 tField = ptGUIControlTextBox(KIAgeOwnerExpanded.dialog.getControlFromTag(kGUI.BKAgeOwnerDescriptionTitle))
-                tField.setStringW(PtGetLocalizedString("KI.Config.Description"))
+                tField.setString(PtGetLocalizedString("KI.Config.Description"))
                 titleEdit = ptGUIControlEditBox(KIAgeOwnerExpanded.dialog.getControlFromTag(kGUI.BKAgeOwnerTitleEditbox))
                 titleEdit.hide()
                 self.RefreshAgeOwnerSettings()
@@ -6287,7 +6301,7 @@ class xKI(ptModifier):
                 try:
                     # Get the selected Age config setting.
                     myAge = self.BKConfigFolderDict[self.BKConfigListOrder[self.BKFolderSelected]]
-                    titleEdit.setStringW(myAge.getAgeUserDefinedName())
+                    titleEdit.setString(myAge.getAgeUserDefinedName())
                 except LookupError:
                     titleEdit.setString("")
                 titleEdit.show()
@@ -6314,7 +6328,7 @@ class xKI(ptModifier):
                         myAge = self.BKConfigFolderDict[self.BKConfigListOrder[self.BKFolderSelected]]
                         if myAge is not None:
                             PtDebugPrint("xKI.ProcessNotifyAgeOwnerExpanded(): Age description updated for {}.".format(myAge.getDisplayName()), level=kDebugDumpLevel)
-                            myAge.setAgeDescription(descript.getStringW())
+                            myAge.setAgeDescription(descript.getString())
                             myAge.save()
                         else:
                             PtDebugPrint("xKI.ProcessNotifyAgeOwnerExpanded(): Neighborhood is None while trying to update description.", level=kDebugDumpLevel)
@@ -6325,7 +6339,7 @@ class xKI(ptModifier):
                     myAge = self.BKConfigFolderDict[self.BKConfigListOrder[self.BKFolderSelected]]
                     if myAge is not None:
                         PtDebugPrint("xKI.ProcessNotifyAgeOwnerExpanded(): Age description updated for {}.".format(myAge.getDisplayName()), level=kDebugDumpLevel)
-                        buff = descript.getStringW()
+                        buff = descript.getString()
                         myAge.setAgeDescription(buff)
                         myAge.save()
                     else:
@@ -6367,7 +6381,7 @@ class xKI(ptModifier):
             elif tagID == kGUI.CreateMarkerGameCancelBT:
                 KIMarkerGameGUIClose.run(self.key, netPropagate=0)
             elif kGUI.CreateMarkerGameSubmitBT:
-                markerGameNameText = ptGUIControlEditBox(KICreateMarkerGameGUI.dialog.getControlFromTag(kGUI.CreateMarkerGameNameEB)).getStringW()
+                markerGameNameText = ptGUIControlEditBox(KICreateMarkerGameGUI.dialog.getControlFromTag(kGUI.CreateMarkerGameNameEB)).getString()
                 try:
                     markerGameType = kGUI.MarkerGameStates[self.selectedMGType]
                 except:
@@ -6387,6 +6401,8 @@ class xKI(ptModifier):
             typeField = ptGUIControlTextBox(KIMarkerFolderExpanded.dialog.getControlFromTag(kGUI.MarkerFolderGameTimeTB))
             typeField.setString(kLoc.MarkerFolderPopupMenu[self.markerGameTimeID][0])
         elif event == kShowHide:
+            mgr.LoadGame(self.BKCurrentContent)
+
             # Reset the edit text lines.
             if control.isEnabled():
                 titleEdit = ptGUIControlEditBox(KIMarkerFolderExpanded.dialog.getControlFromTag(kGUI.MarkerFolderTitleEB))
@@ -6439,7 +6455,7 @@ class xKI(ptModifier):
                 mfmlb = ptGUIControlListBox(KIMarkerFolderExpanded.dialog.getControlFromTag(kGUI.MarkerFolderMarkListbox))
                 self.MFScrollPos = mfmlb.getScrollPos()
 
-                if not mgr.playing:
+                if not mgr.am_playing:
                     # NOTE: We must use selected_marker_index because marker IDs don't necessarily
                     #       match up with the indices used in the GUI
                     mgr.selected_marker_index = control.getSelection()
@@ -6449,7 +6465,7 @@ class xKI(ptModifier):
                 control.disable()
                 title = ptGUIControlTextBox(KIMarkerFolderExpanded.dialog.getControlFromTag(kGUI.MarkerFolderTitleText))
                 titleEdit = ptGUIControlEditBox(KIMarkerFolderExpanded.dialog.getControlFromTag(kGUI.MarkerFolderTitleEB))
-                titleEdit.setStringW(title.getStringW())
+                titleEdit.setString(title.getString())
                 title.hide()
                 titleEdit.show()
                 titleEdit.end()
@@ -6461,7 +6477,7 @@ class xKI(ptModifier):
                 control.disable()
                 title = ptGUIControlTextBox(KIMarkerFolderExpanded.dialog.getControlFromTag(kGUI.MarkerFolderMarkerTextTB))
                 titleEdit = ptGUIControlEditBox(KIMarkerFolderExpanded.dialog.getControlFromTag(kGUI.MarkerFolderMarkerTextEB))
-                titleEdit.setStringW(title.getStringW())
+                titleEdit.setString(title.getString())
                 title.hide()
                 titleEdit.show()
                 titleEdit.end()
@@ -6567,14 +6583,14 @@ class xKI(ptModifier):
                 folder = tupData[0].getParent()
                 folder = folder.upcastToFolderNode()
                 # If the parent of this ref is the Inbox, then it's incoming mail.
-                if folder is not None and folder.folderGetType() == PtVaultStandardNodes.kInboxFolder:
+                if folder is not None and folder.getFolderType() == PtVaultStandardNodes.kInboxFolder:
                     self.AlertKIStart()
                     # Note: beenSeen() is not yet implemented.
                     if not tupData[0].beenSeen():
                         if self.onlyGetPMsFromBuddies:
                             vault = ptVault()
                             buddies = vault.getBuddyListFolder()
-                            if buddies.playerlistHasPlayer(tupData[0].getSaverID()):
+                            if buddies.hasPlayer(tupData[0].getSaverID()):
                                 # then show alert
                                 self.AlertKIStart()
                         else:
@@ -6615,7 +6631,7 @@ class xKI(ptModifier):
             if delFolder is not None and delElem is not None:
                 # Are we removing a visitor from an Age we own?
                 tFolder = delFolder.upcastToFolderNode()
-                if tFolder is not None and tFolder.folderGetType() == PtVaultStandardNodes.kCanVisitFolder:
+                if tFolder is not None and tFolder.getFolderType() == PtVaultStandardNodes.kCanVisitFolder:
                     PtDebugPrint("xKI.HandleBigKIDeleteConfirmation(): Revoking visitor.", level=kDebugDumpLevel)
                     delElem = delElem.upcastToPlayerInfoNode()
                     # Need to refind the folder that has the ageInfo in it.
@@ -6628,7 +6644,7 @@ class xKI(ptModifier):
                     PtDebugPrint("xKI.HandleBigKIDeleteConfirmation(): Removing player from folder.", level=kDebugDumpLevel)
                     delFolder = delFolder.upcastToPlayerInfoListNode()
                     delElem = delElem.upcastToPlayerInfoNode()
-                    delFolder.playerlistRemovePlayer(delElem.playerGetID())
+                    delFolder.removePlayer(delElem.playerGetID())
                     self.BKPlayerSelected = None
                     sendToField = ptGUIControlTextBox(BigKI.dialog.getControlFromTag(kGUI.BKIPlayerLine))
                     sendToField.setString(" ")

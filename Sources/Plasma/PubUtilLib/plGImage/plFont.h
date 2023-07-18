@@ -212,6 +212,7 @@ class plFont : public hsKeyedObject
 
         uint8_t   *IGetFreeCharData( uint32_t &newOffset );
 
+        const plCharacter& IGetCharacter(wchar_t c) const;
         void    IRenderLoop( const wchar_t *string, int32_t maxCount );
         void    IRenderString( plMipmap *mip, uint16_t x, uint16_t y, const wchar_t *string, bool justCalc );
 
@@ -278,7 +279,7 @@ class plFont : public hsKeyedObject
 
         uint16_t  CalcStringWidth( const ST::string &string );
         uint16_t  CalcStringWidth( const wchar_t *string );
-        void    CalcStringExtents( const ST::string &string, uint16_t &width, uint16_t &height, uint16_t &ascent, uint32_t &firstClippedChar, uint16_t &lastX, uint16_t &lastY );
+        void    CalcStringExtents( const ST::string &string, uint16_t &width, uint16_t &height, uint16_t &ascent, uint16_t &lastX, uint16_t &lastY );
         void    CalcStringExtents( const wchar_t *string, uint16_t &width, uint16_t &height, uint16_t &ascent, uint32_t &firstClippedChar, uint16_t &lastX, uint16_t &lastY );
 
         bool    LoadFromFNT( const plFileName &path );

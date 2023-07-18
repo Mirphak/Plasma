@@ -52,7 +52,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pyVaultNode.h"
 
 class pyAgeInfoStruct;
-struct RelVaultNode;
+namespace ST { class string; }
 
 class pyVaultPlayerNode : public pyVaultNode
 {
@@ -69,9 +69,6 @@ public:
 
     static void AddPlasmaClasses(PyObject *m);
 
-//==================================================================
-// class plVaultPlayerInfoNode : public plVaultNode
-//
     PyObject *GetInbox(); // returns pyVaultFolderNode
     PyObject *GetPlayerInfo(); // returns pyVaultPlayerInfoNode
     PyObject *GetAvatarOutfitFolder(); // returns pyVaultFolderNode
@@ -88,17 +85,17 @@ public:
     PyObject *GetLinkToCity(); // returns pyVaultAgeLinkNode
 
     PyObject *GetOwnedAgeLink(const pyAgeInfoStruct *info); // returns pyVaultAgeLinkNode
-    void RemoveOwnedAgeLink(const char* guid);
+    void RemoveOwnedAgeLink(const ST::string& guid);
 
     PyObject *GetVisitAgeLink(const pyAgeInfoStruct *info); // returns pyVaultAgeLinkNode
-    void RemoveVisitAgeLink(const char* guid);
+    void RemoveVisitAgeLink(const ST::string& guid);
 
-    PyObject *FindChronicleEntry(const char *entryName); // returns pyVaultChronicleNode
+    PyObject *FindChronicleEntry(const ST::string& entryName); // returns pyVaultChronicleNode
 
-    void SetPlayerName(const char *value);
+    void SetPlayerName(const ST::string& value);
     ST::string GetPlayerName() const;
 
-    void SetAvatarShapeName(const char *value);
+    void SetAvatarShapeName(const ST::string& value);
     ST::string GetAvatarShapeName() const;
 
     void SetDisabled(bool value);

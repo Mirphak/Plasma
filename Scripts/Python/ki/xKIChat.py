@@ -138,7 +138,7 @@ class xKIChat(object):
     def ClearBBMini(self, value=-1):
 
         if self.KILevel == kNormalKI:
-            mmRG = ptGUIControlRadioGroup(KIBlackbar.dialog.getControlFromTag(kGUI.MiniMaximizeRGID))
+            mmRG = KIBlackbar.dialog.getControlModFromTag(kGUI.MiniMaximizeRGID)
             mmRG.setValue(value)
 
     ## Check if the chat is faded out.
@@ -179,8 +179,8 @@ class xKIChat(object):
             KIMicro.dialog.show()
         else:
             mKIdialog = KIMini.dialog
-        caret = ptGUIControlTextBox(mKIdialog.getControlFromTag(kGUI.ChatCaretID))
-        chatEdit = ptGUIControlEditBox(mKIdialog.getControlFromTag(kGUI.ChatEditboxID))
+        caret = mKIdialog.getControlModFromTag(kGUI.ChatCaretID)
+        chatEdit = mKIdialog.getControlModFromTag(kGUI.ChatEditboxID)
         if entering:
             self.isChatting = True
             if not KIMini.dialog.isEnabled():
@@ -233,7 +233,7 @@ class xKIChat(object):
         msg = message.casefold()
 
         # Get any selected players.
-        userListBox = ptGUIControlListBox(KIMini.dialog.getControlFromTag(kGUI.PlayerList))
+        userListBox = KIMini.dialog.getControlModFromTag(kGUI.PlayerList)
         iSelect = userListBox.getSelection()
         selPlyrList = []
 
@@ -258,7 +258,7 @@ class xKIChat(object):
             else:
                 vault = ptVault()
                 PIKA = vault.getPeopleIKnowAboutFolder()
-                if PIKA is not None and PIKA.playerlistHasPlayer(self.toReplyToLastPrivatePlayerID[1]):
+                if PIKA is not None and PIKA.hasPlayer(self.toReplyToLastPrivatePlayerID[1]):
                     PIKArefs = PIKA.getChildNodeRefList()
                     for PIKAref in PIKArefs:
                         PIKAelem = PIKAref.getChild()
@@ -378,7 +378,7 @@ class xKIChat(object):
 
                 # Is it a list of players?
                 elif isinstance(toPlyr, ptVaultPlayerInfoListNode):
-                    fldrType = toPlyr.folderGetType()
+                    fldrType = toPlyr.getFolderType()
                     # If it's a list of Age Owners, they must be neighbors.
                     if fldrType == PtVaultStandardNodes.kAgeOwnersFolder:
                         fldrType = PtVaultStandardNodes.kHoodMembersFolder
@@ -508,7 +508,7 @@ class xKIChat(object):
                                 buddies = ptVault().getBuddyListFolder()
                                 if buddies is not None:
                                     buddyID = player.getPlayerID()
-                                    if not buddies.playerlistHasPlayer(buddyID):
+                                    if not buddies.hasPlayer(buddyID):
                                         PtDebugPrint("xKIChat.AddChatLine(): Add unknown buddy {} to recents.".format(buddyID))
                                         self.AddPlayerToRecents(buddyID)
                         except ValueError:
@@ -614,7 +614,7 @@ class xKIChat(object):
                 mKIdialog.show()
         if player is not None:
             separator = "" if not pretext or pretext.endswith(" ") else " "
-            chatHeaderFormatted = "{}{}{}:".format(pretext, separator, player.getPlayerNameW())
+            chatHeaderFormatted = "{}{}{}:".format(pretext, separator, player.getPlayerName())
             chatMessageFormatted = " {}".format(message)
         else:
             # It must be a subtitle, status or error message.
@@ -641,9 +641,7 @@ class xKIChat(object):
                 wasAtEnd = chatArea.isAtEnd()
                 chatArea.moveCursor(PtGUIMultiLineDirection.kBufferEnd)
                 chatArea.insertColor(headerColor)
-
-                # Added unicode support here.
-                chatArea.insertStringW(f"\n{contextPrefix if self.chatTextColor else ''}{chatHeaderFormatted}")
+                chatArea.insertString(f"\n{contextPrefix if self.chatTextColor else ''}{chatHeaderFormatted}")
                 chatArea.insertColor(bodyColor)
 
                 lastInsert = 0
@@ -652,18 +650,18 @@ class xKIChat(object):
                 for start, end, mention in chatMentions:
                     if start > lastInsert:
                         # Insert normal text up to the current name mention position
-                        chatArea.insertStringW(chatMessageFormatted[lastInsert:start], censorLevel=censorLevel)
+                        chatArea.insertString(chatMessageFormatted[lastInsert:start], censorLevel=censorLevel)
 
                     lastInsert = end
                     
                     chatArea.insertColor(mentionColor)
-                    chatArea.insertStringW(mention, censorLevel=censorLevel, urlDetection=False)
+                    chatArea.insertString(mention, censorLevel=censorLevel, urlDetection=False)
                     chatArea.insertColor(bodyColor)
 
                 # If there is remaining text to display after last mention, write it
                 # Or if it was just a plain message with no mention of player's name
                 if lastInsert != len(chatMessageFormatted):
-                    chatArea.insertStringW(chatMessageFormatted[lastInsert:], censorLevel=censorLevel)
+                    chatArea.insertString(chatMessageFormatted[lastInsert:], censorLevel=censorLevel)
 
                 chatArea.moveCursor(PtGUIMultiLineDirection.kBufferEnd)
 
@@ -723,8 +721,8 @@ class xKIChat(object):
         if PIKAFolder:
             PIKA = PIKAFolder.upcastToPlayerInfoListNode()
             if PIKA is not None:
-                if not PIKA.playerlistHasPlayer(playerID):
-                    PIKA.playerlistAddPlayer(playerID)
+                if not PIKA.hasPlayer(playerID):
+                    PIKA.addPlayer(playerID)
                     childRefList = PIKAFolder.getChildNodeRefList()
                     numPeople = len(childRefList)
                     if numPeople > kLimits.MaxRecentPlayerListSize:
@@ -770,7 +768,7 @@ class xKIChat(object):
         if self.onlyGetPMsFromBuddies:
             buddies = ptVault().getBuddyListFolder()
             if buddies is not None:
-                return buddies.playerlistHasPlayer(playerID)
+                return buddies.hasPlayer(playerID)
             return False
         return True
 
@@ -1104,9 +1102,9 @@ class CommandsProcessor:
 
                         # If remaining message is empty, try to do mousefree KI folder selection instead
                         if remainingMsg == "" or remainingMsg.isspace():
-                            userListBox = ptGUIControlListBox(KIMini.dialog.getControlFromTag(kGUI.PlayerList))
-                            caret = ptGUIControlTextBox(KIMini.dialog.getControlFromTag(kGUI.ChatCaretID))
-                            privateChbox = ptGUIControlCheckBox(KIMini.dialog.getControlFromTag(kGUI.miniPrivateToggle))
+                            userListBox = KIMini.dialog.getControlModFromTag(kGUI.PlayerList)
+                            caret = KIMini.dialog.getControlModFromTag(kGUI.ChatCaretID)
+                            privateChbox = KIMini.dialog.getControlModFromTag(kGUI.miniPrivateToggle)
 
                             # Handling for selecting Age Players, Buddies, or Neighbors
                             folderName = None
@@ -1130,7 +1128,7 @@ class CommandsProcessor:
                                     pass
                                 else:
                                     userListBox.setSelection(folderIdx)
-                                    caret.setStringW(caretValue)
+                                    caret.setString(caretValue)
                                     privateChbox.setChecked(False)
                                 
                             # Don't send an actual message because it was just a command with nothing after it
@@ -1184,10 +1182,10 @@ class CommandsProcessor:
                 vault = ptVault()
                 buddies = vault.getBuddyListFolder()
                 if buddies is not None:
-                    if buddies.playerlistHasPlayer(pID):
+                    if buddies.hasPlayer(pID):
                         self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Player.AlreadyAdded"), kChat.SystemMessage)
                     else:
-                        buddies.playerlistAddPlayer(pID)
+                        buddies.addPlayer(pID)
                         self.chatMgr.DisplayStatusMessage(PtGetLocalizedString("KI.Player.Added"))
             else:
                 self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Player.NotYourself"), kChat.SystemMessage)
@@ -1209,10 +1207,10 @@ class CommandsProcessor:
                 vault = ptVault()
                 ignores = vault.getIgnoreListFolder()
                 if ignores is not None:
-                    if ignores.playerlistHasPlayer(pID):
+                    if ignores.hasPlayer(pID):
                         self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Player.AlreadyAdded"), kChat.SystemMessage)
                     else:
-                        ignores.playerlistAddPlayer(pID)
+                        ignores.addPlayer(pID)
                         self.chatMgr.DisplayStatusMessage(PtGetLocalizedString("KI.Player.Added"))
             else:
                 self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Player.NotYourself"), kChat.SystemMessage)
@@ -1230,8 +1228,8 @@ class CommandsProcessor:
 
         # Is it a number?
         if pID:
-            if buddies.playerlistHasPlayer(pID):
-                buddies.playerlistRemovePlayer(pID)
+            if buddies.hasPlayer(pID):
+                buddies.removePlayer(pID)
                 self.chatMgr.DisplayStatusMessage(PtGetLocalizedString("KI.Player.Removed"))
             else:
                 self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Player.NotFound"), kChat.SystemMessage)
@@ -1244,7 +1242,7 @@ class CommandsProcessor:
                     PLR = PLR.upcastToPlayerInfoNode()
                     if PLR is not None and PLR.getType() == PtVaultNodeTypes.kPlayerInfoNode:
                         if player == PLR.playerGetName():
-                            buddies.playerlistRemovePlayer(PLR.playerGetID())
+                            buddies.removePlayer(PLR.playerGetID())
                             self.chatMgr.DisplayStatusMessage(PtGetLocalizedString("KI.Player.Removed"))
                             return
             self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Player.NumberOnly"), kChat.SystemMessage)
@@ -1276,8 +1274,8 @@ class CommandsProcessor:
 
         # Is it a number?
         if pID:
-            if ignores.playerlistHasPlayer(pID):
-                ignores.playerlistRemovePlayer(pID)
+            if ignores.hasPlayer(pID):
+                ignores.removePlayer(pID)
                 self.chatMgr.DisplayStatusMessage(PtGetLocalizedString("KI.Player.Removed"))
             else:
                 self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Player.NotFound"), kChat.SystemMessage)
@@ -1290,7 +1288,7 @@ class CommandsProcessor:
                     PLR = PLR.upcastToPlayerInfoNode()
                     if PLR is not None and PLR.getType() == PtVaultNodeTypes.kPlayerInfoNode:
                         if player == PLR.playerGetName():
-                            ignores.playerlistRemovePlayer(PLR.playerGetID())
+                            ignores.removePlayer(PLR.playerGetID())
                             self.chatMgr.DisplayStatusMessage(PtGetLocalizedString("KI.Player.Removed"))
                             return
             self.chatMgr.AddChatLine(None, PtGetLocalizedString("KI.Player.NumberOnly"), kChat.SystemMessage)
@@ -1623,7 +1621,7 @@ class CommandsProcessor:
         if entry is None:
             vault.addChronicleEntry("feather", 1, str(self.chatMgr.gFeather))
             entry = vault.findChronicleEntry("feather")
-        entry.chronicleSetValue(str(self.chatMgr.gFeather))
+        entry.setValue(str(self.chatMgr.gFeather))
         entry.save()
 
     ## Looks for feathers in the player's "inventory".
@@ -1678,15 +1676,15 @@ class CommandsProcessor:
             child = child.upcastToChronicleNode()
             if not child:
                 continue
-            if child.chronicleGetName() == kChron.Party:
+            if child.getName() == kChron.Party:
                 party = child
                 break
 
         # Let's see what we need to do
         if not params:
             # No params = LINK ME!
-            if party and party.chronicleGetValue():
-                data = party.chronicleGetValue().split(";", 3)
+            if party and party.getValue():
+                data = party.getValue().split(";", 3)
                 ageInfo = ptAgeInfoStruct()
                 ageInfo.setAgeFilename(data[0])
                 ageInfo.setAgeInstanceGuid(data[1])
@@ -1708,7 +1706,7 @@ class CommandsProcessor:
             except NameError:
                 # Garbage SO = kill party
                 if party:
-                    party.chronicleSetValue("")
+                    party.setValue("")
                     party.save()
                     self.chatMgr.AddChatLine(None, "Party Crashed.", 0)
                 else:
@@ -1719,12 +1717,12 @@ class CommandsProcessor:
                 data = "%s;%s;%s" % (ageInfo.getAgeFilename(), ageInfo.getAgeInstanceGuid(), params)
                 if not party:
                     party = ptVaultChronicleNode()
-                    party.chronicleSetName(kChron.Party)
-                    party.chronicleSetValue(data)
+                    party.setName(kChron.Party)
+                    party.setValue(data)
                     party.save() # creates node on server (and blocks) so we can add it to the global inbox
                     inbox.addNode(party)
                 else:
-                    party.chronicleSetValue(data)
+                    party.setValue(data)
                     party.save()
 
     ## Export the local avatar's clothing to a file
@@ -1743,7 +1741,7 @@ class CommandsProcessor:
         if not file:
             self.chatMgr.AddChatLine(None, "Usage: /loadclothing <name>", kChat.SystemMessage)
             return
-        if PtGetPlayerList() and not PtIsInternalRelease():
+        if not PtIsSolo() and not PtIsInternalRelease():
             self.chatMgr.AddChatLine(None, "You have to be alone to change your clothes!", kChat.SystemMessage)
             return
         file = file + ".clo"

@@ -41,38 +41,39 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include <Python.h>
+#include <string_theory/string>
+#include <utility>
 #include "pyKey.h"
 
 #include "cyMisc.h"
 #include "pyGlueHelpers.h"
 #include "pySceneObject.h"
-#include "pnUtils/pnUtils.h"
 #include "pnUUID/pnUUID.h"
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtSendPetitionToCCR, args, "Params: message,reason=0,title=\"\"\nSends a petition with a message to the CCR group")
 {
-    char* message;
+    ST::string message;
     unsigned char reason = 0;
-    char* title = nullptr;
-    if (!PyArg_ParseTuple(args, "s|bs", &message, &reason, &title))
+    ST::string title;
+    if (!PyArg_ParseTuple(args, "O&|bO&", PyUnicode_STStringConverter, &message, &reason, PyUnicode_STStringConverter, &title))
     {
         PyErr_SetString(PyExc_TypeError, "PtSendPetitionToCCR expects a string, and an optional unsigned 8-bit int and optional string");
         PYTHON_RETURN_ERROR;
     }
-    cyMisc::SendPetitionToCCRI(message, reason, title);
+    cyMisc::SendPetitionToCCR(std::move(message), reason, std::move(title));
     PYTHON_RETURN_NONE;
 }
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtSendChatToCCR, args, "Params: message,CCRPlayerID\nSends a chat message to a CCR that has contacted this player")
 {
-    char* message;
+    ST::string message;
     long CCRPlayerID;
-    if (!PyArg_ParseTuple(args, "sl", &message, &CCRPlayerID))
+    if (!PyArg_ParseTuple(args, "O&l", PyUnicode_STStringConverter, &message, &CCRPlayerID))
     {
         PyErr_SetString(PyExc_TypeError, "PtSendChatToCCR expects a string and a long");
         PYTHON_RETURN_ERROR;
     }
-    cyMisc::SendChatToCCR(message, CCRPlayerID);
+    cyMisc::SendChatToCCR(std::move(message), CCRPlayerID);
     PYTHON_RETURN_NONE;
 }
 
@@ -95,8 +96,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtSetPythonLoggingLevel, args, "Params: level\nS
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtConsole, args, "Params: command\nThis will execute 'command' as if it were typed into the Plasma console.")
 {
-    char* command;
-    if (!PyArg_ParseTuple(args, "s", &command))
+    ST::string command;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &command))
     {
         PyErr_SetString(PyExc_TypeError, "PtConsole expects a string");
         PYTHON_RETURN_ERROR;
@@ -108,9 +109,9 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtConsole, args, "Params: command\nThis will exe
 PYTHON_GLOBAL_METHOD_DEFINITION(PtConsoleNet, args, "Params: command,netForce\nThis will execute 'command' on the console, over the network, on all clients.\n"
             "If 'netForce' is true then force command to be sent over the network.")
 {
-    char* command;
+    ST::string command;
     char netForce;
-    if (!PyArg_ParseTuple(args, "sb", &command, &netForce))
+    if (!PyArg_ParseTuple(args, "O&b", PyUnicode_STStringConverter, &command, &netForce))
     {
         PyErr_SetString(PyExc_TypeError, "PtConsoleNet expects a string and a boolean");
         PYTHON_RETURN_ERROR;
@@ -118,21 +119,6 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtConsoleNet, args, "Params: command,netForce\nT
     cyMisc::ConsoleNet(command, netForce != 0);
     PYTHON_RETURN_NONE;
 }
-
-#if 1
-// TEMP
-PYTHON_GLOBAL_METHOD_DEFINITION(PtPrintToScreen, args, "Params: message\nPrints 'message' to the status log, for debug only.")
-{
-    char* message;
-    if (!PyArg_ParseTuple(args, "s", &message))
-    {
-        PyErr_SetString(PyExc_TypeError, "PtPrintToScreen expects a string");
-        PYTHON_RETURN_ERROR;
-    }
-    cyMisc::PrintToScreen(message);
-    PYTHON_RETURN_NONE;
-}
-#endif
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtAtTimeCallback, args, "Params: selfkey,time,id\nThis will create a timer callback that will call OnTimer when complete\n"
             "- 'selfkey' is the ptKey of the PythonFile component\n"
@@ -179,39 +165,39 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtFindSceneobject, args, "Params: name,ageName\n
             "- it will return a ptSceneObject if found"
             "- if not found then a NameError exception will happen")
 {
-    char* name;
-    char* ageName;
-    if (!PyArg_ParseTuple(args, "ss", &name, &ageName))
+    ST::string name;
+    ST::string ageName;
+    if (!PyArg_ParseTuple(args, "O&O&", PyUnicode_STStringConverter, &name, PyUnicode_STStringConverter, &ageName))
     {
         PyErr_SetString(PyExc_TypeError, "PtFindSceneobject expects two strings");
         PYTHON_RETURN_ERROR;
     }
-    return cyMisc::FindSceneObject(ST::string::from_utf8(name), ageName);
+    return cyMisc::FindSceneObject(name, ageName);
 }
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtFindSceneobjects, args, "Params: name\nThis will try to find a any sceneobject containing string in name")
 {
-    char* name = nullptr;
-    if (!PyArg_ParseTuple(args, "s", &name))
+    ST::string name;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &name))
     {
         PyErr_SetString(PyExc_TypeError, "PtFindSceneobject expects string");
         PYTHON_RETURN_ERROR;
     }
-    return cyMisc::FindSceneObjects(ST::string::from_utf8(name));
+    return cyMisc::FindSceneObjects(name);
 }
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtFindActivator, args, "Params: name\nThis will try to find an activator based on its name\n"
             "- it will return a ptKey if found"
             "- it will return None if not found")
 {
-    char* name;
-    if (!PyArg_ParseTuple(args, "s", &name))
+    ST::string name;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &name))
     {
         PyErr_SetString(PyExc_TypeError, "PtFindActivator expects a string");
         PYTHON_RETURN_ERROR;
     }
 
-    return cyMisc::FindActivator(ST::string::from_utf8(name));
+    return cyMisc::FindActivator(name);
 }
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtWasLocallyNotified, args, "Params: selfKey\nReturns 1 if the last notify was local or 0 if the notify originated on the network")
@@ -297,32 +283,12 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtDetachObject, args, "Params: child,parent,netF
     PYTHON_RETURN_NONE;
 }
 
-/*PYTHON_GLOBAL_METHOD_DEFINITION(PtLinkToAge, args, "Params: selfKey,ageName,spawnPointName\nDEPRECIATED: Links you to the specified age and spawnpoint")
-{
-    PyObject* keyObj = nullptr;
-    char* ageName;
-    char* spawnPointName;
-    if (!PyArg_ParseTuple(args, "Oss", &keyObj, &ageName, &spawnPointName))
-    {
-        PyErr_SetString(PyExc_TypeError, "PtLinkToAge expects a ptKey, and two strings");
-        PYTHON_RETURN_ERROR;
-    }
-    if (!pyKey::Check(keyObj))
-    {
-        PyErr_SetString(PyExc_TypeError, "PtLinkToAge expects a ptKey, and two strings");
-        PYTHON_RETURN_ERROR;
-    }
-    pyKey* key = pyKey::ConvertFrom(keyObj);
-    cyMisc::LinkToAge(*key, ageName, spawnPointName);
-    PYTHON_RETURN_NONE;
-}*/
-
 PYTHON_GLOBAL_METHOD_DEFINITION(PtDirtySynchState, args, "Params: selfKey,SDLStateName,flags\nDO NOT USE - handled by ptSDL")
 {
     PyObject* keyObj = nullptr;
-    char* SDLStateName;
+    ST::string SDLStateName;
     unsigned long flags;
-    if (!PyArg_ParseTuple(args, "Osl", &keyObj, &SDLStateName, &flags))
+    if (!PyArg_ParseTuple(args, "OO&l", &keyObj, PyUnicode_STStringConverter, &SDLStateName, &flags))
     {
         PyErr_SetString(PyExc_TypeError, "PtDirtySynchState expects a ptKey, a string, and an unsigned long");
         PYTHON_RETURN_ERROR;
@@ -340,9 +306,9 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtDirtySynchState, args, "Params: selfKey,SDLSta
 PYTHON_GLOBAL_METHOD_DEFINITION(PtDirtySynchClients, args, "Params: selfKey,SDLStateName,flags\nDO NOT USE - handled by ptSDL")
 {
     PyObject* keyObj = nullptr;
-    char* SDLStateName;
+    ST::string SDLStateName;
     unsigned long flags;
-    if (!PyArg_ParseTuple(args, "Osl", &keyObj, &SDLStateName, &flags))
+    if (!PyArg_ParseTuple(args, "OO&l", &keyObj, PyUnicode_STStringConverter, &SDLStateName, &flags))
     {
         PyErr_SetString(PyExc_TypeError, "PtDirtySynchClients expects a ptKey, a string, and an unsigned long");
         PYTHON_RETURN_ERROR;
@@ -411,9 +377,9 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtFadeLocalAvatar, args, "Params: fade\nFade (or
 PYTHON_GLOBAL_METHOD_DEFINITION(PtSetOfferBookMode, args, "Params: selfkey,ageFilename,ageInstanceName\nPut us into the offer book interface")
 {
     PyObject* keyObj = nullptr;
-    char* ageFilename;
-    char* ageInstanceName;
-    if (!PyArg_ParseTuple(args, "Oss", &keyObj, &ageFilename, &ageInstanceName))
+    ST::string ageFilename;
+    ST::string ageInstanceName;
+    if (!PyArg_ParseTuple(args, "OO&O&", &keyObj, PyUnicode_STStringConverter, &ageFilename, PyUnicode_STStringConverter, &ageInstanceName))
     {
         PyErr_SetString(PyExc_TypeError, "PtSetOfferBookMode expects a ptKey, and two strings");
         PYTHON_RETURN_ERROR;
@@ -430,8 +396,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtSetOfferBookMode, args, "Params: selfkey,ageFi
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtSetShareSpawnPoint, args, "Params: spawnPoint\nThis sets the desired spawn point for the receiver to link to")
 {
-    char* spawnPoint;
-    if (!PyArg_ParseTuple(args, "s", &spawnPoint))
+    ST::string spawnPoint;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &spawnPoint))
     {
         PyErr_SetString(PyExc_TypeError, "PtSetShareSpawnPoint expects a string");
         PYTHON_RETURN_ERROR;
@@ -442,8 +408,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtSetShareSpawnPoint, args, "Params: spawnPoint\
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtSetShareAgeInstanceGuid, args, "Params: instanceGuid\nThis sets the desired age instance guid for the receiver to link to")
 {
-    char* guidStr;
-    if (!PyArg_ParseTuple(args, "s", &guidStr))
+    ST::string guidStr;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &guidStr))
     {
         PyErr_SetString(PyExc_TypeError, "PtSetShareAgeInstanceGuid expects a string");
         PYTHON_RETURN_ERROR;
@@ -589,11 +555,6 @@ PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtGetLanguage, "Returns the current langu
     return PyLong_FromLong(cyMisc::GetLanguage());
 }
 
-PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtUsingUnicode, "Returns true if the current language is a unicode language (like Japanese)")
-{
-    PYTHON_RETURN_BOOL(cyMisc::UsingUnicode());
-}
-
 PYTHON_GLOBAL_METHOD_DEFINITION(PtFakeLinkAvatarToObject, args, "Params: avatar,object\nPseudo-links avatar to object within the same age\n")
 {
     PyObject* avatarObj = nullptr;
@@ -659,12 +620,12 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtCreateDir, args, "Params: directory\nCreates t
     PYTHON_RETURN_BOOL(cyMisc::CreateDir(directory));
 }
 
-PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtGetUserPath, "Returns the unicode path to the client's root user directory. Do NOT convert to a standard string.")
+PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtGetUserPath, "Returns the path to the client's root user directory.")
 {
     return PyUnicode_FromSTString(cyMisc::GetUserPath().AsString());
 }
 
-PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtGetInitPath, "Returns the unicode path to the client's init directory. Do NOT convert to a standard string.")
+PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtGetInitPath, "Returns the path to the client's init directory.")
 {
     return PyUnicode_FromSTString(cyMisc::GetInitPath().AsString());
 }
@@ -686,11 +647,6 @@ void cyMisc::AddPlasmaMethods3(PyObject* m)
         PYTHON_GLOBAL_METHOD(PtConsole)
         PYTHON_GLOBAL_METHOD(PtConsoleNet)
 
-#if 1
-        // TEMP
-        PYTHON_GLOBAL_METHOD(PtPrintToScreen)
-#endif
-
         PYTHON_GLOBAL_METHOD(PtAtTimeCallback)
         PYTHON_GLOBAL_METHOD(PtClearTimerCallbacks)
 
@@ -701,8 +657,6 @@ void cyMisc::AddPlasmaMethods3(PyObject* m)
 
         PYTHON_GLOBAL_METHOD(PtAttachObject)
         PYTHON_GLOBAL_METHOD(PtDetachObject)
-
-        //PYTHON_GLOBAL_METHOD(PtLinkToAge)
 
         PYTHON_GLOBAL_METHOD(PtDirtySynchState)
         PYTHON_GLOBAL_METHOD(PtDirtySynchClients)
@@ -735,7 +689,6 @@ void cyMisc::AddPlasmaMethods3(PyObject* m)
         PYTHON_GLOBAL_METHOD(PtGetControlEvents)
 
         PYTHON_GLOBAL_METHOD_NOARGS(PtGetLanguage)
-        PYTHON_GLOBAL_METHOD_NOARGS(PtUsingUnicode)
 
         PYTHON_GLOBAL_METHOD(PtFakeLinkAvatarToObject)
 

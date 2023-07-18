@@ -38,11 +38,18 @@ set_package_properties(
     TYPE REQUIRED
 )
 set_package_properties(
+    Fontconfig PROPERTIES
+    URL "https://www.fontconfig.org/"
+    DESCRIPTION "Linux font loading library"
+    PURPOSE "Used for loading system fonts on Linux"
+    TYPE REQUIRED
+)
+set_package_properties(
     freetype PROPERTIES
     URL "https://www.freetype.org/"
     DESCRIPTION "Library for rendering fonts"
     PURPOSE "Used to convert vector fonts to raster assets"
-    TYPE OPTIONAL
+    TYPE REQUIRED
 )
 set_package_properties(
     JPEG PROPERTIES

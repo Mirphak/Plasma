@@ -47,10 +47,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 
 #include "pyVaultChronicleNode.h"
+
+#include <string_theory/string>
+
 #include "plVault/plVault.h"
-#ifndef BUILDING_PYPLASMA
-#   include "pyVault.h"
-#endif
 
 //create from the Python side
 pyVaultChronicleNode::pyVaultChronicleNode()
@@ -63,7 +63,7 @@ pyVaultChronicleNode::pyVaultChronicleNode()
 //==================================================================
 // class RelVaultNode : public plVaultNode
 //
-void pyVaultChronicleNode::Chronicle_SetName( const char * text )
+void pyVaultChronicleNode::Chronicle_SetName( const ST::string& text )
 {
     if (!fNode)
         return;
@@ -81,7 +81,7 @@ ST::string pyVaultChronicleNode::Chronicle_GetName() const
     return ST::string();
 }
 
-void pyVaultChronicleNode::Chronicle_SetValue( const char * text )
+void pyVaultChronicleNode::Chronicle_SetValue( const ST::string& text )
 {
     if (fNode) {
         VaultChronicleNode chron(fNode);

@@ -47,11 +47,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "pyNetLinkingMgr.h"
 
+#include <string_theory/string>
+
 #include "plNetClient/plNetLinkingMgr.h"
 #include "plAvatar/plAvatarMgr.h"
 #include "plAvatar/plArmatureMod.h"
 
-#include "pyAgeInfoStruct.h"
 #include "pyAgeLinkStruct.h"
 
 bool pyNetLinkingMgr::IsEnabled() const
@@ -64,9 +65,9 @@ void pyNetLinkingMgr::SetEnabled( bool b ) const
     plNetLinkingMgr::GetInstance()->SetEnabled( b );
 }
 
-void pyNetLinkingMgr::LinkToAge( pyAgeLinkStruct & link, const char* linkAnim, bool linkInSfx, bool linkOutSfx )
+void pyNetLinkingMgr::LinkToAge(pyAgeLinkStruct & link, const ST::string& linkAnim, bool linkInSfx, bool linkOutSfx)
 {
-    plNetLinkingMgr::GetInstance()->LinkToAge( link.GetAgeLink(), linkAnim, linkInSfx, linkOutSfx );
+    plNetLinkingMgr::GetInstance()->LinkToAge(link.GetAgeLink(), linkAnim, linkInSfx, linkOutSfx);
 }
 
 void pyNetLinkingMgr::LinkToMyPersonalAge()

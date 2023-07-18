@@ -41,6 +41,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include <Python.h>
+#include <string_theory/string>
+
 #include "pyKey.h"
 
 #include "pyGUIControlEditBox.h"
@@ -86,49 +88,21 @@ PYTHON_METHOD_DEFINITION(ptGUIControlEditBox, setStringSize, args)
 
 PYTHON_METHOD_DEFINITION_NOARGS(ptGUIControlEditBox, getString)
 {
-    return PyUnicode_FromStdString(self->fThis->GetBuffer());
-}
-
-PYTHON_METHOD_DEFINITION_NOARGS(ptGUIControlEditBox, getStringW)
-{
-    std::wstring val = self->fThis->GetBufferW();
-    return PyUnicode_FromWideChar(val.c_str(), val.length());
+    return PyUnicode_FromSTString(self->fThis->GetBuffer());
 }
 
 PYTHON_BASIC_METHOD_DEFINITION(ptGUIControlEditBox, clearString, ClearBuffer)
 
 PYTHON_METHOD_DEFINITION(ptGUIControlEditBox, setString, args)
 {
-    char* text;
-    if (!PyArg_ParseTuple(args, "s", &text))
+    ST::string text;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &text))
     {
         PyErr_SetString(PyExc_TypeError, "setString expects a string");
         PYTHON_RETURN_ERROR;
     }
     self->fThis->SetText(text);
     PYTHON_RETURN_NONE;
-}
-
-PYTHON_METHOD_DEFINITION(ptGUIControlEditBox, setStringW, args)
-{
-    PyObject* textObj;
-    if (!PyArg_ParseTuple(args, "O", &textObj))
-    {
-        PyErr_SetString(PyExc_TypeError, "setStringW expects a unicode string");
-        PYTHON_RETURN_ERROR;
-    }
-    if (PyUnicode_Check(textObj))
-    {
-        wchar_t* text = PyUnicode_AsWideCharString(textObj, nullptr);
-        self->fThis->SetTextW(text);
-        PyMem_Free(text);
-        PYTHON_RETURN_NONE;
-    }
-    else
-    {
-        PyErr_SetString(PyExc_TypeError, "setStringW expects a unicode string");
-        PYTHON_RETURN_ERROR;
-    }
 }
 
 PYTHON_BASIC_METHOD_DEFINITION(ptGUIControlEditBox, home, SetCursorToHome)
@@ -229,10 +203,8 @@ PYTHON_METHOD_DEFINITION(ptGUIControlEditBox, setChatMode, args)
 PYTHON_START_METHODS_TABLE(ptGUIControlEditBox)
     PYTHON_METHOD(ptGUIControlEditBox, setStringSize, "Params: size\nSets the maximum size of the string that can be inputted by the user."),
     PYTHON_METHOD_NOARGS(ptGUIControlEditBox, getString, "Returns the sting that the user typed in."),
-    PYTHON_METHOD_NOARGS(ptGUIControlEditBox, getStringW, "Unicode version of getString."),
     PYTHON_BASIC_METHOD(ptGUIControlEditBox, clearString, "Clears the editbox."),
-    PYTHON_METHOD(ptGUIControlEditBox, setString, "Params: text\nPre-sets the editbox to a atring."),
-    PYTHON_METHOD(ptGUIControlEditBox, setStringW, "Params: text\nUnicode version of setString."),
+    PYTHON_METHOD(ptGUIControlEditBox, setString, "Params: text\nPre-sets the editbox to a string."),
     PYTHON_BASIC_METHOD(ptGUIControlEditBox, home, "Sets the cursor in the editbox to before the first character."),
     PYTHON_BASIC_METHOD(ptGUIControlEditBox, end, "Sets the cursor in the editbox to the after the last character."),
     PYTHON_METHOD(ptGUIControlEditBox, setColor, "Params: foreColor,backColor\nSets the fore and back color of the editbox."),

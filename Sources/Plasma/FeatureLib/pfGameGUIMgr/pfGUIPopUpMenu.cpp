@@ -57,7 +57,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <string_theory/format>
 
-#include "pfGUIButtonMod.h"
 #include "pfGUIControlHandlers.h"
 #include "pfGUICtrlGenerator.h"
 #include "pfGUIDialogHandlers.h"
@@ -232,11 +231,10 @@ void    pfGUIPopUpMenu::Read( hsStream *s, hsResMgr *mgr )
     fMenuItems.resize(count);
     for (uint32_t i = 0; i < count; i++)
     {
-        char readTemp[ 256 ];
-        s->Read( sizeof( readTemp ), readTemp );
-        wchar_t *wReadTemp = hsStringToWString( readTemp );
-        fMenuItems[ i ].fName = wReadTemp;
-        delete [] wReadTemp;
+        char readTemp[257];
+        s->Read(sizeof(readTemp) - 1, readTemp);
+        readTemp[sizeof(readTemp) - 1] = '\0';
+        fMenuItems[ i ].fName = ST::string::from_latin_1(readTemp);
         
         fMenuItems[ i ].fHandler = pfGUICtrlProcWriteableObject::Read( s );
 
@@ -263,9 +261,8 @@ void    pfGUIPopUpMenu::Write( hsStream *s, hsResMgr *mgr )
     for (const pfMenuItem& item : fMenuItems)
     {
         char writeTemp[ 256 ];
-        char *sName = hsWStringToString(item.fName.c_str());
-        strncpy( writeTemp, sName, sizeof( writeTemp ) );
-        delete [] sName;
+        ST::char_buffer sName = item.fName.to_latin_1();
+        strncpy(writeTemp, sName.c_str(), sizeof(writeTemp));
         s->Write( sizeof( writeTemp ), writeTemp );
 
         // Write the handler out (if it's not a writeable, damn you)
@@ -460,7 +457,7 @@ bool    pfGUIPopUpMenu::IBuildMenu()
     for (const pfMenuItem& item : fMenuItems)
     {
         uint16_t  thisW, thisH;
-        thisW = scratch->CalcStringWidth(item.fName.c_str(), &thisH);
+        thisW = scratch->CalcStringWidth(item.fName, &thisH);
         if (item.fSubMenu != nullptr)
         {
             if (fSkin != nullptr)
@@ -546,11 +543,11 @@ bool    pfGUIPopUpMenu::IBuildMenu()
         float thisMargin = (i == 0 || i == fMenuItems.size() - 1) ? topMargin : 0.f;
         float thisOffset = (i == fMenuItems.size() - 1) ? topMargin : 0.f;
 
-        pfGUIMenuItem *button = pfGUIMenuItem::ConvertNoRef( pfGUICtrlGenerator::Instance().CreateRectButton( this, fMenuItems[ i ].fName.c_str(), x, y + thisOffset, width, height + thisMargin, mat, true ) );
+        pfGUIMenuItem *button = pfGUICtrlGenerator::Instance().CreateRectButton(this, x, y + thisOffset, width, height + thisMargin, mat);
         if (button != nullptr)
         {
             button->SetColorScheme( scheme );
-            button->SetName( fMenuItems[ i ].fName.c_str() );
+            button->SetName(fMenuItems[i].fName);
             button->SetHandler( new pfGUIMenuItemProc( this, i ) );
             // make the tag ID the position in the menu list
             button->SetTagID(i);
@@ -655,18 +652,11 @@ void    pfGUIPopUpMenu::ClearItems()
 //// AddItem /////////////////////////////////////////////////////////////////
 //  Append a new item to the list of things to build the menu from 
 
-void    pfGUIPopUpMenu::AddItem( const char *name, pfGUICtrlProcObject *handler, pfGUIPopUpMenu *subMenu )
-{
-    wchar_t *wName = hsStringToWString(name);
-    AddItem(wName,handler,subMenu);
-    delete [] wName;
-}
-
-void    pfGUIPopUpMenu::AddItem( const wchar_t *name, pfGUICtrlProcObject *handler, pfGUIPopUpMenu *subMenu )
+void    pfGUIPopUpMenu::AddItem(ST::string name, pfGUICtrlProcObject *handler, pfGUIPopUpMenu *subMenu)
 {
     pfMenuItem  &newItem = fMenuItems.emplace_back();
 
-    newItem.fName = name;
+    newItem.fName = std::move(name);
     newItem.fHandler = handler;
     if (newItem.fHandler != nullptr)
         newItem.fHandler->IncRef();
@@ -716,7 +706,7 @@ hsGMaterial *pfGUIPopUpMenu::ICreateDynMaterial()
 
 #include "plGImage/plJPEG.h"
 
-pfGUIPopUpMenu  *pfGUIPopUpMenu::Build( const char *name, pfGUIDialogMod *parent, float x, float y, const plLocation &destLoc )
+pfGUIPopUpMenu  *pfGUIPopUpMenu::Build(const ST::string& name, pfGUIDialogMod *parent, float x, float y, const plLocation &destLoc)
 {
     float           fovX, fovY;
     

@@ -79,6 +79,7 @@ jobs:
             -DPLASMA_BUILD_TOOLS=ON `
             -DPLASMA_EXTERNAL_RELEASE=${{ matrix.cfg.external }} `
             -D3dsm_PATH="${{ github.workspace }}/maxsdk/${{ matrix.platform.max-version }}" `
+            -DVCPKG_INSTALL_OPTIONS=--clean-after-build `
             -S . -B build
         env:
           VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"
@@ -107,17 +108,17 @@ jobs:
     if: github.event_name == 'push' && needs.max-secrets.outputs.HAS_MACHINE_USER_TOKEN == 'true'
 
     runs-on: windows-2019
-    name: maxplugin-${{ matrix.cfg.str }}
+    name: maxplugin-${{ matrix.cfg.str }}-${{ matrix.cfg.sdk-version }}
     strategy:
       matrix:
         cfg:
           # Max 7 and 2022 are tested in the x86 and x64 windows build jobs, respectively.
-          - { sdk-version: 2008, generator: Visual Studio 16 2019, arch: Win32, str: 2008-windows-x86 }
-          - { sdk-version: 2012, generator: Visual Studio 16 2019, arch: Win32, str: 2012-windows-x86 }
-          - { sdk-version: 2013, generator: Visual Studio 16 2019, arch: x64, str: 2013-windows-x64 }
-          - { sdk-version: 2017, generator: Visual Studio 16 2019, arch: x64, str: 2017-windows-x64 }
-          - { sdk-version: 2019, generator: Visual Studio 16 2019, arch: x64, str: 2019-windows-x64 }
-          - { sdk-version: 2020, generator: Visual Studio 16 2019, arch: x64, str: 2020-windows-x64 }
+          - { sdk-version: 2008, generator: Visual Studio 16 2019, arch: Win32, str: windows-x86 }
+          - { sdk-version: 2012, generator: Visual Studio 16 2019, arch: Win32, str: windows-x86 }
+          - { sdk-version: 2013, generator: Visual Studio 16 2019, arch: x64, str: windows-x64 }
+          - { sdk-version: 2017, generator: Visual Studio 16 2019, arch: x64, str: windows-x64 }
+          - { sdk-version: 2019, generator: Visual Studio 16 2019, arch: x64, str: windows-x64 }
+          - { sdk-version: 2020, generator: Visual Studio 16 2019, arch: x64, str: windows-x64 }
 
     steps:
       - name: Checkout Plasma
@@ -155,6 +156,7 @@ jobs:
             -DPLASMA_BUILD_TESTS=OFF `
             -DPLASMA_BUILD_TOOLS=OFF `
             -D3dsm_PATH="${{ github.workspace }}/maxsdk/${{ matrix.cfg.sdk-version }}" `
+            -DVCPKG_INSTALL_OPTIONS=--clean-after-build `
             -S . -B build
         env:
           VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"
@@ -166,7 +168,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: max-${{ matrix.cfg.str }}
+          name: plasma-${{ matrix.cfg.str }}-max-${{ matrix.cfg.sdk-version }}
           path: build/install
 
   linux:
@@ -222,6 +224,7 @@ jobs:
             -DPLASMA_BUILD_TESTS=ON \
             -DPLASMA_BUILD_TOOLS=ON \
             -DPLASMA_EXTERNAL_RELEASE=${{ matrix.cfg.external }} \
+            -DVCPKG_INSTALL_OPTIONS=--clean-after-build \
             -S . -B build
         env:
           VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"
@@ -237,6 +240,12 @@ jobs:
       - name: Install
         run: |
           cmake --build build --target install -j 2
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: plasma-${{ matrix.platform.str }}-${{ matrix.cfg.str }}
+          path: build/install
 
 
   macos:
@@ -296,6 +305,7 @@ jobs:
             -DPLASMA_BUILD_TOOLS=ON \
             -DPLASMA_EXTERNAL_RELEASE=${{ matrix.cfg.external }} \
             ${{ (matrix.platform.triplet == 'x64' && '-DQt5_ROOT=$(brew --prefix qt@5)') || '' }} \
+            -DVCPKG_INSTALL_OPTIONS=--clean-after-build \
             -S . -B build
         env:
           VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,readwrite"

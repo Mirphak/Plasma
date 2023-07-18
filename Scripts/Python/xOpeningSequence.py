@@ -74,8 +74,9 @@ OrientationPBIcon01Zandi = ptAttribSceneobject(6, "Zandi Icon")
 #--------
 
 gIntroMovie = None
+gMovieFilePath = None
 kAtrusIntroMovie = "avi/AtrusIntro.webm"
-kYeeshaIntroMovie = "avi/URULiveIntro.webm"
+kReltoIntroMovie = "avi/NewPlayerIntro.webm"
 
 gIntroStarted = 0
 
@@ -152,7 +153,7 @@ class xOpeningSequence(ptModifier):
         self.version = MaxVersionNumber
         PtDebugPrint("__xOpeningSequence: Max version %d - minor version %d" % (MaxVersionNumber,MinorVersionNumber))
 
-    def OnFirstUpdate(self):
+    def OnServerInitComplete(self):
         "First update, load our dialogs"
         global gCurrentTick
         global gIntroByTimer
@@ -194,6 +195,7 @@ class xOpeningSequence(ptModifier):
         global gOriginalAmbientVolume
         global gOriginalSFXVolume
         global gIntroMovie
+        global gMovieFilePath
         PtDebugPrint("xOpeningSequence::OnGUINotify id=%d, event=%d control=" % (id,event),control,level=kDebugDumpLevel)
 ###############################################
 ##
@@ -221,32 +223,11 @@ class xOpeningSequence(ptModifier):
         elif id == OrientationDlg.id:
             if event == kDialogLoaded:
                 # see if the there actually is a movie to play
-                skipMovie = 1
-                try:
-                    if IsTutorialPath():
-                        os.stat(kAtrusIntroMovie)
-                    else:
-                        os.stat(kYeeshaIntroMovie)
+                if self.CheckMovie():
                     # its there! show the background, which will start the movie
                     PtShowDialog("IntroBahroBgGUI")
-                    skipMovie = 0
-                except:
-                    skipMovie = 1
-                if skipMovie:
-                    # no movie... just show the help screen
-                    # start rendering the scene again
-                    PtEnableRenderScene()
-                    PtGUICursorOn()
-                    OrientationDlg.dialog.show()
-                    PtDebugPrint("xOpeningSequence - no intro movie!!!",level=kDebugDumpLevel)
-                    if IsTutorialPath():
-                        OrientationPBIcon01.value.draw.disable()
-                        OrientationPBIcon02.value.draw.disable()
-                        OrientationPBIcon01Zandi.value.draw.enable()
-                        ptGUIControlTextBox(OrientationDlg.dialog.getControlFromTag(kOrientPBText)).setStringW(PtGetLocalizedString("GUI.OrientationGUI.OrientPBTextZandi"))
-                    else:
-                        OrientationPBIcon01Zandi.value.draw.disable()
-                        ptGUIControlTextBox(OrientationDlg.dialog.getControlFromTag(kOrientPBText)).setStringW(PtGetLocalizedString("GUI.OrientationGUI.OrientPBText"))
+                else:
+                    self.IFinishStartOrientation()
             elif event == kAction or event == kValueChanged:
                 orientationID = control.getTagID()
                 if orientationID == kFirstHelpOkBtn:
@@ -258,48 +239,30 @@ class xOpeningSequence(ptModifier):
                 PtDebugPrint("xOpeningSequence - quiet sounds and show background",level=kDebugDumpLevel)
                 # this SHOULD be in the max file, but since someone has the KI max file tied up, it will have to go here
                 # set the text localized strings
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kHelpTitle))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.Title"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kWalkText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.Walk"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kRunText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.Run"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kTurnLeftText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.TurnLeft"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kBackwardsText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.WalkBackwards"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kTurnRightText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.TurnRight"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kToggleViewText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.ToggleView"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kJumpText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.KeyCommands.Jump"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kMouseWalkText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.Walk"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kMouseRunText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.Run"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kSelectText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.Select"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kMousePanCam))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.MousePanCam"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kMouseBackwards))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.WalkBackwards"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kMousePresetsTitle))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.MousePresets"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kMouseNormalText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.Normal"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kMouseNoviceText))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.StartupHelp.Novice"))
-                textField = ptGUIControlTextBox(FirstHelpDlg.dialog.getControlFromTag(kOkButton))
-                textField.setStringW(PtGetLocalizedString("OptionsMenu.Main.Ok"))
+                getControl = FirstHelpDlg.dialog.getControlModFromTag
+                getControl(kHelpTitle).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.Title"))
+                getControl(kWalkText).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.Walk"))
+                getControl(kRunText).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.Run"))
+                getControl(kTurnLeftText).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.TurnLeft"))
+                getControl(kBackwardsText).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.WalkBackwards"))
+                getControl(kTurnRightText).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.TurnRight"))
+                getControl(kToggleViewText).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.ToggleView"))
+                getControl(kJumpText).setString(PtGetLocalizedString("OptionsMenu.KeyCommands.Jump"))
+                getControl(kMouseWalkText).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.Walk"))
+                getControl(kMouseRunText).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.Run"))
+                getControl(kSelectText).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.Select"))
+                getControl(kMousePanCam).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.MousePanCam"))
+                getControl(kMouseBackwards).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.WalkBackwards"))
+                getControl(kMousePresetsTitle).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.MousePresets"))
+                getControl(kMouseNormalText).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.Normal"))
+                getControl(kMouseNoviceText).setString(PtGetLocalizedString("OptionsMenu.StartupHelp.Novice"))
+                getControl(kOkButton).setString(PtGetLocalizedString("OptionsMenu.Main.Ok"))
                 # hide the ok button until they agree to the terms... or pick normal or novice
-                ##textField.setStringW(" ")
-                ##okBtn = ptGUIControlButton(FirstHelpDlg.dialog.getControlFromTag(kFirstHelpOkBtn))
-                ##okBtn.hide()
+                ##getControl(kFirstHelpOkBtn).hide()
             elif event == kShowHide:
                 # reset the edit text lines
                 if control.isEnabled():
-                    nnRG = ptGUIControlRadioGroup(FirstHelpDlg.dialog.getControlFromTag(kNormNoviceRGID))
+                    nnRG = FirstHelpDlg.dialog.getControlModFromTag(kNormNoviceRGID)
                     if PtIsClickToTurn():
                         nnRG.setValue(1)
                     else:
@@ -311,7 +274,7 @@ class xOpeningSequence(ptModifier):
                 helpID = control.getTagID()
                 if helpID == kFirstHelpOkBtn:
                     # get the setting of the novice/normal radio group
-                    nnRG = ptGUIControlRadioGroup(FirstHelpDlg.dialog.getControlFromTag(kNormNoviceRGID))
+                    nnRG = FirstHelpDlg.dialog.getControlModFromTag(kNormNoviceRGID)
                     vault = ptVault()
                     entry = vault.findChronicleEntry(kIntroPlayedChronicle)
                     if nnRG.getValue() == 1:
@@ -328,13 +291,13 @@ class xOpeningSequence(ptModifier):
         elif id == -1:
             if event == kShowHide:
                 if control.isEnabled():
-                    if StartInCleft():
-                        gIntroMovie = ptMoviePlayer(kAtrusIntroMovie, self.key)
+                    if self.CheckMovie():
+                        gIntroMovie = ptMoviePlayer(gMovieFilePath, self.key)
+                        gIntroMovie.playPaused()
+                        if gIntroByTimer:
+                            PtAtTimeCallback(self.key, kIntroPauseSeconds, kIntroPauseID)
                     else:
-                        gIntroMovie = ptMoviePlayer(kYeeshaIntroMovie, self.key)
-                    gIntroMovie.playPaused()
-                    if gIntroByTimer:
-                        PtAtTimeCallback(self.key, kIntroPauseSeconds, kIntroPauseID)
+                        self.IStartOrientation()
 
     def OnBehaviorNotify(self,type,id,state):
         global playScene
@@ -403,10 +366,10 @@ class xOpeningSequence(ptModifier):
                 OrientationPBIcon01.value.draw.disable()
                 OrientationPBIcon02.value.draw.disable()
                 OrientationPBIcon01Zandi.value.draw.enable()
-                ptGUIControlTextBox(OrientationDlg.dialog.getControlFromTag(kOrientPBText)).setStringW(PtGetLocalizedString("GUI.OrientationGUI.OrientPBTextZandi"))
+                OrientationDlg.dialog.getControlModFromTag(kOrientPBText).setString(PtGetLocalizedString("GUI.OrientationGUI.OrientPBTextZandi"))
             else:
                 OrientationPBIcon01Zandi.value.draw.disable()
-                ptGUIControlTextBox(OrientationDlg.dialog.getControlFromTag(kOrientPBText)).setStringW(PtGetLocalizedString("GUI.OrientationGUI.OrientPBText"))
+                OrientationDlg.dialog.getControlModFromTag(kOrientPBText).setString(PtGetLocalizedString("GUI.OrientationGUI.OrientPBText"))
         PtFadeIn(kHelpFadeInSeconds,0)
 
 
@@ -429,7 +392,7 @@ class xOpeningSequence(ptModifier):
         vault = ptVault()
         entry = vault.findChronicleEntry(kIntroPlayedChronicle)
         if entry is not None:
-            entry.chronicleSetValue("yes")
+            entry.setValue("yes")
             entry.save()
         elif IsTutorialPath():
             vault.addChronicleEntry(kIntroPlayedChronicle, 2, "no")
@@ -476,3 +439,18 @@ class xOpeningSequence(ptModifier):
             audio.setAmbienceVolume(gOriginalAmbientVolume*(gCurrentTick/gTotalTickTime))
             audio.setSoundFXVolume(gOriginalSFXVolume*(gCurrentTick/gTotalTickTime))
             PtAtTimeCallback(self.key, kSoundTickTime, kSoundFadeInID)
+
+    def CheckMovie(self):
+        global gMovieFilePath
+        try:
+            ageSDL = PtGetAgeSDL()
+            if StartInCleft():
+                gMovieFilePath = kAtrusIntroMovie
+            elif ageSDL["psnlIntroMovie"][0]:
+                gMovieFilePath = ageSDL["psnlIntroMovie"][0]
+            else:
+                gMovieFilePath = kReltoIntroMovie
+            os.stat(gMovieFilePath)
+            return True
+        except:
+            return False

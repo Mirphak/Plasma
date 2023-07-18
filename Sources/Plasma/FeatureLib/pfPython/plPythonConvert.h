@@ -48,6 +48,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include <type_traits>
 #include <tuple>
 
+#include "pnNetBase/pnNbError.h"
+
 #include "pyGlueHelpers.h"
 #include "pyObjectRef.h"
 
@@ -61,16 +63,6 @@ namespace plPython
         PyObject* result = value ? Py_True : Py_False;
         Py_INCREF(result);
         return result;
-    }
-
-    inline PyObject* ConvertFrom(char value)
-    {
-        return PyUnicode_FromFormat("%c", (int)value);
-    }
-
-    inline PyObject* ConvertFrom(const char* value)
-    {
-        return PyUnicode_FromString(value);
     }
 
     inline PyObject* ConvertFrom(double value)
@@ -106,6 +98,16 @@ namespace plPython
     inline PyObject* ConvertFrom(signed long long value)
     {
         return PyLong_FromLongLong(value);
+    }
+
+    inline PyObject* ConvertFrom(const ST::string& value)
+    {
+        return PyUnicode_FromSTString(value);
+    }
+
+    inline PyObject* ConvertFrom(ST::string& value)
+    {
+        return PyUnicode_FromSTString(value);
     }
 
     inline PyObject* ConvertFrom(ST::string&& value)
@@ -146,6 +148,11 @@ namespace plPython
     inline PyObject* ConvertFrom(std::nullptr_t)
     {
         Py_RETURN_NONE;
+    }
+
+    inline PyObject* ConvertFrom(ENetError value)
+    {
+        return ConvertFrom(static_cast<int32_t>(value));
     }
 
     /**

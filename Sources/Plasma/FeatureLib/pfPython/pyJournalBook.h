@@ -49,14 +49,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //////////////////////////////////////////////////////////////////////
 
 #include "pyGlueHelpers.h"
-#include <vector>
-#include <string>
 
-class cyAnimation;
 class pyImage;
-class pyColor;
 class pfJournalBook;
 class plKey;
+class pyKey;
+namespace ST { class string; }
 
 class pyJournalBook
 {
@@ -69,24 +67,19 @@ protected:
     void    IMakeNewKey();
 
     pyJournalBook(); // used by python glue only, do NOT call
-    pyJournalBook( const char *esHTMLSource );
-    pyJournalBook( const std::wstring& esHTMLSource );
-    pyJournalBook( const char *esHTMLSource, const pyKey& callbackKey );
-    pyJournalBook( const std::wstring& esHTMLSource, const pyKey& callbackKey );
-    pyJournalBook( const char *esHTMLSource, pyImage &coverImage, const pyKey& callbackKey );
-    pyJournalBook( const std::wstring& esHTMLSource, pyImage &coverImage, const pyKey& callbackKey );
-    pyJournalBook( const char *esHTMLSource, pyImage &coverImage, const pyKey& callbackKey, const ST::string &guiName );
-    pyJournalBook( const std::wstring& esHTMLSource, pyImage &coverImage, const pyKey& callbackKey, const ST::string &guiName );
+    pyJournalBook( const ST::string& esHTMLSource );
+    pyJournalBook( const ST::string& esHTMLSource, const pyKey& callbackKey );
+    pyJournalBook( const ST::string& esHTMLSource, pyImage &coverImage, const pyKey& callbackKey );
+    pyJournalBook( const ST::string& esHTMLSource, pyImage &coverImage, const pyKey& callbackKey, const ST::string &guiName );
 
 public:
-    virtual ~pyJournalBook();
+    ~pyJournalBook();
 
     // No copy constructor; don't allow copying
 
     // required functions for PyObject interoperability
     PYTHON_CLASS_NEW_FRIEND(ptBook);
-    static PyObject *New(const std::string& htmlSource, plKey coverImageKey = {}, plKey callbackKey = {}, const ST::string &guiName = {});
-    static PyObject *New(const std::wstring& htmlSource, plKey coverImageKey = {}, plKey callbackKey = {}, const ST::string &guiName = {});
+    static PyObject *New(const ST::string& htmlSource, plKey coverImageKey = {}, plKey callbackKey = {}, const ST::string &guiName = {});
     PYTHON_CLASS_CHECK_DEFINITION; // returns true if the PyObject is a pyJournalBook object
     PYTHON_CLASS_CONVERT_FROM_DEFINITION(pyJournalBook); // converts a PyObject to a pyJournalBook (throws error if not correct type)
 
@@ -95,36 +88,35 @@ public:
     static void AddPlasmaConstantsClasses(PyObject *m);
 
     // Deletes the existing book and re-creates it, for use by the python glue
-    void MakeBook(const std::string& esHTMLSource, plKey coverImageKey = {}, plKey callbackKey = {}, const ST::string &guiName = {});
-    void MakeBook(const std::wstring& esHTMLSource, plKey coverImageKey = {}, plKey callbackKey = {}, const ST::string &guiName = {});
+    void MakeBook(const ST::string& esHTMLSource, plKey coverImageKey = {}, plKey callbackKey = {}, const ST::string &guiName = {});
 
     // Interface functions per book
-    virtual void    Show( bool startOpened );
-    virtual void    Hide();
-    virtual void    Open( uint32_t startingPage );
-    virtual void    Close();
-    virtual void    CloseAndHide();
+    void Show(bool startOpened);
+    void Hide();
+    void Open(uint32_t startingPage);
+    void Close();
+    void CloseAndHide();
 
-    virtual void    NextPage();
-    virtual void    PreviousPage();
-    virtual void    GoToPage( uint32_t page );
-    virtual uint32_t  GetCurrentPage() const;
-    virtual void    SetPageMargin( uint32_t margin );
-    virtual void    AllowPageTurning( bool allow );
+    void NextPage();
+    void PreviousPage();
+    void GoToPage(uint32_t page);
+    uint32_t GetCurrentPage() const;
+    void SetPageMargin(uint32_t margin);
+    void AllowPageTurning(bool allow);
 
-    virtual void    SetSize( float width, float height );
+    void SetSize(float width, float height);
 
-    virtual void    SetGUI( const ST::string &guiName );
+    void SetGUI(const ST::string &guiName);
 
     static void     LoadGUI( const ST::string &guiName );
     static void     UnloadGUI( const ST::string &guiName );
     static void     UnloadAllGUIs();
 
-    virtual PyObject *GetMovie( uint8_t index ); // returns cyAnimation
+    PyObject *GetMovie(uint8_t index); // returns cyAnimation
     
-    virtual void    SetEditable( bool editable );
-    virtual std::string GetEditableText() const;
-    virtual void    SetEditableText( const std::string& text );
+    void SetEditable(bool editable);
+    ST::string GetEditableText() const;
+    void SetEditableText(const ST::string& text);
 };
 
 #endif // _pyJournalBook_h_

@@ -41,6 +41,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include <Python.h>
+#include <string_theory/string>
 
 #include "pyVaultAgeLinkNode.h"
 #include "pySpawnPointInfo.h"
@@ -159,8 +160,8 @@ PYTHON_METHOD_DEFINITION(ptVaultAgeLinkNode, removeSpawnPoint, args)
 
 PYTHON_METHOD_DEFINITION(ptVaultAgeLinkNode, hasSpawnPoint, args)
 {
-    char* name;
-    if (!PyArg_ParseTuple(args, "s", &name))
+    ST::string name;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &name))
     {
         PyErr_SetString(PyExc_TypeError, "hasSpawnPoint expects a string");
         PYTHON_RETURN_ERROR;

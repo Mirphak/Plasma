@@ -87,6 +87,8 @@ class Ahnonay(ptResponder):
         ageLinkNode = agevault.getSubAgeLink(ageStruct)
         if ageLinkNode:
             localCathedralGuid = ageLinkNode.getAgeInfo().getAgeInstanceGuid()
+        else:
+            localCathedralGuid = None
 
         folder = vault.getAgesIOwnFolder()
         cathedralInfoTemplate = ptVaultAgeInfoNode(0)
@@ -106,7 +108,7 @@ class Ahnonay(ptResponder):
             for ageInfoChildRef in ageInfoChildren:
                 ageInfoChild = ageInfoChildRef.getChild()
                 folder = ageInfoChild.upcastToFolderNode()
-                if folder and folder.folderGetName() == "AgeData":
+                if folder and folder.getFolderName() == "AgeData":
                     ageDataFolder = folder
                     ageDataChildren = folder.getChildNodeRefList()
                     for ageDataChildRef in ageDataChildren:
@@ -134,29 +136,29 @@ class Ahnonay(ptResponder):
             if linkid == None:
                 PtDebugPrint("Ahnonay.OnServerInitComplete(): Link Chron not found, creating")
                 newNode = ptVaultChronicleNode(0)
-                newNode.chronicleSetName("AhnonayLink")
-                newNode.chronicleSetValue(guid)
+                newNode.setName("AhnonayLink")
+                newNode.setValue(guid)
                 ageDataFolder.addNode(newNode)
 
             if locked == None:
                 PtDebugPrint("Ahnonay.OnServerInitComplete(): Locked Chron not found, creating")
                 newNode = ptVaultChronicleNode(0)
-                newNode.chronicleSetName("AhnonayLocked")
-                newNode.chronicleSetValue("1")
+                newNode.setName("AhnonayLocked")
+                newNode.setValue("1")
                 ageDataFolder.addNode(newNode)
 
             if volatile == None:
                 PtDebugPrint("Ahnonay.OnServerInitComplete(): Volatile Chron not found, creating")
                 newNode = ptVaultChronicleNode(0)
-                newNode.chronicleSetName("AhnonayVolatile")
-                newNode.chronicleSetValue("0")
+                newNode.setName("AhnonayVolatile")
+                newNode.setValue("0")
                 ageDataFolder.addNode(newNode)
 
             if spawn == None:
                 PtDebugPrint("Ahnonay.OnServerInitComplete(): Spawn Chron not found, creating")
                 newNode = ptVaultChronicleNode(0)
-                newNode.chronicleSetName("AhnonaySpawnPoints")
-                newNode.chronicleSetValue("Default,LinkInPointDefault")
+                newNode.setName("AhnonaySpawnPoints")
+                newNode.setValue("Default,LinkInPointDefault")
                 ageDataFolder.addNode(newNode)
 
             if volatile and linkid:

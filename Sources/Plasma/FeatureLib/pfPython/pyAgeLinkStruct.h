@@ -51,7 +51,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 //////////////////////////////////////////////////////////////////////
 
-class pyVaultAgeLinkNode;
 class pySpawnPointInfo;
 class pySpawnPointInfoRef;
 class pyAgeLinkStructRef;
@@ -67,8 +66,6 @@ protected:
     pyAgeLinkStruct( plAgeLinkStruct * link );
 
 public:
-    ~pyAgeLinkStruct();
-
     // required functions for PyObject interoperability
     PYTHON_CLASS_NEW_FRIEND(ptAgeLinkStruct);
     PYTHON_CLASS_NEW_DEFINITION;
@@ -84,8 +81,8 @@ public:
     const plAgeLinkStruct * GetAgeLink() const { return &fAgeLink; }
     PyObject * GetAgeInfo(); // returns pyAgeInfoStructRef
     void    SetAgeInfo( pyAgeInfoStruct & info );
-    const char* GetParentAgeFilename();
-    void    SetParentAgeFilename( const char* parentname );
+    ST::string GetParentAgeFilename();
+    void    SetParentAgeFilename(ST::string parentname);
     void    CopyFrom( const pyAgeLinkStruct & other );
     void    CopyFromRef( const pyAgeLinkStructRef & other );
     void    SetLinkingRules( int v );
@@ -107,8 +104,6 @@ protected:
     pyAgeLinkStructRef( plAgeLinkStruct & link ):fAgeLink(link) {}
 
 public:
-    ~pyAgeLinkStructRef(){}
-
     // required functions for PyObject interoperability
     PYTHON_CLASS_NEW_FRIEND(ptAgeLinkStructRef);
     static PyObject *New(plAgeLinkStruct& link);

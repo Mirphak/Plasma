@@ -146,7 +146,7 @@ public:
     plArmatureMod *FindAvatarByPlayerID(uint32_t pid);
     plArmatureMod *FindAvatarByModelName(const ST::string& name); // Probably only useful for custom NPCs. All players are
                                                       // either "Male" or "Female".
-    void FindAllAvatarsByModelName(const char* name, plArmatureModPtrVec& outVec);
+    void FindAllAvatarsByModelName(const ST::string& name, plArmatureModPtrVec& outVec);
     plArmatureMod *GetFirstRemoteAvatar();
 
     // \{
@@ -160,9 +160,9 @@ public:
     int NumSpawnPoints() { return fSpawnPoints.size(); }
     int FindSpawnPoint( const char *name ) const;
     // \}
-    static int WarpPlayerToAnother(bool iMove, uint32_t remoteID);
-    static int WarpPlayerToXYZ(float x, float y, float z);
-    static int WarpPlayerToXYZ(int pid, float x, float y, float z);
+    static bool WarpPlayerToAnother(bool iMove, uint32_t remoteID);
+    static bool WarpPlayerToXYZ(float x, float y, float z);
+    static bool WarpPlayerToXYZ(int pid, float x, float y, float z);
 
     static plAvatarMgr *GetInstance();
     static void ShutDown();

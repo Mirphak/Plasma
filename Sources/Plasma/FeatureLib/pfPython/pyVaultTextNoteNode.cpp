@@ -46,14 +46,11 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //////////////////////////////////////////////////////////////////////
 
 #include <Python.h>
+#include <string_theory/string>
 
 #include "pyVaultTextNoteNode.h"
-#include "pyVaultAgeLinkNode.h"
-#include "pyVaultFolderNode.h"
+#include "pnNetBase/pnNbError.h"
 #include "plVault/plVault.h"
-#ifndef BUILDING_PYPLASMA
-#   include "pyVault.h"
-#endif
 
 //create from the Python side
 pyVaultTextNoteNode::pyVaultTextNoteNode()
@@ -66,21 +63,13 @@ pyVaultTextNoteNode::pyVaultTextNoteNode()
 //==================================================================
 // class RelVaultNode : public plVaultNode
 //
-void pyVaultTextNoteNode::Note_SetTitle( const char * text )
-{
-    if (fNode) {
-        VaultTextNoteNode textNote(fNode);
-        textNote.SetNoteTitle(text);
-    }
-}
-
-void pyVaultTextNoteNode::Note_SetTitleW( const wchar_t * text )
+void pyVaultTextNoteNode::Note_SetTitle(const ST::string& text)
 {
     if (!fNode)
         return;
 
     VaultTextNoteNode textNote(fNode);
-    textNote.SetNoteTitle(ST::string::from_wchar(text));
+    textNote.SetNoteTitle(text);
 }
 
 ST::string pyVaultTextNoteNode::Note_GetTitle() const
@@ -92,21 +81,13 @@ ST::string pyVaultTextNoteNode::Note_GetTitle() const
     return ST::string();
 }
 
-void pyVaultTextNoteNode::Note_SetText(const char * text)
-{
-    if (fNode) {
-        VaultTextNoteNode textNote(fNode);
-        textNote.SetNoteText(text);
-    }
-}
-
-void pyVaultTextNoteNode::Note_SetTextW( const wchar_t * text )
+void pyVaultTextNoteNode::Note_SetText(const ST::string& text)
 {
     if (!fNode)
         return;
 
     VaultTextNoteNode textNote(fNode);
-    textNote.SetNoteText(ST::string::from_wchar(text));
+    textNote.SetNoteText(text);
 }
 
 ST::string pyVaultTextNoteNode::Note_GetText() const
@@ -163,7 +144,7 @@ PyObject * pyVaultTextNoteNode::GetDeviceInbox() const
         PYTHON_RETURN_NONE;
 }
 
-void pyVaultTextNoteNode::SetDeviceInbox( const char * devName, PyObject * cbObject, uint32_t cbContext )
+void pyVaultTextNoteNode::SetDeviceInbox(const ST::string& devName, PyObject * cbObject, uint32_t cbContext)
 {
     if (!fNode)
         return;
@@ -174,5 +155,6 @@ void pyVaultTextNoteNode::SetDeviceInbox( const char * devName, PyObject * cbObj
     if (hsRef<RelVaultNode> rvn = VaultAgeSetDeviceInboxAndWait(devName, DEFAULT_DEVICE_INBOX))
         cb->SetNode(rvn);
 
-    cb->VaultOperationComplete( cbContext, cb->GetNode() ? hsOK : hsFail ); // cbHolder deletes itself here.
+    // cb deletes itself here.
+    cb->VaultOperationComplete(cbContext, cb->GetNode() ? kNetSuccess : kNetErrInternalError);
 }

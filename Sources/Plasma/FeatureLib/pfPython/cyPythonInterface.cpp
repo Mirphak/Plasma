@@ -48,6 +48,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 
 #include <functional>
+#include <string_theory/string>
+#include <string_theory/string_stream>
 
 #include <Python.h>
 #include <marshal.h>
@@ -62,7 +64,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "plPythonCallable.h"
 #include "cyPythonInterface.h"
-#include "plPythonPack.h"
 
 #include "pyEnum.h"
 #include "cyDraw.h"
@@ -82,6 +83,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "cyInputInterface.h"
 #include "pySDL.h"
 #include "cyAccountManagement.h"
+
+// GameMgr
+#include "pyGameCli.h"
+#include "pyGameMgr.h"
+#include "pyGmBlueSpiral.h"
+#include "pyGmMarker.h"
 
 // GUIDialog and its controls
 #include "pyGUIDialog.h"
@@ -103,8 +110,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plPythonSDLModifier.h"
 
 // For printing to the log
+#include "plNetClientComm/plNetClientComm.h"
 #include "plStatusLog/plStatusLog.h"
-#include "plNetGameLib/plNetGameLib.h"
 
 // vault
 #include "pyVaultNode.h"
@@ -137,9 +144,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 // audio setting stuff
 #include "pyAudioControl.h"
-
-//CCR stufff
-#include "pyCCRMgr.h"
 
 // spawn point def
 #include "pySpawnPointInfo.h"
@@ -188,6 +192,8 @@ bool PythonInterface::requestedExit = false;
 
 #if defined(HAVE_CYPYTHONIDE) && !defined(PLASMA_EXTERNAL_RELEASE)
 // Special includes for debugging
+#include <string>
+#include <vector>
 #include <frameobject.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -575,7 +581,7 @@ static int PythonTraceCallback(PyObject*, PyFrameObject* frame, int what, PyObje
 class pyOutputRedirector
 {
 private:
-    std::string fData;
+    ST::string_stream fData;
     static bool fTypeCreated;
 
 protected:
@@ -588,23 +594,23 @@ public:
     PYTHON_CLASS_CHECK_DEFINITION; // returns true if the PyObject is a pyOutputRedirector object
     PYTHON_CLASS_CONVERT_FROM_DEFINITION(pyOutputRedirector); // converts a PyObject to a pyOutputRedirector (throws error if not correct type)
 
-    void Write(const std::string& data) {fData += data;}
-    void Write(const std::wstring& data)
+    void Write(const ST::string& data) {fData << data;}
+
+    void Flush()
     {
-        char* strData = hsWStringToString(data.c_str());
-        Write(strData);
-        delete [] strData;
+        // Currently a no-op - the actual printing happens externally
+        // and is not controlled by the Python side.
     }
 
     // accessor functions for the PyObject*
 
     // returns the current data stored
-    static std::string GetData(PyObject *redirector)
+    static ST::string GetData(PyObject *redirector)
     {
         if (!pyOutputRedirector::Check(redirector))
-            return ""; // it's not a redirector object
+            return {}; // it's not a redirector object
         pyOutputRedirector *obj = pyOutputRedirector::ConvertFrom(redirector);
-        return obj->fData;
+        return obj->fData.to_string();
     }
 
     // clears the internal buffer out
@@ -613,7 +619,7 @@ public:
         if (!pyOutputRedirector::Check(redirector))
             return; // it's not a redirector object
         pyOutputRedirector *obj = pyOutputRedirector::ConvertFrom(redirector);
-        obj->fData = "";
+        obj->fData.erase(SIZE_MAX);
     }
 };
 
@@ -632,25 +638,25 @@ PYTHON_INIT_DEFINITION(ptOutputRedirector, args, keywords)
 
 PYTHON_METHOD_DEFINITION(ptOutputRedirector, write, args)
 {
-    PyObject* textObj;
-    if (!PyArg_ParseTuple(args, "O", &textObj))
+    ST::string text;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &text))
     {
-        PyErr_SetString(PyExc_TypeError, "write expects a string or unicode string");
+        PyErr_SetString(PyExc_TypeError, "write expects a string");
         PYTHON_RETURN_ERROR;
     }
-    if (PyUnicode_Check(textObj))
-    {
-        wchar_t* text = PyUnicode_AsWideCharString(textObj, nullptr);
-        self->fThis->Write(text);
-        PyMem_Free(text);
-        PYTHON_RETURN_NONE;
-    }
-    PyErr_SetString(PyExc_TypeError, "write expects a string or unicode string");
-    PYTHON_RETURN_ERROR;
+    self->fThis->Write(text);
+    PYTHON_RETURN_NONE;
+}
+
+PYTHON_METHOD_DEFINITION_NOARGS(ptOutputRedirector, flush)
+{
+    self->fThis->Flush();
+    PYTHON_RETURN_NONE;
 }
 
 PYTHON_START_METHODS_TABLE(ptOutputRedirector)
     PYTHON_METHOD(ptOutputRedirector, write, "Adds text to the output object"),
+    PYTHON_METHOD(ptOutputRedirector, flush, "Flushes the output (currently a no-op)"),
 PYTHON_END_METHODS_TABLE;
 
 // Type structure definition
@@ -681,7 +687,7 @@ class pyErrorRedirector
 private:
     static bool fTypeCreated;
 
-    std::string fData;
+    ST::string_stream fData;
     bool        fLog;
 
 protected:
@@ -699,7 +705,7 @@ public:
         fLog = log;
     }
 
-    void Write(const std::string& data)
+    void Write(const ST::string& data)
     {
         PyObject* stdOut = PythonInterface::GetStdOut();
 
@@ -710,14 +716,7 @@ public:
         }
 
         if (fLog)
-            fData += data;
-    }
-
-    void Write(const std::wstring& data)
-    {
-        char* strData = hsWStringToString(data.c_str());
-        Write(strData);
-        delete [] strData;
+            fData << data;
     }
 
     void ExceptHook(PyObject* except, PyObject* val, PyObject* tb)
@@ -725,12 +724,21 @@ public:
         PyErr_Display(except, val, tb);
 
         // Send to the log server
-        ST::utf16_buffer wdata = ST::utf8_to_utf16(fData.c_str(), fData.size(),
-                                                   ST::substitute_invalid);
-        NetCliAuthLogPythonTraceback(wdata.data());
+        NetCommLogPythonTraceback(fData.to_string());
 
         if (fLog)
-            fData.clear();
+            fData.erase(SIZE_MAX);
+    }
+
+    void Flush()
+    {
+        PyObject* stdOut = PythonInterface::GetStdOut();
+
+        if (stdOut && pyOutputRedirector::Check(stdOut))
+        {
+            pyOutputRedirector *obj = pyOutputRedirector::ConvertFrom(stdOut);
+            obj->Flush();
+        }
     }
 };
 
@@ -749,21 +757,14 @@ PYTHON_INIT_DEFINITION(ptErrorRedirector, args, keywords)
 
 PYTHON_METHOD_DEFINITION(ptErrorRedirector, write, args)
 {
-    PyObject* textObj;
-    if (!PyArg_ParseTuple(args, "O", &textObj))
+    ST::string text;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &text))
     {
-        PyErr_SetString(PyExc_TypeError, "write expects a string or unicode string");
+        PyErr_SetString(PyExc_TypeError, "write expects a string");
         PYTHON_RETURN_ERROR;
     }
-    if (PyUnicode_Check(textObj))
-    {
-        wchar_t* text = PyUnicode_AsWideCharString(textObj, nullptr);
-        self->fThis->Write(text);
-        PyMem_Free(text);
-        PYTHON_RETURN_NONE;
-    }
-    PyErr_SetString(PyExc_TypeError, "write expects a string or unicode string");
-    PYTHON_RETURN_ERROR;
+    self->fThis->Write(text);
+    PYTHON_RETURN_NONE;
 }
 
 PYTHON_METHOD_DEFINITION(ptErrorRedirector, excepthook, args)
@@ -777,9 +778,16 @@ PYTHON_METHOD_DEFINITION(ptErrorRedirector, excepthook, args)
     PYTHON_RETURN_NONE;
 }
 
+PYTHON_METHOD_DEFINITION_NOARGS(ptErrorRedirector, flush)
+{
+    self->fThis->Flush();
+    PYTHON_RETURN_NONE;
+}
+
 PYTHON_START_METHODS_TABLE(ptErrorRedirector)
     PYTHON_METHOD(ptErrorRedirector, write, "Adds text to the output object"),
     PYTHON_METHOD(ptErrorRedirector, excepthook, "Handles exceptions"),
+    PYTHON_METHOD(ptErrorRedirector, flush, "Flushes the output (currently a no-op)"),
 PYTHON_END_METHODS_TABLE;
 
 // Type structure definition
@@ -924,6 +932,8 @@ void PythonInterface::initPython()
     // we get complaints about these modules being leaked :(
     IInitBuiltinModule("Plasma", "Plasma 2.0 Game Library", dbgLog, AddPlasmaClasses, AddPlasmaMethods);
     IInitBuiltinModule("PlasmaConstants", "Plasma 2.0 Constants", dbgLog, AddPlasmaConstantsClasses);
+    IInitBuiltinModule("PlasmaGame", "Plasma 2.0 GameMgr Library", dbgLog, AddPlasmaGameClasses);
+    IInitBuiltinModule("PlasmaGameConstants", "Plasma 2.0 Game Constants", dbgLog, AddPlasmaGameConstantsClasses);
     IInitBuiltinModule("PlasmaNetConstants", "Plasma 2.0 Net Constants", dbgLog, AddPlasmaNetConstantsClasses);
     IInitBuiltinModule("PlasmaVaultConstants", "Plasma 2.0 Vault Constants", dbgLog, AddPlasmaVaultConstantsClasses);
 
@@ -1178,6 +1188,32 @@ void PythonInterface::AddPlasmaConstantsClasses(PyObject* plasmaConstantsMod)
     //pyVault::AddPlasmaConstantsClasses(plasmaConstantsMod);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+//  Function   : AddPlasmaGameClasses
+//  PARAMETERS : none
+//
+//  PURPOSE    : Initialize the PlasmaGame module
+//
+void PythonInterface::AddPlasmaGameClasses(PyObject* plasmaGameMod)
+{
+    pyGameCli::AddPlasmaGameClasses(plasmaGameMod);
+    pyGmBlueSpiral::AddPlasmaGameClasses(plasmaGameMod);
+    pyGmMarker::AddPlasmaGameClasses(plasmaGameMod);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+//  Function   : AddPlasmaGameConstantsClasses
+//  PARAMETERS : none
+//
+//  PURPOSE    : Initialize the PlasmaGameConstants module
+//
+void PythonInterface::AddPlasmaGameConstantsClasses(PyObject* plasmaGameConstantsMod)
+{
+    pyGameMgr::AddPlasmaGameConstantsClasses(plasmaGameConstantsMod);
+    pyGmMarker::AddPlasmaGameConstantsClasses(plasmaGameConstantsMod);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1284,13 +1320,12 @@ PyObject* PythonInterface::GetStdErr()
 //
 //  PURPOSE    : get the Output to the error file to be displayed
 //
-int PythonInterface::getOutputAndReset(std::string *output)
+ST::string PythonInterface::getOutputAndReset()
 {
     if (stdOut != nullptr)
     {
-        std::string strVal = pyOutputRedirector::GetData(stdOut);
-        int size = strVal.length();
-        dbgLog->AddLine(strVal.c_str());
+        ST::string strVal = pyOutputRedirector::GetData(stdOut);
+        dbgLog->AddLine(strVal);
 
         // reset the file back to zero
         pyOutputRedirector::ClearData(stdOut);
@@ -1305,7 +1340,7 @@ int PythonInterface::getOutputAndReset(std::string *output)
         if (dbgOut != nullptr)
         {
             // then send it the new text
-            pyObjectRef retVal = plPython::CallObject(dbgOut, PyUnicode_FromStdString(strVal));
+            pyObjectRef retVal = plPython::CallObject(dbgOut, strVal);
             if (!retVal) {
                 // for some reason this function didn't, remember that and not call it again
                 dbgOut = nullptr;
@@ -1315,11 +1350,9 @@ int PythonInterface::getOutputAndReset(std::string *output)
             }
         }
 
-        if (output)
-            (*output) = strVal;
-        return size;
+        return strVal;
     }
-    return 0;
+    return {};
 }
 
 void PythonInterface::WriteToLog(const ST::string& text)
@@ -1327,7 +1360,7 @@ void PythonInterface::WriteToLog(const ST::string& text)
     dbgLog->AddLine(text);
 }
 
-void PythonInterface::WriteToStdErr(const char* text)
+void PythonInterface::WriteToStdErr(const ST::string& text)
 {
     PyObject* stdErr = PythonInterface::GetStdErr();
     if (stdErr && pyErrorRedirector::Check(stdErr))

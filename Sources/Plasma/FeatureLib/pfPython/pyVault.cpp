@@ -47,6 +47,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <memory>
 #include <Python.h>
+#include <string_theory/format>
 
 #ifdef BUILDING_PYPLASMA
 # error "pyVault is not compatible with pyPlasma.pyd. Use BUILDING_PYPLASMA macro to ifdef out unwanted headers."
@@ -61,19 +62,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pyVaultPlayerInfoListNode.h"
 #include "pyVaultPlayerInfoNode.h"
 #include "pyVaultChronicleNode.h"
-#include "pyVaultTextNoteNode.h"
-#include "pyNetLinkingMgr.h"
 #include "pyAgeInfoStruct.h"
 #include "pyAgeLinkStruct.h"
 #include "pySDL.h"
 
-#include "pnKeyedObject/plKey.h"
-
 #include "plVault/plVault.h"
-#include "pnNetCommon/plNetApp.h"
 #include "plNetClient/plNetClientMgr.h"
-#include "plNetClient/plNetLinkingMgr.h"
-#include "plMessage/plVaultNotifyMsg.h"
+#include "plNetCommon/plNetCommon.h"
 
 #include "plSDL/plSDL.h"
 
@@ -319,7 +314,7 @@ PyObject* pyVault::GetVisitAgeLink( const pyAgeInfoStruct & info)
 
 ///////////////
 // Chronicle
-PyObject* pyVault::FindChronicleEntry( const char * entryName )
+PyObject* pyVault::FindChronicleEntry(const ST::string& entryName)
 {
     if (hsRef<RelVaultNode> rvn = VaultFindChronicleEntry(entryName))
         return pyVaultChronicleNode::New(rvn);
@@ -328,7 +323,7 @@ PyObject* pyVault::FindChronicleEntry( const char * entryName )
     PYTHON_RETURN_NONE;
 }
 
-void pyVault::AddChronicleEntry( const char * name, uint32_t type, const char * value )
+void pyVault::AddChronicleEntry(const ST::string& name, uint32_t type, const ST::string& value)
 {
     // FIXME: We should ideally not block, but for now, the Python assumes that when
     //        we return, the chronicle exists and can be found with findChronicleEntry.
@@ -337,7 +332,7 @@ void pyVault::AddChronicleEntry( const char * name, uint32_t type, const char * 
 }
 
 
-void pyVault::SendToDevice( pyVaultNode& node, const char * deviceName )
+void pyVault::SendToDevice(pyVaultNode& node, const ST::string& deviceName)
 {
     if (!node.GetNode())
         return;
@@ -482,7 +477,7 @@ void pyVault::RegisterOwnedAge( const pyAgeLinkStruct & link )
     VaultRegisterOwnedAgeAndWait(link.GetAgeLink());
 }
 
-void pyVault::UnRegisterOwnedAge( const char * ageFilename )
+void pyVault::UnRegisterOwnedAge(const ST::string& ageFilename)
 {
     plAgeInfoStruct info;
     info.SetAgeFilename(ageFilename);
@@ -494,7 +489,7 @@ void pyVault::RegisterVisitAge( const pyAgeLinkStruct & link )
     VaultRegisterVisitAge(link.GetAgeLink());
 }
 
-void pyVault::UnRegisterVisitAge( const char * guidstr )
+void pyVault::UnRegisterVisitAge(const ST::string& guidstr)
 {
     plAgeInfoStruct info;
     plUUID guid(guidstr);
@@ -526,7 +521,7 @@ void _UninvitePlayerToAge(ENetError result, void* state, void* param, hsWeakRef<
         VaultSendNode(node, (uint32_t)((uintptr_t)param));
 }
 
-void pyVault::UnInvitePlayerToAge( const char * str, uint32_t playerID )
+void pyVault::UnInvitePlayerToAge(const ST::string& str, uint32_t playerID)
 {
     plAgeInfoStruct info;
     plUUID guid(str);

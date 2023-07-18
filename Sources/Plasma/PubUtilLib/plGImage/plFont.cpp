@@ -245,6 +245,16 @@ void    plFont::RenderString( plMipmap *mip, uint16_t x, uint16_t y, const wchar
         *lastY = fRenderInfo.fLastY;
 }
 
+const plFont::plCharacter& plFont::IGetCharacter(wchar_t c) const
+{
+    if (c - fFirstChar < fCharacters.size()) {
+        return fCharacters[c - fFirstChar];
+    } else {
+        // Ignore any characters that the font doesn't support.
+        return fCharacters[0];
+    }
+}
+
 void    plFont::IRenderString( plMipmap *mip, uint16_t x, uint16_t y, const wchar_t *string, bool justCalc )
 {
     fRenderInfo.fMipmap = mip;
@@ -278,7 +288,7 @@ void    plFont::IRenderString( plMipmap *mip, uint16_t x, uint16_t y, const wcha
 
     if( justCalc )
     {
-        plCharacter &ch = fCharacters[ (uint16_t)string[ 0 ] - fFirstChar ];
+        const plCharacter& ch = IGetCharacter(string[0]);
         fRenderInfo.fX = fRenderInfo.fFarthestX = x - (int16_t)ch.fLeftKern;
         if( fRenderInfo.fX < 0 )
             fRenderInfo.fX = 0;
@@ -377,7 +387,7 @@ void    plFont::IRenderString( plMipmap *mip, uint16_t x, uint16_t y, const wcha
         // Just calculating, no wrapping, so the max is as far as we can go
         // Note: 32767 isn't quite right, since we'll be adding the left kern in before we
         // calc the first character, so adjust so we make sure we don't underflow
-        plCharacter &ch = fCharacters[ (uint16_t)(uint8_t)string[ 0 ] - fFirstChar ];
+        const plCharacter& ch = IGetCharacter(string[0]);
 
         fRenderInfo.fMaxHeight = (int16_t)fMaxCharHeight;
         fRenderInfo.fMaxWidth = (int16_t)32767 + (int16_t)ch.fLeftKern;
@@ -441,13 +451,9 @@ void    plFont::IRenderString( plMipmap *mip, uint16_t x, uint16_t y, const wcha
                 }
                 
                 // handle invalid chars discretely
-                plCharacter* charToDraw = nullptr;
-                if (fCharacters.size() <= ((uint16_t)string[i] - fFirstChar))
-                    charToDraw = &(fCharacters[(uint16_t)L' ' - fFirstChar]);
-                else
-                    charToDraw = &(fCharacters[(uint16_t)string[i] - fFirstChar]);
+                const plCharacter& charToDraw = IGetCharacter(string[i]);
 
-                int16_t leftKern = (int16_t)charToDraw->fLeftKern;
+                int16_t leftKern = (int16_t)charToDraw.fLeftKern;
                 if( fRenderInfo.fFlags & kRenderScaleAA )
                     x += leftKern / 2;
                 else
@@ -456,7 +462,7 @@ void    plFont::IRenderString( plMipmap *mip, uint16_t x, uint16_t y, const wcha
                 // Update our position and see if we're over
                 // Note that our wrapping is slightly off, in that it doesn't take into account
                 // the left kerning of characters. Hopefully that won't matter much...
-                uint16_t charWidth = (uint16_t)(fWidth + (int16_t)charToDraw->fRightKern);
+                uint16_t charWidth = (uint16_t)(fWidth + (int16_t)charToDraw.fRightKern);
                 if( fRenderInfo.fFlags & kRenderScaleAA )
                     charWidth >>= 1;
 
@@ -575,7 +581,7 @@ void    plFont::IRenderString( plMipmap *mip, uint16_t x, uint16_t y, const wcha
                 {
                     int16_t baseX = fRenderInfo.fX;
 
-                    plCharacter &ch = fCharacters[ (uint16_t)string[ 0 ] - fFirstChar ];
+                    const plCharacter& ch = IGetCharacter(string[0]);
 
                     fRenderInfo.fX -= (int16_t)ch.fLeftKern;
                     fRenderInfo.fDestPtr -= (int16_t)ch.fLeftKern * fRenderInfo.fDestBPP;
@@ -1176,8 +1182,7 @@ void    plFont::IRenderCharNull( const plCharacter &c )
 uint16_t  plFont::CalcStringWidth( const ST::string &string )
 {
     uint16_t w, h, a, lX, lY;
-    uint32_t s;
-    CalcStringExtents( string, w, h, a, s, lX, lY );
+    CalcStringExtents( string, w, h, a, lX, lY );
     return w;
 }
 
@@ -1189,9 +1194,13 @@ uint16_t  plFont::CalcStringWidth( const wchar_t *string )
     return w;
 }
 
-void    plFont::CalcStringExtents( const ST::string &string, uint16_t &width, uint16_t &height, uint16_t &ascent, uint32_t &firstClippedChar, uint16_t &lastX, uint16_t &lastY )
+void    plFont::CalcStringExtents( const ST::string &string, uint16_t &width, uint16_t &height, uint16_t &ascent, uint16_t &lastX, uint16_t &lastY )
 {
     // convert the char string to a wchar_t string
+    // We don't expose firstClippedChar as an out parameter in the ST::string overload,
+    // because converting it to a correct UTF-8-based count is a bit complicated
+    // and currently nothing uses this information.
+    uint32_t firstClippedChar;
     CalcStringExtents(string.to_wchar().data(), width, height, ascent, firstClippedChar, lastX, lastY);
 }
 
@@ -1526,7 +1535,7 @@ class plLineParser
             *fCursor = fRestore;
 
             // Scan for the start of the next token
-            while( *fCursor != 0 && (*tester)( *fCursor ) )
+            while (*fCursor != 0 && (*tester)(static_cast<unsigned char>(*fCursor)))
                 fCursor++;
 
             if( *fCursor == 0 )
@@ -1546,7 +1555,7 @@ class plLineParser
             *fCursor = fRestore;
 
             // Scan for the start of the next token
-            while( *fCursor != 0 && (*tester)( *fCursor ) )
+            while (*fCursor != 0 && (*tester)(static_cast<unsigned char>(*fCursor)))
                 fCursor++;
 
             if( *fCursor == 0 )
@@ -1554,7 +1563,7 @@ class plLineParser
 
             // This is the start of our token; find the end
             const char *start = fCursor;
-            while( *fCursor != 0 && !(*tester)( *fCursor ) )
+            while (*fCursor != 0 && !(*tester)(static_cast<unsigned char>(*fCursor)))
                 fCursor++;
 
             // Put a stopper here

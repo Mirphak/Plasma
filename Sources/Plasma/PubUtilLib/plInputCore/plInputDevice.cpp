@@ -47,6 +47,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plInputDevice.h"
 #include "plInputManager.h"
 #include "plAvatarInputInterface.h"
+
+#include <utility>
+#include "plMessage/plDisplayScaleChangedMsg.h"
+
 #include "plMessage/plInputEventMsg.h"
 #include "pnMessage/plTimeMsg.h"
 
@@ -227,11 +231,12 @@ bool plMouseDevice::bCursorOverride = false;
 bool plMouseDevice::bInverted = false;
 float plMouseDevice::fWidth = BASE_WIDTH;
 float plMouseDevice::fHeight = BASE_HEIGHT;
+float plMouseDevice::fScale = 1.0f;
 plMouseDevice* plMouseDevice::fInstance = nullptr;
 
 plMouseDevice::plMouseDevice()
     : fXPos(), fYPos(), fOpacity(1.f), fButtonState(),
-      fCursor(), fCursorID(CURSOR_UP),
+      fCursor(), fCursorID(ST_LITERAL(CURSOR_UP)),
       fXMsg(), fYMsg(), fB2Msg(),
       fLeftBMsg(), fMiddleBMsg(), fRightBMsg(),
       fWXPos(), fWYPos()
@@ -253,7 +258,13 @@ void plMouseDevice::SetDisplayResolution(float Width, float Height)
     IUpdateCursorSize();
 }
 
-void    plMouseDevice::CreateCursor( const char* cursor )
+void plMouseDevice::SetDisplayScale(float Scale)
+{
+    fScale = Scale;
+    IUpdateCursorSize();
+}
+
+void    plMouseDevice::CreateCursor(const ST::string& cursor)
 {
     if (fCursor == nullptr)
     {
@@ -276,7 +287,7 @@ void plMouseDevice::IUpdateCursorSize()
     if(fCursor)
     {
         // set the size of the cursor based on resolution.
-        fCursor->SetSize( 2*fCursor->GetMipmap()->GetWidth()/fWidth, 2*fCursor->GetMipmap()->GetHeight()/fHeight );
+        fCursor->SetSize( fScale * 2*fCursor->GetMipmap()->GetWidth()/fWidth, fScale * 2*fCursor->GetMipmap()->GetHeight()/fHeight );
     }
 }
 
@@ -285,7 +296,7 @@ void plMouseDevice::AddNameToCursor(const ST::string& name)
     if (fInstance && !name.empty())
     {
         plDebugText     &txt = plDebugText::Instance();
-        txt.DrawString(fInstance->fWXPos + 12 ,fInstance->fWYPos - 7,name);
+        txt.DrawString(fInstance->fWXPos + 12 * fScale, fInstance->fWYPos - txt.GetFontHeight() / 2,name);
     }
 }
 void plMouseDevice::AddCCRToCursor()
@@ -293,7 +304,7 @@ void plMouseDevice::AddCCRToCursor()
     if (fInstance)
     {
         plDebugText     &txt = plDebugText::Instance();
-        txt.DrawString(fInstance->fWXPos + 12, fInstance->fWYPos - 17, "CCR");
+        txt.DrawString(fInstance->fWXPos + 12 * fScale, fInstance->fWYPos - 17, "CCR");
     }
 }
 void plMouseDevice::AddIDNumToCursor(uint32_t idNum)
@@ -301,9 +312,7 @@ void plMouseDevice::AddIDNumToCursor(uint32_t idNum)
     if (fInstance && idNum)
     {
         plDebugText     &txt = plDebugText::Instance();
-        char str[256];
-        sprintf(str, "%d",idNum);
-        txt.DrawString(fInstance->fWXPos + 12 ,fInstance->fWYPos + 3,str);
+        txt.DrawString(fInstance->fWXPos + 12 * fScale,fInstance->fWYPos + 3, ST::string::from_uint(idNum));
     }
 }
         
@@ -365,10 +374,10 @@ void plMouseDevice::ShowCursor(bool override)
     }
 }
 
-void plMouseDevice::NewCursor(const char* cursor)
+void plMouseDevice::NewCursor(ST::string cursor)
 {
-    fInstance->fCursorID = cursor;
-    fInstance->CreateCursor(cursor);
+    fInstance->fCursorID = std::move(cursor);
+    fInstance->CreateCursor(fInstance->fCursorID);
     fInstance->SetCursorX(fInstance->GetCursorX());
     fInstance->SetCursorY(fInstance->GetCursorY());
 }
@@ -381,7 +390,13 @@ void    plMouseDevice::SetCursorOpacity( float opacity )
 }
 
 bool plMouseDevice::MsgReceive(plMessage* msg)
-{   
+{
+    plDisplayScaleChangedMsg* pDSChangedMsg = plDisplayScaleChangedMsg::ConvertNoRef(msg);
+    if (pDSChangedMsg) {
+        SetDisplayScale(pDSChangedMsg->GetScale());
+        return true;
+    }
+
     plEvalMsg* pEMsg = plEvalMsg::ConvertNoRef(msg);
     if (pEMsg)
     {
@@ -483,7 +498,7 @@ bool plMouseDevice::MsgReceive(plMessage* msg)
             fXPos = pXMsg->fX;
 
         SetCursorX(fXPos);
-        fWXPos = pXMsg->fWx;
+        fWXPos = pXMsg->fWx * fScale;
         return true;
     }
 
@@ -520,7 +535,7 @@ bool plMouseDevice::MsgReceive(plMessage* msg)
         else
             fYPos = pYMsg->fY;
 
-        fWYPos = pYMsg->fWy;
+        fWYPos = pYMsg->fWy * fScale;
         SetCursorY(fYPos);
         
         return true;

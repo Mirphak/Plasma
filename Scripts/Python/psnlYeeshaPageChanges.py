@@ -62,7 +62,7 @@ respAudioStop = ptAttribResponder(4,"Audio stop responder")
 
 respEnable = ptAttribResponder(5, "Enabled resp (if necessary)")
 respDisable = ptAttribResponder(6, "Disabled resp (if necessary)")
-bushDistrib = ptAttribClusterList(7, "Bush distributor")
+clusterList = ptAttribClusterList(7, "Cluster Group object list")
 
 #globals
 TotalPossibleYeeshaPages = len(xLinkingBookDefs.xYeeshaPages)
@@ -145,7 +145,7 @@ class psnlYeeshaPageChanges(ptMultiModifier):
                     MAX_SIZE = 10
                     size, state = divmod(CurrentValue, 10)
 
-                    if len(PtGetPlayerList()) == 0 and state != 0:
+                    if PtIsSolo() and state != 0:
                         growSizes = self.TimeToGrow()
                         PtDebugPrint("Growsizes: %d" % growSizes)
                         if growSizes and size < MAX_SIZE:
@@ -190,7 +190,7 @@ class psnlYeeshaPageChanges(ptMultiModifier):
                             except:
                                 PtDebugPrint("ERROR: psnlYeeshaPageChanges.OnServerInitComplete():\tException occurred trying to access age SDL")
                         
-                    if len(PtGetPlayerList()) == 0:
+                    if PtIsSolo():
                         newstate = self.UpdateState(CurrentValue, 0, SDLVar, AgeVault, ageSDL, 0)
                     else:
                         newstate = CurrentValue
@@ -238,9 +238,8 @@ class psnlYeeshaPageChanges(ptMultiModifier):
 
             respAudioStop.run(self.key,avatar=None,fastforward=0)
             respDisable.run(self.key,avatar=None,fastforward=1)
-            if bushDistrib.value:
-                for x in bushDistrib.value:
-                    x.setVisible(False)
+            for i in clusterList.value:
+                i.setVisible(False)
 
 
     def TimeToGrow(self):

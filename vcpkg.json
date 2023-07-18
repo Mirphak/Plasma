@@ -6,6 +6,10 @@
       "asio",
       "curl",
       "expat",
+      {
+        "name": "fontconfig",
+        "platform": "!(osx | windows)"
+      },
       "freetype",
       "libepoxy",
       "libjpeg-turbo",
@@ -41,7 +45,10 @@
             "platform": "windows",
             "default-features": false
           },
-          "python3-cairosvg"
+          {
+            "name": "python3-cairosvg",
+            "host": true
+          }
         ]
       }
     }

@@ -56,6 +56,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "plClient.h"
 
+#ifdef HS_BUILD_FOR_WIN32
+#   include "plWinDpi/plWinDpi.h"
+#endif
+
 #include "pnDispatch/plDispatch.h"
 #include "pnDispatch/plDispatchLogBase.h"
 #include "pnKeyedObject/plFixedKey.h"
@@ -92,6 +96,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plInputCore/plInputManager.h"
 #include "plMessage/plAgeLoadedMsg.h"
 #include "plMessage/plAnimCmdMsg.h"
+#include "plMessage/plDisplayScaleChangedMsg.h"
 #include "plMessage/plInputEventMsg.h"
 #include "plMessage/plLinkToAgeMsg.h"
 #include "plMessage/plMovieMsg.h"
@@ -139,7 +144,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
     #include "pfDXPipeline/plDXPipeline.h"
 #endif
 #include "pfGameGUIMgr/pfGameGUIMgr.h"
-#include "pfGameGUIMgr/pfGUICtrlGenerator.h"
+#include "pfGameMgr/pfGameMgr.h"
 #ifdef PLASMA_PIPELINE_GL
     #include "pfGLPipeline/plGLPipeline.h"
 #endif
@@ -246,6 +251,9 @@ bool plClient::Shutdown()
     // This guy may send callbacks that release resources
     pfConfirmationMgr::Shutdown();
 
+    // Same as above
+    pfGameMgr::Shutdown();
+
     // Must kill off all movies before shutting down audio.
     IKillMovies();
 
@@ -275,9 +283,6 @@ bool plClient::Shutdown()
     pfGameGUIMgr    *mgr = pfGameGUIMgr::GetInstance();
     if( mgr )
         mgr->UnloadDialog( "KIBlackBar" );  // unload the blackbar which will bootstrap in the rest of the KI dialogs
-
-    // Take down our GUI control generator
-    pfGUICtrlGenerator::Instance().Shutdown();
 
     if (plNetClientMgr* nc = plNetClientMgr::GetInstance())
         nc->Shutdown();
@@ -382,6 +387,7 @@ void plClient::InitInputs()
     plgDispatch::Dispatch()->RegisterForExactType(plIMouseYEventMsg::Index(), fInputManager->GetKey());
     plgDispatch::Dispatch()->RegisterForExactType(plIMouseBEventMsg::Index(), fInputManager->GetKey());
     plgDispatch::Dispatch()->RegisterForExactType(plEvalMsg::Index(), fInputManager->GetKey());
+    plgDispatch::Dispatch()->RegisterForExactType(plDisplayScaleChangedMsg::Index(), fInputManager->GetKey());
     plInputDevice* pKeyboard = new plKeyboardDevice();
     fInputManager->AddInputDevice(pKeyboard);
     
@@ -710,6 +716,44 @@ bool plClient::MsgReceive(plMessage* msg)
         }
         return true;
     }
+
+    plDisplayScaleChangedMsg* pDSChangedMsg = plDisplayScaleChangedMsg::ConvertNoRef(msg);
+    if (pDSChangedMsg) {
+        fPipeline->SetBackingScale(pDSChangedMsg->GetScale());
+        if (pDSChangedMsg->GetSuggestedLocation().has_value()) {
+            int width = pDSChangedMsg->GetSuggestedLocation()->fRight - pDSChangedMsg->GetSuggestedLocation()->fLeft;
+            int height = pDSChangedMsg->GetSuggestedLocation()->fBottom - pDSChangedMsg->GetSuggestedLocation()->fTop;
+            IResizeWindow(width, height);
+            if (fPipeline) {
+                // NOTE: Trying to resize the pipeline while it spans multiple
+                // monitors seems to crash on D3D9.
+                fPipeline->ResetDisplayDevice(
+                    width,
+                    height,
+                    fPipeline->ColorDepth(),
+                    !fPipeline->IsFullScreen(),
+                    // FIXME... There doesn't seem to be a way to get the current AA value?
+                    fPipeline->GetMaxAntiAlias(width, height, fPipeline->ColorDepth()),
+                    fPipeline->GetMaxAnisotropicSamples(),
+                    // FIXME... There doesn't seem to be a way to get the current VSync value?
+                    true
+                );
+            }
+#ifdef HS_BUILD_FOR_WIN32
+            SetWindowPos(
+                fWindowHndl,
+                nullptr,
+                pDSChangedMsg->GetSuggestedLocation()->fLeft,
+                pDSChangedMsg->GetSuggestedLocation()->fTop,
+                width,
+                height,
+                SWP_NOZORDER | SWP_NOACTIVATE
+            );
+#endif
+        }
+        return true;
+    }
+
     plRenderRequestMsg* rendReq = plRenderRequestMsg::ConvertNoRef(msg);
     if( rendReq )
     {
@@ -1143,7 +1187,7 @@ void plClient::IRoomLoaded(plSceneNode* node, bool hold)
             
 #ifndef PLASMA_EXTERNAL_RELEASE
             if (plDispatchLogBase::IsLogging())
-                plDispatchLogBase::GetInstance()->LogStatusBarChange(fProgressBar->GetTitle().c_str(), "displaying messages");
+                plDispatchLogBase::GetInstance()->LogStatusBarChange(fProgressBar->GetTitle(), "displaying messages");
 #endif // PLASMA_EXTERNAL_RELEASE
 #endif
         }
@@ -1253,7 +1297,7 @@ void    plClient::IStartProgress( const char *title, float len )
         fProgressBar = plProgressMgr::GetInstance()->RegisterOperation(len, title, plProgressMgr::kNone, false, true);
 #ifndef PLASMA_EXTERNAL_RELEASE
         if (plDispatchLogBase::IsLogging())
-            plDispatchLogBase::GetInstance()->LogStatusBarChange(fProgressBar->GetTitle().c_str(), "starting");
+            plDispatchLogBase::GetInstance()->LogStatusBarChange(fProgressBar->GetTitle(), "starting");
 #endif // PLASMA_EXTERNAL_RELEASE
 
         ((plResManager*)hsgResMgr::ResMgr())->SetProgressBarProc(IReadKeyedObjCallback);
@@ -1275,7 +1319,7 @@ void    plClient::IStopProgress()
     {
 #ifndef PLASMA_EXTERNAL_RELEASE
         if (plDispatchLogBase::IsLogging())
-            plDispatchLogBase::GetInstance()->LogStatusBarChange(fProgressBar->GetTitle().c_str(), "done");
+            plDispatchLogBase::GetInstance()->LogStatusBarChange(fProgressBar->GetTitle(), "done");
 #endif // PLASMA_EXTERNAL_RELEASE
 
         plDispatch::SetMsgRecieveCallback(nullptr);
@@ -1414,6 +1458,8 @@ bool plClient::StartInit()
     plgDispatch::Dispatch()->RegisterForExactType(plEvalMsg::Index(), pLMod->GetKey());
     plgDispatch::Dispatch()->RegisterForExactType(plAudioSysMsg::Index(), pLMod->GetKey());
 
+    plgDispatch::Dispatch()->RegisterForExactType(plDisplayScaleChangedMsg::Index(), GetKey());
+
     plSynchedObject::PushSynchDisabled(false);      // enable dirty tracking
     return true;
 }
@@ -1422,7 +1468,7 @@ bool plClient::StartInit()
 bool plClient::BeginGame()
 {
     plNetClientMgr::GetInstance()->Init();
-    IPlayIntroMovie("avi/CyanWorlds.webm", 0.f, 0.f, 0.f, 1.f, 1.f, 0.75);
+    IPlayIntroMovie("avi/CyanWorlds.webm", 0.f, 0.f, 0.f, fPipeline->fBackingScale, fPipeline->fBackingScale, 0.75);
     if (GetDone()) return false;
     if (NetCommGetStartupAge()->ageDatasetName.compare_i("StartUp") == 0) {
         // This is needed because there is no auth step in this case
@@ -1870,6 +1916,16 @@ void plClient::IAddRenderRequest(plRenderRequest* req)
     }
 }
 
+void plClient::IResizeWindow(int Width, int Height)
+{
+    if (plMouseDevice::Instance())
+        plMouseDevice::Instance()->SetDisplayResolution((float)Width, (float)Height);
+
+    float aspectratio = (float)Width / (float)Height;
+    if (pfGameGUIMgr::GetInstance())
+        pfGameGUIMgr::GetInstance()->SetAspectRatio(aspectratio);
+}
+
 void plClient::ResetDisplayDevice(int Width, int Height, int ColorDepth, bool Windowed, int NumAASamples, int MaxAnisotropicSamples, bool VSync)
 {
     if(!fPipeline) return;
@@ -1885,13 +1941,7 @@ void plClient::ResetDisplayDevice(int Width, int Height, int ColorDepth, bool Wi
 
 void plClient::ResizeDisplayDevice(int Width, int Height, bool Windowed)
 {
-
-    if (plMouseDevice::Instance())
-        plMouseDevice::Instance()->SetDisplayResolution((float)Width, (float)Height);
-
-    float aspectratio = (float)Width / (float)Height;
-    if (pfGameGUIMgr::GetInstance())
-        pfGameGUIMgr::GetInstance()->SetAspectRatio( aspectratio );
+    IResizeWindow(Width, Height);
 
     // Direct3D no longer uses exclusive fullscreen mode, ergo, we must resize the display
     if (!Windowed)
@@ -1949,8 +1999,8 @@ void plClient::IDetectAudioVideoSettings()
 #ifdef HS_BUILD_FOR_WIN32
     if(!plPipeline::fDefaultPipeParams.Windowed)
     {
-        plPipeline::fDefaultPipeParams.Width = GetSystemMetrics(SM_CXSCREEN);
-        plPipeline::fDefaultPipeParams.Height = GetSystemMetrics(SM_CYSCREEN);
+        plPipeline::fDefaultPipeParams.Width = plWinDpi::Instance().GetSystemMetrics(SM_CXSCREEN, fWindowHndl);
+        plPipeline::fDefaultPipeParams.Height = plWinDpi::Instance().GetSystemMetrics(SM_CYSCREEN, fWindowHndl);
     }
     else
 #endif

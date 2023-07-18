@@ -48,11 +48,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "HeadSpin.h"
 #include "pyGlueHelpers.h"
 #include "pyVaultNode.h"
 
-struct RelVaultNode;
+namespace ST { class string; }
 
 class pyVaultFolderNode : public pyVaultNode
 {
@@ -70,10 +69,9 @@ public:
 
     static void AddPlasmaClasses(PyObject *m);
 
-    virtual void    Folder_SetType( int type );
-    virtual int     Folder_GetType();
-    void    Folder_SetName(const char* name);
-    void    Folder_SetNameW(const wchar_t* name);
+    void Folder_SetType(int type);
+    int Folder_GetType();
+    void    Folder_SetName(const ST::string& name);
     ST::string Folder_GetName() const;
 
 

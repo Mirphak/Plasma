@@ -45,6 +45,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 //////////////////////////////////////////////////////////////////////
 
+#include <string_theory/string>
+
 #include "plgDispatch.h"
 #include "pyGeometry3.h"
 #include "pyKey.h"
@@ -71,10 +73,6 @@ pyNotify::pyNotify(const pyKey& selfkey)
     // loop though adding the ones that want to be notified of the change
     for (size_t j = 0; j < selfkey.NotifyListCount(); j++)
         fReceivers.emplace_back(selfkey.GetNotifyListItem(j));
-}
-
-pyNotify::~pyNotify()
-{
 }
 
 void pyNotify::SetSender(const pyKey& selfKey)
@@ -132,22 +130,22 @@ void pyNotify::AddControlKeyEvent( int32_t key, bool down )
     fBuildMsg.AddControlKeyEvent(key,down);
 }
 
-void pyNotify::AddVarNumber(const char* name, float number)
+void pyNotify::AddVarNumber(const ST::string& name, float number)
 {
     fBuildMsg.AddVariableEvent(name, number);
 }
 
-void pyNotify::AddVarNumber(const char* name, int32_t number)
+void pyNotify::AddVarNumber(const ST::string& name, int32_t number)
 {
     fBuildMsg.AddVariableEvent(name, number);
 }
 
-void pyNotify::AddVarNull(const char* name)
+void pyNotify::AddVarNull(const ST::string& name)
 {
     fBuildMsg.AddVariableEvent(name);
 }
 
-void pyNotify::AddVarKey(const char* name, pyKey* key)
+void pyNotify::AddVarKey(const ST::string& name, pyKey* key)
 {
     fBuildMsg.AddVariableEvent(name, key ? key->getKey() : plKey() );
 }

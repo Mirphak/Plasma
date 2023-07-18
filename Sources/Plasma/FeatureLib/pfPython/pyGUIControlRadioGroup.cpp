@@ -40,7 +40,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
 #include "pyKey.h"
 
 #include "pfGameGUIMgr/pfGUIRadioGroupCtrl.h"
@@ -55,9 +54,9 @@ pyGUIControlRadioGroup::pyGUIControlRadioGroup(plKey objkey) : pyGUIControl(std:
 {
 }
 
-bool pyGUIControlRadioGroup::IsGUIControlRadioGroup(pyKey& gckey)
+bool pyGUIControlRadioGroup::IsGUIControlRadioGroup(const plKey& key)
 {
-    if ( gckey.getKey() && pfGUIRadioGroupCtrl::ConvertNoRef(gckey.getKey()->ObjectIsLoaded()) )
+    if ( key && pfGUIRadioGroupCtrl::ConvertNoRef(key->ObjectIsLoaded()) )
         return true;
     return false;
 }

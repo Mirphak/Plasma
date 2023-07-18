@@ -45,10 +45,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 // Ensure these get set consistently regardless of what module includes it
 #include "hsConfig.h"
 
-#if defined(_DEBUG)
-#   define HS_DEBUGGING
-#endif
-
 //======================================
 // Some standard includes
 //======================================
@@ -93,9 +89,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #   define CDECL
 #endif
 
-#define kPosInfinity32      (0x7fffffff)
-#define kNegInfinity32      (0x80000000)
-
 // Based on std::numbers from C++20
 namespace hsConstants
 {
@@ -116,13 +109,6 @@ namespace hsConstants
     template <typename T>
     inline constexpr T inv_sqrt2 = T(1.0) / hsConstants::sqrt2<T>;
 }
-
-typedef int32_t   hsError;
-
-#define hsOK                0
-#define hsFail              -1
-#define hsFailed(r)         ((hsError)(r)<hsOK)
-#define hsSucceeded(r)      ((hsError)(r)>=hsOK)
 
 // Indirection required for joining preprocessor macros together
 #define _hsMacroJoin_(lhs, rhs) lhs ## rhs
@@ -223,8 +209,8 @@ inline double hsSwapEndianDouble(double dvalue)
 // Generic versions for use in templates
 template <typename T> inline T hsToLE(T value) = delete;
 template <> inline char hsToLE(char value) { return value; }
-template <> inline int8_t hsToLE(int8_t value) { return value; }
-template <> inline uint8_t hsToLE(uint8_t value) { return value; }
+template <> inline signed char hsToLE(signed char value) { return value; }
+template <> inline unsigned char hsToLE(unsigned char value) { return value; }
 template <> inline int16_t hsToLE(int16_t value) { return (int16_t)hsToLE16((uint16_t)value); }
 template <> inline uint16_t hsToLE(uint16_t value) { return hsToLE16(value); }
 template <> inline int32_t hsToLE(int32_t value) { return (int32_t)hsToLE32((uint32_t)value); }
@@ -280,23 +266,14 @@ inline char *hsStrncpy(char *strDest, const char *strSource, size_t count)
     return temp;
 }
 
-wchar_t *hsStringToWString( const char *str );
-char    *hsWStringToString( const wchar_t *str );
-
 // Use "correct" non-standard string functions based on the
 // selected compiler / library
 #if HS_BUILD_FOR_WIN32
 #    define stricmp     _stricmp
 #    define strnicmp    _strnicmp
-#    define wcsicmp     _wcsicmp
-#    define wcsnicmp    _wcsnicmp
-#    define strdup      _strdup
-#    define wcsdup      _wcsdup
 #else
 #    define stricmp     strcasecmp
 #    define strnicmp    strncasecmp
-#    define wcsicmp     wcscasecmp
-#    define wcsnicmp    wcsncasecmp
 #endif
 
 enum {              // Kind of MessageBox...passed to hsMessageBox
@@ -343,17 +320,12 @@ int hsMessageBoxWithOwner(hsWindowHndl owner, const wchar_t* message, const wcha
 #if HS_BUILD_FOR_WIN32
      // This is for Windows
 #    define snprintf        _snprintf
-#    define swprintf        _snwprintf
 
 #    ifndef fileno
 #        define fileno(__F)       _fileno(__F)
 #    endif
-
-#   define hsWFopen(name, mode)     _wfopen(name, mode)
 #else
      // This is for Unix, Linux, OSX, etc.
-#   define hsWFopen(name, mode)     fopen(hsWStringToString(name), hsWStringToString(mode))
-
 #   include <limits.h>
 #   define MAX_PATH PATH_MAX
 #endif

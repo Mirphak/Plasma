@@ -52,15 +52,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef PLASMA20_SOURCES_PLASMA_PUBUTILLIB_PLNETCLIENTCOMM_PLNETCLIENTCOMM_H
 #define PLASMA20_SOURCES_PLASMA_PUBUTILLIB_PLNETCLIENTCOMM_PLNETCLIENTCOMM_H
 
-
-#include "HeadSpin.h"
-
 #include "pnEncryption/plChecksum.h"
 #include "pnNetBase/pnNbError.h"
 #include "pnUUID/pnUUID.h"
 
 #include "plMessage/plNetCommMsgs.h"
 #include "plNetCommon/plNetCommonHelpers.h"
+#include "plNetCommon/plNetMsgHandler.h"
 
 #include <string_theory/string>
 #include <vector>
@@ -149,11 +147,7 @@ void NetCommActivateMsgDispatchers();
 *
 ***/
 
-// Return this value from your registered msg handler
-// to stop further dispatching of incoming msg.
-const unsigned kOK_MsgConsumed  = hsOK + 1;
-
-typedef int (FNetCommMsgHandler)(
+typedef plNetMsgHandler::Status (FNetCommMsgHandler)(
     plNetMessage *  msg,
     void *          userState
 );
@@ -290,6 +284,8 @@ void NetCommSendFriendInvite (
     const ST::string& toName,
     const plUUID&     inviteUuid
 );
+void NetCommLogPythonTraceback(const ST::string& traceback);
+void NetCommLogStackDump(const ST::string& stackDump);
 
 #endif // PLASMA20_SOURCES_PLASMA_PUBUTILLIB_PLNETCLIENTCOMM_PLNETCLIENTCOMM_H
 
@@ -326,8 +322,8 @@ public:
     class MsgHandler
     {
     public:
-        static int StaticMsgHandler(plNetMessage * msg, void * userState);
-        virtual int HandleMessage( plNetMessage* msg ) = 0;
+        static plNetMsgHandler::Status StaticMsgHandler(plNetMessage* msg, void* userState);
+        virtual plNetMsgHandler::Status HandleMessage(plNetMessage* msg) = 0;
     };
 
     ////////////////////////////////////////////////////////////////

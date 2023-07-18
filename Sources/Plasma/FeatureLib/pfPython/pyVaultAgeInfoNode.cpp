@@ -46,16 +46,14 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //////////////////////////////////////////////////////////////////////
 
 #include <Python.h>
+#include <string_theory/string>
 #include <string_theory/string_stream>
 
 #include "pyVaultAgeInfoNode.h"
 
 #include "pyVaultAgeInfoListNode.h"
 #include "pyVaultPlayerInfoListNode.h"
-#include "pyVaultPlayerInfoNode.h"
-#include "pyVaultSDLNode.h"
 #include "pyVaultAgeLinkNode.h"
-#include "pyNetLinkingMgr.h"
 #include "pyAgeInfoStruct.h"
 
 #include "pnUUID/pnUUID.h"
@@ -94,10 +92,6 @@ static PyObject * GetChildAgeInfoList(hsWeakRef<RelVaultNode> node, unsigned typ
         result = pyVaultAgeInfoListNode::New(rvn);
     return result;
 }
-
-//==================================================================
-// class RelVaultNode : public plVaultNode
-//
 
 PyObject * pyVaultAgeInfoNode::GetAgeOwnersFolder() const
 {
@@ -143,7 +137,7 @@ PyObject * pyVaultAgeInfoNode::GetAgeSDL() const
 
     hsAssert(false, "eric, port me");
     // just return a None object.
-    PYTHON_RETURN_NONE
+    PYTHON_RETURN_NONE;
 }
 
 PyObject * pyVaultAgeInfoNode::GetCzar() const
@@ -154,7 +148,7 @@ PyObject * pyVaultAgeInfoNode::GetCzar() const
     hsAssert(false, "eric, port me");
 
     // just return a None object.
-    PYTHON_RETURN_NONE
+    PYTHON_RETURN_NONE;
 }
 
 PyObject * pyVaultAgeInfoNode::GetParentAgeLink () const
@@ -166,7 +160,7 @@ PyObject * pyVaultAgeInfoNode::GetParentAgeLink () const
         return pyVaultAgeLinkNode::New(rvn);
 
     // just return a None object.
-    PYTHON_RETURN_NONE
+    PYTHON_RETURN_NONE;
 }
 
 
@@ -231,13 +225,11 @@ plUUID pyVaultAgeInfoNode::GetAgeInstanceGuid() const
     return kNilUuid;
 }
 
-void pyVaultAgeInfoNode::SetAgeInstanceGuid( const char * sguid )
+void pyVaultAgeInfoNode::SetAgeInstanceGuid(const ST::string& sguid)
 {
     if (fNode) {
         VaultAgeInfoNode access(fNode);
-        plUUID uuid;
-        uuid.FromString(sguid);
-        access.SetAgeInstanceGuid(uuid);
+        access.SetAgeInstanceGuid(plUUID(sguid));
     }
 }
 

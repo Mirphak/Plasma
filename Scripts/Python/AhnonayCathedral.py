@@ -81,7 +81,7 @@ class AhnonayCathedral(ptResponder):
                 for ageInfoChildRef in ageInfoChildren:
                     ageInfoChild = ageInfoChildRef.getChild()
                     folder = ageInfoChild.upcastToFolderNode()
-                    if folder and folder.folderGetName() == "AgeData":
+                    if folder and folder.getFolderName() == "AgeData":
                         ageDataFolder = folder
                         ageDataChildren = folder.getChildNodeRefList()
                         for ageDataChildRef in ageDataChildren:
@@ -98,8 +98,8 @@ class AhnonayCathedral(ptResponder):
             if owner == None:
                 PtDebugPrint("I own this Cathedral, but I haven't set myself as Ahnonay owner yet.")
                 newNode = ptVaultChronicleNode(0)
-                newNode.chronicleSetName("AhnonayOwner")
-                newNode.chronicleSetValue(str(PtGetClientIDFromAvatarKey(PtGetLocalAvatar().getKey())))
+                newNode.setName("AhnonayOwner")
+                newNode.setValue(str(PtGetClientIDFromAvatarKey(PtGetLocalAvatar().getKey())))
                 ageDataFolder.addNode(newNode)
 
     def OnNotify(self,state,id,events):

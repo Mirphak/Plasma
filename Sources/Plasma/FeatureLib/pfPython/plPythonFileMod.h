@@ -55,9 +55,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 class PythonVaultCallback;
 class plPythonSDLModifier;
-class pyKey;
 class pfPythonKeyCatcher;
-class plKeyEventMsg;
 class plPipeline;
 
 typedef struct _object PyObject;
@@ -214,7 +212,7 @@ public:
     bool WasLocalNotify() const { return fLocalNotify; }
     plPipeline* GetPipeline() const { return fPipe; }
     void SetSourceFile(const ST::string& filename) { fPythonFile = filename; }
-    int getPythonOutput(std::string* line);
+    ST::string getPythonOutput();
     void ReportError();
     void DisplayPythonOutput();
     static void SetAtConvertTime() { fAtConvertTime = true; }

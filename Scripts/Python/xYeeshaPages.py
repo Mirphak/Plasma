@@ -72,44 +72,8 @@ kFadeOutSecs = 2.0
 kReltoLinkSecs = 4.0
 
 #Note: when adding more Ages to this script, be sure to also update IDrawLinkPanel() module below
-kYeeshaPage01 = 201
-kYeeshaPage02 = 202
-kYeeshaPage03 = 203
-kYeeshaPage04 = 204
-kYeeshaPage05 = 205
-kYeeshaPage06 = 206
-kYeeshaPage07 = 207
-kYeeshaPage08 = 208
-kYeeshaPage09 = 209
-kYeeshaPage10 = 210
-kYeeshaPage12 = 212
-kYeeshaPage13 = 213
-kYeeshaPage14 = 214
-kYeeshaPage15 = 215
-kYeeshaPage16 = 216
-kYeeshaPage17 = 217
-kYeeshaPage18 = 218
-kYeeshaPage19 = 219
-kYeeshaPage20 = 220
-kYeeshaPage21 = 221
-kYeeshaPage22 = 222
-kYeeshaPage23 = 223
-kYeeshaPage24 = 224
-kYeeshaPage25 = 225
-kYeeshaPage26 = 226
-kYeeshaPage27 = 227
-kYeeshaPage28 = 228
-kYeeshaPage29 = 229
+kYeeshaPage = list(range(200, 298, 1))
 kYeeshaPageCancel = 299
-
-YeeshaPageIDList = [ kYeeshaPage01, kYeeshaPage02, kYeeshaPage03, kYeeshaPage04,\
-                    kYeeshaPage05, kYeeshaPage06, kYeeshaPage07, kYeeshaPage08,\
-                    kYeeshaPage09, kYeeshaPage10, kYeeshaPage12, kYeeshaPage13,\
-                    kYeeshaPage14, kYeeshaPage15, kYeeshaPage16, kYeeshaPage17,\
-                    kYeeshaPage18, kYeeshaPage19, kYeeshaPage20, kYeeshaPage21,\
-                    kYeeshaPage22, kYeeshaPage23, kYeeshaPage24, kYeeshaPage25,\
-                    kYeeshaPage26, kYeeshaPage27, kYeeshaPage28, kYeeshaPage29 ]
-
 
 class xYeeshaPages(ptModifier):
     "The Yeesha Page python code"
@@ -154,22 +118,22 @@ class xYeeshaPages(ptModifier):
         if event == kExitMode:
             PtHideDialog(DialogName)
             return
-
+        
         btnID = 0
         if isinstance(control,ptGUIControlButton):
             btnID = control.getTagID()
 
-        if event == 2 and btnID in YeeshaPageIDList:
+        if event == 2 and btnID in kYeeshaPage:
             PtDebugPrint("xYeeshaPages.OnGUINotify():\tPicked up page number: ", PageNumber.value)
 #            PtUnloadDialog(DialogName)
             PtHideDialog(DialogName)
-
+            
             vault = ptVault()
-
+                
             psnlSDL = vault.getPsnlAgeSDL()
             if psnlSDL:
                 YeeshaPageVar = psnlSDL.findVar("YeeshaPage" + str(PageNumber.value))
-
+                
                 PtDebugPrint ("xYeeshaPages.py: The previous value of the SDL variable %s is %s" % ("YeeshaPage" + str(PageNumber.value), YeeshaPageVar.getInt()))
 
                 if StartInCleft():
@@ -180,13 +144,13 @@ class xYeeshaPages(ptModifier):
                 if YeeshaPageVar.getInt() != 0: 
                     PtDebugPrint ("xYeeshaPages.py: You've already found Yeesha Page #%s. Move along. Move along." % (PageNumber.value))
                     return
-
+                    
                 else:
                     PtDebugPrint ("xYeeshaPages.py: Yeesha Page #%s is new to you." % (PageNumber.value))
-
+                    
                     PtDebugPrint ("xYeeshaPages.py: Trying to update the value of the SDL variable %s to 1" % ("YeeshaPage" + str(PageNumber.value)))
                     YeeshaPageVar.setInt(4)
-                    vault.updatePsnlAgeSDL (psnlSDL)
+                    vault.updatePsnlAgeSDL(psnlSDL)
 
                     if not StartInCleft():
                         PtSendKIMessageInt(kStartBookAlert,0)
@@ -207,7 +171,7 @@ class xYeeshaPages(ptModifier):
 
         elif event == 2 and btnID == kYeeshaPageCancel:
             PtHideDialog(DialogName)
-
+    
 
 
     def IDrawLinkPanel(self):
@@ -216,96 +180,16 @@ class xYeeshaPages(ptModifier):
 
         #first hide them all
 #        PtDebugPrint("PageNumber = ", PageNumber.value)
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage01)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage02)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage03)).hide() 
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage04)).hide() 
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage05)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage06)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage07)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage08)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage09)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage10)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage12)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage13)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage14)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage15)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage16)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage17)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage18)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage19)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage20)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage21)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage22)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage23)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage24)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage25)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage26)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage27)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage28)).hide()
-        ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage29)).hide()
+        for x in kYeeshaPage:
+            try:
+                ctrl = mydialog.getControlModFromTag(x)
+            except KeyError:
+                continue
+            else:
+                ctrl.hide()
 
         #now draw correct panel
-        if (PageNumber.value) == 1:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage01)).show()
-        elif (PageNumber.value) == 2:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage02)).show()
-        elif (PageNumber.value) == 3:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage03)).show()
-        elif (PageNumber.value) == 4:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage04)).show()
-        elif (PageNumber.value) == 5:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage05)).show()
-        elif (PageNumber.value) == 6:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage06)).show()
-        elif (PageNumber.value) == 7:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage07)).show()
-        elif (PageNumber.value) == 8:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage08)).show()
-        elif (PageNumber.value) == 9:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage09)).show()
-        elif (PageNumber.value) == 10:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage10)).show()
-        elif (PageNumber.value) == 12:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage12)).show()
-        elif (PageNumber.value) == 13:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage13)).show()
-        elif (PageNumber.value) == 14:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage14)).show()
-        elif (PageNumber.value) == 15:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage15)).show()
-        elif (PageNumber.value) == 16:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage16)).show()
-        elif (PageNumber.value) == 17:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage17)).show()
-        elif (PageNumber.value) == 18:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage18)).show()
-        elif (PageNumber.value) == 19:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage19)).show()
-        elif (PageNumber.value) == 20:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage20)).show()
-        elif (PageNumber.value) == 21:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage21)).show()
-        elif (PageNumber.value) == 22:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage22)).show()
-        elif (PageNumber.value) == 23:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage23)).show()
-        elif (PageNumber.value) == 24:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage24)).show()
-        elif (PageNumber.value) == 25:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage25)).show()
-        elif (PageNumber.value) == 26:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage26)).show()
-        elif (PageNumber.value) == 27:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage27)).show()
-        elif (PageNumber.value) == 28:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage28)).show()
-        elif (PageNumber.value) == 29:
-            ptGUIControlButton(mydialog.getControlFromTag(kYeeshaPage29)).show()
-
-
-        else:
-            PtDebugPrint("xYeeshaPages.IDrawLinkPanel():\tERROR: couldn't find page named ",PageNumber.value)
+        mydialog.getControlModFromTag(kYeeshaPage[PageNumber.value]).show()
         return
 
 #

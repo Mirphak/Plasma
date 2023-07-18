@@ -43,14 +43,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include <Python.h>
 #include <marshal.h>
 #include <ctime>
-#include <string>
 
 #include "HeadSpin.h"
 #include "hsStream.h"
 
 #include "plPythonPack.h"
 
-#include "plFile/plSecureStream.h"
 #include "plFile/plStreamSource.h"
 
 struct plPackOffsetInfo

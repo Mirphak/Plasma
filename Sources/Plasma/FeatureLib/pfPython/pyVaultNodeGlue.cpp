@@ -41,9 +41,9 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include <Python.h>
+#include <string_theory/string>
 
 #include "pyVaultNode.h"
-#include "pnUUID/pnUUID.h"
 #include "plVault/plVault.h"
 
 // glue functions
@@ -223,8 +223,8 @@ PYTHON_METHOD_DEFINITION(ptVaultNode, setCreatorNodeID, args)
 
 PYTHON_METHOD_DEFINITION(ptVaultNode, setCreateAgeName, args)
 {
-    char* name;
-    if (!PyArg_ParseTuple(args, "s", &name))
+    ST::string name;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &name))
     {
         PyErr_SetString(PyExc_TypeError, "setCreateAgeName expects a string");
         PYTHON_RETURN_ERROR;
@@ -235,8 +235,8 @@ PYTHON_METHOD_DEFINITION(ptVaultNode, setCreateAgeName, args)
 
 PYTHON_METHOD_DEFINITION(ptVaultNode, setCreateAgeGuid, args)
 {
-    char* guid;
-    if (!PyArg_ParseTuple(args, "s", &guid))
+    ST::string guid;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &guid))
     {
         PyErr_SetString(PyExc_TypeError, "setCreateAgeGuid expects a string");
         PYTHON_RETURN_ERROR;

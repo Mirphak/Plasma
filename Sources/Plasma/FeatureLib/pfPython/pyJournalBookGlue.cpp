@@ -41,6 +41,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include <Python.h>
+#include <string_theory/string>
+
 #include "pyKey.h"
 
 #include "pyJournalBook.h"
@@ -58,14 +60,14 @@ PYTHON_DEFAULT_DEALLOC_DEFINITION(ptBook)
 PYTHON_INIT_DEFINITION(ptBook, args, keywords)
 {
     const char* kwlist[] = {"esHTMLSource", "coverImage", "callbackKey", "guiName", nullptr};
-    PyObject* sourceObj = nullptr;
+    ST::string source;
     PyObject* coverObj = nullptr;
     PyObject* callbackObj = nullptr;
-    char* guiName = nullptr;
-    if (!PyArg_ParseTupleAndKeywords(args, keywords, "O|OOs", const_cast<char **>(kwlist),
-                                     &sourceObj, &coverObj, &callbackObj, &guiName))
+    ST::string guiName;
+    if (!PyArg_ParseTupleAndKeywords(args, keywords, "O&|OOO&", const_cast<char **>(kwlist),
+                                     PyUnicode_STStringConverter, &source, &coverObj, &callbackObj, PyUnicode_STStringConverter, &guiName))
     {
-        PyErr_SetString(PyExc_TypeError, "__init__ expects a string or unicode string, and optionally a ptImage, ptKey, and string");
+        PyErr_SetString(PyExc_TypeError, "__init__ expects a string and optionally a ptImage, ptKey, and string");
         PYTHON_RETURN_INIT_ERROR;
     }
 
@@ -78,7 +80,7 @@ PYTHON_INIT_DEFINITION(ptBook, args, keywords)
             // this is really the callback key
             if (callbackObj) // callbackObj was already defined, can't have two keys
             {
-                PyErr_SetString(PyExc_TypeError, "__init__ expects a string or unicode string, and optionally a ptImage, ptKey, and string");
+                PyErr_SetString(PyExc_TypeError, "__init__ expects a string and optionally a ptImage, ptKey, and string");
                 PYTHON_RETURN_INIT_ERROR;
             }
             callbackObj = coverObj;
@@ -86,7 +88,7 @@ PYTHON_INIT_DEFINITION(ptBook, args, keywords)
         }
         else if (!pyImage::Check(coverObj))
         {
-            PyErr_SetString(PyExc_TypeError, "__init__ expects a string or unicode string, and optionally a ptImage, ptKey, and string");
+            PyErr_SetString(PyExc_TypeError, "__init__ expects a string and optionally a ptImage, ptKey, and string");
             PYTHON_RETURN_INIT_ERROR;
         }
         else
@@ -98,30 +100,14 @@ PYTHON_INIT_DEFINITION(ptBook, args, keywords)
     {
         if (!pyKey::Check(callbackObj))
         {
-            PyErr_SetString(PyExc_TypeError, "__init__ expects a string or unicode string, and optionally a ptImage, ptKey, and string");
+            PyErr_SetString(PyExc_TypeError, "__init__ expects a string and optionally a ptImage, ptKey, and string");
             PYTHON_RETURN_INIT_ERROR;
         }
         callbackKey = pyKey::ConvertFrom(callbackObj)->getKey();
     }
 
-    ST::string guiNameStr;
-    if (guiName)
-        guiNameStr = ST::string::from_utf8(guiName);
-
-    // convert the sourcecode object
-    if (PyUnicode_Check(sourceObj))
-    {
-        wchar_t* temp = PyUnicode_AsWideCharString(sourceObj, nullptr);
-        std::wstring source = temp;
-        PyMem_Free(temp);
-
-        self->fThis->MakeBook(source, coverKey, callbackKey, guiNameStr);
-        PYTHON_RETURN_INIT_OK;
-    }
-
-    // source wasn't a string or unicode string
-    PyErr_SetString(PyExc_TypeError, "__init__ expects a string or unicode string, and optionally a ptImage, ptKey, and string");
-    PYTHON_RETURN_INIT_ERROR;
+    self->fThis->MakeBook(source, coverKey, callbackKey, guiName);
+    PYTHON_RETURN_INIT_OK;
 }
 
 PYTHON_METHOD_DEFINITION(ptBook, show, args)
@@ -211,13 +197,13 @@ PYTHON_METHOD_DEFINITION(ptBook, setPageMargin, args)
 
 PYTHON_METHOD_DEFINITION(ptBook, setGUI, args)
 {
-    char* guiName;
-    if (!PyArg_ParseTuple(args, "s", &guiName))
+    ST::string guiName;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &guiName))
     {
         PyErr_SetString(PyExc_TypeError, "setGUI expects a string");
         PYTHON_RETURN_ERROR;
     }
-    self->fThis->SetGUI(ST::string::from_utf8(guiName));
+    self->fThis->SetGUI(guiName);
     PYTHON_RETURN_NONE;
 }
 
@@ -246,13 +232,13 @@ PYTHON_METHOD_DEFINITION(ptBook, setEditable, args)
 
 PYTHON_METHOD_DEFINITION(ptBook, getEditableText, args)
 {
-    return PyUnicode_FromStdString(self->fThis->GetEditableText());
+    return PyUnicode_FromSTString(self->fThis->GetEditableText());
 }
 
 PYTHON_METHOD_DEFINITION(ptBook, setEditableText, args)
 {
-    char* text;
-    if (!PyArg_ParseTuple(args, "s", &text))
+    ST::string text;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &text))
     {
         PyErr_SetString(PyExc_TypeError, "setEditableText expects a string");
         PYTHON_RETURN_ERROR;
@@ -285,14 +271,7 @@ PYTHON_END_METHODS_TABLE;
 PLASMA_DEFAULT_TYPE(ptBook, "Params: esHTMLSource,coverImage=None,callbackKey=None,guiName=''\nCreates a new book");
 
 // required functions for PyObject interoperability
-PyObject *pyJournalBook::New(const std::string& htmlSource, plKey coverImageKey /* = {} */, plKey callbackKey /* = {} */, const ST::string &guiName /* = "" */)
-{
-    ptBook *newObj = (ptBook*)ptBook_type.tp_new(&ptBook_type, nullptr, nullptr);
-    newObj->fThis->MakeBook(htmlSource, std::move(coverImageKey), std::move(callbackKey), guiName);
-    return (PyObject*)newObj;
-}
-
-PyObject *pyJournalBook::New(const std::wstring& htmlSource, plKey coverImageKey /* = {} */, plKey callbackKey /* = {} */, const ST::string &guiName /* = "" */)
+PyObject *pyJournalBook::New(const ST::string& htmlSource, plKey coverImageKey /* = {} */, plKey callbackKey /* = {} */, const ST::string &guiName /* = "" */)
 {
     ptBook *newObj = (ptBook*)ptBook_type.tp_new(&ptBook_type, nullptr, nullptr);
     newObj->fThis->MakeBook(htmlSource, std::move(coverImageKey), std::move(callbackKey), guiName);
@@ -315,25 +294,25 @@ void pyJournalBook::AddPlasmaClasses(PyObject *m)
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtLoadBookGUI, args, "Params: guiName\nLoads the gui specified, a gui must be loaded before it can be used. If the gui is already loaded, doesn't do anything")
 {
-    char* guiName;
-    if (!PyArg_ParseTuple(args, "s", &guiName))
+    ST::string guiName;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &guiName))
     {
         PyErr_SetString(PyExc_TypeError, "PtLoadBookGUI expects a string");
         PYTHON_RETURN_ERROR;
     }
-    pyJournalBook::LoadGUI(ST::string::from_utf8(guiName));
+    pyJournalBook::LoadGUI(guiName);
     PYTHON_RETURN_NONE;
 }
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtUnloadBookGUI, args, "Params: guiName\nUnloads the gui specified. If the gui isn't loaded, doesn't do anything")
 {
-    char* guiName;
-    if (!PyArg_ParseTuple(args, "s", &guiName))
+    ST::string guiName;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &guiName))
     {
         PyErr_SetString(PyExc_TypeError, "PtUnloadBookGUI expects a string");
         PYTHON_RETURN_ERROR;
     }
-    pyJournalBook::UnloadGUI(ST::string::from_utf8(guiName));
+    pyJournalBook::UnloadGUI(guiName);
     PYTHON_RETURN_NONE;
 }
 

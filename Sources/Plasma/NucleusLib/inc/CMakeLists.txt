@@ -2,10 +2,10 @@ set(pnNucleusInc_HEADERS
     hsGDeviceRef.h
     hsGMatState.h
     hsGMatState.inl
+    hsGMatStateEnums.h
     hsResMgr.h
     hsTimer.h
     plAudible.h
-    plCCRMgrBase.h
     plClassIndexMacros.h
     plCreatableIndex.h
     plCreatableStrings.h
@@ -46,6 +46,7 @@ target_link_libraries(
         pnModifier
         pnNetCommon
         pnSceneObject
+        pnTimer
 )
 
 target_include_directories(pnNucleusInc INTERFACE ${CMAKE_CURRENT_LIST_DIR})

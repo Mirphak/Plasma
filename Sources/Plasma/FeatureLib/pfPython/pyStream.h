@@ -51,11 +51,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "HeadSpin.h"
 #include "pyGlueHelpers.h"
-#include <string>
+
 #include <vector>
 
 class hsStream;
 class plFileName;
+namespace ST { class string; }
 
 class pyStream
 {
@@ -66,7 +67,7 @@ protected:
     pyStream();
 
 public:
-    virtual ~pyStream();
+    ~pyStream();
 
     // required functions for PyObject interoperability
     PYTHON_CLASS_NEW_FRIEND(ptStream);
@@ -76,12 +77,12 @@ public:
 
     static void AddPlasmaClasses(PyObject *m);
 
-    virtual bool Open(const plFileName& fileName, const char* flags);
-    virtual std::vector<std::string> ReadLines();
-    virtual bool WriteLines(const std::vector<std::string> & lines);
-    virtual void Close();
+    bool Open(const plFileName& fileName, const ST::string& flags);
+    std::vector<ST::string> ReadLines();
+    bool WriteLines(const std::vector<ST::string> & lines);
+    void Close();
 
-    virtual bool IsOpen() { return (fStream != nullptr); }
+    bool IsOpen() { return (fStream != nullptr); }
 };
 
 

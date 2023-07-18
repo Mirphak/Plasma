@@ -49,19 +49,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
  */
 
 // Standard Library Includes
-#include <algorithm>
 #include <array>
-#include <exception>
-#include <functional>
-#include <locale>
-#include <memory>
-#include <string>
-
-// Platform Library Includes
 #include <ctime>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <functional>
+#include <memory>
 
+// string_theory Library Includes
 #include <string_theory/string>
 #include <string_theory/string_stream>
 #include <string_theory/format>

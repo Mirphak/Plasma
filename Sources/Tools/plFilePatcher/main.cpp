@@ -65,12 +65,16 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
     }
 #else
 #   include <sys/ioctl.h>
+#   include <sys/termios.h>
 #   include <unistd.h>
 
     void GetConsoleWidth(size_t& width)
     {
         struct winsize w;
         ioctl(fileno(stdout), TIOCGWINSZ, &w);
+        if (w.ws_col == 0) {
+            w.ws_col = 80;
+        }
         width = size_t(w.ws_col) - 1;
     }
 #endif

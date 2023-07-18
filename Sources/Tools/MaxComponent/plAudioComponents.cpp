@@ -592,9 +592,8 @@ plSoundBuffer   *plBaseSoundEmitterComponent::GetSourceBuffer( const plFileName 
         plFileName sfxPath = plFileName::Join(plasmaDir, "sfx", fileName.GetFileName());
 
         // Export any localized versions as well
-        for (int i = 0; i < plLocalization::GetNumLocales(); i++)
-        {
-            plFileName localName = plLocalization::ExportGetLocalized(sfxPath, i);
+        for (auto lang : plLocalization::GetAllLanguages()) {
+            plFileName localName = plLocalization::ExportGetLocalized(sfxPath, lang);
             if (localName.IsValid())
             {
                 IGetSourceBuffer(localName, srcNode, srcBufferFlags);
@@ -1148,7 +1147,7 @@ enum
 
 //// Shared ParamBlock for All Sounds ///////////////////////////////////////////////////////////
 
-#define sSoundSharedPBHeader(s)     kSndSharedParams,   IDD_COMP_SOUNDBASE,         s##,            0, 0, &gSoundCompProc,  \
+#define sSoundSharedPBHeader(s)     kSndSharedParams,   IDD_COMP_SOUNDBASE,         s,            0, 0, &gSoundCompProc,  \
                                     kSoundFadeParams,   IDD_COMP_SOUND_FADEPARAMS,  IDS_COMP_SOUNDFADEPARAMS,   0, 0, &gSoundFadeParamsProc
 
 static ParamBlockDesc2 sSoundSharedPB
@@ -2095,7 +2094,7 @@ void    plSound3DEmitterComponent::ISetParameters( plWin32Sound *destSound, plEr
     }
     else
     {
-        OutVol = 0;
+        OutVol = 5000;
         innerCone = 360;
         outerCone = 360;
     }

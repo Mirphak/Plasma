@@ -48,15 +48,14 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "HeadSpin.h"
-
 #include "pyGlueHelpers.h"
 #include "pyVaultNode.h"
 
 #include <vector>
 
-struct RelVaultNode;
 class plUUID;
+struct VaultMarker;
+namespace ST { class string; }
 
 class pyVaultMarkerGameNode : public pyVaultNode
 {
@@ -73,7 +72,9 @@ public:
 
     static void AddPlasmaClasses(PyObject *m);
 
+    ST::string      GetGameGuid() const;
     ST::string      GetGameName () const;
+    void            SetGameGuid(const ST::string& guid);
     void            SetGameName (const ST::string& name);
 
     ST::string GetReward() const;
@@ -81,7 +82,7 @@ public:
 
     /** Returns a tuple of tuples */
     PyObject*       GetMarkers() const;
-    void            SetMarkers(const std::vector<struct VaultMarker>& markers);
+    void            SetMarkers(const std::vector<VaultMarker>& markers);
 };
 
 #endif // _pyVaultMarkerGameNode_h_

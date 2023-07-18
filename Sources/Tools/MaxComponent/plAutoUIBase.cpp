@@ -73,7 +73,7 @@ ST::string plAutoUIBase::IMakeScriptName(const ST::string& fullName)
 
     ST::string_stream ss;
     for (auto chr : fullName) {
-        if (isalpha(chr) || isdigit(chr))
+        if (isalpha(static_cast<unsigned char>(chr)) || isdigit(static_cast<unsigned char>(chr)))
             ss.append_char(chr);
     }
     return ss.to_string();
@@ -501,6 +501,7 @@ void plAutoUIBase::ICreateControls()
     RECT rect;
     GetWindowRect(fhDlg, &rect);
 
+#if MAX_VERSION_MAJOR >= 24 // Max 2022
     // This used to use MoveWindow() to resize the rollup, but in Max 2022,
     // that does not seem to work anymore. So, we now do the same thing
     // that WM_SIZE_PANEL does.
@@ -511,6 +512,9 @@ void plAutoUIBase::ICreateControls()
         rollup->SetPageDlgHeight(index, yOffset + 5);
 
     InvalidateRect(fhDlg, nullptr, TRUE);
+#else
+    MoveWindow(fhDlg, rect.left, rect.top, rect.right - rect.left, yOffset + 5, FALSE);
+#endif
 }
 
 void plAutoUIBase::CreateAutoRollup(IParamBlock2 *pb)

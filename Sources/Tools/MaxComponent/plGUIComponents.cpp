@@ -481,7 +481,7 @@ LRESULT CALLBACK    SubclassedEditProc( HWND hWnd, UINT msg, WPARAM wParam, LPAR
     switch( msg )
     {
         case WM_CHAR:
-            if( !isdigit( (TCHAR)wParam ) )
+            if (wParam >= 0x80 || !isdigit(wParam))
                 return 0;
             break;
 
@@ -2020,12 +2020,12 @@ static plPlasmaAnimSelectDlgProc    sGUIButtonProc( plGUIButtonComponent::kRefMo
 
 
 #define GUI_SOUND_REF( comp, evt, allCapsEvt )      \
-        comp##::kRefMouse##evt##Sound,  _T( "mouse##evt##Sound" ), TYPE_BOOL, 0, 0,                 \
+        comp::kRefMouse##evt##Sound,  _T("mouse" #evt "Sound"), TYPE_BOOL, 0, 0,                 \
             p_ui, plGUIControlBase::kRollMain, TYPE_SINGLECHEKBOX, IDC_GUI_M##allCapsEvt##SND,      \
             p_default, FALSE,                                                                       \
-            p_enable_ctrls, 1, comp##::kRefMouse##evt##SoundComp,                                   \
+            p_enable_ctrls, 1, comp::kRefMouse##evt##SoundComp,                                   \
             p_end,                                                                                  \
-        comp##::kRefMouse##evt##SoundComp, _T("mouse##evt##SoundComp"), TYPE_INODE,     0, 0,       \
+        comp::kRefMouse##evt##SoundComp, _T("mouse" #evt "SoundComp"), TYPE_INODE,     0, 0,       \
             p_accessor, &sGUIButtonAccessor,                                                        \
             p_end
 
@@ -3056,9 +3056,9 @@ public:
 class plGUITextBoxProc : public ParamMap2UserDlgProc
 {
 private:
-    std::vector<M_STD_STRING> fTranslations;
+    std::vector<ST::string> fTranslations;
     int fCurLanguage;
-    void ISetTranslation(int lang, M_STD_STRING text)
+    void ISetTranslation(int lang, ST::string text)
     {
         while (lang >= fTranslations.size())
             fTranslations.emplace_back();
@@ -3072,7 +3072,6 @@ public:
 
     INT_PTR DlgProc(TimeValue t, IParamMap2 *pmap, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) override
     {
-        int i;
         switch( msg )
         {
             case WM_INITDIALOG:
@@ -3080,14 +3079,15 @@ public:
                 if ( pmap->GetParamBlock()->GetStr( plGUITextBoxComponent::kRefInitText ) )
                 {
                     fTranslations = plLocalization::StringToLocal(pmap->GetParamBlock()->GetStr( plGUITextBoxComponent::kRefInitText ) );
-                    SetDlgItemText( hWnd, IDC_GUI_INITTEXT, fTranslations[0].c_str() );
+                    SetDlgItemText(hWnd, IDC_GUI_INITTEXT, ST2T(fTranslations[0]));
                 }
                 else
                     // if there is no text, then there is nothing to translate
                     SetDlgItemText( hWnd, IDC_GUI_INITTEXT, pmap->GetParamBlock()->GetStr( plGUITextBoxComponent::kRefInitText ) );
                 SendMessage( GetDlgItem( hWnd, IDC_GUI_LANGUAGE ), CB_RESETCONTENT, 0, 0 );
-                for (i=0; i<plLocalization::kNumLanguages; i++)
-                    SendMessageA( GetDlgItem( hWnd, IDC_GUI_LANGUAGE ), CB_ADDSTRING, 0, (LPARAM)plLocalization::GetLanguageName((plLocalization::Language)i) );
+                for (const auto& langName : plLocalization::GetAllLanguageNames()) {
+                    SendMessage(GetDlgItem(hWnd, IDC_GUI_LANGUAGE), CB_ADDSTRING, 0, (LPARAM)ST2T(langName));
+                }
                 SendMessage( GetDlgItem( hWnd, IDC_GUI_LANGUAGE ), CB_SETCURSEL, 0, 0 );
                 fCurLanguage = 0;
 
@@ -3121,20 +3121,16 @@ public:
                 {
                     if( HIWORD( wParam ) == EN_CHANGE )
                     {
-                        int strLen = (int)SendDlgItemMessage(hWnd, IDC_GUI_INITTEXT, WM_GETTEXTLENGTH, 0, 0);
+                        int strLen = (int)SendDlgItemMessageW(hWnd, IDC_GUI_INITTEXT, WM_GETTEXTLENGTH, 0, 0);
                         if( strLen > 0 )
                         {
-                            auto str = std::make_unique<TCHAR[]>(strLen + 1);
-                            GetDlgItemText( hWnd, IDC_GUI_INITTEXT, str.get(), strLen + 1 );
-                            str[ strLen ] = 0;
-                            ISetTranslation(fCurLanguage, str.get());
+                            ST::wchar_buffer strBuf;
+                            strBuf.allocate(strLen);
+                            GetDlgItemTextW(hWnd, IDC_GUI_INITTEXT, strBuf.data(), strLen + 1);
+                            ISetTranslation(fCurLanguage, strBuf);
 
-                            auto translation = plLocalization::LocalToString(fTranslations);
-                            str = std::make_unique<TCHAR[]>(translation.length() + 1);
-                            _tcsncpy(str.get(), translation.c_str(), strLen + 1);
-                            str[translation.length()] = 0;
-                
-                            pmap->GetParamBlock()->SetValue( plGUITextBoxComponent::kRefInitText, 0, str.get() );
+                            ST::string translation = plLocalization::LocalToString(fTranslations);
+                            pmap->GetParamBlock()->SetValue(plGUITextBoxComponent::kRefInitText, 0, ST2M(translation));
                         }
                     }
                     else if( HIWORD( wParam ) == EN_KILLFOCUS )
@@ -3177,7 +3173,7 @@ public:
                         if (idx >= fTranslations.size())
                             SetDlgItemText( hWnd, IDC_GUI_INITTEXT, _T("") );
                         else
-                            SetDlgItemText( hWnd, IDC_GUI_INITTEXT, fTranslations[idx].c_str() );
+                            SetDlgItemText(hWnd, IDC_GUI_INITTEXT, ST2T(fTranslations[idx]));
                         fCurLanguage = idx;
                     }
                 }
@@ -4583,10 +4579,10 @@ static pfGUISkinProc gGUISkinProc;
 
 // Component defined in pfGUISkinProc.h
 
-#define kDeclSkinRectValues( ref ) (plGUISkinComp::##ref + 0), _T("f##ref##.left"), TYPE_INT, 0, 0, p_default, 0, p_end,  \
-                                   (plGUISkinComp::##ref + 1), _T("f##ref##.top"), TYPE_INT, 0, 0, p_default, 0, p_end,   \
-                                   (plGUISkinComp::##ref + 2), _T("f##ref##.width"), TYPE_INT, 0, 0, p_default, 8, p_end, \
-                                   (plGUISkinComp::##ref + 3), _T("f##ref##.height"), TYPE_INT, 0, 0, p_default, 8, p_end
+#define kDeclSkinRectValues( ref ) (plGUISkinComp::ref + 0), _T("f" #ref ".left"), TYPE_INT, 0, 0, p_default, 0, p_end,  \
+                                   (plGUISkinComp::ref + 1), _T("f" #ref ".top"), TYPE_INT, 0, 0, p_default, 0, p_end,   \
+                                   (plGUISkinComp::ref + 2), _T("f" #ref ".width"), TYPE_INT, 0, 0, p_default, 8, p_end, \
+                                   (plGUISkinComp::ref + 3), _T("f" #ref ".height"), TYPE_INT, 0, 0, p_default, 8, p_end
 
 #define kSetSkinRectValues( pb, ref, l, t, w, h ) { pb->SetValue( ref + 0, 0, (int) l ); \
                                                     pb->SetValue( ref + 1, 0, (int) t ); \

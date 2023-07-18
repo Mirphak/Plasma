@@ -43,8 +43,9 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "cyMisc.h"
 
 #include <Python.h>
-
+#include <string_theory/string>
 #include <string_view>
+#include <vector>
 
 #include "pyEnum.h"
 #include "pyColor.h"
@@ -193,10 +194,10 @@ PYTHON_GLOBAL_METHOD_DEFINITION_WKEY(PtLocalizedYesNoDialog, args, kwargs,
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtRateIt, args, "Params: chronicleName,dialogPrompt,onceFlag\nShows a dialog with dialogPrompt and stores user input rating into chronicleName")
 {
-    char* chronicleName;
-    char* dialogPrompt;
+    ST::string chronicleName;
+    ST::string dialogPrompt;
     char onceFlag;
-    if (!PyArg_ParseTuple(args, "ssb", &chronicleName, &dialogPrompt, &onceFlag))
+    if (!PyArg_ParseTuple(args, "O&O&b", PyUnicode_STStringConverter, &chronicleName, PyUnicode_STStringConverter, &dialogPrompt, &onceFlag))
     {
         PyErr_SetString(PyExc_TypeError, "PtRateIt expects two strings and a boolean");
         PYTHON_RETURN_ERROR;
@@ -255,9 +256,9 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtExcludeRegionSetNow, args, "Params: senderKey,
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtAcceptInviteInGame, args, "Params: friendName,inviteKey\nSends a VaultTask to the server to perform the invite")
 {
-    char* friendName;
-    char* inviteKey;
-    if (!PyArg_ParseTuple(args, "ss", &friendName, &inviteKey))
+    ST::string friendName;
+    ST::string inviteKey;
+    if (!PyArg_ParseTuple(args, "O&O&", PyUnicode_STStringConverter, &friendName, PyUnicode_STStringConverter, &inviteKey))
     {
         PyErr_SetString(PyExc_TypeError, "PtAcceptInviteInGame expects two strings");
         PYTHON_RETURN_ERROR;
@@ -284,17 +285,17 @@ PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtGetFrameDeltaTime, "Returns the amount 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtPageInNode, args, "Params: nodeName, netForce=false, ageName=\"\"\nPages in node, or a list of nodes")
 {
     PyObject* nodeNameObj = nullptr;
-    char* ageName = nullptr;
+    ST::string ageName;
     char netForce = 0;
-    if (!PyArg_ParseTuple(args, "O|bs", &nodeNameObj, &netForce, &ageName))
+    if (!PyArg_ParseTuple(args, "O|bO&", &nodeNameObj, &netForce, PyUnicode_STStringConverter, &ageName))
     {
         PyErr_SetString(PyExc_TypeError, "PtPageInNode expects a string or list of strings, and optionally a string");
         PYTHON_RETURN_ERROR;
     }
-    std::vector<std::string> nodeNames;
+    std::vector<ST::string> nodeNames;
     if (PyUnicode_Check(nodeNameObj))
     {
-        nodeNames.emplace_back(PyUnicode_AsUTF8(nodeNameObj));
+        nodeNames.emplace_back(PyUnicode_AsSTString(nodeNameObj));
     }
     else if (PyList_Check(nodeNameObj))
     {
@@ -307,7 +308,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtPageInNode, args, "Params: nodeName, netForce=
                 PyErr_SetString(PyExc_TypeError, "PtPageInNode expects a string or list of strings, and optionally a string");
                 PYTHON_RETURN_ERROR;
             }
-            nodeNames.emplace_back(PyUnicode_AsUTF8(listItem));
+            nodeNames.emplace_back(PyUnicode_AsSTString(listItem));
         }
     }
     else
@@ -322,9 +323,9 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtPageInNode, args, "Params: nodeName, netForce=
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtPageOutNode, args, "Params: nodeName, netForce = false\nPages out a node")
 {
-    char* nodeName;
+    ST::string nodeName;
     char netForce = 0;
-    if (!PyArg_ParseTuple(args, "s|b", &nodeName, &netForce))
+    if (!PyArg_ParseTuple(args, "O&|b", PyUnicode_STStringConverter, &nodeName, &netForce))
     {
         PyErr_SetString(PyExc_TypeError, "PtPageOutNode expects a string and bool");
         PYTHON_RETURN_ERROR;
@@ -402,10 +403,10 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtFogSetDefExp2, args, "Params: end,density\nSet
 PYTHON_GLOBAL_METHOD_DEFINITION(PtLoadDialog, args, "Params: dialogName,selfKey=None,ageName=\"\"\nLoads a GUI dialog by name and optionally set the Notify proc key\n"
             "If the dialog is already loaded then it won't load it again")
 {
-    char* dialogName;
+    ST::string dialogName;
     PyObject* keyObj = nullptr;
-    char* ageName = nullptr;
-    if (!PyArg_ParseTuple(args, "s|Os", &dialogName, &keyObj, &ageName))
+    ST::string ageName = ST_LITERAL("GUI");
+    if (!PyArg_ParseTuple(args, "O&|OO&", PyUnicode_STStringConverter, &dialogName, &keyObj, PyUnicode_STStringConverter, &ageName))
     {
         PyErr_SetString(PyExc_TypeError, "PtLoadDialog expects a string, and optionally a ptKey and second string");
         PYTHON_RETURN_ERROR;
@@ -418,10 +419,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtLoadDialog, args, "Params: dialogName,selfKey=
             PYTHON_RETURN_ERROR;
         }
         pyKey* key = pyKey::ConvertFrom(keyObj);
-        if (ageName)
-            cyMisc::LoadDialogKA(dialogName, *key, ageName);
-        else
-            cyMisc::LoadDialogK(dialogName, *key);
+        cyMisc::LoadDialogKA(dialogName, *key, ageName);
     }
     else
         cyMisc::LoadDialog(dialogName);
@@ -430,8 +428,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtLoadDialog, args, "Params: dialogName,selfKey=
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtUnloadDialog, args, "Params: dialogName\nThis will unload the GUI dialog by name. If not loaded then nothing will happen")
 {
-    char* dialogName;
-    if (!PyArg_ParseTuple(args, "s", &dialogName))
+    ST::string dialogName;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &dialogName))
     {
         PyErr_SetString(PyExc_TypeError, "PtUnloadDialog expects a string");
         PYTHON_RETURN_ERROR;
@@ -442,8 +440,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtUnloadDialog, args, "Params: dialogName\nThis 
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtIsDialogLoaded, args, "Params: dialogName\nTest to see if a GUI dialog is loaded, by name")
 {
-    char* dialogName;
-    if (!PyArg_ParseTuple(args, "s", &dialogName))
+    ST::string dialogName;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &dialogName))
     {
         PyErr_SetString(PyExc_TypeError, "PtIsDialogLoaded expects a string");
         PYTHON_RETURN_ERROR;
@@ -453,8 +451,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtIsDialogLoaded, args, "Params: dialogName\nTes
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtShowDialog, args, "Params: dialogName\nShow a GUI dialog by name (does not load dialog)")
 {
-    char* dialogName;
-    if (!PyArg_ParseTuple(args, "s", &dialogName))
+    ST::string dialogName;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &dialogName))
     {
         PyErr_SetString(PyExc_TypeError, "PtShowDialog expects a string");
         PYTHON_RETURN_ERROR;
@@ -465,8 +463,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtShowDialog, args, "Params: dialogName\nShow a 
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtHideDialog, args, "Params: dialogName\nHide a GUI dialog by name (does not unload dialog)")
 {
-    char* dialogName;
-    if (!PyArg_ParseTuple(args, "s", &dialogName))
+    ST::string dialogName;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &dialogName))
     {
         PyErr_SetString(PyExc_TypeError, "PtHideDialog expects a string");
         PYTHON_RETURN_ERROR;
@@ -488,8 +486,8 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtGetDialogFromTagID, args, "Params: tagID\nRetu
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtGetDialogFromString, args, "Params: dialogName\nGet a ptGUIDialog from its name")
 {
-    char* dialogName;
-    if (!PyArg_ParseTuple(args, "s", &dialogName))
+    ST::string dialogName;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &dialogName))
     {
         PyErr_SetString(PyExc_TypeError, "PtHideDialog expects a string");
         PYTHON_RETURN_ERROR;
@@ -634,6 +632,10 @@ void cyMisc::AddPlasmaConstantsClasses(PyObject *m)
     PYTHON_ENUM_ELEMENT(PtLanguage, kSpanish,       plLocalization::kSpanish)
     PYTHON_ENUM_ELEMENT(PtLanguage, kItalian,       plLocalization::kItalian)
     PYTHON_ENUM_ELEMENT(PtLanguage, kJapanese,      plLocalization::kJapanese)
+    PYTHON_ENUM_ELEMENT(PtLanguage, kDutch,         plLocalization::kDutch)
+    PYTHON_ENUM_ELEMENT(PtLanguage, kRussian,       plLocalization::kRussian)
+    PYTHON_ENUM_ELEMENT(PtLanguage, kPolish,        plLocalization::kPolish)
+    PYTHON_ENUM_ELEMENT(PtLanguage, kCzech,         plLocalization::kCzech)
     PYTHON_ENUM_ELEMENT(PtLanguage, kNumLanguages,  plLocalization::kNumLanguages)
     PYTHON_ENUM_END(m, PtLanguage)
 

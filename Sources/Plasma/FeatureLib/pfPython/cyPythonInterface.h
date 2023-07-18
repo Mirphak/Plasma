@@ -50,10 +50,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 // NOTE: Eventually, this will be made into a separate dll, because there should
 //       only be one instance of this interface. 
 //
-#include "HeadSpin.h"
-#include <string_theory/string>
-#include <string>
-#include <vector>
 
 #if defined(HAVE_CYPYTHONIDE) && !defined(PLASMA_EXTERNAL_RELEASE)
 #include "../../Apps/CyPythonIDE/plCyDebug/plCyDebServer.h"
@@ -62,7 +58,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 class plStatusLog;
 class pyKey;
 typedef struct _object PyObject;
-typedef struct PyMethodDef PyMethodDef;
+namespace ST { class string; }
 
 class  PythonInterface
 {
@@ -87,11 +83,6 @@ private:
     static plCyDebServer debugServer;
 #endif
 
-    static void initPlasmaModule();
-    static void initPlasmaConstantsModule();
-    static void initPlasmaNetConstantsModule();
-    static void initPlasmaVaultConstantsModule();
-
 public:
 
     // set that we are truly shutting down
@@ -109,6 +100,12 @@ public:
 
     // Initialize the PlasmaConstants module
     static void AddPlasmaConstantsClasses(PyObject* m);
+
+    // Initialize the PlasmaGame module
+    static void AddPlasmaGameClasses(PyObject* m);
+
+    // Initialize the PlasmaGameConstants module
+    static void AddPlasmaGameConstantsClasses(PyObject* m);
 
     // Initialize the PlasmaNetConstants module;
     static void AddPlasmaNetConstantsClasses(PyObject* m);
@@ -130,13 +127,13 @@ public:
     static PyObject* GetStdErr();
 
     // get the Output to the error file to be displayed
-    static int getOutputAndReset(std::string* output = nullptr);
+    static ST::string getOutputAndReset();
 
     // Writes 'text' to the Python log
     static void WriteToLog(const ST::string& text);
 
     // Writes 'text' to stderr specified in the python interface
-    static void WriteToStdErr(const char* text);
+    static void WriteToStdErr(const ST::string& text);
 
     static PyObject* ImportModule(const char* module);
 

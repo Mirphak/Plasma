@@ -43,7 +43,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #define _pyGlueHelpers_h_
 
 namespace ST { class string; }
-class pyKey;
 typedef struct _object PyObject;
 typedef struct _typeobject PyTypeObject;
 typedef struct PyMethodDef PyMethodDef;
@@ -55,13 +54,6 @@ int PyUnicode_PlFileNameDecoder(PyObject* obj, void* str);
 
 PyObject* PyUnicode_FromSTString(const ST::string& str);
 #define PyUnicode_FromSTString(x) PyUnicode_FromStringAndSize((x).c_str(), (x).size())
-#define PyUnicode_FromStdString(x) PyUnicode_FromStringAndSize((x).c_str(), (x).size())
-
-// Python 2.7 uses non-const "char *" in many places where a string literal
-// should be accepted.  This makes many compilers unhappy.
-// This hack is borrowed from libhsplasma
-template <size_t size>
-inline char* _pycs(const char (&str)[size]) { return const_cast<char*>(str); }
 
 // A set of macros to take at least some of the tediousness out of creating straight python glue code
 
@@ -90,24 +82,6 @@ struct pythonClassName \
 PyObject *glueClassName::New() \
 { \
     pythonClassName *newObj = (pythonClassName*)pythonClassName##_type.tp_new(&pythonClassName##_type, nullptr, nullptr); \
-    return (PyObject*)newObj; \
-}
-
-#define PYTHON_CLASS_VAULT_NODE_NEW_IMPL(pythonClassName, glueClassName) \
-PyObject* glueClassName::New(hsRef<RelVaultNode> nfsNode) \
-{ \
-    pythonClassName* newObj = (pythonClassName*)pythonClassName##_type.tp_new(&pythonClassName##_type, nullptr, nullptr); \
-    if (nfsNode) \
-        newObj->fThis->fNode = std::move(nfsNode); \
-    return (PyObject*)newObj; \
-}
-
-#define PYTHON_CLASS_VAULT_NODE_NEW_IMPL(pythonClassName, glueClassName) \
-PyObject* glueClassName::New(hsRef<RelVaultNode> nfsNode) \
-{ \
-    pythonClassName* newObj = (pythonClassName*)pythonClassName##_type.tp_new(&pythonClassName##_type, nullptr, nullptr); \
-    if (nfsNode) \
-        newObj->fThis->fNode = std::move(nfsNode); \
     return (PyObject*)newObj; \
 }
 
@@ -439,6 +413,8 @@ PyModule_AddObject(m, #pythonClassName, (PyObject*)&pythonClassName##_type)
     static PyObject *pythonClassName##_##methodName(PyObject*, PyObject *argsVar)
 #define PYTHON_METHOD_DEFINITION_STATIC_WKEY(pythonClassName, methodName, argsVar, keywordsVar) \
     static PyObject *pythonClassName##_##methodName(PyObject*, PyObject *argsVar, PyObject *keywordsVar)
+#define PYTHON_METHOD_DEFINITION_STATIC_NOARGS(pythonClassName, methodName) \
+    static PyObject *pythonClassName##_##methodName(pythonClassName *self)
 #define PYTHON_METHOD_DEFINITION_WKEY(pythonClassName, methodName, argsVar, keywordsVar) \
     static PyObject *pythonClassName##_##methodName(pythonClassName *self, PyObject *argsVar, PyObject *keywordsVar)
 
@@ -452,15 +428,14 @@ static PyObject *pythonClassName##_##methodName(pythonClassName *self) \
 
 // Different basic return types
 #define PYTHON_RETURN_ERROR { return nullptr; }
-#define PYTHON_RETURN_NONE {Py_INCREF(Py_None); return Py_None;}
-#define PYTHON_RETURN_BOOL(testValue) \
-{ \
-    if (testValue) \
-        return PyLong_FromLong((long)1); \
-    else \
-        return PyLong_FromLong((long)0); \
-}
-#define PYTHON_RETURN_NOT_IMPLEMENTED {Py_INCREF(Py_NotImplemented); return Py_NotImplemented;}
+#define PYTHON_RETURN_NONE Py_RETURN_NONE
+#define PYTHON_RETURN_BOOL(testValue)                     \
+{                                                         \
+    PyObject* retVal = (testValue) ? Py_True : Py_False;  \
+    Py_INCREF(retVal);                                    \
+    return retVal;                                        \
+}                                                         //
+#define PYTHON_RETURN_NOT_IMPLEMENTED Py_RETURN_NOTIMPLEMENTED
 
 // method table start
 #define PYTHON_START_METHODS_TABLE(pythonClassName) static PyMethodDef pythonClassName##_methods[] = {
@@ -484,6 +459,10 @@ static PyObject *pythonClassName##_##methodName(pythonClassName *self) \
 #define PYTHON_METHOD_STATIC_WKEY(pythonClassName, methodName, docString) \
     {#methodName, (PyCFunction)pythonClassName##_##methodName, METH_STATIC | METH_VARARGS | METH_KEYWORDS, docString}
 
+// static method with no arguments
+#define PYTHON_METHOD_STATIC_NOARGS(pythonClassName, methodName, docString) \
+    {#methodName, (PyCFunction)pythonClassName##_##methodName, METH_STATIC | METH_NOARGS, docString}
+
 // method with keywords
 #define PYTHON_METHOD_WKEY(pythonClassName, methodName, docString) \
     {#methodName, (PyCFunction)pythonClassName##_##methodName, METH_VARARGS | METH_KEYWORDS, docString}
@@ -504,6 +483,12 @@ static PyObject *pythonClassName##_##methodName(pythonClassName *self) \
 #define PYTHON_GET_DEFINITION(pythonClassName, attribName) \
     static PyObject *pythonClassName##_get##attribName(pythonClassName *self, void *closure)
 
+#define PYTHON_GET_DEFINITION_PROXY(pythonClassName, attribName, getterFunction) \
+static PyObject* pythonClassName##_get##attribName(pythonClassName* self, void*) \
+{                                                                                \
+    return plPython::ConvertFrom(self->fThis->getterFunction());                 \
+}                                                                                //
+
 // setter function definition
 #define PYTHON_SET_DEFINITION(pythonClassName, attribName, valueVarName) \
     static int pythonClassName##_set##attribName(pythonClassName *self, PyObject *valueVarName, void *closure)
@@ -523,9 +508,9 @@ int pythonClassName##_set##attribName(PyObject *self, PyObject *value, void *clo
 #define PYTHON_END_GETSET_TABLE { nullptr } }
 
 // the get/set definition
-#define PYTHON_GETSET(pythonClassName, attribName, docString) {_pycs(#attribName), \
+#define PYTHON_GETSET(pythonClassName, attribName, docString) {#attribName, \
     (getter)pythonClassName##_get##attribName, (setter)pythonClassName##_set##attribName, \
-    _pycs(docString), nullptr }
+    docString, nullptr }
 
 /////////////////////////////////////////////////////////////////////
 // as_ table macros
@@ -614,18 +599,5 @@ static PyObject *methodName(PyObject *self) /* and now for the actual function *
         if (PyModule_AddFunctions(moduleVarName, name##_globalMethods) < 0) \
             return; \
     }
-
-/////////////////////////////////////////////////////////////////////
-// Enum glue (these should all be inside a function)
-/////////////////////////////////////////////////////////////////////
-
-// the start of an enum block
-#define PYTHON_ENUM_START(enumName) std::vector<std::tuple<ST::string, Py_ssize_t>> enumName##_enumValues{
-
-// for each element of the enum
-#define PYTHON_ENUM_ELEMENT(enumName, elementName, elementValue) std::make_tuple(ST_LITERAL(#elementName), (Py_ssize_t)elementValue),
-
-// to finish off and define the enum
-#define PYTHON_ENUM_END(m, enumName) }; pyEnum::MakeEnum(m, #enumName, enumName##_enumValues);
 
 #endif // _pyGlueHelpers_h_

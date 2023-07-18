@@ -48,13 +48,16 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plNetClientComm.h"
 
 #include <chrono>
+#include <string_view>
 #include <thread>
 
+#include "HeadSpin.h"
 #include "plProduct.h"
 #include "hsResMgr.h"
 
 #include "pnAsyncCore/pnAsyncCore.h"
 #include "pnEncryption/plChallengeHash.h"
+#include "pnNetBase/pnNbConst.h"
 #include "pnNetCli/pnNetCli.h"
 #include "pnNetCommon/plNetApp.h"
 
@@ -63,17 +66,14 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plMessage/plNetCommMsgs.h"
 #include "plMessage/plNetClientMgrMsg.h"
 #include "plNetCommon/plNetCommon.h"
+#include "plNetCommon/plNetMsgHandler.h"
 #include "plNetGameLib/plNetGameLib.h"
 #include "plNetMessage/plNetMessage.h"
 #include "plVault/plVault.h"
 
 #include "pfMessage/pfKIMsg.h"
 
-#ifdef HS_BUILD_FOR_MACOS
-#include <malloc/malloc.h>
-#else
-#include <malloc.h>
-#endif
+using namespace std::literals::string_view_literals;
 
 extern  bool    gDataServerLocal;
 
@@ -903,7 +903,7 @@ void NetCommRecvMsg (
     plNetMessage * msg
 ) {
     for (;;) {
-        if (s_preHandler.proc && kOK_MsgConsumed == s_preHandler.proc(msg, s_preHandler.state))
+        if (s_preHandler.proc && s_preHandler.proc(msg, s_preHandler.state) == plNetMsgHandler::Status::kConsumed)
             break;
 
         unsigned msgClassIdx = msg->ClassIndex();
@@ -914,7 +914,7 @@ void NetCommRecvMsg (
             break;
         }        
         while (handler) {
-            if (kOK_MsgConsumed == handler->proc(msg, handler->state))
+            if (handler->proc(msg, handler->state) == plNetMsgHandler::Status::kConsumed)
                 break;
             handler = s_handlers.FindNext(msgClassIdx, handler);
         }
@@ -1259,6 +1259,43 @@ void NetCommSendFriendInvite (
     );
 }
 
+static constexpr std::u16string_view kTracebackTruncatedMarker = u"[...]"sv;
+// Maximum length of a traceback chunk to still leave room for the truncation marker.
+// Like kMaxTracebackLength, includes one char16_t extra for the zero terminator.
+static constexpr unsigned int kTracebackChunkLength = kMaxTracebackLength - std::size(kTracebackTruncatedMarker);
+
+typedef void LogErrorFunc(const char16_t* errorText);
+
+template<LogErrorFunc logErrorFunc>
+static void NetCommLogChunkedError(const ST::string& errorText)
+{
+    ST::utf16_buffer wdata = errorText.to_utf16();
+    if (wdata.size() < kMaxTracebackLength - 1) {
+        logErrorFunc(wdata.data());
+    } else {
+        // The traceback is too long for a single message,
+        // so split it up into multiple small messages
+        // and add a truncation marker at the end of every message but the last.
+        auto pos = wdata.begin();
+        for (; wdata.end() - pos >= kMaxTracebackLength - 1; pos += kTracebackChunkLength - 1) {
+            ST::utf16_buffer chunk = ST::utf16_buffer(pos, kMaxTracebackLength - 1);
+            kTracebackTruncatedMarker.copy(&chunk[kTracebackChunkLength - 1], kTracebackTruncatedMarker.size());
+            logErrorFunc(chunk.data());
+        }
+        logErrorFunc(pos);
+    }
+}
+
+void NetCommLogPythonTraceback(const ST::string& traceback)
+{
+    NetCommLogChunkedError<NetCliAuthLogPythonTraceback>(traceback);
+}
+
+void NetCommLogStackDump(const ST::string& stackDump)
+{
+    NetCommLogChunkedError<NetCliAuthLogStackDump>(stackDump);
+}
+
 
 /*****************************************************************************
 *
@@ -1310,7 +1347,7 @@ void plNetClientComm::SetDefaultHandler( MsgHandler* handler) {
 }
 
 // MsgHandler::StaticMsgHandler ----------------------------------------------
-int plNetClientComm::MsgHandler::StaticMsgHandler (plNetMessage * msg, void * userState) {
+plNetMsgHandler::Status plNetClientComm::MsgHandler::StaticMsgHandler(plNetMessage* msg, void* userState) {
     plNetClientComm::MsgHandler * handler = (plNetClientComm::MsgHandler *) userState;
     return handler->HandleMessage(msg);
 }

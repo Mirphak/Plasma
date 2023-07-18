@@ -17,7 +17,6 @@ set(CoreLib_SOURCES
     hsStringTokenizer.cpp
     hsSystemInfo.cpp
     hsThread.cpp
-    hsWide.cpp
     pcSmallRect.cpp
     plCmdParser.cpp
     plFileSystem.cpp
@@ -39,7 +38,6 @@ endif()
 set(CoreLib_HEADERS
     HeadSpin.h
     hsAlignedAllocator.hpp
-    hsBiExpander.h
     hsBitVector.h
     hsBounds.h
     hsColorRGBA.h
@@ -50,6 +48,7 @@ set(CoreLib_HEADERS
     hsGeometry3.h
     hsLockGuard.h
     hsMatrix44.h
+    hsMatrixMath.h
     hsMemory.h
     hsPoint2.h
     hsPoolVector.h
@@ -61,7 +60,6 @@ set(CoreLib_HEADERS
     hsStringTokenizer.h
     hsSystemInfo.h
     hsThread.h
-    hsWide.h
     hsWindows.h
     pcSmallRect.h
     plCmdParser.h
@@ -86,6 +84,7 @@ target_link_libraries(
         string_theory
         Threads::Threads
         $<$<AND:$<CONFIG:Debug>,$<BOOL:${USE_VLD}>>:VLD::VLD>
+        "$<$<PLATFORM_ID:Darwin>:-framework Accelerate>"
     PRIVATE
         "$<$<PLATFORM_ID:Darwin>:-framework CoreFoundation>"
 )

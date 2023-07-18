@@ -48,20 +48,21 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 // PURPOSE: Class wrapper to map animation functions to plasma2 message
 //
-#include "plFileSystem.h"
+
+#include <vector>
 
 #include "pnKeyedObject/plKey.h"
 
 #include "pyGlueHelpers.h"
 
-#include <string>
-
+class plFileName;
 class pySceneObject;
 class pyColor;
 class plMipmap;
 class plClothingItem;
 class plArmatureMod;
 class plMorphSequence;
+namespace ST { class string; }
 
 class cyAvatar
 {
@@ -70,23 +71,17 @@ protected:
     std::vector<plKey> fRecvr;
     bool          fNetForce;
 
-    virtual const plArmatureMod* IFindArmatureMod(const plKey& avObj);
-    virtual plKey IFindArmatureModKey(const plKey& avObj);
-    
-// XX   static bool IEnterGenericMode(const char *enterAnim, const char *idleAnim, const char *exitAnim, bool autoExit);
-// XX   static bool IExitTopmostGenericMode();
+    const plArmatureMod* IFindArmatureMod(const plKey& avObj);
+    plKey IFindArmatureModKey(const plKey& avObj);
 
 protected:
     cyAvatar() : fNetForce() { }
     cyAvatar(plKey sender, plKey recvr=nullptr);
 
 public:
-    virtual ~cyAvatar() { }
-
     // required functions for PyObject interoperability
     PYTHON_CLASS_NEW_FRIEND(ptAvatar);
     PYTHON_CLASS_NEW_DEFINITION;
-    static PyObject* New(PyObject* sender, PyObject* recvr = nullptr);
     PYTHON_CLASS_CHECK_DEFINITION; // returns true if the PyObject is a cyAvatar object
     PYTHON_CLASS_CONVERT_FROM_DEFINITION(cyAvatar); // converts a PyObject to a cyAvatar (throws error if not correct type)
 
@@ -97,32 +92,32 @@ public:
     // setters
     void SetSender(plKey sender);
     void AddRecvr(plKey recvr);
-    virtual void SetNetForce(bool state) { fNetForce = state; }
+    void SetNetForce(bool state) { fNetForce = state; }
 
     // oneShot Avatar (must already be there)
-    virtual void OneShot(pyKey &seekKey, float duration, bool usePhysics,
+    void OneShot(pyKey &seekKey, float duration, bool usePhysics,
                    const ST::string &animName, bool drivable, bool reversible);
 
     // oneShot Avatar 
-    virtual void RunBehavior(pyKey &behKey, bool netForce, bool netProp);
-    virtual void RunBehaviorAndReply(pyKey& behKey, pyKey& replyKey, bool netForce, bool netProp);
-    virtual bool RunCoopAnim(pyKey& targetKey, ST::string activeAvatarAnim, ST::string targetAvatarAnim, float range, float dist, bool move);
+    void RunBehavior(pyKey &behKey, bool netForce, bool netProp);
+    void RunBehaviorAndReply(pyKey& behKey, pyKey& replyKey, bool netForce, bool netProp);
+    bool RunCoopAnim(pyKey& targetKey, ST::string activeAvatarAnim, ST::string targetAvatarAnim, float range, float dist, bool move);
 
     // for the multistage behaviors
-    virtual void NextStage(pyKey &behKey, float transTime, bool setTime, float newTime,
+    void NextStage(pyKey &behKey, float transTime, bool setTime, float newTime,
                         bool setDirection, bool isForward, bool netForce);
-    virtual void PreviousStage(pyKey &behKey, float transTime, bool setTime, float newTime,
+    void PreviousStage(pyKey &behKey, float transTime, bool setTime, float newTime,
                         bool setDirection, bool isForward, bool netForce);
-    virtual void GoToStage(pyKey &behKey, int32_t stage, float transTime, bool setTime, float newTime,
+    void GoToStage(pyKey &behKey, int32_t stage, float transTime, bool setTime, float newTime,
                         bool setDirection, bool isForward, bool netForce);
 
     // static behavior functions:
     static void SetLoopCount(pyKey &behKey, int32_t stage, int32_t loopCount, bool netForce);
 
-    virtual void SetSenderKey(const pyKey &pKey);
+    void SetSenderKey(const pyKey &pKey);
 
     // seek Avatar (must already be there)
-    //virtual void Seek(pyKey &seekKey, float duration, bool usePhysics);
+    //void Seek(pyKey &seekKey, float duration, bool usePhysics);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -131,7 +126,7 @@ public:
     //
     //  PURPOSE    : Return what clothing group the avatar is in
     //
-    virtual int32_t GetAvatarClothingGroup();
+    int32_t GetAvatarClothingGroup();
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -140,7 +135,7 @@ public:
     //
     //  PURPOSE    : Return a list of the wearable items for this avatar of that clothing_type
     //
-    virtual std::vector<ST::string> GetEntireClothingList(int32_t clothing_type);
+    std::vector<ST::string> GetEntireClothingList(int32_t clothing_type);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -149,7 +144,7 @@ public:
     //
     //  PURPOSE    : Return a list of the wearable items for this avatar of that clothing_type
     //
-    virtual std::vector<PyObject*> GetClosetClothingList(int32_t clothing_type);
+    std::vector<PyObject*> GetClosetClothingList(int32_t clothing_type);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -158,7 +153,7 @@ public:
     //
     //  PURPOSE    : Return a list of items being worn by this avatar
     //
-    virtual std::vector<PyObject*> GetAvatarClothingList();
+    std::vector<PyObject*> GetAvatarClothingList();
     
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -167,7 +162,7 @@ public:
     //
     //  PURPOSE    : Return a list of items that are in the avatars closet
     //
-    virtual std::vector<PyObject*> GetWardrobeClothingList();
+    std::vector<PyObject*> GetWardrobeClothingList();
     /////////////////////////////////////////////////////////////////////////////
     //
     //  Function   : AddWardrobeClothingItem
@@ -177,7 +172,7 @@ public:
     //
     //  PURPOSE    : To add a clothing item to the avatar's wardrobe (closet)
     //
-    virtual void AddWardrobeClothingItem(const ST::string& clothing_name,pyColor& tint1,pyColor& tint2);
+    void AddWardrobeClothingItem(const ST::string& clothing_name,pyColor& tint1,pyColor& tint2);
     
     
     /////////////////////////////////////////////////////////////////////////////
@@ -188,7 +183,7 @@ public:
     //  PURPOSE    : Return a list of unique clothing items (each has a different mesh)
     //             : that belong to the specific type
     //
-    virtual std::vector<PyObject*> GetUniqueMeshList(int32_t clothing_type);
+    std::vector<PyObject*> GetUniqueMeshList(int32_t clothing_type);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -198,7 +193,7 @@ public:
     //  PURPOSE    : Return a list of clothing items that have the same mesh as
     //             : the item passed in
     //
-    virtual std::vector<PyObject*> GetAllWithSameMesh(const ST::string& clothing_name);
+    std::vector<PyObject*> GetAllWithSameMesh(const ST::string& clothing_name);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -207,7 +202,7 @@ public:
     //
     //  PURPOSE    : Return the clothing item that matches this one
     //
-    virtual PyObject* GetMatchingClothingItem(const ST::string& clothing_name);
+    PyObject* GetMatchingClothingItem(const ST::string& clothing_name);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -217,7 +212,7 @@ public:
     //  PURPOSE    : Wear a particular piece of clothing based on name of clothing item
     //             : returns 0, if clothing item was not found
     //
-    virtual bool WearClothingItem(const ST::string& clothing_name);
+    bool WearClothingItem(const ST::string& clothing_name);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -227,7 +222,7 @@ public:
     //  PURPOSE    : Remove (take off) a particular piece of clothing based on name of clothing item
     //             : returns 0, if clothing item was not found
     //
-    virtual bool RemoveClothingItem(const ST::string& clothing_name);
+    bool RemoveClothingItem(const ST::string& clothing_name);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -236,7 +231,7 @@ public:
     //
     //  PURPOSE    : Tint a clothing item, i.e. change the color of it
     //
-    virtual bool TintClothingItem(const ST::string& clothing_name, pyColor& tint);
+    bool TintClothingItem(const ST::string& clothing_name, pyColor& tint);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -247,7 +242,7 @@ public:
     //
     //  PURPOSE    : Tint a clothing item, i.e. change the color of it
     //
-    virtual bool TintClothingItemLayer(const ST::string& clothing_name, pyColor& tint, uint8_t layer);
+    bool TintClothingItemLayer(const ST::string& clothing_name, pyColor& tint, uint8_t layer);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -257,7 +252,7 @@ public:
     //  PURPOSE    : Wear a particular piece of clothing based on name of clothing item
     //             : returns 0, if clothing item was not found
     //
-    virtual bool WearClothingItemU(const ST::string& clothing_name, bool update);
+    bool WearClothingItemU(const ST::string& clothing_name, bool update);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -267,7 +262,7 @@ public:
     //  PURPOSE    : Remove (take off) a particular piece of clothing based on name of clothing item
     //             : returns 0, if clothing item was not found
     //
-    virtual bool RemoveClothingItemU(const ST::string& clothing_name, bool update);
+    bool RemoveClothingItemU(const ST::string& clothing_name, bool update);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -276,7 +271,7 @@ public:
     //
     //  PURPOSE    : Tint a clothing item, i.e. change the color of it
     //
-    virtual bool TintClothingItemU(const ST::string& clothing_name, pyColor& tint, bool update);
+    bool TintClothingItemU(const ST::string& clothing_name, pyColor& tint, bool update);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -287,7 +282,7 @@ public:
     //
     //  PURPOSE    : Tint a clothing item, i.e. change the color of it
     //
-    virtual bool TintClothingItemLayerU(const ST::string& clothing_name, pyColor& tint, uint8_t layer, bool update);
+    bool TintClothingItemLayerU(const ST::string& clothing_name, pyColor& tint, uint8_t layer, bool update);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -296,7 +291,7 @@ public:
     //
     //  PURPOSE    : Get the custom parameter string for a clothing item
     //
-    virtual ST::string GetClothingItemParameterString(const ST::string& clothing_name);
+    ST::string GetClothingItemParameterString(const ST::string& clothing_name);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -305,7 +300,7 @@ public:
     //
     //  PURPOSE    : Get the tint a clothing item, i.e. change the color of it
     //
-    virtual PyObject* GetTintClothingItem(const ST::string& clothing_name);
+    PyObject* GetTintClothingItem(const ST::string& clothing_name);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -314,7 +309,7 @@ public:
     //
     //  PURPOSE    : Get the tint a clothing item, i.e. change the color of it
     //
-    virtual PyObject* GetTintClothingItemL(const ST::string& clothing_name, uint8_t layer);
+    PyObject* GetTintClothingItemL(const ST::string& clothing_name, uint8_t layer);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -323,7 +318,7 @@ public:
     //
     //  PURPOSE    : Tint the skin of the player's avatar
     //
-    virtual void TintSkin(pyColor& tint);
+    void TintSkin(pyColor& tint);
     /////////////////////////////////////////////////////////////////////////////
     //
     //  Function   : TintSkinU
@@ -331,7 +326,7 @@ public:
     //
     //  PURPOSE    : Tint the skin of the player's avatar with optional update flag
     //
-    virtual void TintSkinU(pyColor& tint, bool update);
+    void TintSkinU(pyColor& tint, bool update);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -340,9 +335,9 @@ public:
     //
     //  PURPOSE    : Get the tint of the skin of the player's avatar
     //
-    virtual PyObject* GetTintSkin();
+    PyObject* GetTintSkin();
 
-    virtual plMorphSequence* LocalMorphSequence();
+    plMorphSequence* LocalMorphSequence();
     
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -353,7 +348,7 @@ public:
     //
     //  PURPOSE    : Set the morph value of a specific layer of clothing
     //
-    virtual void SetMorph(const ST::string& clothing_name, uint8_t layer, float value);
+    void SetMorph(const ST::string& clothing_name, uint8_t layer, float value);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -363,7 +358,7 @@ public:
     //
     //  PURPOSE    : Returns the current morph value of the specific layer of clothing
     //
-    virtual float GetMorph(const ST::string& clothing_name, uint8_t layer);
+    float GetMorph(const ST::string& clothing_name, uint8_t layer);
     
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -373,7 +368,7 @@ public:
     //
     //  PURPOSE    : Set the skin blend for the specified layer
     //
-    virtual void SetSkinBlend(uint8_t layer, float value);
+    void SetSkinBlend(uint8_t layer, float value);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -382,7 +377,7 @@ public:
     //
     //  PURPOSE    : Returns the current layer's skin blend
     //
-    virtual float GetSkinBlend(uint8_t layer);
+    float GetSkinBlend(uint8_t layer);
     
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -391,7 +386,7 @@ public:
     //
     //  PURPOSE    : Saves the current clothing to the vault (including morphs)
     //
-    virtual void SaveClothing();
+    void SaveClothing();
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -400,7 +395,7 @@ public:
     //
     //  PURPOSE    : Place the Avatar into the subworld of the sceneobject specified
     //
-    virtual void EnterSubWorld(pySceneObject& object);
+    void EnterSubWorld(pySceneObject& object);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -409,12 +404,12 @@ public:
     //
     //  PURPOSE    : Exit the avatar from the subworld, back into the ... <whatever> world
     //
-    virtual void ExitSubWorld();
+    void ExitSubWorld();
 
-    virtual void PlaySimpleAnimation(const ST::string& animName);
+    void PlaySimpleAnimation(const ST::string& animName);
 
-    virtual bool SaveClothingToFile(plFileName filename);
-    virtual bool LoadClothingFromFile(plFileName filename);
+    bool SaveClothingToFile(plFileName filename);
+    bool LoadClothingFromFile(plFileName filename);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -427,7 +422,7 @@ public:
     //    Male
     //    Female
     //
-    static void ChangeAvatar(const char* genderName);
+    static void ChangeAvatar(const ST::string& genderName);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -436,7 +431,7 @@ public:
     //
     //  PURPOSE    : Change the local player's avatar name
     //
-    static void ChangePlayerName(const char* playerName);
+    static void ChangePlayerName(const ST::string& playerName);
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -445,7 +440,7 @@ public:
     //
     //  PURPOSE    : plays an emote on the local avatar (net propagated)
     //
-    static bool Emote(const char* emoteName);
+    static bool Emote(const ST::string& emoteName);
 
     /////////////////////////////////////////////////////////////////////////////
     //

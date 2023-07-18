@@ -58,74 +58,26 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 //// pfGUICtrlGenerator Definition ///////////////////////////////////////////
 
-struct hsColorRGBA;
 class plDrawable;
 class hsGMaterial;
-class pfGUIButtonMod;
 class pfGUIDialogMod;
-class pfGUIDragBarCtrl;
+class pfGUIMenuItem;
 class hsKeyedObject;
 class plKey;
 struct hsMatrix44;
-class plSceneNode;
 class plSceneObject;
-class plTextGenerator;
 
 class pfGUICtrlGenerator
 {
     protected:
+        plKey       IAddKey(hsKeyedObject *ko, const ST::string& prefix);
+        ST::string  IGetNextKeyName(const ST::string& prefix);
 
-        char    fFontFace[ 256 ];
-        uint32_t  fFontSize;
-
-        std::vector<plTextGenerator *> fTextGens;
-
-        std::vector<plSceneNode *>     fDynDlgNodes;
-        std::vector<pfGUIDialogMod *>  fDynDialogs;
-        std::vector<plSceneObject *>   fDynDragBars;
-
-
-        plKey       IAddKey( hsKeyedObject *ko, const char *prefix );
-        ST::string  IGetNextKeyName( const char *prefix );
-
-        hsGMaterial *ICreateSolidMaterial( hsColorRGBA &color );
-
-        hsGMaterial *ICreateTextMaterial( const char *text, hsColorRGBA &bgColor, 
-                                                 hsColorRGBA &textColor, float objWidth, float objHeight );
-
-        pfGUIDialogMod  *IGetDialog();
-        pfGUIDialogMod  *IGenerateDialog( const char *name, float scrnWidth, bool show = true );
-
-        plSceneObject   *IGenSceneObject(pfGUIDialogMod *dlg, plDrawable *myDraw,
-                                         plSceneObject *parent = nullptr,
-                                         hsMatrix44 *l2w = nullptr,
-                                         hsMatrix44 *w2l = nullptr);
+        plSceneObject   *IGenSceneObject(pfGUIDialogMod *dlg, plDrawable *myDraw);
 
     public:
-        
-        pfGUICtrlGenerator();
-        ~pfGUICtrlGenerator();
-
-        void    Shutdown();
-
-        void            SetFont( const char *face, uint16_t size );
-
-
-        pfGUIButtonMod  *GenerateRectButton( const char *title, float x, float y, float width, float height,
-                                                const char *consoleCmd, hsColorRGBA &color, hsColorRGBA &textColor );
-
-        pfGUIButtonMod  *GenerateSphereButton( float x, float y, float radius,
-                                                const char *consoleCmd, hsColorRGBA &color );
-
-        pfGUIDragBarCtrl *GenerateDragBar( float x, float y, float width, float height, hsColorRGBA &color );
-
-        void            GenerateDialog( const char *name );
-
-
-        pfGUIButtonMod  *CreateRectButton( pfGUIDialogMod *parent, const char *title, float x, float y, 
-                                                float width, float height, hsGMaterial *material, bool asMenuItem = false );
-        pfGUIButtonMod  *CreateRectButton( pfGUIDialogMod *parent, const wchar_t *title, float x, float y,
-                                                float width, float height, hsGMaterial *material, bool asMenuItem = false );
+        pfGUIMenuItem *CreateRectButton( pfGUIDialogMod *parent, float x, float y,
+                                                float width, float height, hsGMaterial *material );
 
         static pfGUICtrlGenerator   &Instance();
 };

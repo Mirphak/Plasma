@@ -40,12 +40,17 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
-#include "pyKey.h"
-
 #include "cyMisc.h"
+
+#include <Python.h>
+#include <string_theory/string>
+#include <utility>
+#include <vector>
+
 #include "pyGlueHelpers.h"
+#include "pyKey.h"
 #include "pyPlayer.h"
+#include "plPythonConvert.h"
 
 
 PYTHON_BASIC_GLOBAL_METHOD_DEFINITION(PtFlashWindow, cyMisc::FlashWindow, "Flashes the client window if it is not focused");
@@ -129,6 +134,11 @@ PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtGetLocalAvatar, "This will return a ptS
 PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtGetLocalPlayer, "Returns a ptPlayer object of the local player")
 {
     return cyMisc::GetLocalPlayer();
+}
+
+PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtIsSolo, "Returns whether we are the only player in the Age")
+{
+    return plPython::ConvertFrom(cyMisc::IsSolo());
 }
 
 PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtGetPlayerList, "Returns a list of ptPlayer objects of all the remote players")
@@ -282,9 +292,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtSendKIMessage, args, "Params: command,value\nS
     }
     if (PyUnicode_Check(val))
     {
-        wchar_t* buffer = PyUnicode_AsWideCharString(val, nullptr);
-        cyMisc::SendKIMessageS(command, buffer);
-        PyMem_Free(buffer);
+        cyMisc::SendKIMessageS(command, PyUnicode_AsSTString(val));
     }
     else if (PyFloat_Check(val))
     {
@@ -321,17 +329,17 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtSendKIMessageInt, args, "Params: command,value
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtLoadAvatarModel, args, "Params: modelName, spawnPoint, userStr = \"\"\nLoads an avatar model at the given spawn point. Assigns the user specified string to it.")
 {
-    char* modelName;
+    ST::string modelName;
     PyObject* keyObj;
     ST::string userStr;
-    if (!PyArg_ParseTuple(args, "sO|O&", &modelName, &keyObj, PyUnicode_STStringConverter, &userStr) ||
+    if (!PyArg_ParseTuple(args, "O&O|O&", PyUnicode_STStringConverter, &modelName, &keyObj, PyUnicode_STStringConverter, &userStr) ||
         !pyKey::Check(keyObj)) {
         PyErr_SetString(PyExc_TypeError, "PtLoadAvatarModel expects a string, a ptKey, and an optional string");
         PYTHON_RETURN_ERROR;
     }
     pyKey* key = pyKey::ConvertFrom(keyObj);
 
-    return cyMisc::LoadAvatarModel(modelName, *key, userStr);
+    return cyMisc::LoadAvatarModel(std::move(modelName), *key, userStr);
 }
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtUnLoadAvatarModel, args, "Params: avatarKey\nForcibly unloads the specified avatar model.\n"
@@ -365,7 +373,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtGetLocalizedString, args, "Params: name, argum
     PyObject* argObj = nullptr;
     if (!PyArg_ParseTuple(args, "O&|O", PyUnicode_STStringConverter, &name, &argObj))
     {
-        PyErr_SetString(PyExc_TypeError, "PtGetLocalizedString expects a unicode string and a list of unicode strings");
+        PyErr_SetString(PyExc_TypeError, "PtGetLocalizedString expects a string and a list of strings");
         PYTHON_RETURN_ERROR;
     }
     std::vector<ST::string> argList;
@@ -373,16 +381,16 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtGetLocalizedString, args, "Params: name, argum
     // convert name from a string
     if (name.empty())
     {
-        PyErr_SetString(PyExc_TypeError, "PtGetLocalizedString expects a unicode string and a list of unicode strings");
+        PyErr_SetString(PyExc_TypeError, "PtGetLocalizedString expects a string and a list of strings");
         PYTHON_RETURN_ERROR;
     }
 
     if (argObj != nullptr) // NULL is valid... but won't fill the args vector
     {
-        // convert args from a list of strings or unicode strings
+        // convert args from a list of strings
         if (!PyList_Check(argObj))
         {
-            PyErr_SetString(PyExc_TypeError, "PtGetLocalizedString expects a unicode string and a list of unicode strings");
+            PyErr_SetString(PyExc_TypeError, "PtGetLocalizedString expects a string and a list of strings");
             PYTHON_RETURN_ERROR;
         }
 
@@ -461,6 +469,7 @@ void cyMisc::AddPlasmaMethods(PyObject* m)
         PYTHON_GLOBAL_METHOD(PtGetClientName)
         PYTHON_GLOBAL_METHOD_NOARGS(PtGetLocalAvatar)
         PYTHON_GLOBAL_METHOD_NOARGS(PtGetLocalPlayer)
+        PYTHON_GLOBAL_METHOD_NOARGS(PtIsSolo)
         PYTHON_GLOBAL_METHOD_NOARGS(PtGetPlayerList)
         PYTHON_GLOBAL_METHOD_NOARGS(PtGetPlayerListDistanceSorted)
         PYTHON_GLOBAL_METHOD_NOARGS(PtMaxListenListSize)
