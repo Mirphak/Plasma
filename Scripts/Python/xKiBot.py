@@ -280,20 +280,20 @@ class SurveyBotAge:
         print("SurveyBotAge:")
         
     def WhereAmI(self):
-        #print "SurveyBotAge:"
+        print("SurveyBotAge:")
         myCurrentAgeInstanceGuid = PtGetAgeInfo().getAgeInstanceGuid()
         # Am I in one of Mir-o-Bot's age?
         for val in list(ages.MirobotAgeDict.values()):
             if val[2] == myCurrentAgeInstanceGuid:
                 # I am in a Mir-o-Bot age, it's ok.
-                #print "SurveyBotAge:ok mob"
+                print("SurveyBotAge:ok mob")
                 self._nbTry = 0
                 return
         # Am I in one of MagicBot age?
         for val in list(ages.MagicbotAgeDict.values()):
             if val[2] == myCurrentAgeInstanceGuid:
                 # I am in a Mir-o-Bot age, it's ok.
-                #print "SurveyBotAge:ok magic"
+                print("SurveyBotAge:ok magic")
                 self._nbTry = 0
                 return
         # Am I in one of my own private age?
@@ -302,7 +302,7 @@ class SurveyBotAge:
             ageInfo = age.getChild().upcastToAgeLinkNode().getAgeInfo()
             if ageInfo.getAgeInstanceGuid() == myCurrentAgeInstanceGuid:
                 # OK
-                #print "SurveyBotAge:ok own"
+                print("SurveyBotAge:ok own")
                 self._nbTry = 0
                 return
         # Am I in a Public Age ?
@@ -311,7 +311,7 @@ class SurveyBotAge:
         #    return
         infoNode = ptAgeVault().getAgeInfo()
         if not infoNode.isPublic():
-            #print "SurveyBotAge:ok, I am in a private age."
+            print("SurveyBotAge:ok, I am in a private age.")
             return
         print("This age is not allowed for the bot: {0}, {1}".format(PtGetAgeInfo().getAgeFilename(), myCurrentAgeInstanceGuid))
         # I am not welcome here, link myself in an allowed age
@@ -330,15 +330,15 @@ class SurveyBotAge:
                 PtConsole("App.Quit")
         
     def onAlarm(self, param=1):
-        #print "SurveyBotAge:onalarm"
+        print("SurveyBotAge:onalarm")
         if not self._running:
             print("SurveyBotAge:not running")
             return
-        #print "SurveyBotAge:call WhereAmI"
+        print("SurveyBotAge:call WhereAmI")
         self.WhereAmI()
         #Check age player positions to see why I have Collision error crash
         agePlayers = PtGetPlayerList()
-        for player in agePlayer:
+        for player in agePlayers:
             so = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             pos = so.position()
             #PtDebugPrint(f">> Check position of {so.getName()}: {round(pos.getX(), 2)}, {round(pos.getY(), 2)}, {round(pos.getZ())}")
