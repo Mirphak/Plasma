@@ -84,6 +84,10 @@ spDict = {
         , "LinkInPointGreatTree", "LinkInPointIslmLibrary", "LinkInPointLibrary", "LinkInPointPalace", "LinkInPointKadishGallery"
         , "Perf-SpawnPointIslm01", "Perf-SpawnPointIslm02", "Perf-SpawnPointIslm03", "Perf-SpawnPointIslm04", "Perf-SpawnPointIslm05"
         , "MuseumIntStart"
+        , "DakotahRoofPlayerStart" # dakotah / trt = sp 23
+        , "PalaceBalcony01PlayerStart"
+        , "PalaceBalcony02PlayerStart"
+        , "PalaceBalcony03PlayerStart"
     ],
     "BaronCityOffice":["LinkInPointDefault", "Perf-SpawnPointBCO"],
     "Dereno":["LinkInPointDefault", "Dummy01"],
@@ -241,11 +245,11 @@ aliasCitySP = {
     "islm5":"Perf-SpawnPointIslm05",            # = sp 20 # 
     "museum":"MuseumIntStart",                  # = sp 21 # 
     "mu":"jrnlNegilahn",                        # = sp 22 # Museum : mu         xx
-    "dakotah":"DakotahRoofPlayerStart",
-    "trt":"DakotahRoofPlayerStart",
-    "pb1":"PalaceBalcony01PlayerStart",
-    "pb2":"PalaceBalcony02PlayerStart",
-    "pb3":"PalaceBalcony03PlayerStart",
+    "dakotah":"DakotahRoofPlayerStart",         # = sp 23 # Tokotah Roof Top
+    "trt":"DakotahRoofPlayerStart",             # = sp 23 # Tokotah Roof Top
+    "pb1":"PalaceBalcony01PlayerStart",         # = sp 24 # Balcony 1
+    "pb2":"PalaceBalcony02PlayerStart",         # = sp 25 # Balcony 2
+    "pb3":"PalaceBalcony03PlayerStart",         # = sp 26 # Balcony 3
 }
 
 """
@@ -279,31 +283,31 @@ aliasErcanaSP = {
 
 aliasKadishSP = {
     "k0":"LinkInPointDefault",       # = sp 0  
-		#- kdshCourtyard : 
+        #- kdshCourtyard : 
     "k1":"kdshJourneyCloth06POS",    # = sp 1
     "k2":"LinkInPointFromGallery",   # = sp 2 
-		#- kdshForest :                     
+        #- kdshForest :                     
     "k3":"Perf-SpawnPointKdsh03",    # = sp 3
     "k4":"kdshJourneyCloth01POS",    # = sp 4
     "k5":"kdshJourneyCloth02POS",    # = sp 5
     "k6":"LinkInPointDefault",       # = sp 6  
-		#- kdshShadowPath :                 
+        #- kdshShadowPath :                 
     "k7":"StartPoint",               # = sp 7 
-		#- kdshGlowInTheDark :              
+        #- kdshGlowInTheDark :              
     "k8":"LinkInPointDummy",         # = sp 8 
-		#- kdshPillars :                    
+        #- kdshPillars :                    
     "k9":"kdshJourneyCloth04POS",    # = sp 9
     "k10":"kdshJourneyCloth07POS",   # = sp 10
     "k11":"Perf-SpawnPointKdsh04",   # = sp 11
     "k12":"pillarRoomStartingPoint", # = sp 12 
-		#- kdshVaultExtr :                  
+        #- kdshVaultExtr :                  
     "k13":"Perf-SpawnPointKdsh01",   # = sp 13
     "k14":"KadishVaultPST02",        # = sp 14 
-		#- kdshVaultIntr :                  
+        #- kdshVaultIntr :                  
     "k15":"kdshJourneyCloth05POS",   # = sp 15
     "k16":"Perf-SpawnPointKdsh05",   # = sp 16
     "k17":"StartDummy02",            # = sp 17 
-		#- kdshVaultIntrYeesha :            
+        #- kdshVaultIntrYeesha :            
     "k18":"StartDummy02",            # = sp 18
     "k19":"LinkInPointYeeshaVault"   # = sp 19
 }

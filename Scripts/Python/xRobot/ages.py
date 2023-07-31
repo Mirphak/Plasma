@@ -125,6 +125,8 @@ MirobotAgeDict = {
     "mobFahetsHighgarden":["FahetsHighgarden", "FahetsHighgarden", "039c7539-ba3d-41d5-a571-0de8da6cb7fd", "mob's", ""],
     "mobFahets":["FahetsHighgarden", "FahetsHighgarden", "039c7539-ba3d-41d5-a571-0de8da6cb7fd", "mob's", ""],
     "mobHighgarden":["FahetsHighgarden", "FahetsHighgarden", "039c7539-ba3d-41d5-a571-0de8da6cb7fd", "mob's", ""],
+    "mobKalamee":["Kalamee", "Kalamee", "a035e8c5-a7c1-459b-bfc7-fbbb84014562", "mob's", ""],
+    "Kalamee":["Kalamee", "Kalamee", "cb7d9652-4f46-485d-966e-8b144519f413", "Mir-o-Bot's", ""],
 }
 
 tmp = dict()
@@ -203,6 +205,7 @@ PublicAgeDict = {
     "Fahets Highgarden":["Fahets: Highgarden", "FahetsHighgarden", "744ba6f4-65ce-504f-b623-210ed73d6721", "", ""],
     "Fahets":["Fahets: Highgarden", "FahetsHighgarden", "744ba6f4-65ce-504f-b623-210ed73d6721", "", ""],
     "Highgarden":["Fahets: Highgarden", "FahetsHighgarden", "744ba6f4-65ce-504f-b623-210ed73d6721", "", ""],
+    "EderBahvahnter":["EderBahvahnter", "EderBahvahnter", "2c6778c1-ad8c-55aa-ae30-75087164f829", "EderBahvahnter", ""],
 }
 tmp = dict()
 for k, v in PublicAgeDict.items():

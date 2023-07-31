@@ -74,6 +74,8 @@ class WaitAndChangeScale:
             pos = self._so.getLocalToWorld()
             mscale = ptMatrix44()
             mscale.makeScaleMat(self._scale)
+            self._so.physics.disable()
+            self._so.physics.netForce(True)
             self._so.physics.warp(pos * mscale)
             print("WaitAndChangeScale: done")
         else:
@@ -963,5 +965,3 @@ def CercleH(objname="Duster", age="BahroCave", n=10, scale=1.0, coef=2.0, avCent
         #avatar.physics.warp(matrix)
         print("x={}, y={}, z={}".format(dx, dy, dz))
         Clone(ageName=age, obj=objname, bOnOff=True, nb=n, num=i, x=dx, y=dy, z=dz, scale=1, bAttacher=False)
-
-#

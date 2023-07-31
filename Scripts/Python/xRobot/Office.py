@@ -164,3 +164,34 @@ def togglePhys(bOn=False):
         obj=PtFindSceneobject(objName, "BaronCityOffice")
         obj.netForce(True)
         obj.physics.enable(bOn)
+
+#-------------------------------------------------------------
+
+# Get an SDL value.
+def GetSDL(name):
+    sdl = PtGetAgeSDL()
+    value = sdl[name][0]
+    return value
+
+# Set an SDL value.
+def SetSDL(name, value):
+    sdl = PtGetAgeSDL()
+    sdl[name] = (value,)
+
+# Toggle Bool SDL.
+def ToggleBoolSDL(name):
+    try:
+        sdlValue = GetSDL(name)
+    except:
+        print("sdl not found")
+        return 0
+    sdlValue = not sdlValue
+    print("sdlValue={}".format(sdlValue))
+    try:
+        SetSDL(name, sdlValue)
+    except:
+        pass
+
+#
+def xmastree():
+    ToggleBoolSDL("bcoChristmasVis")

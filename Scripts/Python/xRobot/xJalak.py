@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from Plasma import *
+from PlasmaKITypes import *
 from . import jalak_michel as jalak
 import math
 
@@ -403,5 +404,3 @@ def Figure():
 #        ToggleObjects("Sky", True)
 #        ToggleObjects("CameraClouds", True)
 #        return "jour"
-
-#

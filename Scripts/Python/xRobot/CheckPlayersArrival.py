@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from Plasma import *
+from PlasmaKITypes import *
 import math
 from . import xBotAge
 from . import BahroCaveFloor
@@ -13,6 +14,8 @@ def DoNothing(player=None, params=[]):
 #
 def WarpToMe(player=None, params=[]):
     print("WarpToMe(player={}, params={}".format(player, params))
+    ageName = PtGetAgeInfo().getAgeFilename()
+    xBotAge.ToggleSceneObjects("Panic", age=ageName, bDrawOn=False, bPhysicsOn=False)
     try:
         av = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
         so = PtGetLocalAvatar()
@@ -21,6 +24,16 @@ def WarpToMe(player=None, params=[]):
         av.physics.warp(pos)
     except Exception as ex:
         traceback.print_exc()
+
+#
+def Green(player=None, params=[]):
+    bOff = False
+    xBotAge.ToggleSceneObjects("Sphere", age="Elonin", bDrawOn=bOff, bPhysicsOn=bOff)
+    xBotAge.SetRenderer(style="100000", start=-100, end=5000, density=3, r=0.0, g=1.0, b=0.0, cr=0.0, cg=0.36, cb=0.0)
+    me = PtGetLocalAvatar()
+    me.draw.netForce(True)
+    me.draw.enable(False)
+    PtToggleAvatarClickability(False)
 
 #
 def ProtractorOff(player=None, params=[]):
@@ -86,6 +99,146 @@ def Tiwah(player=None, params=[]):
     #PtSendKIMessage(kKILocalChatStatusMsg, "    > warp")
     print("CheckPlayersArrival.Tiwah : END")
 
+# Minkata + Dereno
+def MinDer(player=None, params=[]):
+    print("WarpToMe(player={}, params={}".format(player, params))
+    try:
+        av = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+        so = PtGetLocalAvatar()
+        pos = so.getLocalToWorld()
+        av.netForce(True)
+        av.physics.warp(pos)
+    except Exception as ex:
+        traceback.print_exc()
+    
+    ## Minkata : Try to move the fog regions
+    print("WarpToMe : Try to move the fog regions")
+    mTrans = ptMatrix44()
+    mTrans.translate(ptVector3(10000.0, 10000.0, 10000.0))
+    so = PtFindSceneobject("FogRegion - Exterior", "Minkata")
+    pos = so.getLocalToWorld()
+    so.physics.netForce(True)
+    so.physics.warp(pos * mTrans)
+    so = PtFindSceneobject("FogRegion - Caves", "Minkata")
+    pos = so.getLocalToWorld()
+    so.physics.netForce(True)
+    so.physics.warp(pos * mTrans)
+    so = PtFindSceneobject("FogOuterDummy", "Minkata")
+    pos = so.getLocalToWorld()
+    so.physics.netForce(True)
+    so.physics.warp(pos * mTrans)
+    
+    ## Minkata : "StarGlobe", "SkyDome", "ClearColorCatcher", "Dust", "Fog", "Ground"
+    print("WarpToMe : Hide some objects")
+    #xBotAge.ToggleSceneObjects("StarGlobe", "Minkata", bDrawOn=False, bPhysicsOn=False)
+    xBotAge.ToggleSceneObjects("SkyDome", "Minkata", bDrawOn=False, bPhysicsOn=False)
+    #xBotAge.ToggleSceneObjects("ClearColorCatcher", "Minkata", bDrawOn=False, bPhysicsOn=False)
+    xBotAge.ToggleSceneObjects("Dust", "Minkata", bDrawOn=False, bPhysicsOn=False)
+    xBotAge.ToggleSceneObjects("Fog", "Minkata", bDrawOn=False, bPhysicsOn=False)
+    xBotAge.ToggleSceneObjects("Ground", "Minkata", bDrawOn=False, bPhysicsOn=True)
+    xBotAge.ToggleSceneObjects("Ladder", "Minkata", bDrawOn=True, bPhysicsOn=False)
+    
+    ## Dereno : "Pod", "Sky", "Surface", "Mirror"
+    print("WarpToMe : Add Dereno")
+    AddDereno()
+    #xBotAge.ToggleSceneObjects("Pod", "Dereno", bDrawOn=True, bPhysicsOn=False)
+    #xBotAge.ToggleSceneObjects("Sky", "Dereno", bDrawOn=True, bPhysicsOn=False)
+    #xBotAge.ToggleSceneObjects("Surface", "Dereno", bDrawOn=True, bPhysicsOn=False)
+    #xBotAge.ToggleSceneObjects("Mirror", "Dereno", bDrawOn=True, bPhysicsOn=False)
+    
+    ## 
+    #tupmat=((-0.9672924280166626,0.2536635398864746,0.0,1.1919100284576416),(-0.2536635398864746,-0.9672924280166626;0.0,10.312591552734375),(0.0,0.0,1.0,-0.0328427329659462),(0.0,0.0,0.0,1.0))
+    try:
+        mTrans = ptMatrix44()
+        mTrans.translate(ptVector3(1.0, 10.0, 0.0))
+        av = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+        av.netForce(True)
+        av.physics.warp(mTrans)
+    except Exception as ex:
+        traceback.print_exc()
+
+    print("WarpToMe : End")
+
+#************************************************************************#
+# "1-Sky", "1-WaterSurface", "LowerSky", "Mirror"
+#************************************************************************#
+#
+class AlarmAddPrp:
+    _nbFois = 0
+    _bPrpLoaded = False
+    
+    def __init__(self, objectName="FishAClockwise", ageFileName="Dereno", bFirst=False, method=DoNothing, params=[]):
+        print("AlarmAddPrp: init")
+        self._objectName = objectName
+        self._ageFileName = ageFileName
+        self._bPrpLoaded = False
+        self._bFirst = bFirst
+        self._method = method
+        self._params = params
+        self._so = PtFindSceneobject(self._objectName, self._ageFileName)
+    def onAlarm(self, context):
+        if context == 0:
+            print("AlarmAddPrp: 0 - AddPrp")
+            PtConsoleNet("Nav.PageInNode DrnoExterior", True)
+            #PhysObjectList(self._ageFileName, ["PanicLinkRgn"], False)
+            PtSetAlarm(.25, self, 1)
+        elif context == 1:
+            print("AlarmAddPrp: 1 - Waitting loop")
+            #PhysObjectList(self._ageFileName, ["PanicLinkRgn"], False)
+            try:
+                pos = self._so.position()
+            except:
+                print("err so pos")
+                return
+            print("pos: {}, {}, {}".format(pos.getX(), pos.getY(), pos.getZ()))
+            if (pos.getX() == 0 and pos.getY() == 0 and pos.getZ() == 0 and self._nbFois < 20):
+                self._nbFois += 1
+                print(">>> Attente nb: {}".format(self._nbFois))
+                PtSetAlarm(1.0, self, 1)
+            else:
+                if (self._nbFois < 20):
+                    self._bPrpLoaded = True
+                    PtSetAlarm(2.0, self, 2)
+                else:
+                    print("loading prp was too long...")
+                    
+                self._nbFois = 0
+        elif context == 2:
+            print("AlarmAddPrp: 2 - The prp is ready")
+            if self._bFirst:
+                ## Disable physics for some objects
+                #names = ["Panic", "Camera", "Field", "Link"
+                #    "Start", "Terrain", "Wall0"]
+                #PhysObjectList(self._ageFileName, names, False)
+                # Hide some objects
+                #names = ["Bamboo", "Bone", "Distan",
+                #    "Calendar", "Camera", "FarHills", 
+                #    "Field", "Flag", "Fog", "Green", 
+                #    "LightBase", "moss", "Object",  
+                #    "SkyDome01", "SoftRegionMain", 
+                #    "Star", "Sun", "Terrain", "Wall0"]
+                #ShowObjectList(self._ageFileName, names, False)
+                #names = []
+                # Dereno : "Pod", "Sky", "Surface", "Mirror"
+                #xBotAge.ToggleSceneObjects("Pod", "Dereno", bDrawOn=False, bPhysicsOn=False)
+                xBotAge.ToggleSceneObjects("Sky", "Dereno", bDrawOn=False, bPhysicsOn=False)
+                xBotAge.ToggleSceneObjects("Surface", "Dereno", bDrawOn=False, bPhysicsOn=False)
+                xBotAge.ToggleSceneObjects("Mirror", "Dereno", bDrawOn=False, bPhysicsOn=False)
+            #self._method(self._params)
+        else:
+            pass
+
+#
+def AddDereno():
+    PtSendKIMessage(kKILocalChatStatusMsg, "Adding Dereno...")
+    try:
+        PtSetAlarm(0, AlarmAddPrp(), 0)
+        PtSendKIMessage(kKILocalChatStatusMsg, "Dereno added!")
+        return 1
+    except:
+        PtSendKIMessage(kKILocalChatErrorMsg, "Error while adding Dereno.")
+        return 0
+
 #************************************************************************#
 # When a new player is arriving in my age,
 # I'm doing some automatic stuffs.
@@ -97,7 +250,6 @@ def Tiwah(player=None, params=[]):
 class CheckPlayersArrival:
     _running = False
     _nbTry   = 0
-    #_xKiSelf = None
     _player  = None
     _playerList = []
     _method = None
@@ -184,15 +336,10 @@ class CheckPlayersArrival:
             #pass
             self._method(self._player, self._params)
         
-    #def Start(self, xKiSelf, player, method=DoNothing, params=[]):
     def Start(self, player, method=DoNothing, params=[]):
-        #if xKiSelf is None:
-        #    print("CheckPlayersArrival : Error : self._xKiSelf is none")
-        #    return
         if not isinstance(player, ptPlayer):
             print("CheckPlayersArrival : not player")
             return
-        #self._xKiSelf = xKiSelf
         self._player = player
         self._method = method
         self._params = params
@@ -211,7 +358,6 @@ class CheckPlayersArrival:
 # Global variables
 isActive = False
 checkArrivals = None
-#strArgs = ""
 function = DoNothing
 parameters = []
 
@@ -246,6 +392,10 @@ def stringToMethodParams(strArgs=""):
                 function = Cave
             elif fct == "tiwah" or fct == "descent":
                 function = Tiwah
+            elif fct == "minder":
+                function = MinDer
+            elif fct == "green":
+                function = Green
             else:
                 print("unknown fct {}".format(fct))
     else:
@@ -258,13 +408,9 @@ def StopChecking():
         checkArrivals = None
 
 #
-#def StartChecking(xKiSelf, player, method=DoNothing, params=[]):
-#def StartChecking(xKiSelf, player):
 def StartChecking(player):
     global checkArrivals
     #stopchecking()
     checkArrivals = CheckPlayersArrival()
     #checkArrivals.Start(xKiSelf, player, method=function, params=parameters)
     checkArrivals.Start(player, method=function, params=parameters)
-
-#

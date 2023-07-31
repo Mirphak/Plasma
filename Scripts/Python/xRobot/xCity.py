@@ -200,7 +200,11 @@
                 togglesdl(name="scream")    "islmScreamRun", 
                 togglesdl(name="tldn")      "islmTeledahnLinkLibraryExteriorVis", 
                 togglesdl(name="canyon")    "islmCanyonConstructionVis", 
+
+    V5 : 24/06/2023
         
+        - Montrer l'estrade (stage)
+        sdl.ToggleIntSDL("islmDRCStageState", 0, 2)
 """
 from Plasma import *
 #from PlasmaTypes import *
@@ -602,11 +606,16 @@ def togglesdl(name="lm"):
         #"mem":"MemorialImagerStartTime", #INT
         "mem":"islmMemorialImagerVis", 
         "gz":"islmGZBeamVis",
+        "map":"islmPlayerMap01Vis"
     }
     if (name in list(dicNames.keys())):
         sdl.ToggleBoolSDL(dicNames[name])
     else:
         print("wrong sdl name")
+
+# pour l'estrade
+def toggleStage():
+    sdl.ToggleIntSDL("islmDRCStageState", 0, 2)
 
 # long platform(where=1)
 def platform(where=None):
@@ -639,6 +648,9 @@ def platok2():
 def platok1():
     Platform.SecretPath2()
 
+def platgh():
+    Platform.CreatePlatformForGuildHall()
+
 #========================================================
 """
     aliasCitySP = {
@@ -667,11 +679,11 @@ def platok1():
         "islm5":"Perf-SpawnPointIslm05",            # = sp 20 # 
         "museum":"MuseumIntStart",                  # = sp 21 # 
         "mu":"jrnlNegilahn",                        # = sp 22 # Museum : mu         xx
-        "dakotah":"DakotahRoofPlayerStart",
-        "trt":"DakotahRoofPlayerStart",
-        "pb1":"PalaceBalcony01PlayerStart",
-        "pb2":"PalaceBalcony02PlayerStart",
-        "pb3":"PalaceBalcony03PlayerStart",
+        "dakotah":"DakotahRoofPlayerStart",         # = sp 23 # Tokotah Roof Top
+        "trt":"DakotahRoofPlayerStart",             # = sp 23 # Tokotah Roof Top
+        "pb1":"PalaceBalcony01PlayerStart",         # = sp 24 # Balcony 1
+        "pb2":"PalaceBalcony02PlayerStart",         # = sp 25 # Balcony 2
+        "pb3":"PalaceBalcony03PlayerStart",         # = sp 26 # Balcony 3
     }
 """
 #========================================================
@@ -706,7 +718,6 @@ def CercleV(coef=2.0, avCentre=None):
 class CircleAlarm:
     def onAlarm(self, en):
         CercleV(coef=2.0, avCentre=None)
-
 
 # en ville les bahros volants b1 a b6 et bahro
 def ride(soName="b1", t=30.0):
@@ -789,5 +800,3 @@ def ride(soName="b1", t=30.0):
         tokotah alley, 
         and musuem
 """
-
-#

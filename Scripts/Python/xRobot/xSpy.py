@@ -99,22 +99,22 @@ def DelPrpLocal():
 
 # ====================================
 #
-def hide():
+def hide(bHide=True):
     Platform.HideJalak()
     # Hide some objects
     names = ["column_23", "column_22",
         "column_21", "column_20", "column_19",
         "column_18", "column_17", "column_16", 
         "column_15", "Light"]
-    Platform.ShowObjectList("jalak", names, False)
-    names = ["Dak2FAKE", "Dak1Plane", "dkta",
-        "DAK2grndEntrnc"]
-    Platform.ShowObjectList("city", names, False)
+    Platform.ShowObjectList("jalak", names, not bHide)
+    #names = ["Dak2FAKE", "Dak1Plane", "dkta", "DAK2grndEntrnc"]
+    names = ["DAK2grndEntrnc", "DakBuilding1Front", "dktaLitRoom"]
+    Platform.ShowObjectList("city", names, not bHide)
     names = ["Wall"]
-    Platform.ShowObjectList("spyroom", names, False)
+    Platform.ShowObjectList("spyroom", names, not bHide)
     # Disable physics for some objects
     names = ["Collid"]
-    Platform.PhysObjectList("spyroom", names, False)
+    Platform.PhysObjectList("spyroom", names, not bHide)
 
 #
 def hj():
@@ -140,6 +140,16 @@ def hw(bShow=False):
     # Hide some objects
     names = ["DAK2grndEntrnc"]
     Platform.ShowObjectList("city", names, bShow)
+
+#
+bTok2=True
+#
+def tok2():
+    # Hide/Show Tokotah2 building
+    global bTok2
+    bTok2 = not bTok2
+    names = ["DAK2grndEntrnc"]
+    Platform.ShowObjectList("city", names, bTok2)
 
 #
 def hs():
@@ -324,4 +334,3 @@ def LinkAll(ageName):
         LinkPlayerTo(age, playerID = player.getPlayerID(), spawnPointNumber = None)
     # link myself
     LinkPlayerTo(age, playerID = None, spawnPointNumber = None)
-

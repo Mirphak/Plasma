@@ -15,6 +15,7 @@ from . import xSave2
 from . import xJalak
 
 from . import CloneObject
+from . import CloneObjects
 from . import sdl
 from . import Columns2
 
@@ -62,7 +63,7 @@ adminList += [
     11243,   # Luluberlu
     11896,   # MagicYoda
     115763,  # Willy
-    119426,  # Edith
+    #119426,  # Edith
     127131,  # tsuno
     #133403,  # sendlinger
     137998,  # Mabe
@@ -84,24 +85,26 @@ adminList += [
     #6725908, # Raymondo
     #6833983, # malcg
     6961947, # Calisia (= Terry L. Britton)
-    #7060111, # Aeonihya
+    7060111, # Aeonihya
     7132841, # Mina Sunda
     #7172637, # Baeda
     #7227499, # Lidia (Mav Hungary)
     #7327507, # artopia
     #7517653, # ladylora
     #7731330, # My.St'ro
-    7796072, # Klaide
+    #7796072, # Klaide
     #7881034, # Yakoso
     7939982, # Claidi Song
     #7965725, # Z A N D l
     8068100, # NDG Eternal Seeker
-    8315178, # Roland (Mav Hungary)
+    #8315178, # Roland (Mav Hungary)
 	9292763, # MinBot
     #9843955, # CatYoh
     9995228, # NDGSeeker
     #10287894, # Thallan
     #10360615, # Thallane
+    12348922, # ben2
+    12480587, # Tituss
 ]
 
 # For the Cavern Tours : Larry Ledeay and CT Hostess Susa'n
@@ -2328,10 +2331,10 @@ def SpecialEventCommand(self, cFlags, args = []):
             print "==> event 1"
             xBotAge.ToggleSceneObjects("Blocker", age = "Cleft", bDrawOn = bOn, bPhysicsOn = bOff)
             xBotAge.ToggleSceneObjects("ProxyPropertyLine", age = "Cleft", bDrawOn = bOn, bPhysicsOn = bOff)
-            xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dome", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Mountain", age=None, bDrawOn=bOff, bPhysicsOn=True)
             xBotAge.ToggleSceneObjects("nb01", age = "Kveer", bDrawOn = bOff, bPhysicsOn = bOn)
             CloneObject.Minkata(bShow=bOn, bLoad=bOn)
             CreateReltoNight1(self, cFlags, [args[0], onOff])
@@ -2341,10 +2344,10 @@ def SpecialEventCommand(self, cFlags, args = []):
             print("==> event 1")
             xBotAge.ToggleSceneObjects("Blocker", age = "Cleft", bDrawOn = bOn, bPhysicsOn = bOff)
             xBotAge.ToggleSceneObjects("ProxyPropertyLine", age = "Cleft", bDrawOn = bOn, bPhysicsOn = bOff)
-            xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dome", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Mountain", age=None, bDrawOn=bOff, bPhysicsOn=True)
             xBotAge.ToggleSceneObjects("nb01", age = "Kveer", bDrawOn = bOff, bPhysicsOn = bOn)
             CloneObject.Minkata(bShow=bOn, bLoad=bOn)
             #CloneObject.co3("ZandiMobileRegion", "Cleft", bShow=bOn, bLoad=bOn)
@@ -2366,10 +2369,10 @@ def SpecialEventCommand(self, cFlags, args = []):
         elif eventNumber == 2:
             # -- 2 -- Hood + nuit + clone de SandscritRoot
             print("==> event 2")
-            xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dome", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Mountain", age=None, bDrawOn=bOff, bPhysicsOn=True)
             print("==> Minkata ground")
             CloneObject.Minkata(bShow=bOn, bLoad=bOn)
             print("==> GT sky")
@@ -2404,10 +2407,10 @@ def SpecialEventCommand(self, cFlags, args = []):
         elif eventNumber == 3:
             # -- 3 -- 
             print("==> event 3")
-            xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dome", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Mountain", age=None, bDrawOn=bOff, bPhysicsOn=True)
             print("==> Minkata ground")
             CloneObject.Minkata(bShow=bOn, bLoad=bOn)
             print("==> 2 Tails Monkey")
@@ -2441,10 +2444,10 @@ def SpecialEventCommand(self, cFlags, args = []):
             CloneObject.co3("Rect0", "Jalak", bShow=bOn, bLoad=bOn)
             """
             
-            xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dome", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Mountain", age=None, bDrawOn=bOff, bPhysicsOn=True)
             print("==> Gira sky")
             CloneObject.co3("SunDummyNew", "Gira", bShow=bOn, bLoad=bOn)
             CloneObject.co3("Sky", "Gira", bShow=bOn, bLoad=bOn)
@@ -2460,17 +2463,17 @@ def SpecialEventCommand(self, cFlags, args = []):
         elif eventNumber == 5:
             # -- 5 -- 
             print("==> event 5")
-            xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            #xBotAge.ToggleSceneObjects("Cloud", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Back", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Fog", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Sphere", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Dust", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Pod", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Rain", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dome", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Mountain", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            #xBotAge.ToggleSceneObjects("Cloud", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Back", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Fog", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Sphere", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dust", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Pod", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Rain", age=None, bDrawOn=bOff, bPhysicsOn=True)
             print("==> Gira sky")
             CloneObject.co3("SkyGlobe", "Payiferen", bShow=bOn, bLoad=bOn)
             CloneObject.co3("StarSphere", "Payiferen", bShow=bOn, bLoad=bOn)
@@ -2478,17 +2481,17 @@ def SpecialEventCommand(self, cFlags, args = []):
         elif eventNumber == 6:
             # -- 6 -- 
             print("==> event 6")
-            xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            #xBotAge.ToggleSceneObjects("Cloud", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Back", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Fog", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Sphere", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Dust", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Pod", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Rain", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dome", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Mountain", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            #xBotAge.ToggleSceneObjects("Cloud", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Back", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Fog", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Sphere", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dust", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Pod", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Rain", age=None, bDrawOn=bOff, bPhysicsOn=True)
             print("==> Dereno fish C01")
             CloneObject.co3("C01_Root", "Dereno", bShow=bOn, bLoad=bOn)
             SendChatMessage(self, myself, [player], "Event 6 (Dereno) is {0}".format(onOff), cFlags.flags)
@@ -2789,6 +2792,50 @@ def SpecialEventCommand(self, cFlags, args = []):
                 #SkyOnOff(self, cFlags, [args[0], "on"])
                 SetRendererStyle(self, cFlags, [player, "default"])
             SendChatMessage(self, myself, [player], "Event 24 (Bright golden mist) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 241:
+            # -- 241 -- 
+            print("==> event 241 : Bright golden mist.")
+            # Brume dorée brillante.
+            if onOff == "on":
+                SetRendererClearColor(self, cFlags, [player, "gold2"])
+                SetRendererFogLinear(self, cFlags, [player, "-200 3000 2"])
+                SetRendererFogColor(self, cFlags, [player, "gold2"])
+            else:
+                SetRendererStyle(self, cFlags, [player, "default"])
+            SendChatMessage(self, myself, [player], "Event 241 (Bright golden mist) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 242:
+            # -- 242 -- 
+            print("==> event 242 : Less Bright golden mist.")
+            # Brume dorée moins brillante.
+            if onOff == "on":
+                SetRendererClearColor(self, cFlags, [player, "gold3"])
+                SetRendererFogLinear(self, cFlags, [player, "-200 3000 2"])
+                SetRendererFogColor(self, cFlags, [player, "gold3"])
+            else:
+                SetRendererStyle(self, cFlags, [player, "default"])
+            SendChatMessage(self, myself, [player], "Event 243 (Less Bright golden mist) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 243:
+            # -- 243 -- 
+            print("==> event 243 : Less Bright golden mist.")
+            # Brume dorée moins brillante.
+            if onOff == "on":
+                SetRendererClearColor(self, cFlags, [player, "gold4"])
+                SetRendererFogLinear(self, cFlags, [player, "-200 3000 2"])
+                SetRendererFogColor(self, cFlags, [player, "gold4"])
+            else:
+                SetRendererStyle(self, cFlags, [player, "default"])
+            SendChatMessage(self, myself, [player], "Event 243 (Less Bright golden mist) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 244:
+            # -- 243 -- 
+            print("==> event 244 : Less Bright golden mist.")
+            # Brume dorée moins brillante.
+            if onOff == "on":
+                SetRendererClearColor(self, cFlags, [player, "gold5"])
+                SetRendererFogLinear(self, cFlags, [player, "-200 3000 2"])
+                SetRendererFogColor(self, cFlags, [player, "gold5"])
+            else:
+                SetRendererStyle(self, cFlags, [player, "default"])
+            SendChatMessage(self, myself, [player], "Event 244 (Less Bright golden mist) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 25:
             # -- 25 -- 
             print("==> event 25 : Remove Protractor of Great Zero.")
@@ -2859,25 +2906,25 @@ def SpecialEventCommand(self, cFlags, args = []):
         elif eventNumber == 121:
             print("==> event {} : Hide some objects 2.".format(eventNumber))
             # Hide some objects.
-            xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Rain", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Garden", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Water", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Dome", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Rain", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Garden", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Water", age=None, bDrawOn=bOff, bPhysicsOn=True)
             SendChatMessage(self, myself, [player], "Event {} (Hide some objects 2) is {}".format(eventNumber, onOff), cFlags.flags)
         elif eventNumber == 27:
             # -- 27 -- 
             print("==> event 27")
-            xBotAge.ToggleSceneObjects("Sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("sky", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Dome", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Mountain", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Cloud", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Back", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Fog", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Sphere", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Dust", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Pod", age = None, bDrawOn = bOff, bPhysicsOn = True)
-            xBotAge.ToggleSceneObjects("Rain", age = None, bDrawOn = bOff, bPhysicsOn = True)
+            xBotAge.ToggleSceneObjects("Sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dome", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Mountain", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Cloud", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Back", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Fog", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Sphere", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dust", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Pod", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Rain", age=None, bDrawOn=bOff, bPhysicsOn=True)
             xBotAge.SetRenderer(style = None, cr=0.00, cg=0.06, cb=0.13)
             print("==> Minkata night sky")
             CloneObject.co3("StarGlobe", "Minkata", bShow=bOn, bLoad=bOn)
@@ -2893,13 +2940,13 @@ def SpecialEventCommand(self, cFlags, args = []):
             #CloneObject.co3("ConstellationDummyCave03", "Minkata", bShow=bOn, bLoad=bOn)
             #CloneObject.co3("ConstellationDummyCave04", "Minkata", bShow=bOn, bLoad=bOn)
             #CloneObject.co3("ConstellationDummyCave05", "Minkata", bShow=bOn, bLoad=bOn)
-            SendChatMessage(self, myself, [player], "Event 272 (Minkata night sky) is {0}".format(onOff), cFlags.flags)
+            SendChatMessage(self, myself, [player], "Event 27 (Minkata night sky) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 271:
             # -- 271 -- 
             print("==> event 271")
             print("==> Minkata night sky 1")
             CloneObject.co3("StarGlobe", "Minkata", bShow=bOn, bLoad=bOn)
-            SendChatMessage(self, myself, [player], "Event 27 (Minkata night sky 1) is {0}".format(onOff), cFlags.flags)
+            SendChatMessage(self, myself, [player], "Event 271 (Minkata night sky 1) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 272:
             # -- 272 -- 
             print("==> event 272")
@@ -2912,6 +2959,71 @@ def SpecialEventCommand(self, cFlags, args = []):
             print("==> Minkata night sky 3")
             CloneObject.co3("GalaxyDecalSmall", "Minkata", bShow=bOn, bLoad=bOn)
             SendChatMessage(self, myself, [player], "Event 273 (Minkata night sky 3) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 28:
+            # -- 28 -- 
+            print("==> event 28")
+            xBotAge.ToggleSceneObjects("Sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("sky", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dome", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Mountain", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Cloud", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Back", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Fog", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Sphere", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Dust", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Pod", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.ToggleSceneObjects("Rain", age=None, bDrawOn=bOff, bPhysicsOn=True)
+            xBotAge.SetRenderer(style = None, cr=0.00, cg=0.06, cb=0.13)
+            print("==> Veelay night sky")
+            CloneObject.co3("SkyDome", "VeeTsah", bShow=bOn, bLoad=bOn)
+            SendChatMessage(self, myself, [player], "Event 28 (Veelay night sky) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 281:
+            # -- 281 -- 
+            print("==> event 281")
+            print("==> Veelay Aurora 1")
+            CloneObject.co3("Aurora01", "VeeTsah", bShow=bOn, bLoad=bOn)
+            SendChatMessage(self, myself, [player], "Event 281 (Veelay Aurora 1) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 282:
+            # -- 282 -- 
+            print("==> event 282")
+            print("==> Veelay Aurora 2")
+            CloneObject.co3("Aurora02", "VeeTsah", bShow=bOn, bLoad=bOn)
+            SendChatMessage(self, myself, [player], "Event 282 (Veelay Aurora 2) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 283:
+            # -- 283 -- 
+            print("==> event 283")
+            print("==> Veelay Aurora 3")
+            CloneObject.co3("Aurora03", "VeeTsah", bShow=bOn, bLoad=bOn)
+            SendChatMessage(self, myself, [player], "Event 283 (Veelay Aurora 3) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 29:
+            # -- 29 -- 
+            print("==> event 29")
+            print("==> Upper Planet Vessal Fog")
+            xBotAge.ToggleSceneObjects("Dust", age=None, bDrawOn=False, bPhysicsOn=False)
+            xBotAge.ToggleSceneObjects("Fog", age=None, bDrawOn=False, bPhysicsOn=False)
+            xBotAge.ToggleSceneObjects("Sky", age=None, bDrawOn=False, bPhysicsOn=False)
+            xBotAge.ToggleSceneObjects("sky", age=None, bDrawOn=False, bPhysicsOn=False)
+            xBotAge.ToggleSceneObjects("Dome", age=None, bDrawOn=False, bPhysicsOn=False)
+            xBotAge.ToggleSceneObjects("Sphere", age=None, bDrawOn=False, bPhysicsOn=False)
+            xBotAge.ToggleSceneObjects("Fog", age="Personal", bDrawOn=False, bPhysicsOn=False)
+            xBotAge.ToggleSceneObjects("Sky", age="Personal", bDrawOn=False, bPhysicsOn=False)
+            SendChatMessage(self, myself, [player], "Event 29 (Upper Planet Vessal Fog) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 291:
+            # -- 291 -- 
+            print("==> event 291")
+            print("==> Upper Planet Vessal Fog")
+            tupMat = ((-0.6027394533157349, -0.7979380488395691, 0.0, -49.398189544677734), (0.7979380488395691, -0.6027394533157349, 0.0, -105.94088745117188), (0.0, 0.0, 1.0, 2993.45263671875), (0.0, 0.0, 0.0, 1.0))
+            pos.setData(tupMat)
+            CloneObjects.CloneThat(objName="DustPlaneParticle01", age="Minkata", bShow=bOn, bLoad=bOn, number=1, thisone=0, scale=ptVector3(0.5, 0.5, 0.5), matPos=pos, bAttach=False, fct=CloneObjects.DoStuff2)
+            SendChatMessage(self, myself, [player], "Event 291 (Upper Planet Vessal Fog) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 292:
+            # -- 292 -- 
+            print("==> event 292")
+            print("==> Upper Planet Vessal Fog")
+            tupMat = ((-0.6027394533157349, -0.7979380488395691, 0.0, -49.398189544677734), (0.7979380488395691, -0.6027394533157349, 0.0, -105.94088745117188), (0.0, 0.0, 1.0, -50000.0), (0.0, 0.0, 0.0, 1.0))
+            pos.setData(tupMat)
+            CloneObjects.CloneThat(objName="DustPlaneParticle01", age="Minkata", bShow=bOn, bLoad=bOn, number=1, thisone=0, scale=ptVector3(0.5, 0.5, 0.5), matPos=pos, bAttach=False, fct=CloneObjects.DoStuff2)
+            SendChatMessage(self, myself, [player], "Event 292 (Upper Planet Vessal Fog) is {0}".format(onOff), cFlags.flags)
         else:
             pass
         return 1
@@ -4471,18 +4583,21 @@ def CallMethod(self, cmdName, cFlags, pAmIRobot, args=[]):
             myself = PtGetLocalPlayer()
             if myself.getPlayerID() != 2332508: # si je ne suis pas mob, j'en debloque quelques unes
                 #authorizedCmds = ('link', 'to', 'onbot', 'wd', 'warp', 'onlake', 'nolake', 'coord', 'save', 'ws', 'agoto', 'rgoto', 'dnigoto', 'land', 'turn', 'rot', 'float', 'jump', 'find', 'list', 'anim', 'sp', 'ki', 'light', 'nopanic', 'sdl', 'sendme', 'help')
-                authorizedCmds = ('link', 'to', 'onbot', 'wd', 'warp', 'coord', 'save', 'ws', 'agoto', 'rgoto', 'land', 'turn', 'rot', 'float', 'jump', 'find', 'list', 'anim', 'sp', 'ki', 'light', 'nopanic', 'saveme', 'sendme', 'restoreme', 'help')
+                #authorizedCmds = ('link', 'to', 'onbot', 'wd', 'warp', 'coord', 'save', 'ws', 'agoto', 'rgoto', 'land', 'turn', 'rot', 'float', 'jump', 'find', 'list', 'anim', 'sp', 'ki', 'light', 'nopanic', 'saveme', 'sendme', 'restoreme', 'help')
                 #authorizedCmds = ('onbot', 'link')
-                #authorizedCmds = ()
+                authorizedCmds = () # ou pas!
             if cmdName not in authorizedCmds:
                 #myself = PtGetLocalPlayer()
                 player = args[0]
                 if player.getPlayerID() not in adminList :
-                    #msg = "An event is running, only the W / LINK commands are enabled."
-                    #msg = "Cavern Tour is running, only basic commands are enabled."
-                    msg = "An event is running, only basic commands are enabled."
+                    if not authorizedCmds:
+                        msg = "Sorry, I'm not available for the moment."
+                    else:
+                        #msg = "An event is running, only the W / LINK commands are enabled."
+                        #msg = "Cavern Tour is running, only basic commands are enabled."
+                        msg = "An event is running, only basic commands are enabled."
                     SendChatMessage(self, myself, [player], msg, cFlags.flags)  
-                    return 0
+                    return 1
         if len(args) == 0:
             #return cmdDict[cmdName][0]()
             ret = cmdDict[cmdName][0]()
@@ -4496,4 +4611,3 @@ def CallMethod(self, cmdName, cFlags, pAmIRobot, args=[]):
         return ret
     else:
         return 0
-
