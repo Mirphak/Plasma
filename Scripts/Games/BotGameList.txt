@@ -181,6 +181,7 @@ List of markers games
 2692250: KI Gahreesen 02/21/15
 3557071: KIQuest! 05/25/15
 3383155: KIREL: Route 1 by Zesty of Xeniphers 05/06/15
+12889637: Kadish - Tree Floor 07/11/23
 9320889: Kadish Forest  03/20/20
 2692151: Kadish Great Elevator 02/21/15
 2692081: Kadish Pillars 02/21/15
@@ -276,6 +277,7 @@ List of markers games
 2692246: More Rings (Gahreesen Subworld) 02/21/15
 9544026: Mt Ercana Marker Game 06/12/20
 11997622: Mt. Henderson 07/15/22
+3032984: Museum Door 03/24/15
 2692228: Museum Hardcore 02/21/15
 12042464: Mysterium 2022 - Naryan Poems (Rules In Relto) 08/05/22
 10757221: Mysterium Marker test 06/05/21
@@ -356,6 +358,7 @@ List of markers games
 505294: Tent to Musium  10/03/14
 2691996: Terminal Front (Er'cana Canyon) 02/21/15
 2904883: Terokh Jeruth's Competition Marker Game 03/12/15
+12751432: Thakan'dar's Kalamee 05/07/23
 7229736: Thank Anniversary 01/10/18
 6360505: Thank You Michel 10/31/16
 7544900: That Rock! 04/14/18
@@ -472,6 +475,7 @@ List of markers games
 1981522: Xeniphers Quest 4: Hidden Jewels 12/29/14
 6310611: Xeniphers' City Race 09/26/16
 948910: ZANDI STUCK IN MUD - Start City Sign 10/19/14
+12782748: Zark's Eder Bahvahnter 05/19/23
 2132323: _Hadamard's Marker Game Part 2 Teledahn 01/08/15
 2133386: _Hadamard's Marker Game Part 3 Gahreesen 01/08/15
 2133481: _Hadamard's Marker Game Part 4 Kadish Tolesa 01/08/15
