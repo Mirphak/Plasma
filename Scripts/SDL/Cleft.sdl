@@ -40,9 +40,9 @@
 # 
 # *==LICENSE==*/
 #==============================================================
-# READ:	When modifying an SDL record, do *not* modify the
-#	existing record. You must copy and paste a new version
-#	below the current one and make your changes there.
+# READ: When modifying an SDL record, do *not* modify the
+#   existing record. You must copy and paste a new version
+#   below the current one and make your changes there.
 #==============================================================
 
 #
@@ -51,7 +51,7 @@
 
 STATEDESC Cleft
 {
-	VERSION 21
+    VERSION 21
 
 # Boolean variables
 
@@ -89,7 +89,7 @@ STATEDESC Cleft
 
 STATEDESC Cleft
 {
-	VERSION 22
+    VERSION 22
 
 # Boolean variables
 
@@ -130,7 +130,7 @@ STATEDESC Cleft
 
 STATEDESC Cleft
 {
-	VERSION 23
+    VERSION 23
 
 # Boolean variables
 
@@ -172,7 +172,7 @@ STATEDESC Cleft
 
 STATEDESC Cleft
 {
-	VERSION 24
+    VERSION 24
 
 # Boolean variables
 
@@ -215,7 +215,7 @@ STATEDESC Cleft
 
 STATEDESC Cleft
 {
-	VERSION 25
+    VERSION 25
 
 # Boolean variables
 
@@ -255,4 +255,3 @@ STATEDESC Cleft
     VAR BOOL    clftYeeshaShowJC[1]    DEFAULT=0 DISPLAYOPTION=red
     VAR BOOL    clftIsCleftDone[1]    DEFAULT=0 DISPLAYOPTION=red
 }
-

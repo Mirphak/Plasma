@@ -51,58 +51,101 @@ STATEDESC Elonin
 
 {
    VERSION 1
-    
+
     VAR BOOL    fntOnOff[1] DEFAULT=0
-    VAR BOOL 	birdie[1] DEFAULT=0
-    VAR INT     flwrCorrectCount[1] DEFAULT=0   
-    VAR BOOL    flwrPuzSolved[1] DEFAULT=0
+    VAR BOOL    birdie[1]   DEFAULT=0
+    VAR INT     flwrCorrectCount[1] DEFAULT=0
+    VAR BOOL    flwrPuzSolved[1]    DEFAULT=0
     VAR BOOL    flwrPuzInUse[1] DEFAULT=0
-    VAR INT     keyPzlCorrectPushes[1] DEFAULT=0
+    VAR INT     keyPzlCorrectPushes[1]  DEFAULT=0
     VAR BOOL    keyPzlSolved[1] DEFAULT=0
-    VAR BOOL    keyPzlInUse[1] DEFAULT=0
-    VAR BOOL    fireOne[1] DEFAULT=0
-    VAR BOOL    fireTwo[1] DEFAULT=0
-    
-    
+    VAR BOOL    keyPzlInUse[1]  DEFAULT=0
+    VAR BOOL    fireOne[1]  DEFAULT=0
+    VAR BOOL    fireTwo[1]  DEFAULT=0
+
 }
 
 STATEDESC Elonin
 
 {
    VERSION 2
-    
+
     VAR BOOL    fntOnOff[1] DEFAULT=0
-    VAR BOOL 	birdie[1] DEFAULT=0
+    VAR BOOL    birdie[1]   DEFAULT=0
     VAR INT     flwrCorrectCount[1] DEFAULT=0   
-    VAR BOOL    flwrPuzSolved[1] DEFAULT=0
+    VAR BOOL    flwrPuzSolved[1]    DEFAULT=0
     VAR BOOL    flwrPuzInUse[1] DEFAULT=0
-    VAR INT     keyPzlCorrectPushes[1] DEFAULT=0
+    VAR INT     keyPzlCorrectPushes[1]  DEFAULT=0
     VAR BOOL    keyPzlSolved[1] DEFAULT=0
-    VAR BOOL    keyPzlInUse[1] DEFAULT=0
-    VAR BOOL    fireOne[1] DEFAULT=0
-    VAR BOOL    fireTwo[1] DEFAULT=0
-    VAR BOOL    balcOpenClose[1] DEFAULT=0
+    VAR BOOL    keyPzlInUse[1]  DEFAULT=0
+    VAR BOOL    fireOne[1]  DEFAULT=0
+    VAR BOOL    fireTwo[1]  DEFAULT=0
+    VAR BOOL    balcOpenClose[1]    DEFAULT=0
     VAR BOOL    caveDoor[1] DEFAULT=0
-    
+
 }
 
 STATEDESC Elonin
 
 {
    VERSION 3
-    
+
     VAR BOOL    fntOnOff[1] DEFAULT=0
-    VAR BOOL 	birdie[1] DEFAULT=0
-    VAR INT     flwrCorrectCount[1] DEFAULT=0   
-    VAR BOOL    flwrPuzSolved[1] DEFAULT=0
+    VAR BOOL    birdie[1]   DEFAULT=0
+    VAR INT     flwrCorrectCount[1] DEFAULT=0
+    VAR BOOL    flwrPuzSolved[1]    DEFAULT=0
     VAR BOOL    flwrPuzInUse[1] DEFAULT=0
-    VAR INT     keyPzlCorrectPushes[1] DEFAULT=0
+    VAR INT     keyPzlCorrectPushes[1]  DEFAULT=0
     VAR BOOL    keyPzlSolved[1] DEFAULT=0
-    VAR BOOL    keyPzlInUse[1] DEFAULT=0
-    VAR BOOL    fireOne[1] DEFAULT=0
-    VAR BOOL    fireTwo[1] DEFAULT=0
-    VAR BOOL    balcOpenClose[1] DEFAULT=0
+    VAR BOOL    keyPzlInUse[1]  DEFAULT=0
+    VAR BOOL    fireOne[1]  DEFAULT=0
+    VAR BOOL    fireTwo[1]  DEFAULT=0
+    VAR BOOL    balcOpenClose[1]    DEFAULT=0
     VAR BOOL    caveDoor[1] DEFAULT=0
-    VAR BOOL    fourknobsDoor[1] DEFAULT=0
+    VAR BOOL    fourknobsDoor[1]    DEFAULT=0
 }
 
+STATEDESC Elonin
+
+{
+   VERSION 4
+
+    VAR BOOL    fntOnOff[1]            DEFAULT=0
+    VAR BOOL 	birdie[1]              DEFAULT=0
+    VAR INT     flwrCorrectCount[1]    DEFAULT=0
+    VAR BOOL    flwrPuzSolved[1]       DEFAULT=0
+    VAR BOOL    flwrPuzInUse[1]        DEFAULT=0
+    VAR INT     keyPzlCorrectPushes[1] DEFAULT=0
+    VAR BOOL    keyPzlSolved[1]        DEFAULT=0
+    VAR BOOL    keyPzlInUse[1]         DEFAULT=0
+    VAR BOOL    fireOne[1]             DEFAULT=0
+    VAR BOOL    fireTwo[1]             DEFAULT=0
+    VAR BOOL    balcOpenClose[1]       DEFAULT=0
+    VAR BOOL    caveDoor[1]            DEFAULT=0
+    VAR BOOL    fourknobsDoor[1]       DEFAULT=0
+    VAR BOOL    bigWoodDoor[1]         DEFAULT=0
+    VAR BOOL    mTshirt[1]             DEFAULT=0
+}
+
+STATEDESC Elonin
+
+{
+   VERSION 5
+
+    VAR BOOL    fntOnOff[1]             DEFAULT=0
+    VAR BOOL 	birdie[1]               DEFAULT=0
+    VAR INT     flwrCorrectCount[1]     DEFAULT=0
+    VAR BOOL    flwrPuzSolved[1]        DEFAULT=0
+    VAR BOOL    flwrPuzInUse[1]         DEFAULT=0
+    VAR INT     keyPzlCorrectPushes[1]  DEFAULT=0
+    VAR BOOL    keyPzlSolved[1]         DEFAULT=0
+    VAR BOOL    keyPzlInUse[1]          DEFAULT=0
+    VAR BOOL    fireOne[1]              DEFAULT=0
+    VAR BOOL    fireTwo[1]              DEFAULT=0
+    VAR BOOL    balcOpenClose[1]        DEFAULT=0
+    VAR BOOL    caveDoor[1]             DEFAULT=0
+    VAR BOOL    fourknobsDoor[1]        DEFAULT=0
+    VAR BOOL    bigWoodDoor[1]          DEFAULT=0
+    VAR BOOL    mTshirt[1]              DEFAULT=0
+    VAR BOOL    cannenVis[1]            DEFAULT=0   DEFAULTOPTION=VAULT
+}
