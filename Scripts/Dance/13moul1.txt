@@ -1,8 +1,8 @@
-﻿13moul1 - Fahets Fischteich - 286.50 - Wassergeister - spielend
+﻿13moul1 - Fahets Fischteich - 5.17 - Guardians of the Pond
 
-definegroup|f1:137998,f2:7939982,f3:9995228,f4:6551797,f5:115763,f6:127131,f7:12348922,f8:6961947,m:7132841,l:7060111
+definegroup|f1:137998,f2:7939982,f3:9995228,f4:6551797,f5:115763,f6:127131,f7:12348922,f8:6961947,m:7132841,l:7060111,f1a:12480587
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,l
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,l,f1a
 float|1.00
 ws|0|0.50
 
@@ -13,13 +13,13 @@ aliasgroup|m
 vis|0|1.00
 ws|4|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul1m|0.10
 
 aliasgroup|f2,f4,f6,f8
 restoreme|13moul1f|1.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 elevatorarrivingtop|1|7.00
 ws|1|2.00
 bow|1|4.50
@@ -31,7 +31,7 @@ powertowerprimerbutton|3|4.50
 aliasgroup|l
 event|10|1.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 cheer|1|3.50
 ws|1|2.00
 
@@ -39,7 +39,7 @@ aliasgroup|f2,f4,f6,f8
 wallslide|1|1.50
 sitidle|1|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 ws|1|1.00
 talkhand|1|4.50
 vertblastlevel02|1|3.00
@@ -53,15 +53,15 @@ beckonsmall|1|2.00
 aliasgroup|f2,f4,f6,f8
 softlanding|1|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 ws|72|2.00
 walk|1|2.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|1|2.00
 clutchlevergeargrind|1|4.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 wallslide|1|1.50
 sitidle|1|1.00
 
@@ -75,14 +75,14 @@ walk|1|2.00
 ws|71|2.00	
 beckonsmall|1|2.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 softlanding|1|0.50
 
 aliasgroup|f2,f4,f6,f8
 ws|72|1.50
 walk|1|2.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|1|2.00
 clutchlevergeargrind|1|4.50
 talkhand|1|5.00
@@ -93,7 +93,7 @@ vertblastlevel01|1|3.00
 walk|1|2.00
 ws|2|2.00
 
-aliasgroup|f1
+aliasgroup|f1,f1a
 pelletbookright|1|0.50
 aliasgroup|f2
 pelletbookright|1|0.50
@@ -110,7 +110,7 @@ pelletbookright|1|0.50
 aliasgroup|f8
 pelletbookright|1|2.00
 
-aliasgroup|f1
+aliasgroup|f1,f1a
 noxiouscavedoorpushopen|1|0.50
 aliasgroup|f	2
 noxiouscavedoorpushopen|1|0.50
@@ -127,7 +127,7 @@ noxiouscavedoorpushopen|1|0.50
 aliasgroup|f8
 noxiouscavedoorpushopen|1|4.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|2|1.00
 hatchclose|1|3.00
 vertblastlevel03|1|3.00
@@ -152,7 +152,7 @@ floorleverapushhard|1|3.00
 steponfloorplate|1|2.50
 cheer|1|3.50
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|72|2.00
 elevatorleavingbottom|1|10.00
 ws|73|2.00
@@ -165,7 +165,7 @@ ws|2|2.00
 lookaround|1|9.00
 stop|1|3.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 doh|1|2.00
 restoreme|13moul2m|1.00
 
@@ -174,13 +174,13 @@ okay|1|3.00
 doh|1|2.00
 restoreme|13moul2f|1.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|72|2.00
 
 elevatorleavingbottom|1|10.00
 ws|0|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul1m|1.00
 
 aliasgroup|f2,f4,f6,f8

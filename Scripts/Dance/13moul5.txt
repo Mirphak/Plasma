@@ -1,8 +1,8 @@
-13moul5 - Fahets Fischteich - Rancher und Fee - 367.50
+13moul5 - Fahets Fischteich - Rancher and Waternymph - 6.20
 
-definegroup|f1:137998,f2:7939982,f3:9995228,f4:6551797,f5:115763,f6:127131,f7:12348922,f8:6961947,m:7132841,l:7060111
+definegroup|f1:137998,f2:7939982,f3:9995228,f4:6551797,f5:115763,f6:127131,f7:12348922,f8:6961947,m:7132841,l:7060111,f1a:12480587
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,l
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,l,f1a
 float|1.00
 ws|0|1.00
 
@@ -14,7 +14,7 @@ aliasgroup|m
 vis|0|1.00
 ws|2|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul5m|1.00
 
 aliasgroup|f2
@@ -47,7 +47,7 @@ swimsurfacedive|2|f|6.00
 ws|14|1.50
 talk|2|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 ws|13|1.00
 cleftdropin|1|5.00
 
@@ -55,7 +55,7 @@ aliasgroup|f2,f4,f6,f8
 cower|1|4.00
 afkidle|1|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 ws|14|1.00
 peer|1|6.00
 globalscopehold|1|1.00
@@ -70,7 +70,7 @@ ws|15|1.00
 flinch|1|2.50
 afkidle|1|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 globalscopehold|1|1.00
 steponfloorplate|1|3.00
 globalscopehold|1|1.00
@@ -86,14 +86,14 @@ aliasgroup|f2,f4,f6,f8
 treadwaterturnleft|1|4.00
 ws|15|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 ws|83|1.50
 amazed|1|0.50
 
 aliasgroup|f2,f4,f6,f8
 afkidle|1|4.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 walk|1|2.00
 ws|16|1.50
 hatchlockedabove|1|5.00
@@ -104,20 +104,20 @@ aliasgroup|f2,f4,f6,f8
 ws|16|1.50
 aquariumbuttonrelease|1|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 flinch|1|2.50
 groundimpact|1|0.50
 
 aliasgroup|f2,f4,f6,f8
 vertblastlevel06|1|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 cower|1|2.00
 
 aliasgroup|f2,f4,f6,f8
 aquariumbuttonrelease|1|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul5m1|1.00
 flinch|1|3.00
 doh|1|2.00
@@ -128,7 +128,7 @@ laugh|1|4.50
 ws|16|1.00
 hatchclose|10|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 amazed|1|6.00
 stop|1|3.50
 laugh|1|5.00
@@ -141,7 +141,7 @@ aliasgroup|f2,f4,f6,f8
 softlanding|1|2.00
 ws|17|2.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 treadwaterturnleft|1|4.00
 ws|17|1.00
 
@@ -169,7 +169,7 @@ wallclimbdismountright|4|10.00
 aliasgroup|f2,f4,f6,f8
 ladderupon|1|2.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|18|2.00
 floorleverapushhard|2|6.00
 floorleverastuck|1|4.00
@@ -191,7 +191,7 @@ bow|1|5.00
 wallclimbmountdown|1|6.00
 ws|0|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul6m|1.00
 
 aliasgroup|f2,f4,f6,f8

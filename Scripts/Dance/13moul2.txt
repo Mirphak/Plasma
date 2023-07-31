@@ -1,8 +1,8 @@
-13moul2 - Fahets Fischteich - Schwimmrunde Wassergeister - 317.90
+13moul2 - Fahets Fischteich - Commotion in the Pond - 5.58
 
-definegroup|f1:137998,f2:7939982,f3:9995228,f4:6551797,f5:115763,f6:127131,f7:12348922,f8:6961947,m:7132841,l:7060111
+definegroup|f1:137998,f2:7939982,f3:9995228,f4:6551797,f5:115763,f6:127131,f7:12348922,f8:6961947,m:7132841,l:7060111,f1a:12480587
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,l
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,l,f1a
 float|1.00
 ws|0|1.00
 
@@ -14,13 +14,13 @@ aliasgroup|m
 vis|0|1.00
 ws|6|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul1m|1.00
 
 aliasgroup|f2,f4,f6,f8
 restoreme|13moul1f|1.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 float|1.00
 ws|5|2.00
 cleftdropin|1|7.00
@@ -130,7 +130,7 @@ hatchopenabove|1|6.00
 climbdown|1|11.00
 ws|0|1.00
 					
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul3m|1.00
 
 aliasgroup|f2,f4,f6,f8

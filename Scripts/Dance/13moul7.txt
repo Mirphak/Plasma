@@ -1,8 +1,8 @@
-13moul7 - Fahets Fischteich - Finale - 412.0
+13moul7 - Fahets Fischteich - Finale - 7.52
 
-definegroup|f1:137998,f2:7939982,f3:9995228,f4:6551797,f5:115763,f6:127131,f7:12348922,f8:6961947,m:7132841,l:7060111
+definegroup|f1:137998,f2:7939982,f3:9995228,f4:6551797,f5:115763,f6:127131,f7:12348922,f8:6961947,m:7132841,l:7060111,f1a:12480587
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,l
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,l,f1a
 float|1.00
 ws|0|1.00
 
@@ -14,13 +14,13 @@ aliasgroup|m
 vis|0|1.00
 ws|7|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul1m|1.00
 
 aliasgroup|f2,f4,f6,f8
 restoreme|13moul1f|1.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 elevatorarrivingtop|1|7.00
 ws|1|2.00
 talkhand|1|5.00
@@ -29,7 +29,7 @@ vertblastlevel03|1|3.00
 groan|1|3.00
 vertblastlevel01|2|5.00		
 
-aliasgroup|f1
+aliasgroup|f1,f1a
 pelletbookright|1|0.50
 aliasgroup|f2
 pelletbookright|1|0.50
@@ -46,10 +46,10 @@ pelletbookright|1|0.50
 aliasgroup|f8
 pelletbookright|1|1.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|1|1.00
 
-aliasgroup|f1
+aliasgroup|f1,f1a
 ladderdownoff|4|1.00
 aliasgroup|f2
 ladderdownoff|4|1.00
@@ -66,19 +66,19 @@ ladderdownoff|4|1.00
 aliasgroup|f8
 ladderdownoff|4|8.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 treadwaterturnleft|1|4.00
 ws|42|2.00
 swimsurfacedive|2|f|6.00
 ws|43|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul2m|0.50
 
 aliasgroup|f2,f4,f6,f8
 restoreme|13moul2f|1.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 sideswimleft|1|2.50
 sideswimright|1|2.50
 treadwaterturnleft|1|4.00
@@ -88,13 +88,13 @@ sideswimleft|1|2.50
 wallclimbdismountright|3|7.50
 ws|44|2.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul3m|0.50
 
 aliasgroup|f2,f4,f6,f8
 restoreme|13moul3f|0.50
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 windmilllockedcw|1|5.00
 taunt|1|5.00
 wallclimbmountleft|1|3.00
@@ -105,7 +105,7 @@ taunt|1|5.00
 noxiouscavedoorpullopen|2|8.00
 ws|46|2.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 hatchlockedabove|1|0.50
 
 aliasgroup|f2,f4,f6,f8
@@ -113,33 +113,33 @@ vertblastlevel01|1|3.00
 vertblastlevel04|1|3.00
 hatchlockedabove|1|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 vertblastlevel01|1|3.00
 vertblastlevel04|1|3.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|46|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 vertblastlevel05|1|1.00
 aliasgroup|f2,f4,f6,f8
 vertblastlevel05|1|1.00
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 vertblastlevel05|1|1.00
 aliasgroup|f2,f4,f6,f8
 vertblastlevel05|1|3.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|46|2.00
 retrodance|1|7.50
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 laugh|1|5.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 hrvstrleverbackward|1|2.00
 noxiousdoorclose|1|3.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 wallclimbidle|1|1.00
 restoreme|13moul4m1|0.50
 
@@ -147,7 +147,7 @@ aliasgroup|f2,f4,f6,f8
 doh|1|2.00
 restoreme|13moul4f1|2.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|46|2.00
 walk|1|2.00
 ws|47|2.00
@@ -166,7 +166,7 @@ pelletbookleft|3|2.50
 pelletbookwait|3|5.00
 pelletbookright|3|2.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 doh|1|2.00
 restoreme|13moul5m|0.50
 
@@ -176,7 +176,7 @@ restoreme|13moul5f2|0.50
 wallclimbmountright|3|5.00
 ws|84|2.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 lookaround|1|1.00
 
 aliasgroup|f2,f4,f6,f8
@@ -186,7 +186,7 @@ ws|85|1.00
 swimsurfacedive|2|6.00
 ws|48|2.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 floorleverapushhard|2|6.00
 floorleverastuck|1|4.00
 powertowerprimerbutton|1|2.50
@@ -194,20 +194,20 @@ blindsleverdown|1|3.50
 buttontouch|2|4.50
 insertkihand|1|4.00
 						
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 groundimpact|1|0.50
 
 aliasgroup|f2,f4,f6,f8
 vertblastlevel06|1|0.50
 restoreme|13moul5f6|1.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 cower|1|3.00
 
 aliasgroup|f2,f4,f6,f8
 aquariumbuttonrelease|1|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul5m2|1.00
 flinch|1|0.50
 
@@ -216,7 +216,7 @@ laugh|1|0.50
 restoreme|13moul5f4|4.00
 swimunderwater|1|0.50
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 amazed|1|0.50
 restoreme|13moul6m|0.50
 
@@ -224,7 +224,7 @@ aliasgroup|f2,f4,f6,f8
 wallclimbmountup|1|2.50
 restoreme|13moul6f|2.50
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|49|2.00
 wallclimbdismountright|1|3.50
 wallclimbmountleft|1|3.00
@@ -256,7 +256,7 @@ vis|1|0.50
 ladderup|3|4.00
 ws|9|1.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|49|1.00
 rot|z|180|0.50
 ws|86|1.00
@@ -269,7 +269,7 @@ rot|z|180|1.00
 bow|1|4.50
 thx|1|2.50
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 bow|1|4.50
 ws|49|2.00
 kneel|1|6.00

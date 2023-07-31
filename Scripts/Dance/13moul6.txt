@@ -1,8 +1,8 @@
-13moul6 - Fahets Fischteich - Eingeborene - 394.00
+13moul6 - Fahets Fischteich - tribal dance - 7.08
 
-definegroup|f1:137998,f2:7939982,f3:9995228,f4:6551797,f5:115763,f6:127131,f7:12348922,f8:6961947,m:7132841,l:7060111
+definegroup|f1:137998,f2:7939982,f3:9995228,f4:6551797,f5:115763,f6:127131,f7:12348922,f8:6961947,m:7132841,l:7060111,f1a:12480587
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,l
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,l,f1a
 float|1.00
 ws|0|1.00
 
@@ -14,24 +14,24 @@ aliasgroup|m
 vis|0|1.00
 ws|4|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul6m|1.00
 
 aliasgroup|f2,f4,f6,f8
 restoreme|13moul6f|1.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|19|1.00
 elevatorarrivingtop|1|7.00
 ws|20|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 wallclimbidle|1|0.50
 
 aliasgroup|f2,f4,f6,f8
 doh|1|4.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 wallclimbdismountright|1|3.50
 wallclimbmountleft|1|3.00
 wallclimbdismountright|1|3.50
@@ -49,13 +49,13 @@ wallclimbleft|1|2.00
 wallclimbright|1|2.00
 ws|20|1.00
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 wallclimbidle|1|0.50
 
 aliasgroup|f2,f4,f6,f8
 doh|1|4.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|21|2.00
 wallclimbright|2|4.00
 ladderupon|1|2.00
@@ -170,7 +170,7 @@ ws|41|2.00
 wallclimbright|2|4.00
 secretwallbutton|1|9.00
 
-aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8
+aliasgroup|f1,f2,f3,f4,f5,f6,f7,f8,f1a
 ws|20|2.00
 wallclimbdismountright|1|3.50
 wallclimbmountleft|1|3.00
@@ -193,7 +193,7 @@ wallclimbmountdown|1|5.50
 ladderdown|2|5.00
 ws|0|1.00	
 
-aliasgroup|f1,f3,f5,f7
+aliasgroup|f1,f3,f5,f7,f1a
 restoreme|13moul1m|1.00
 
 aliasgroup|f2,f4,f6,f8
