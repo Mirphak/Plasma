@@ -413,6 +413,38 @@ def PageInGameRoom():
 def PageOutGameRoom():
     PtConsoleNet("Nav.PageOutNode GameRoom_mainRoom", True)
 
+def gameroomup():
+    PtConsoleNet("Avatar.Warp.WarpToXYZ 222.37, -801.80, 49980.93", True)
+
+def gameroomdown():
+    PtConsoleNet("Avatar.Warp.WarpToXYZ 209.41, -854.58, 49946.63", True)
+
+def PageInMonitor():
+    PtConsoleNet("Nav.PageInNode TLABahroRoom_mainRoom", True)
+    #PtConsoleNet("Nav.PageInNode TLABahroRoom_Textures", True)
+    PtConsoleNet("Avatar.Warp.WarpToXYZ 18.50, 7.33, 15.69", True)
+
+def PageOutMonitor():     # !! CRASHES THE CLIENT !!
+    PtConsoleNet("Avatar.Spawn.Go 2", True)
+    #PtConsoleNet("Nav.PageOutNode TLABahroRoom_Textures", True)
+    PtConsoleNet("Nav.PageOutNode TLABahroRoom_mainRoom", True)
+
+def PageInPlanet():
+    PtConsoleNet("Nav.PageInNode TLAPlanet_mainRoom", True)
+    #PtConsoleNet("Nav.PageInNode TLAPlanet_Textures", True)
+    PtConsoleNet("Avatar.Warp.WarpToXYZ -109.90, -17.58, 3001.20", True)
+
+def PageOutPlanet():
+    PtConsoleNet("Avatar.Spawn.Go 2", True)
+    #PtConsoleNet("Nav.PageOutNode TLAPlanet_Textures", True)
+    PtConsoleNet("Nav.PageOutNode TLAPlanet_mainRoom", True)
+
+def miniplanet():
+    PtConsoleNet("Avatar.Warp.WarpToXYZ 18.08, -145.56, -4962.47", True)
+
+def bigplanet():
+    PtConsoleNet("Avatar.Warp.WarpToXYZ -109.90, -17.58, 3001.20", True)
+
 """ Methods for Mintata """
 
 # Hide Minkata ground and dust
@@ -472,6 +504,18 @@ def TapKi():
 # To talk while seatting
 def TalkSeat():
     name = ("Male", "Female")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "Talk"
+    PtGetLocalAvatar().avatar.playSimpleAnimation(name)
+                        
+def KneelLink():
+    name = ("Male", "Female")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "FishBookLinkOut"
+    PtGetLocalAvatar().avatar.playSimpleAnimation(name)
+
+def BookOffer():
+    name = ("Male", "Female")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "BookOffer"
+    PtGetLocalAvatar().avatar.playSimpleAnimation(name)
+
+def BookOfferIdle():
+    name = ("Male", "Female")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "BookOfferIdle"
     PtGetLocalAvatar().avatar.playSimpleAnimation(name)
 
 # CAMERA SPEED
@@ -534,7 +578,7 @@ def KickOut(kiNumOrName):
 def RotAhny(sphere):
     sdl = PtGetAgeSDL()
     if sphere > 0 and sphere < 5 :
-        sdl["ahnyCurrentSphere"]=(sphere,)
+        sdl["ahnyCurrentSphere"] = (sphere,)
 
 # Get the GUID of the current Age
 def GuidInfo():
