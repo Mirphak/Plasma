@@ -122,7 +122,7 @@ hsRefCnt::hsRefCnt(int initRefs)
 hsRefCnt::~hsRefCnt()
 {
 #ifdef HS_DEBUGGING
-    hsThrowIfFalse(fRefCnt <= 1);
+    hsThrowIfFalse(fRefCnt == 1);
 #endif
 
 #if (REFCOUNT_DEBUGGING == REFCOUNT_DBG_LEAKS) || (REFCOUNT_DEBUGGING == REFCOUNT_DBG_ALL)

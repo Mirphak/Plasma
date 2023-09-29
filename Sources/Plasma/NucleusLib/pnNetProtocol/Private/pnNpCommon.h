@@ -277,7 +277,7 @@ public:
     NetVaultNode()
         : fNodeId(0), fCreateTime(0), fModifyTime(0), fCreatorId(0), fNodeType(0), fInt32_1(0),
           fInt32_2(0), fInt32_3(0), fInt32_4(0), fUInt32_1(0), fUInt32_2(0), fUInt32_3(0),
-          fUInt32_4(0), fUsedFields(0), fDirtyFields(0), hsRefCnt(0)
+          fUInt32_4(0), fUsedFields(0), fDirtyFields(0)
     { }
 
     /** Clears this NetVaultNode for subsequent usage */
