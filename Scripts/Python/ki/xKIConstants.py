@@ -349,76 +349,7 @@ class kCommands:
         "/saveclothing": "SaveClothing",
         "/loadclothing": "LoadClothing",
         "/threaten": "CoopExample",
-        "/roll": "RollDice",
-        "/save" : "SavePosition",
-        "/ws" : "ReturnToPosition"
-    }
-    Robot = {
-        "//" : "ExecuteRobotCommand"
-    }
-    Mystitech = {
-        "/maleme" : "MaleMe", # To turn your avatar into male
-        "/femaleme" : "FemaleMe", # To turn your avatar into female
-        "/bahrome" : "BahroMe", # To turn your avatar into Bahro
-        "/yeeshame" : "YeeshaMe", # To turn your avatar into Yeesha
-        "/kodamame" : "KodamaMe", # To turn your avatar into Kodama
-        "/change" : "Change", # To turn your avatar into male, female or NPC # param : Male, Female or NPC name (in most of the cases the first lettre is sufficient)
-        "/removereltobook" : "RemoveReltoBook", # To remove your Relto Book
-        "/wearreltobook" : "WearReltoBook", # To wear your Relto Book 
-        "/removeki" : "RemoveKI", # To remove your KI
-        "/wearki" : "WearKI", # To wear your KI
-        "/removeotherrelto" : "RemoveOtherRelto", # Remove other player Relto book knowing his name or KI number # param : ki number or player name
-        "/wearotherrelto" : "WearOtherRelto", # Wear other player Relto book knowing his name or KI number # param : ki number or player name
-        "/removeotherki" : "RemoveOtherKI", # Remove other player KI knowing his name or KI number # param : ki number or player name
-        "/wearotherki" : "WearOtherKI", # Wear other player KI knowing his name or KI number # param : ki number or player name
-        "/dontpanic" : "DontPanic", # To automaticaly respawn
-        "/linkhere" : "LinkHere", # To link a player in your age knowing his name or KI number # param : ki number or player name
-        "/linkmethere" : "LinkMeThere", # To link you in the age of a player knowing his name or KI number # param : ki number or player name
-        "/warphere" : "WarpHere", # To move a player where you are knowing his name or KI number # param : ki number or player name
-        "/warpmethere" : "WarpMeThere", # To move you where a player is knowing his name or KI number # param : ki number or player name
-        "/warpmeto" : "WarpMeTo", # To move you to a specific location # params : x, y, z coordinates
-        "/pageingome" : "PageInGome", # PageIn the GoMePub 
-        "/pageoutgome" : "PageOutGome", # PageOut the GoMePub 
-        "/pageinroom" : "PageInRoom", # PageIn the Secret Room
-        "/pageoutroom" : "PageOutRoom", # PageOut the Secret Room
-        "/pageinaltroom" : "PageInAltRoom", # PageIn the Alt Secret Room
-        "/pageoutaltroom" : "PageOutAltRoom", # PageOut the Alt Secret Room
-        "/pageincafe" : "PageInCafe", # PageIn the Mystitech's Cafe
-        "/pageoutcafe" : "PageOutCafe", # PageOut the Mystitech's Cafe
-        "/pageinredcafe" : "PageInRedCafe", # PageIn the Mystitech's Cafe Red
-        "/pageoutredcafe" : "PageOutRedCafe", # PageOut the Mystitech's Cafe Red
-        "/pageinoffice" : "PageInOffice", # PageIn the Mystitech's Office
-        "/pageoutoffice" : "PageOutOffice", # PageOut the Mystitech's Office
-        "/pageinredoffice" : "PageInOfficeRed", # PageIn the Mystitech's Office Red
-        "/pageoutredoffice" : "PageOutOfficeRed", # PageOut the Mystitech's Office Red
-        "/pageintlaloftold" : "PageInTLALoft", # PageIn the Mystitech's TLALoft
-        "/pageouttlaloftold" : "PageOutTLALoft", # PageOut the Mystitech's TLALoft
-        "/pageintlaloft" : "PageInTLALoftEdit", # PageIn the Mystitech's TLALoft Edit
-        "/pageouttlaloft" : "PageOutTLALoftEdit", # PageOut the Mystitech's TLALoft Edit
-        "/pageintlachamber" : "PageInTLATestChamber", # PageIn the Mystitech's TLATestChamber
-        "/pageouttlachamber" : "PageOutTLATestChamber", # PageOut the Mystitech's TLATestChamber
-        "/pageinboat" : "PageInBoat", # PageIn the CoD Boat
-        "/pageoutboat" : "PageOutBoat", # PageOut the CoD Boat
-        "/pageingameroom" : "PageInGameRoom", # PageIn the Mystitech's GameRoom
-        "/pageoutgameroom" : "PageOutGameRoom", # PageOut the Mystitech's GameRoom
-        "/minkatahide" : "MinkataHide", # To hide some objects of Minkata 
-        "/minkatarestore" : "MinkataRestore", # To restore some objects of Minkata
-        "/tokiva4" : "WarpMeToKiva4", # To move you to Kiva4
-        "/tokivaball" : "WarpMeToKivaBall", # To move you to Kiva soccer ball default position
-        "/greenscreen" : "GreenScreen", # To add a green Screen 
-        "/greensdist" : "GreensDist", # To change the distance of the green screen 
-        "/minkatags" : "Minkatags", # Change the "sky" color and distance
-        "/tapki" : "TapKi", # To do a tap KI
-        "/talkseat" : "TalkSeat", # To talk while seatting
-        "/showlocation" : "ShowLocation", # To show the locations of the age players 
-        "/slowercamera" : "SlowerCamera", # To have a slower camera movement 
-        "/slowcamera" : "SlowCamera", # To have a slow camera movement 
-        "/walkcamera" : "WalkCamera", # To adjust the camera speed to that of walking
-        "/cameraspeed" : "CameraSpeed", # To adjust the camera speed (param = speed)
-        "/resetcamera" : "ResetCamera", # To reset the camera
-        "/hidecursor" : "HideCursor", # To hide your cursor 
-        "/linkgroup" : "LinkGroup", # To link a group of players knowing their names or KI numbers (you can mix) # param : list of KI numbers or player names ([kinum1, ..., kinumN])
-        "/rotahny" : "RotAhny", # To rotate the Ahnonay Sphere (Param = sphere number in [1, 2, 3, 4])
+        "/roll": "RollDice"
     }
 
 ## Numeric limits for the KI.
