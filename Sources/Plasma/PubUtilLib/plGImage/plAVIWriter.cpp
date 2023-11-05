@@ -53,6 +53,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "hsTimer.h"
 #include "plMipmap.h"
 #include "plMessage/plRenderMsg.h"
+#include "plMessageBox/hsMessageBox.h"
 #include "plPipeline.h"
 #include "pnDispatch/plDispatch.h"
 #include "pnKeyedObject/plFixedKey.h"
@@ -62,9 +63,9 @@ plProfile_CreateTimer("AviCapture", "RenderSetup", AviCapture);
 
 bool plAVIWriter::fInitialized = false;
 
-#if HS_BUILD_FOR_WIN32
 class plAVIWriterImp : public plAVIWriter
 {
+#if HS_BUILD_FOR_WIN32
 protected:
     PAVIFILE fFileHandle;
     PAVISTREAM fStreamHandle;
@@ -80,33 +81,19 @@ protected:
     void IFillBitmapInfo(BITMAPINFOHEADER* inf, plPipeline* pipeline);
 
     bool ICaptureFrame(plPipeline* pipeline);
-
-public:
-    plAVIWriterImp();
-    virtual ~plAVIWriterImp();
-
-    bool MsgReceive(plMessage* msg) override;
-
-    void Shutdown() override;
-
-    bool Open(const char* fileName, plPipeline* pipeline) override;
-    void Close() override;
-};
-#else
-class plAVIWriterImp : public plAVIWriter
-{
-public:
-    plAVIWriterImp();
-    virtual ~plAVIWriterImp();
-
-    bool MsgReceive(plMessage* msg) override;
-
-    void Shutdown() override;
-
-    bool Open(const char* fileName, plPipeline* pipeline) override;
-    void Close() override;
-};
 #endif
+
+public:
+    plAVIWriterImp();
+    virtual ~plAVIWriterImp();
+
+    bool MsgReceive(plMessage* msg) override;
+
+    void Shutdown() override;
+
+    bool Open(const char* fileName, plPipeline* pipeline) override;
+    void Close() override;
+};
 
 plAVIWriter::~plAVIWriter()
 {
@@ -237,7 +224,7 @@ bool plAVIWriterImp::Open(const char* fileName, plPipeline* pipeline)
                                     &fBitmapInfo,   // stream format
                                     fBitmapInfo.biSize);
     } while (err != AVIERR_OK &&
-            hsMessageBox("Codec unavailable, try again?", "AVI Writer", hsMessageBoxYesNo) == hsMBoxYes);
+            hsMessageBox(ST_LITERAL("Codec unavailable, try again?"), ST_LITERAL("AVI Writer"), hsMessageBoxYesNo) == hsMBoxYes);
 
     if (err != AVIERR_OK)
     {

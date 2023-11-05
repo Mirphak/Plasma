@@ -46,6 +46,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plFileSystem.h"
 #include "hsStream.h"
 #include "hsWindows.h"
+#include "hsDarwin.h"
 
 #include <cstring>
 #include <iterator>
@@ -67,6 +68,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #endif
 
 #ifdef HS_BUILD_FOR_APPLE
+#    include <mach/mach.h>
 #    include <CoreFoundation/CoreFoundation.h>
 
     extern "C" {
@@ -114,6 +116,39 @@ static inline void ICPUID(cpuid_t* info, int function_id)
 #endif
 }
 
+#ifdef HS_BUILD_FOR_APPLE
+static inline ST::string IGetAppleCPUVendor()
+{
+    ST::string result;
+
+#ifdef HAVE_SYSCTL
+    size_t bufsize = 100;
+    char buffer[bufsize];
+
+    if (sysctlbyname("machdep.cpu.brand_string", &buffer, &bufsize, nullptr, 0) == 0) {
+        result = buffer;
+        return result;
+    }
+#endif
+
+    struct host_basic_info hostinfo;
+    host_name_port_t host = mach_host_self();
+    unsigned int size = sizeof(hostinfo) / sizeof(int);
+
+    if (host_info(host, HOST_BASIC_INFO, (host_info_t)&hostinfo, &size) != KERN_SUCCESS) {
+        return result;
+    }
+
+    char* cpu_name;
+    char* cpu_subname;
+    slot_name(hostinfo.cpu_type, hostinfo.cpu_subtype, &cpu_name, &cpu_subname);
+
+    result = cpu_subname;
+
+    return result;
+}
+#endif
+
 ST::string hsSystemInfo::GetCPUBrand()
 {
     cpuid_t cpuInfo[4]{};
@@ -131,6 +166,12 @@ ST::string hsSystemInfo::GetCPUBrand()
     }
 
     ST::string result(str);
+
+#ifdef HS_BUILD_FOR_APPLE
+    if (result.empty())
+        result = IGetAppleCPUVendor();
+#endif
+
     if (result.empty())
         result = ST_LITERAL("Unknown");
     return result;
@@ -151,13 +192,7 @@ static inline bool IGetAppleVersion(ST::string& system)
         CFRelease(name);
         CFRelease(dict);
 
-        CFIndex infoLen = CFStringGetLength(info);
-        CFIndex infoBufSz = 0;
-        CFStringGetBytes(info, CFRangeMake(0, infoLen), kCFStringEncodingUTF8, 0, false, nullptr, 0, &infoBufSz);
-        ST::char_buffer systemBuf;
-        systemBuf.allocate(infoBufSz);
-        CFStringGetBytes(info, CFRangeMake(0, infoLen), kCFStringEncodingUTF8, 0, false, (UInt8*)systemBuf.data(), infoLen, nullptr);
-        system = ST::string(systemBuf);
+        system = STStringFromCFString(info);
 
         CFRelease(info);
 
@@ -181,12 +216,10 @@ static inline bool IGetLinuxVersion(const plFileName& osVersionPath, ST::string&
                         system = ST::string::from_utf8(token);
                         // chop off the quotes
                         system = system.substr(1, system.size() - 2);
-                        s.Close();
                         return true;
                     }
                 }
             }
-            s.Close();
         }
     }
 
@@ -231,6 +264,8 @@ static inline bool IGetWindowsVersion(const RTL_OSVERSIONINFOEXW& info, ST::stri
         ss << "Server 2016 ";
     else if (info.dwMajorVersion == 10 && info.dwBuildNumber == 17763 && server.value())
         ss << "Server 2019 ";
+    else if (info.dwMajorVersion == 10 && info.dwBuildNumber == 20348 && server.value())
+        ss << "Server 2022 ";
     else if (info.dwMajorVersion == 10 && info.dwBuildNumber >= 22000 && !server.value())
         ss << "11 ";
     else if (info.dwPlatformId & VER_PLATFORM_WIN32_NT)
@@ -254,7 +289,7 @@ static inline bool IGetWindowsVersion(const RTL_OSVERSIONINFOEXW& info, ST::stri
     if (info.wProductType == VER_NT_WORKSTATION)
         ss << "Professional ";
 
-    if (info.szCSDVersion && *info.szCSDVersion)
+    if (info.szCSDVersion[0])
         ss << info.szCSDVersion << ' ';
 
     ss << "(Build " << info.dwBuildNumber << ')';

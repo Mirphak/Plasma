@@ -53,6 +53,7 @@ target_link_libraries(plNetClient
         pnModifier
         pnNucleusInc
         pnSceneObject
+        pnUtils
         plAgeDescription
         plAgeLoader
         plAnimation
@@ -60,6 +61,7 @@ target_link_libraries(plNetClient
         plContainer
         plDrawable
         plMessage
+        plMessageBox
         plModifier
         plNetClientRecorder
         plNetGameLib

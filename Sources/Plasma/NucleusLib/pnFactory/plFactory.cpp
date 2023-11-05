@@ -40,8 +40,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#define PLFACTORY_PRIVATE
 #include "plFactory.h"
+
 #include "hsStream.h"
 #include "plCreatable.h"
 #include "plCreator.h"
@@ -50,6 +50,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 // For class names
 #include "plCreatableStrings.h"
 
+#include <string_theory/format>
 
 static plFactory*   theFactory = nullptr;
 
@@ -199,11 +200,13 @@ uint16_t plFactory::FindClassIndex(const char* className)
 
     if (className && theFactory)
     {
-        for (plCreator* creator : theFactory->fCreators)
+        for (size_t i = 0; i < theFactory->fCreators.size(); i++)
         {
+            plCreator* creator = theFactory->fCreators[i];
             if (creator && stricmp(className, creator->ClassName()) == 0)
             {
-                return creator->ClassIndex();
+                hsAssert(i < numClasses, "Class index out of range??");
+                return static_cast<uint16_t>(i);
             }
         }
     }

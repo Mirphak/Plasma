@@ -68,6 +68,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plNetClient/plNetClientMgr.h"
 #include "plNetGameLib/plNetGameLib.h"
 #include "plMessage/plDisplayScaleChangedMsg.h"
+#include "plMessageBox/hsMessageBox.h"
 #include "plPhysX/plPXSimulation.h"
 #include "plPipeline/hsG3DDeviceSelector.h"
 #include "plResMgr/plLocalization.h"
@@ -97,14 +98,16 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 ITaskbarList3* gTaskbarList = nullptr; // NT 6.1+ taskbar stuff
 
 extern bool gDataServerLocal;
-extern bool gSkipPreload;
+extern bool gPythonLocal;
+extern bool gSDLLocal;
 
 enum
 {
     kArgSkipLoginDialog,
     kArgServerIni,
     kArgLocalData,
-    kArgSkipPreload,
+    kArgLocalPython,
+    kArgLocalSDL,
     kArgPlayerId,
     kArgStartUpAgeName,
     kArgPvdFile,
@@ -116,7 +119,8 @@ static const plCmdArgDef s_cmdLineArgs[] = {
     { kCmdArgFlagged  | kCmdTypeBool,       "SkipLoginDialog", kArgSkipLoginDialog },
     { kCmdArgFlagged  | kCmdTypeString,     "ServerIni",       kArgServerIni },
     { kCmdArgFlagged  | kCmdTypeBool,       "LocalData",       kArgLocalData   },
-    { kCmdArgFlagged  | kCmdTypeBool,       "SkipPreload",     kArgSkipPreload },
+    { kCmdArgFlagged  | kCmdTypeBool,       "LocalPython",     kArgLocalPython },
+    { kCmdArgFlagged  | kCmdTypeBool,       "LocalSDL",        kArgLocalSDL },
     { kCmdArgFlagged  | kCmdTypeInt,        "PlayerId",        kArgPlayerId },
     { kCmdArgFlagged  | kCmdTypeString,     "Age",             kArgStartUpAgeName },
     { kCmdArgFlagged  | kCmdTypeString,     "PvdFile",         kArgPvdFile },
@@ -207,14 +211,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     // Handle messages
     switch (message) {
-        case WM_TIMECHANGE:
-            // To prevent cheating and keep things better synchronized,
-            // we will completely re-eval the offsets on the next NetMsg we
-            // get from the server
-            if (plNetClientMgr* nc = plNetClientMgr::GetInstance())
-                nc->ResetServerTimeOffset(true);
-            break;
-
         case WM_LBUTTONDOWN:
         case WM_RBUTTONDOWN:
         case WM_LBUTTONDBLCLK:
@@ -872,10 +868,8 @@ INT_PTR CALLBACK UruLoginDialogProc( HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
                     {
                         plFileName gipath = plFileName::Join(plFileSystem::GetInitPath(), "general.ini");
                         ST::string ini_str = ST::format("App.SetLanguage {}\n", plLocalization::GetLanguageName(new_language));
-                        hsStream* gini = plEncryptedStream::OpenEncryptedFileWrite(gipath);
+                        std::unique_ptr<hsStream> gini = plEncryptedStream::OpenEncryptedFileWrite(gipath);
                         gini->WriteString(ini_str);
-                        gini->Close();
-                        delete gini;
                     }
 
                     memset(&pLoginParam->authError, 0, sizeof(pLoginParam->authError));
@@ -1090,13 +1084,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 #ifndef PLASMA_EXTERNAL_RELEASE
     if (cmdParser.IsSpecified(kArgSkipLoginDialog))
         doIntroDialogs = false;
-    if (cmdParser.IsSpecified(kArgLocalData))
-    {
+    if (cmdParser.IsSpecified(kArgLocalData)) {
         gDataServerLocal = true;
-        gSkipPreload = true;
+        gPythonLocal = true;
     }
-    if (cmdParser.IsSpecified(kArgSkipPreload))
-        gSkipPreload = true;
+    if (cmdParser.IsSpecified(kArgLocalPython))
+        gPythonLocal = true;
+    if (cmdParser.IsSpecified(kArgLocalSDL))
+        gSDLLocal = true;
     if (cmdParser.IsSpecified(kArgPlayerId))
         NetCommSetIniPlayerId(cmdParser.GetInt(kArgPlayerId));
     if (cmdParser.IsSpecified(kArgStartUpAgeName))
@@ -1138,7 +1133,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
     {
         if(!CreateProcessW(s_patcherExeName, nullptr, nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
         {
-            hsMessageBox("Failed to launch patcher", "Error", hsMessageBoxNormal);
+            hsMessageBox(ST_LITERAL("Failed to launch patcher"), ST_LITERAL("Error"), hsMessageBoxNormal);
         }
         CloseHandle( pi.hThread );
         CloseHandle( pi.hProcess );
@@ -1192,7 +1187,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
                 message = ST_LITERAL("Another copy of URU is already running");
                 break;
         }
-        hsMessageBox(message.to_wchar().c_str(), caption.to_wchar().c_str(), hsMessageBoxNormal);
+        hsMessageBox(message, caption, hsMessageBoxNormal);
         return PARABLE_NORMAL_EXIT;
     }
 #endif
@@ -1210,13 +1205,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
     }
     else
     {
-        hsMessageBox("No server.ini file found.  Please check your URU installation.", "Error", hsMessageBoxNormal);
+        hsMessageBox(ST_LITERAL("No server.ini file found. Please check your URU installation."), ST_LITERAL("Error"), hsMessageBoxNormal);
         return PARABLE_NORMAL_EXIT;
     }
 
     // Begin initializing the client in the background
     if (!WinInit(hInst)) {
-        hsMessageBox("Failed to initialize plClient", "Error", hsMessageBoxNormal);
+        hsMessageBox(ST_LITERAL("Failed to initialize plClient"), ST_LITERAL("Error"), hsMessageBoxNormal);
         return PARABLE_NORMAL_EXIT;
     }
 

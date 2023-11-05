@@ -51,6 +51,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "hsSystemInfo.h"
 #include "hsTimer.h"
 
+#include "pnFactory/plFactory.h"
 #include "pnMessage/plClientMsg.h"
 #include "pnMessage/plPlayerPageMsg.h"
 #include "pnMessage/plTimeMsg.h"
@@ -70,6 +71,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plMessage/plSDLModifierStateMsg.h"
 #include "plMessage/plSynchEnableMsg.h"
 #include "plMessage/plVaultNotifyMsg.h"
+#include "plMessageBox/hsMessageBox.h"
 #include "plModifier/plResponderModifier.h"
 #include "plNetClientRecorder/plNetClientRecorder.h"
 #include "plNetCommon/plNetObjectDebugger.h"
@@ -102,10 +104,10 @@ plNetClientMgr::PendingLoad::~PendingLoad()
 //
 plNetClientMgr::plNetClientMgr()
     : fLocalPlayerKey(), fMsgHandler(this), fJoinOrder(), fTaskProgBar(),
-      fMsgRecorder(), fServerTimeOffset(), fTimeSamples(), fLastTimeUpdate(),
-      fListenListMode(kListenList_Distance), fAgeSDLObjectKey(), fExperimentalLevel(),
-      fOverrideAgeTimeOfDayPercent(-1.f), fNumInitialSDLStates(), fRequiredNumInitialSDLStates(),
-      fDisableMsg(), fIsOwner(true), fIniPlayerID(), fPingServerType()
+      fMsgRecorder(), fLastLocalTime(), fListenListMode(kListenList_Distance),
+      fAgeSDLObjectKey(), fExperimentalLevel(), fOverrideAgeTimeOfDayPercent(-1.f),
+      fNumInitialSDLStates(), fRequiredNumInitialSDLStates(), fDisableMsg(), fIsOwner(true),
+      fIniPlayerID(), fPingServerType()
 {   
 #ifndef HS_DEBUGGING
     // release code will timeout inactive players on servers by default
@@ -114,7 +116,6 @@ plNetClientMgr::plNetClientMgr()
     SetFlagsBit(kAllowAuthTimeOut);
 
 //  fPlayerVault.SetPlayerName("SinglePlayer"); // in a MP game, this will be replaced with a player name like 'Atrus'
-    fTransport.SetNumChannels(kNetNumChannels); 
 }
 
 //
@@ -325,21 +326,13 @@ void plNetClientMgr::Init()
 
 //
 // Prepare to send.
-// Update p2p transport groups and rcvrs list in some msgs
-// Returns channel.
+// Update rcvrs list in some msgs
 //
-int plNetClientMgr::IPrepMsg(plNetMessage* msg)
+void plNetClientMgr::IPrepMsg(plNetMessage* msg)
 {
-    // pick channel, prepare msg
-    int channel=kNetChanDefault;
     plNetMsgVoice* v=plNetMsgVoice::ConvertNoRef(msg);
     if (v)
     {       // VOICE MSG
-        channel=kNetChanVoice;
-        
-        // compute new transport group (from talkList) if necessary
-        GetTalkList()->UpdateTransportGroup(this);  
-        
         // update receivers list in voice msg based on talk list
         v->Receivers()->Clear();
         int i;
@@ -351,31 +344,6 @@ int plNetClientMgr::IPrepMsg(plNetMessage* msg)
         if (msg->IsBitSet(plNetMessage::kEchoBackToSender))
             v->Receivers()->AddReceiverPlayerID(GetPlayerID());
     }
-    else if (plNetMsgListenListUpdate::ConvertNoRef(msg))
-    {   // LISTEN LIST UPDATE MSG
-        channel=kNetChanListenListUpdate;
-
-        // update transport group from rcvrs list, add p2p mbrs to trasnport group
-        fTransport.ClearChannelGrp(kNetChanListenListUpdate);
-        if (IsPeerToPeer())
-        {
-            plNetMsgReceiversListHelper* rl = plNetMsgReceiversListHelper::ConvertNoRef(msg);
-            hsAssert(rl, "error converting msg to rcvrs list?");
-            int i;
-            for(i=0;i<rl->GetNumReceivers();i++)
-            {
-                plNetTransportMember* tm = fTransport.GetMemberByID(rl->GetReceiverPlayerID(i));
-                hsAssert(tm, "error finding transport mbr");
-                if (tm->IsPeerToPeer())
-                    fTransport.SubscribeToChannelGrp(tm, kNetChanListenListUpdate);
-            }
-        }
-    }
-    else if( plNetMsgGameMessageDirected::ConvertNoRef( msg ) )
-    {
-        channel = kNetChanDirectedMsg;
-    }
-    return channel;
 }
 
 //
@@ -403,50 +371,36 @@ void plNetClientMgr::IUnloadNPCs()
 //
 void plNetClientMgr::UpdateServerTimeOffset(plNetMessage* msg)
 {
-    if ((hsTimer::GetSysSeconds() - fLastTimeUpdate) > 5)
-    {
-        fLastTimeUpdate = hsTimer::GetSysSeconds();
+    if (!msg->GetHasTimeSent())
+        return;
+    if (msg->GetTimeSent().AtEpoch())
+        return;
 
-        const plUnifiedTime& msgSentUT = msg->GetTimeSent();
-        if (!msgSentUT.AtEpoch())
-        {
-            double diff = plUnifiedTime::GetTimeDifference(msgSentUT, plUnifiedTime::GetCurrent());
+    double localTime = hsTimer::GetSeconds();
+    if (localTime - fLastLocalTime < 1.0)
+        return;
 
-            if (fServerTimeOffset == 0)
-            {
-                fServerTimeOffset = diff;
-            }
-            else
-            {
-                fServerTimeOffset = fServerTimeOffset + ((diff - fServerTimeOffset) / ++fTimeSamples);
-            }
-
-            DebugMsg("Setting server time offset to {f}", fServerTimeOffset);
-        }
-    }
+    fLastServerTime = msg->GetTimeSent();
+    fLastLocalTime = localTime;
 }
 
-void plNetClientMgr::ResetServerTimeOffset(bool delayed)
+void plNetClientMgr::ResetServerTimeOffset()
 {
-    if (!delayed)
-        fServerTimeOffset = 0;
-    fTimeSamples = 0;
-    fLastTimeUpdate = 0;
+    fLastServerTime.ToEpoch();
+    fLastLocalTime = 0.0;
 }
 
 //
 // return the gameservers time
 //
 plUnifiedTime plNetClientMgr::GetServerTime() const 
-{ 
-    if ( fServerTimeOffset==0 )     // offline mode or before connecting/calibrating to a server
+{
+    if (fLastServerTime.AtEpoch()) {
+        WarningMsg("Someone asked for the server time, but we don't know it yet!");
         return plUnifiedTime::GetCurrent();
-    
-    plUnifiedTime serverUT;
-    if (fServerTimeOffset<0)
-        return plUnifiedTime::GetCurrent() - plUnifiedTime(fabs(fServerTimeOffset));
-    else
-        return  plUnifiedTime::GetCurrent() + plUnifiedTime(fServerTimeOffset);
+    }
+
+    return fLastServerTime + plUnifiedTime(hsTimer::GetSeconds() - fLastLocalTime);
 }
 
 //
@@ -1195,7 +1149,8 @@ void plNetClientMgr::IDisableNet () {
             {
                 // KI may not be loaded
                 ST::string title = ST::format("{} Error", plProduct::CoreName());
-                hsMessageBox(fDisableMsg->str, title.c_str(), hsMessageBoxNormal, hsMessageBoxIconError );
+                ST::string errMsg = ST::string(fDisableMsg->str);
+                hsMessageBox(errMsg, title, hsMessageBoxNormal, hsMessageBoxIconError);
                 plClientMsg *quitMsg = new plClientMsg(plClientMsg::kQuit);
                 quitMsg->Send(hsgResMgr::ResMgr()->FindKey(kClient_KEY));
             }
@@ -1226,7 +1181,6 @@ bool plNetClientMgr::IHandlePlayerPageMsg(plPlayerPageMsg *playerMsg)
 
             // notify server - NOTE: he might not still be around to get this...
             plNetMsgPlayerPage npp (playerKey->GetUoid(), playerMsg->fUnload);
-            npp.SetNetProtocol(kNetProtocolCli2Game);
             SendMsg(&npp);
         }
         else if (int idx; IsRemotePlayerKey(playerKey, &idx))
@@ -1268,7 +1222,6 @@ bool plNetClientMgr::IHandlePlayerPageMsg(plPlayerPageMsg *playerMsg)
 
                 // notify server
                 plNetMsgPlayerPage npp (playerKey->GetUoid(), playerMsg->fUnload);
-                npp.SetNetProtocol(kNetProtocolCli2Game);
                 SendMsg(&npp);
             }
             else
@@ -1341,15 +1294,13 @@ plUoid plNetClientMgr::GetAgeSDLObjectUoid(const ST::string& ageName) const
         if (!loc.IsValid())
         {
             // try to load age desc
-            hsStream* stream=plAgeLoader::GetAgeDescFileStream(ageName);
+            std::unique_ptr<hsStream> stream = plAgeLoader::GetAgeDescFileStream(ageName);
             if (stream)
             {
                 plAgeDescription ad;
-                ad.Read(stream);
+                ad.Read(stream.get());
                 loc=ad.CalcPageLocation("BuiltIn");
-                stream->Close();
-            }           
-            delete stream;
+            }
         }
     }
 

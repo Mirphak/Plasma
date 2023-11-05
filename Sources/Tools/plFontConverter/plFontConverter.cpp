@@ -251,7 +251,6 @@ void plFontConverter::ExportP2F()
                 hsgResMgr::ResMgr()->NewKey( fileName, gFont, plLocation::kGlobalFixedLoc );
             */
             fFont->WriteRaw(&stream);
-            stream.Close();
         }
     }
 }
@@ -259,7 +258,7 @@ void plFontConverter::ExportP2F()
 void plFontConverter::IMakeFontGoAway()
 {
     if (fFont != nullptr) {
-        plKeyImp *imp = (plKeyImp *)(fFont->GetKey());
+        plKeyImp* imp = plKeyImp::GetFromKey(fFont->GetKey());
         if (imp != nullptr)
             imp->SetObjectPtr(nullptr);
         fFont = nullptr;
@@ -582,7 +581,6 @@ void plFontConverter::IBatchFreeType(const plFileName &path, void *init)
         else
         {
             fFont->WriteRaw(&stream);
-            stream.Close();
         }
 
         callback.CharDone();

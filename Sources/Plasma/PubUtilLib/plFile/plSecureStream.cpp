@@ -45,8 +45,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plSecureStream.h"
 #include "hsWindows.h"
 
-#include "hsSTLStream.h"
-
 #if !HS_BUILD_FOR_WIN32
 #include <errno.h>
 #define INVALID_HANDLE_VALUE nullptr
@@ -97,6 +95,18 @@ fDeleteOnExit(false)
 
 plSecureStream::~plSecureStream()
 {
+    if (fOpenMode == kOpenWrite) {
+        fRAMStream->Rewind();
+        IWriteEncrypted(fRAMStream.get(), fWriteFileName);
+    }
+
+    if (fRef != INVALID_HANDLE_VALUE) {
+#if defined(HS_BUILD_FOR_WIN32)
+        CloseHandle(fRef);
+#elif defined(HS_BUILD_FOR_UNIX)
+        fclose(fRef);
+#endif
+    }
 }
 
 //
@@ -219,7 +229,7 @@ bool plSecureStream::Open(const plFileName& name, const char* mode)
     }
     else if (strcmp(mode, "wb") == 0)
     {
-        fRAMStream = new hsVectorStream;
+        fRAMStream = std::make_unique<hsRAMStream>();
         fWriteFileName = name;
         fPosition = 0;
 
@@ -245,7 +255,7 @@ bool plSecureStream::Open(hsStream* stream)
 
     fActualFileSize = stream->ReadLE32();
     uint32_t trimSize = kMagicStringLen + sizeof(uint32_t) + fActualFileSize;
-    fRAMStream = new hsRAMStream;
+    fRAMStream = std::make_unique<hsRAMStream>();
     while (!stream->AtEnd())
     {
         // Don't write out any garbage
@@ -269,51 +279,17 @@ bool plSecureStream::Open(hsStream* stream)
     return true;
 }
 
-bool plSecureStream::Close()
-{
-    int rtn = false;
-
-    if (fOpenMode == kOpenWrite)
-    {
-        fRAMStream->Rewind();
-        rtn = IWriteEncrypted(fRAMStream, fWriteFileName);
-    }
-    if (fRef != INVALID_HANDLE_VALUE)
-    {
-#if HS_BUILD_FOR_WIN32
-        rtn = CloseHandle(fRef);
-#elif HS_BUILD_FOR_UNIX
-        rtn = fclose(fRef);
-#endif
-        fRef = INVALID_HANDLE_VALUE;
-    }
-
-    if (fRAMStream)
-    {
-        delete fRAMStream;
-        fRAMStream = nullptr;
-    }
-
-    fWriteFileName = ST::string();
-    fActualFileSize = 0;
-    fBufferedStream = false;
-    fOpenMode = kOpenFail;
-
-    return rtn;
-}
-
 uint32_t plSecureStream::IRead(uint32_t bytes, void* buffer)
 {
     if (fRef == INVALID_HANDLE_VALUE)
         return 0;
-    uint32_t numItems;
+    uint32_t numItems = 0;
 #if HS_BUILD_FOR_WIN32
     bool success = (ReadFile(fRef, buffer, bytes, (LPDWORD)&numItems, nullptr) != 0);
 #elif HS_BUILD_FOR_UNIX
     numItems = fread(buffer, bytes, 1, fRef);
     bool success = numItems != 0;
 #endif
-    fBytesRead += numItems;
     fPosition += numItems;
     if ((unsigned)numItems < bytes)
     {
@@ -338,7 +314,7 @@ uint32_t plSecureStream::IRead(uint32_t bytes, void* buffer)
 
 void plSecureStream::IBufferFile()
 {
-    fRAMStream = new hsVectorStream;
+    fRAMStream = std::make_unique<hsRAMStream>();
     char buf[1024];
     while (!AtEnd())
     {
@@ -374,7 +350,6 @@ void plSecureStream::Skip(uint32_t delta)
     }
     else if (fRef != INVALID_HANDLE_VALUE)
     {
-        fBytesRead += delta;
         fPosition += delta;
 #if HS_BUILD_FOR_WIN32
         SetFilePointer(fRef, delta, nullptr, FILE_CURRENT);
@@ -393,7 +368,6 @@ void plSecureStream::Rewind()
     }
     else if (fRef != INVALID_HANDLE_VALUE)
     {
-        fBytesRead = 0;
         fPosition = 0;
 #if HS_BUILD_FOR_WIN32
         SetFilePointer(fRef, kFileStartOffset, nullptr, FILE_BEGIN);
@@ -413,11 +387,21 @@ void plSecureStream::FastFwd()
     else if (fRef != INVALID_HANDLE_VALUE)
     {
 #if HS_BUILD_FOR_WIN32
-        fBytesRead = fPosition = SetFilePointer(fRef, kFileStartOffset + fActualFileSize, nullptr, FILE_BEGIN);
+        fPosition = SetFilePointer(fRef, kFileStartOffset + fActualFileSize, nullptr, FILE_BEGIN);
 #elif HS_BUILD_FOR_UNIX
-        fBytesRead = fPosition = fseek(fRef, 0, SEEK_END);
+        fPosition = fseek(fRef, 0, SEEK_END);
 #endif
     }
+}
+
+void plSecureStream::Truncate()
+{
+    if (fOpenMode != kOpenWrite) {
+        hsAssert(false, "Trying to write to a read stream");
+        return;
+    }
+
+    return fRAMStream->Truncate();
 }
 
 uint32_t plSecureStream::GetEOF()
@@ -554,30 +538,27 @@ bool plSecureStream::IWriteEncrypted(hsStream* sourceStream, const plFileName& o
     outputStream.Skip(kMagicStringLen);
     outputStream.WriteLE32(actualSize);
 
-    outputStream.Close();
-
     return true;
 }
 
 bool plSecureStream::FileEncrypt(const plFileName& fileName, uint32_t* key /* = nullptr */)
 {
-    hsUNIXStream sIn;
-    if (!sIn.Open(fileName))
-        return false;
-
-    // Don't double encrypt any files
-    if (ICheckMagicString(sIn.GetFILE()))
+    bool wroteEncrypted;
     {
-        sIn.Close();
-        return true;
+        hsUNIXStream sIn;
+        if (!sIn.Open(fileName))
+            return false;
+
+        // Don't double encrypt any files
+        if (ICheckMagicString(sIn.GetFILE()))
+        {
+            return true;
+        }
+        sIn.Rewind();
+
+        plSecureStream sOut(false, key);
+        wroteEncrypted = sOut.IWriteEncrypted(&sIn, "crypt.dat");
     }
-    sIn.Rewind();
-
-    plSecureStream sOut(false, key);
-    bool wroteEncrypted = sOut.IWriteEncrypted(&sIn, "crypt.dat");
-
-    sIn.Close();
-    sOut.Close();
 
     if (wroteEncrypted)
     {
@@ -590,27 +571,25 @@ bool plSecureStream::FileEncrypt(const plFileName& fileName, uint32_t* key /* = 
 
 bool plSecureStream::FileDecrypt(const plFileName& fileName, uint32_t* key /* = nullptr */)
 {
-    plSecureStream sIn(false, key);
-    if (!sIn.Open(fileName))
-        return false;
-
-    hsUNIXStream sOut;
-    if (!sOut.Open("crypt.dat", "wb"))
     {
-        sIn.Close();
-        return false;
+        plSecureStream sIn(false, key);
+        if (!sIn.Open(fileName))
+            return false;
+
+        hsUNIXStream sOut;
+        if (!sOut.Open("crypt.dat", "wb"))
+        {
+            return false;
+        }
+
+        char buf[1024];
+
+        while (!sIn.AtEnd())
+        {
+            uint32_t numRead = sIn.Read(sizeof(buf), buf);
+            sOut.Write(numRead, buf);
+        }
     }
-
-    char buf[1024];
-
-    while (!sIn.AtEnd())
-    {
-        uint32_t numRead = sIn.Read(sizeof(buf), buf);
-        sOut.Write(numRead, buf);
-    }
-
-    sIn.Close();
-    sOut.Close();
 
     plFileSystem::Unlink(fileName);
     plFileSystem::Move("crypt.dat", fileName);
@@ -669,30 +648,30 @@ bool plSecureStream::IsSecureFile(const plFileName& fileName)
     return isEncrypted;
 }
 
-hsStream* plSecureStream::OpenSecureFile(const plFileName& fileName, const uint32_t flags /* = kRequireEncryption */, uint32_t* key /* = nullptr */)
+std::unique_ptr<hsStream> plSecureStream::OpenSecureFile(const plFileName& fileName, const uint32_t flags /* = kRequireEncryption */, uint32_t* key /* = nullptr */)
 {
     bool requireEncryption = flags & kRequireEncryption;
     bool deleteOnExit = flags & kDeleteOnExit;
     bool isEncrypted = IsSecureFile(fileName);
 
-    hsStream* s = nullptr;
+    std::unique_ptr<hsFileSystemStream> s;
     if (isEncrypted)
-        s = new plSecureStream(deleteOnExit, key);
+        s = std::make_unique<plSecureStream>(deleteOnExit, key);
     else if (!requireEncryption)
-        s = new hsUNIXStream;
+        s = std::make_unique<hsUNIXStream>();
 
     if (s)
         s->Open(fileName, "rb");
     return s;
 }
 
-hsStream* plSecureStream::OpenSecureFileWrite(const plFileName& fileName, uint32_t* key /* = nullptr */)
+std::unique_ptr<hsStream> plSecureStream::OpenSecureFileWrite(const plFileName& fileName, uint32_t* key /* = nullptr */)
 {
-    hsStream* s = nullptr;
+    std::unique_ptr<hsFileSystemStream> s;
 #ifdef PLASMA_EXTERNAL_RELEASE
-    s = new plSecureStream(false, key);
+    s = std::make_unique<plSecureStream>(false, key);
 #else
-    s = new hsUNIXStream;
+    s = std::make_unique<hsUNIXStream>();
 #endif
 
     s->Open(fileName, "wb");
@@ -715,8 +694,6 @@ bool plSecureStream::GetSecureEncryptionKey(const plFileName& filename, uint32_t
         unsigned bytesToRead = length * sizeof(uint32_t);
         uint8_t* buffer = (uint8_t*)malloc(bytesToRead);
         unsigned bytesRead = file.Read(bytesToRead, buffer);
-
-        file.Close();
 
         unsigned memSize = std::min(bytesToRead, bytesRead);
         memcpy(key, buffer, memSize);

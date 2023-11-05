@@ -859,6 +859,16 @@ void plArmatureMod::SpawnAt(int spawnNum, double time)
 
 void plArmatureMod::SetFollowerParticleSystemSO(plSceneObject *follower)
 {
+    if (!follower) {
+        if (fFollowerParticleSystemSO) {
+            plAttachMsg* attMsg = new plAttachMsg(GetTarget(0)->GetKey(), fFollowerParticleSystemSO, plRefMsg::kOnRemove, GetKey());
+            plgDispatch::MsgSend(attMsg);
+        }
+
+        fFollowerParticleSystemSO = follower;
+        return;
+    }
+
     // TODO: Check for old one and clean up.
     hsPoint3 trans = GetTarget(0)->GetLocalToWorld().GetTranslate() - follower->GetLocalToWorld().GetTranslate();
     
@@ -1206,7 +1216,7 @@ bool plArmatureMod::MsgReceive(plMessage* msg)
     {
         // First, do we have the system?
         plSceneObject *dstSysSO = GetFollowerParticleSystemSO();
-        if (!dstSysSO || ((plKeyImp*)dstSysSO->GetKey())->GetCloneOwner() != partMsg->fSysSOKey) 
+        if (!dstSysSO || plKeyImp::GetFromKey(dstSysSO->GetKey())->GetCloneOwner() != partMsg->fSysSOKey) 
         {
             // Need to clone and resend.
             if (plNetClientApp::GetInstance()->GetLocalPlayer() != GetTarget(0))
@@ -1379,7 +1389,7 @@ bool plArmatureMod::MsgReceive(plMessage* msg)
         if (fController)
         {
             fController->SetSubworld(subMsg->fWorldKey);
-            DirtySynchState(kSDLAvatar, plSynchedObject::kBCastToClients);
+            DirtyPhysicalSynchState(plSynchedObject::kBCastToClients);
         }
         return true;
     }
@@ -1556,7 +1566,6 @@ bool plArmatureMod::IEval(double time, float elapsed, uint32_t dirty)
                 {
                     // Send message to the server here.
                     plNetMsgRelevanceRegions relRegionsNetMsg;
-                    relRegionsNetMsg.SetNetProtocol(kNetProtocolCli2Game);
                     relRegionsNetMsg.SetRegionsICareAbout(fRegionsICareAbout);
                     relRegionsNetMsg.SetRegionsImIn(fRegionsImIn);
                     plNetClientApp::GetInstance()->SendMsg(&relRegionsNetMsg);
@@ -2662,7 +2671,7 @@ void plArmatureMod::DumpToDebugDisplay(int &x, int &y, int lineHeight, plDebugTe
     {
         y += lineHeight;
 
-        debugTxt.DrawString(x, y, "ItemsWorn:");
+        debugTxt.DrawString(x, y, ST_LITERAL("ItemsWorn:"));
         y += lineHeight;
         ST::string_stream outfit;
         int itemCount = 0; 
@@ -2696,7 +2705,7 @@ void plArmatureMod::DumpToDebugDisplay(int &x, int &y, int lineHeight, plDebugTe
     {
         y += lineHeight;
 
-        debugTxt.DrawString(x, y, "Relevance Regions:");
+        debugTxt.DrawString(x, y, ST_LITERAL("Relevance Regions:"));
         y += lineHeight;
         debugTxt.DrawString(x, y, ST::format("          In: {}",
                 plRelevanceMgr::Instance()->GetRegionNames(fRegionsImIn)));

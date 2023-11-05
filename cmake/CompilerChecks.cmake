@@ -1,5 +1,4 @@
 # Use LTCG if available.
-cmake_policy(SET CMP0069 NEW)   # gtest projects use old cmake compatibility...
 if(NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT _IPO_SUPPORTED LANGUAGES CXX OUTPUT _IPO_OUTPUT)
@@ -10,10 +9,6 @@ if(NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION)
         message(STATUS "IPO not supported: ${_IPO_OUTPUT}")
     endif()
 endif()
-
-try_compile(HAVE_PTHREAD_TIMEDJOIN_NP ${PROJECT_BINARY_DIR}
-            ${PROJECT_SOURCE_DIR}/cmake/check_pthread_timedjoin_np.cpp
-            LINK_LIBRARIES Threads::Threads)
 
 # Check for Linux sysinfo.
 include(CheckCXXSymbolExists)

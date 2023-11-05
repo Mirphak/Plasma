@@ -55,7 +55,6 @@ class hsBitVector;
 //  Pointer to a plKeyData struct, which is a handle to a keyedObject
 
 class plKeyData;
-class plKeyImp;
 
 class plKey 
 {
@@ -79,11 +78,16 @@ public:
     bool operator==(const plKeyData* rhs) const { return fKeyData == rhs; }
     bool operator!=(const plKey& rhs) const { return !(*this == rhs); }
     bool operator!=(const plKeyData* rhs) const { return !(*this == rhs); }
+    // Ordering operators for stdlib containers, etc. that rely on < (std::less) by default
+    bool operator<(const plKey& rhs) const { return fKeyData < rhs.fKeyData; }
+    bool operator>(const plKey& rhs) const { return fKeyData > rhs.fKeyData; }
+    bool operator<=(const plKey& rhs) const { return fKeyData <= rhs.fKeyData; }
+    bool operator>=(const plKey& rhs) const { return fKeyData >= rhs.fKeyData; }
 
     plKeyData* operator->() const;
     plKeyData& operator*() const;
 
-    operator plKeyImp*() const { return (plKeyImp*)fKeyData; }
+    operator bool() const { return fKeyData != nullptr; }
 
     static plKey Make(plKeyData* data) { return plKey(data); }
 
@@ -93,7 +97,7 @@ protected:
     void IIncRef();
     void IDecRef();
 
-    // Internal constructor, extra param is to distinguish it from the void* constructor
+    // Internal constructor
     plKey(plKeyData* data);
 };
 

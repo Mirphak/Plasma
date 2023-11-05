@@ -45,6 +45,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "hsStream.h"
 
+#include "pnFactory/plFactory.h"
 #include "pnKeyedObject/plKey.h"
 #include "pnNetCommon/plNetApp.h"
 
@@ -240,7 +241,7 @@ void plNetMsgStreamHelper::IAllocStream(uint32_t len)
         fStreamBuf = new uint8_t[len];
 }
 
-void plNetMsgStreamHelper::CopyStream(hsStream* ssStream)
+void plNetMsgStreamHelper::CopyStream(hsRAMStream* ssStream)
 {
     uint32_t len=ssStream->GetEOF();
     IAllocStream(len);

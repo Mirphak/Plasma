@@ -44,6 +44,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "hsStream.h"
 #include "hsTimer.h"
 
+#include <memory>
+#include <string_theory/format>
+
+#include "pnFactory/plFactory.h"
 #include "pnKeyedObject/plKeyImp.h"
 
 #include "plAgeDescription/plAgeManifest.h"
@@ -209,25 +213,25 @@ class plStatDumpIterator : public plRegistryPageIterator, public plRegistryKeyIt
 {
 protected:
     plFileName fOutputDir;
-    hsUNIXStream fStream;
+    std::unique_ptr<hsFileSystemStream> fStream;
 
 public:
     plStatDumpIterator(const plFileName& outputDir) : fOutputDir(outputDir) {}
 
     bool EatKey(const plKey& key) override
     {
-        plKeyImp* imp = (plKey)key;
+        const plKeyImp* imp = plKeyImp::GetFromKey(key);
 
-        fStream.WriteString(imp->GetName());
-        fStream.WriteString(",");
+        fStream->WriteString(key->GetName());
+        fStream->WriteString(",");
 
-        fStream.WriteString(plFactory::GetNameOfClass(imp->GetUoid().GetClassType()));
-        fStream.WriteString(",");
+        fStream->WriteString(plFactory::GetNameOfClass(key->GetUoid().GetClassType()));
+        fStream->WriteString(",");
 
         char buf[30];
         sprintf(buf, "%u", imp->GetDataLen());
-        fStream.WriteString(buf);
-        fStream.WriteString("\n");
+        fStream->WriteString(buf);
+        fStream->WriteString("\n");
 
         return true;
     }
@@ -238,12 +242,13 @@ public:
 
         plFileName fileName = plFileName::Join(fOutputDir,
                 ST::format("{}_{}.csv", info.GetAge(), info.GetPage()));
-        fStream.Open(fileName, "wt");
+        fStream = std::make_unique<hsUNIXStream>();
+        fStream->Open(fileName, "wt");
 
         page->LoadKeys();
         page->IterateKeys(this);
 
-        fStream.Close();
+        fStream.reset();
 
         return true;
     }

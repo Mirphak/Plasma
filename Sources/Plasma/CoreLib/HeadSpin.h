@@ -276,38 +276,6 @@ inline char *hsStrncpy(char *strDest, const char *strSource, size_t count)
 #    define strnicmp    strncasecmp
 #endif
 
-enum {              // Kind of MessageBox...passed to hsMessageBox
-    hsMessageBoxAbortRetyIgnore,
-    hsMessageBoxNormal,             // Just Ok
-    hsMessageBoxOkCancel,
-    hsMessageBoxRetryCancel,
-    hsMessageBoxYesNo,
-    hsMessageBoxYesNoCancel,
-};
-
-enum {
-    hsMessageBoxIconError,
-    hsMessageBoxIconQuestion,
-    hsMessageBoxIconExclamation,
-    hsMessageBoxIconAsterisk,
-};
-
-enum {          // RETURN VALUES FROM hsMessageBox
-    hsMBoxOk = 1,       // OK button was selected. 
-    hsMBoxCancel,   // Cancel button was selected. 
-    hsMBoxAbort,    // Abort button was selected. 
-    hsMBoxRetry,    // Retry button was selected. 
-    hsMBoxIgnore,   // Ignore button was selected. 
-    hsMBoxYes,      // Yes button was selected. 
-    hsMBoxNo        // No button was selected. 
-};
-
-extern bool hsMessageBox_SuppressPrompts;
-int hsMessageBox(const char* message, const char* caption, int kind, int icon=hsMessageBoxIconAsterisk);
-int hsMessageBox(const wchar_t* message, const wchar_t* caption, int kind, int icon=hsMessageBoxIconAsterisk);
-int hsMessageBoxWithOwner(hsWindowHndl owner, const char* message, const char* caption, int kind, int icon=hsMessageBoxIconAsterisk);
-int hsMessageBoxWithOwner(hsWindowHndl owner, const wchar_t* message, const wchar_t* caption, int kind, int icon=hsMessageBoxIconAsterisk);
-
 // flag testing / clearing
 #define hsCheckBits(f,c) ((f & c)==c)
 #define hsTestBits(f,b)  ( (f) & (b)   )
@@ -319,8 +287,6 @@ int hsMessageBoxWithOwner(hsWindowHndl owner, const wchar_t* message, const wcha
 
 #if HS_BUILD_FOR_WIN32
      // This is for Windows
-#    define snprintf        _snprintf
-
 #    ifndef fileno
 #        define fileno(__F)       _fileno(__F)
 #    endif
@@ -387,7 +353,7 @@ void DebugMsg(const char* fmt, ...);
 
 #if defined(_MSC_VER)
 #define  DEFAULT_FATAL(var)  default: FATAL("No valid case for switch variable '" #var "'"); __assume(0); break;
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || defined(__clang__)
 #define  DEFAULT_FATAL(var)  default: FATAL("No valid case for switch variable '" #var "'"); __builtin_unreachable(); break;
 #else
 #define  DEFAULT_FATAL(var)  default: FATAL("No valid case for switch variable '" #var "'"); break;

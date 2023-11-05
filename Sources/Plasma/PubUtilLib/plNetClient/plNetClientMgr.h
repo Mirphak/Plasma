@@ -81,25 +81,11 @@ class plCCRPetitionMsg;
 class plNetMsgPagingRoom;
 
 
-struct plNetClientCommMsgHandler : plNetClientComm::MsgHandler {
-    plNetMsgHandler::Status HandleMessage(plNetMessage* msg) override;
-};
-
 class plNetClientMgr : public plNetClientApp
 {
 private:
     typedef std::vector<plKey> plKeyVec;
 public:
-
-    enum NetChannels
-    {
-        kNetChanDefault,
-        kNetChanVoice,
-        kNetChanListenListUpdate,
-        kNetChanDirectedMsg,
-        kNetNumChannels
-    };
-
     enum DirectedSendFlags
     {
         kInterAgeMsg = 0x1
@@ -161,9 +147,8 @@ private:
     std::string         fSPDesiredPlayerName;   // SP: the player we want to load from vault.
     
     // server info
-    double              fServerTimeOffset;      // diff between our unified time and server's unified time
-    uint32_t              fTimeSamples;
-    double              fLastTimeUpdate;
+    plUnifiedTime       fLastServerTime;       // Last received time update from the server
+    double              fLastLocalTime;        // Last monotonic time (in seconds) when the above update was received
 
     uint8_t               fJoinOrder;         // returned by the server
     
@@ -211,7 +196,7 @@ private:
     bool IUpdateListenList(double secs);
     void IHandleNetVoiceListMsg(plNetVoiceListMsg* msg);
     bool IApplyNewListenList(std::vector<DistSqInfo>& newListenList, bool forceSynch);
-    int IPrepMsg(plNetMessage* msg);
+    void IPrepMsg(plNetMessage* msg);
     void IPlayerChangeAge(bool exiting, int32_t spawnPt);   
     
     void IAddCloneRoom();
@@ -289,9 +274,6 @@ public:
 
     plKey GetLocalPlayerKey()  const override { return fLocalPlayerKey; }
     plSynchedObject* GetLocalPlayer(bool forceLoad=false) const override;
-    
-    bool IsPeerToPeer()               const { return false; }
-    bool IsConnected()                const { return true; }
 
     void IncNumInitialSDLStates();
     void ResetNumInitialSDLStates() { fNumInitialSDLStates=0; }
@@ -379,12 +361,11 @@ public:
     void StoreSDLState(const plStateDataRecord* sdRec, const plUoid& uoid, uint32_t sendFlags, uint32_t writeOptions);
 
     void UpdateServerTimeOffset(plNetMessage* msg);
-    void ResetServerTimeOffset(bool delayed=false);
+    void ResetServerTimeOffset();
 
 private:
     plNetClientComm             fNetClientComm;
-    plNetClientCommMsgHandler   fNetClientCommMsgHandler;
-    
+
     void IInitNetClientComm();
     void IDeInitNetClientComm();
     void INetClientCommOpStarted(uint32_t context);
@@ -395,7 +376,6 @@ private:
     friend class plNetDniInfoSource;
     friend class plNetTalkList;
     friend class plNetClientMsgHandler;
-    friend struct plNetClientCommMsgHandler;
 };
 
 #endif  // PL_NET_CLIENT_inc

@@ -47,6 +47,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "hsStream.h"
 
 #include "pnFactory/plCreatable.h"
+#include "pnFactory/plFactory.h"
 #include "pnNetCommon/plNetApp.h"
 #include "pnNetCommon/pnNetCommon.h"
 
@@ -101,15 +102,15 @@ public:
 // plStateVarNotificationInfo
 /////////////////////////////////////////////////////
 
-void plStateVarNotificationInfo::Read(hsStream* s, uint32_t readOptions)
+void plStateVarNotificationInfo::Read(hsStream* s)
 {
     (void)s->ReadByte();  // unused: saveFlags
     ST::string hint=s->ReadSafeString();
-    if (!hint.empty() && !(readOptions & plSDL::kSkipNotificationInfo))
+    if (!hint.empty())
         fHintString = hint;
 }
 
-void plStateVarNotificationInfo::Write(hsStream* s, uint32_t writeOptions) const
+void plStateVarNotificationInfo::Write(hsStream* s) const
 {
     (void)s->WriteByte(uint8_t(0));   // unused: saveFlags
     s->WriteSafeString(fHintString);
@@ -118,16 +119,22 @@ void plStateVarNotificationInfo::Write(hsStream* s, uint32_t writeOptions) const
 /////////////////////////////////////////////////////
 // plStateVariable
 /////////////////////////////////////////////////////
+// Options: kSkipNotificationInfo, kTimeStampOnRead, kKeepDirty, kMakeDirty, kDirtyNonDefaults, [plSDStateVariable only: kForceConvert]
 bool plStateVariable::ReadData(hsStream* s, float timeConvert, uint32_t readOptions)
 {
     uint8_t saveFlags = s->ReadByte();
     if (saveFlags & plSDL::kHasNotificationInfo)
     {
-        GetNotificationInfo().Read(s, readOptions);
+        if (readOptions & plSDL::kSkipNotificationInfo) {
+            plStateVarNotificationInfo().Read(s);
+        } else {
+            GetNotificationInfo().Read(s);
+        }
     }
     return true;
 }
 
+// Options: kSkipNotificationInfo, [plSDStateVariable only: kDirtyOnly], [plSimpleStateVariable only: kWriteTimeStamps, kTimeStampOnRead, kTimeStampOnWrite, kDontWriteDirtyFlag, kMakeDirty, kDirtyNonDefaults]
 bool plStateVariable::WriteData(hsStream* s, float timeConvert, uint32_t writeOptions) const
 {
     bool writeNotificationInfo = ((writeOptions & plSDL::kSkipNotificationInfo)==0);
@@ -139,7 +146,7 @@ bool plStateVariable::WriteData(hsStream* s, float timeConvert, uint32_t writeOp
     s->WriteByte(saveFlags);
     if (writeNotificationInfo)
     {
-        GetNotificationInfo().Write(s, writeOptions);
+        GetNotificationInfo().Write(s);
     }
     return true;
 }
@@ -1768,10 +1775,7 @@ ST::string plSimpleStateVariable::GetKeyName(int idx) const
     return "(nil)";
 }
 
-#ifdef _MSC_VER
-#   pragma optimize( "g", off )    // disable float optimizations
-#endif
-bool plSimpleStateVariable::IWriteData(hsStream* s, float timeConvert, int idx, uint32_t writeOptions) const
+bool plSimpleStateVariable::IWriteData(hsStream* s, float timeConvert, int idx) const
 {
 #ifdef HS_DEBUGGING
     if (!IsUsed())
@@ -1854,7 +1858,7 @@ bool plSimpleStateVariable::IWriteData(hsStream* s, float timeConvert, int idx, 
     return true;
 }
 
-bool plSimpleStateVariable::IReadData(hsStream* s, float timeConvert, int idx, uint32_t readOptions) 
+bool plSimpleStateVariable::IReadData(hsStream* s, float timeConvert, int idx) 
 {   
     int j=idx*fVar.GetAtomicCount();
     int i;
@@ -1937,10 +1941,8 @@ bool plSimpleStateVariable::IReadData(hsStream* s, float timeConvert, int idx, u
     
     return true;
 }
-#ifdef _MSC_VER
-#   pragma optimize( "", on )  // restore optimizations to their defaults
-#endif
 
+// Options: kSkipNotificationInfo, kWriteTimeStamps, kTimeStampOnRead, kTimeStampOnWrite, kDontWriteDirtyFlag, kMakeDirty, kDirtyNonDefaults
 bool plSimpleStateVariable::WriteData(hsStream* s, float timeConvert, uint32_t writeOptions) const
 {
 #ifdef HS_DEBUGGING
@@ -2004,7 +2006,7 @@ bool plSimpleStateVariable::WriteData(hsStream* s, float timeConvert, uint32_t w
         // list
         int i;
         for(i=0;i<fVar.GetCount();i++)
-            if (!IWriteData(s, timeConvert, i, writeOptions))
+            if (!IWriteData(s, timeConvert, i))
                 return false;
     }
 
@@ -2012,6 +2014,7 @@ bool plSimpleStateVariable::WriteData(hsStream* s, float timeConvert, uint32_t w
 }
 
 // assumes var is created from the right type of descriptor (count, type, etc.)
+// Options: kSkipNotificationInfo, kTimeStampOnRead, kKeepDirty, kMakeDirty, kDirtyNonDefaults
 bool plSimpleStateVariable::ReadData(hsStream* s, float timeConvert, uint32_t readOptions)
 {
     // read base class data
@@ -2068,7 +2071,7 @@ bool plSimpleStateVariable::ReadData(hsStream* s, float timeConvert, uint32_t re
     {
         int i;
         for(i=0;i<fVar.GetCount();i++)
-            if (!IReadData(s, timeConvert, i, readOptions))
+            if (!IReadData(s, timeConvert, i))
                 return false;
     }
     else
@@ -2083,6 +2086,7 @@ bool plSimpleStateVariable::ReadData(hsStream* s, float timeConvert, uint32_t re
     return true;
 }
 
+// Options: all except for kDirtyOnly, kBroadcast, kForceConvert
 void plSimpleStateVariable::CopyData(const plSimpleStateVariable* other, uint32_t writeOptions/*=0*/)
 {
     // use stream as a medium
@@ -2478,6 +2482,7 @@ void plSDStateVariable::IDeInit()
 //
 // Make 'this' into a copy of 'other'.
 //
+// Options: all except for kDirtyOnly, kBroadcast, kForceConvert
 void plSDStateVariable::CopyFrom(plSDStateVariable* other, uint32_t writeOptions/*=0*/)
 {
     // IDeInit();
@@ -2492,6 +2497,7 @@ void plSDStateVariable::CopyFrom(plSDStateVariable* other, uint32_t writeOptions
 // copy them to my corresponding item.
 // Requires that records have the same descriptor.
 //
+// Options: all except for kBroadcast, kForceConvert
 void plSDStateVariable::UpdateFrom(plSDStateVariable* other, uint32_t writeOptions/*=0*/)
 {
     hsAssert(!other->GetSDVarDescriptor()->GetName().compare_i(fVarDescriptor->GetName()),
@@ -2593,6 +2599,7 @@ void plSDStateVariable::GetDirtyDataRecords(ConstDataRecList* recList) const
 //
 // read all SDVars
 //
+// Options: kSkipNotificationInfo, kTimeStampOnRead, kKeepDirty, kMakeDirty, kDirtyNonDefaults, kForceConvert
 bool plSDStateVariable::ReadData(hsStream* s, float timeConvert, uint32_t readOptions)
 {
     plStateVariable::ReadData(s, timeConvert, readOptions);
@@ -2636,6 +2643,7 @@ bool plSDStateVariable::ReadData(hsStream* s, float timeConvert, uint32_t readOp
 //
 // write all SDVars
 //
+// Options: kSkipNotificationInfo, kDirtyOnly
 bool plSDStateVariable::WriteData(hsStream* s, float timeConvert, uint32_t writeOptions) const
 {   
     plStateVariable::WriteData(s, timeConvert, writeOptions);
@@ -2666,7 +2674,7 @@ bool plSDStateVariable::WriteData(hsStream* s, float timeConvert, uint32_t write
             if (!all)
                 plSDL::VariableLengthWrite(s, 
                     GetVarDescriptor()->IsVariableLength() ? 0xffffffff : GetVarDescriptor()->GetCount(), i);   // idx
-            fDataRecList[i]->Write(s, timeConvert, dirtyOnly);  // item
+            fDataRecList[i]->Write(s, timeConvert, dirtyOnly ? plSDL::kDirtyOnly : 0); // item
             written++;
         }
     }

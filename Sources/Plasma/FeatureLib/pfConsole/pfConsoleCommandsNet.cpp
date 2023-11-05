@@ -506,7 +506,6 @@ PF_CONSOLE_CMD( Net,            // groupName
 
     // send net msg
     plNetMsgObjectUpdateFilter netMsg;
-    netMsg.SetNetProtocol(kNetProtocolCli2Game);
     netMsg.SetMaxUpdateFreq(freq);
     netMsg.ObjectListInfo()->AddObject(key);
     plNetClientMgr::GetInstance()->SendMsg(&netMsg);
@@ -751,7 +750,7 @@ PF_CONSOLE_CMD( Net_Vault,
                "string stationName, string mtSpawnPt",
                "Register an MT Station with your Nexus" )
 {
-    VaultRegisterMTStationAndWait(params[0], params[1]);
+    VaultRegisterMTStation(params[0], params[1]);
     PrintString("Registered MT Station.");
 }
 
@@ -780,7 +779,7 @@ PF_CONSOLE_CMD( Net_Vault,
 {
     plAgeInfoStruct info;
     info.SetAgeFilename(params[0]);
-    bool success = VaultUnregisterOwnedAgeAndWait(&info);
+    bool success = VaultUnregisterOwnedAge(&info);
     PrintString(ST::format("Operation {}.", success ? "Successful" : "Failed"));
 }
 
@@ -810,7 +809,7 @@ PF_CONSOLE_CMD( Net_Vault,
     info.SetAgeFilename(params[0]);
 
     unsigned count = 0;
-    while (VaultUnregisterVisitAgeAndWait(&info))
+    while (VaultUnregisterVisitAge(&info))
         ++count;
         
     PrintString(ST::format("Operation {}.", count > 0 ? "Successful" : "Failed"));

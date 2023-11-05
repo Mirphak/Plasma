@@ -51,7 +51,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include <functional>
 #include <algorithm>
 #include <cmath>
-
+#include <string_theory/format>
 
 const uint32_t    plAgePage::kInvalidSeqSuffix = (uint32_t)-1;
 
@@ -166,13 +166,11 @@ bool plAgeDescription::ReadFromFile( const plFileName &fileNameToReadFrom )
 {
     IInit();
 
-    hsStream* stream = plEncryptedStream::OpenEncryptedFile(fileNameToReadFrom);
+    std::unique_ptr<hsStream> stream = plEncryptedStream::OpenEncryptedFile(fileNameToReadFrom);
     if( !stream )
         return false;
 
-    Read( stream );
-    stream->Close();
-    delete stream;
+    Read(stream.get());
 
     SetAgeNameFromPath( fileNameToReadFrom );
     return true;
@@ -402,7 +400,6 @@ void plAgeDescription::Read(hsStream* stream)
     }
     
     reader.Parse();
-    reader.Close();
 }
 
 //

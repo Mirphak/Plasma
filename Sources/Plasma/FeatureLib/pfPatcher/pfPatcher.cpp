@@ -163,7 +163,7 @@ struct pfPatcherWorker : public hsThread
     std::deque<Request> fRequests;
     std::deque<pfPatcherQueuedFile> fQueuedFiles;
 
-    std::mutex fRequestMut;
+    std::recursive_mutex fRequestMut;
     std::mutex fFileMut;
     hsSemaphore fFileSignal;
 
@@ -179,6 +179,8 @@ struct pfPatcherWorker : public hsThread
     pfPatcher* fParent;
     volatile bool fStarted;
     volatile bool fRequestActive;
+    volatile bool fWantPython;
+    volatile bool fWantSDL;
 
     uint64_t fCurrBytes;
     uint64_t fTotalBytes;
@@ -195,6 +197,7 @@ struct pfPatcherWorker : public hsThread
     void IDecompressSound(const pfPatcherQueuedFile& sound) const;
     void ProcessFile();
     void WhitelistFile(const plFileName& file, bool justDownloaded, hsStream* s=nullptr);
+    void EnqueuePreloaderLists();
 };
 
 // ===================================================
@@ -230,7 +233,7 @@ public:
         : fParent(parent), fFilename(filename), fFlags(), fBytesWritten(), fDLStartTime(), plZlibStream()
     {
         fParent->fTotalBytes += size;
-        fOutput = new hsRAMStream;
+        fOutput = std::make_unique<hsRAMStream>();
     }
 
     pfPatcherStream(pfPatcherWorker* parent, const pfPatcherQueuedFile& file)
@@ -261,6 +264,13 @@ public:
         return retVal;
     }
 
+    void Close()
+    {
+        if (hsCheckBits(fFlags, kFlagZipped))
+            plZlibStream::Close();
+        fOutput.reset();
+    }
+
     uint32_t Write(uint32_t count, const void* buf) override
     {
         // tick whatever progress bar we have
@@ -278,6 +288,7 @@ public:
     uint32_t GetPosition() const override { return fOutput->GetPosition(); }
     uint32_t Read(uint32_t count, void* buf) override { return fOutput->Read(count, buf); }
     void Rewind() override { fOutput->Rewind(); }
+    void FastFwd() override { fOutput->FastFwd(); }
     void SetPosition(uint32_t pos) override { fOutput->SetPosition(pos); }
     void Skip(uint32_t deltaByteCount) override { fOutput->Skip(deltaByteCount); }
 
@@ -354,19 +365,10 @@ static void IPreloaderManifestDownloadCB(ENetError result, void* param, const ch
 {
     pfPatcherWorker* patcher = static_cast<pfPatcherWorker*>(param);
 
-    if (IS_NET_SUCCESS(result))
+    if (IS_NET_SUCCESS(result)) {
         IHandleManifestDownload(patcher, group, manifest, entryCount);
-    else {
-        PatcherLogYellow("\tWARNING: *** Falling back to AuthSrv file lists to get game code ***");
-
-        // so, we need to ask the AuthSrv about our game code
-        {
-            hsLockGuard(patcher->fRequestMut);
-            patcher->fRequests.emplace_back(ST::string(), pfPatcherWorker::Request::kPythonList);
-            patcher->fRequests.emplace_back(ST::string(), pfPatcherWorker::Request::kSdlList);
-        }
-
-        // continue pumping requests
+    } else {
+        patcher->EnqueuePreloaderLists();
         patcher->IssueRequest();
     }
 }
@@ -387,6 +389,13 @@ static void IFileThingDownloadCB(ENetError result, void* param, const plFileName
 {
     pfPatcherWorker* patcher = static_cast<pfPatcherWorker*>(param);
     pfPatcherStream* stream = static_cast<pfPatcherStream*>(writer);
+
+    // We need to explicitly close any underlying streams NOW because we
+    // might be about to signal the client that this file needs to be acted
+    // on, eg installed, decompressed from ogg to wave, etc. We can't wait
+    // for hsStream's RAII to close the stream at the end of this function or
+    // the callback code may crash due to either a permissions error or the
+    // zlib decompression not being complete.
     stream->Close();
 
     if (IS_NET_SUCCESS(result)) {
@@ -417,7 +426,8 @@ static void IFileThingDownloadCB(ENetError result, void* param, const plFileName
 // ===================================================
 
 pfPatcherWorker::pfPatcherWorker() :
-    fStarted(false), fCurrBytes(0), fTotalBytes(0), fRequestActive(true), fParent(nullptr)
+    fStarted(false), fCurrBytes(0), fTotalBytes(0), fRequestActive(true), fParent(nullptr),
+    fWantPython(), fWantSDL()
 { }
 
 pfPatcherWorker::~pfPatcherWorker()
@@ -426,7 +436,6 @@ pfPatcherWorker::~pfPatcherWorker()
         hsLockGuard(fRequestMut);
         std::for_each(fRequests.begin(), fRequests.end(),
             [] (const Request& req) {
-                if (req.fStream) req.fStream->Close();
                 delete req.fStream;
             }
         );
@@ -549,6 +558,16 @@ void pfPatcherWorker::Run()
 
 void pfPatcherWorker::IHashFile(pfPatcherQueuedFile& file)
 {
+    // Only accept game code if we want it
+    if (!fWantPython && file.fClientPath.GetFileExt().compare_i("pak") == 0) {
+        PatcherLogRed("\tDeclined unwanted Python code '{}'", file.fClientPath);
+        return;
+    }
+    if (!fWantSDL && file.fClientPath.GetFileExt().compare_i("sdl") == 0) {
+        PatcherLogRed("\tDeclined unwanted SDL '{}'", file.fClientPath);
+        return;
+    }
+
     // Check to see if ours matches
     plFileInfo mine(file.fClientPath);
     if (mine.FileSize() == file.fFileSize) {
@@ -626,8 +645,9 @@ void pfPatcherWorker::WhitelistFile(const plFileName& file, bool justDownloaded,
         ST::string ext = file.GetFileExt();
         if (ext.compare_i("pak") == 0 || ext.compare_i("sdl") == 0) {
             if (!stream) {
-                stream = new hsUNIXStream;
-                stream->Open(file, "rb");
+                hsUNIXStream* newStream = new hsUNIXStream;
+                newStream->Open(file, "rb");
+                stream = newStream;
             }
 
             // if something terrible goes wrong (eg bad encryption), we can exit sanely
@@ -635,11 +655,21 @@ void pfPatcherWorker::WhitelistFile(const plFileName& file, bool justDownloaded,
             if (!fGameCodeDiscovered(file, stream))
                 EndPatch(kNetErrInternalError, "SecurePreloader failed.");
         }
-    } else if (stream) {
+    } else {
         // no dad gum memory leaks, m'kay?
-        stream->Close();
         delete stream;
     }
+}
+
+void pfPatcherWorker::EnqueuePreloaderLists()
+{
+    PatcherLogYellow("\tWARNING: *** Falling back to AuthSrv file lists to get game code ***");
+
+    hsLockGuard(fRequestMut);
+    if (fWantPython)
+        fRequests.emplace_back(ST::string(), pfPatcherWorker::Request::kPythonList);
+    if (fWantSDL)
+        fRequests.emplace_back(ST::string(), pfPatcherWorker::Request::kSdlList);
 }
 
 // ===================================================
@@ -704,10 +734,17 @@ void pfPatcher::OnSelfPatch(FileDownloadFunc cb)
 
 // ===================================================
 
-void pfPatcher::RequestGameCode()
+void pfPatcher::RequestGameCode(bool python, bool sdl)
 {
+    fWorker->fWantPython = python;
+    fWorker->fWantSDL = sdl;
+
     hsLockGuard(fWorker->fRequestMut);
-    fWorker->fRequests.emplace_back("SecurePreloader", pfPatcherWorker::Request::kSecurePreloader);
+    if (NetCliFileQueryConnected()) {
+        fWorker->fRequests.emplace_back("SecurePreloader", pfPatcherWorker::Request::kSecurePreloader);
+    } else {
+        fWorker->EnqueuePreloaderLists();
+    }
 }
 
 void pfPatcher::RequestManifest(const ST::string& mfs)

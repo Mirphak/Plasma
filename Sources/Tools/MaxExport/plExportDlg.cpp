@@ -46,7 +46,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "MaxMain/MaxAPI.h"
 
 #include <set>
-#include <string>
+#include <string_theory/format>
 #include <vector>
 
 #include "plExportDlg.h"
@@ -56,6 +56,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "MaxMain/plMaxCFGFile.h"
 #include "MaxMain/plMaxNode.h"
 #include "plFileSystem.h"
+#include "plMessageBox/hsMessageBox.h"
 
 extern HINSTANCE hInstance;
 
@@ -122,7 +123,7 @@ plExportDlgImp::plExportDlgImp()
 BOOL WritePrivateProfileIntW(LPCWSTR lpAppName, LPCWSTR lpKeyName, int val, LPCWSTR lpFileName)
 {
     wchar_t buf[12];
-    _snwprintf(buf, 12, L"%d", val);
+    swprintf(buf, 12, L"%d", val);
 
     return WritePrivateProfileStringW(lpAppName, lpKeyName, buf, lpFileName);
 }
@@ -413,8 +414,7 @@ static bool AutoExportDir(const plFileName& inputDir, const plFileName& outputDi
         hsUNIXStream log;
         if (log.Open(outputLog, "ab"))
         {
-            log.WriteFmt("{}\r\n", iter->GetFileName());
-            log.Close();
+            log.WriteString(ST::format("{}\r\n", iter->GetFileName()));
         }
 
         if (GetCOREInterface()->LoadFromFile(ST2M(iter->AsString())))
@@ -442,7 +442,6 @@ static void ShutdownMax()
     {
         hsUNIXStream s;
         s.Open("log\\AutoExportDone.txt", "wb");
-        s.Close();
     }
     GetCOREInterface()->FlushUndoBuffer();
     SetSaveRequiredFlag(FALSE);

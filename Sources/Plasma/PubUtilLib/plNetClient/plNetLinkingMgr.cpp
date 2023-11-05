@@ -51,6 +51,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pnMessage/plClientMsg.h"
 #include "pnNetCommon/pnNetCommon.h"
 #include "pnSceneObject/plSceneObject.h"
+#include "pnUtils/pnUtStr.h"
 
 #include "plAvatar/plAvatarMgr.h"
 #include "plAvatar/plArmatureMod.h"
@@ -975,7 +976,7 @@ uint8_t plNetLinkingMgr::IPreProcessLink()
                     // We have the age in our AgesIOwnFolder. If its volatile, dump it for the new one.
                     VaultAgeLinkNode linkAcc(linkNode);
                     if (linkAcc.GetVolatile()) {
-                        if (VaultUnregisterOwnedAgeAndWait(&ageInfo)) {
+                        if (VaultUnregisterOwnedAge(&ageInfo)) {
                             // Fill in fields for new age create.
                             if (!info->HasAgeUserDefinedName())
                             {

@@ -49,6 +49,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "pnAllCreatables.h"
 
+#include "pnFactory/plFactory.h"
 #include "pnKeyedObject/plKey.h"
 #include "pnKeyedObject/plKeyImp.h"
 #include "pnKeyedObject/plUoid.h"
@@ -235,13 +236,13 @@ void plResBrowser::SaveSelectedObject()
 
     if (!fileName.isEmpty())
     {
-        plKeyImp *keyImp = static_cast<plKeyImp *>(itemKey);
+        plKeyImp* keyImp = plKeyImp::GetFromKey(itemKey);
 
         if (keyImp->GetDataLen() <= 0)
             return;
 
         plResManager *resMgr = static_cast<plResManager *>(hsgResMgr::ResMgr());
-        plRegistryPageNode *pageNode = resMgr->FindPage(keyImp->GetUoid().GetLocation());
+        plRegistryPageNode* pageNode = resMgr->FindPage(itemKey->GetUoid().GetLocation());
 
         hsStream *stream = pageNode->OpenStream();
         if (!stream)
@@ -253,6 +254,7 @@ void plResBrowser::SaveSelectedObject()
             stream->SetPosition(keyImp->GetStartPos());
             stream->Read(keyImp->GetDataLen(), buffer);
         }
+        pageNode->CloseStream();
 
         if (!buffer)
             return;
@@ -260,7 +262,6 @@ void plResBrowser::SaveSelectedObject()
         hsUNIXStream outStream;
         outStream.Open(fileName.toUtf8().constData(), "wb");
         outStream.Write(keyImp->GetDataLen(), buffer);
-        outStream.Close();
 
         delete[] buffer;
     }
@@ -317,7 +318,7 @@ void plResBrowser::UpdateInfoPage()
             fUI->fObjectClass->setText(QString("%1 (%2)").arg(cname ? cname : "<unknown>")
                                        .arg(key->GetUoid().GetClassType()));
 
-            plKeyImp *imp = static_cast<plKeyImp *>(key);
+            plKeyImp* imp = plKeyImp::GetFromKey(key);
             if (showAsHex)
                 fUI->fStartPos->setText(QString("0x%1").arg(imp->GetStartPos(), 0, 16));
             else

@@ -46,12 +46,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plResManagerHelper.h"
 #include "plResMgrSettings.h"
 
-#include "hsSTLStream.h"
 #include "hsTimer.h"
 #include "plTimerCallbackManager.h"
 
 #include "pnDispatch/plDispatch.h"
 #include "pnFactory/plCreator.h"
+#include "pnFactory/plFactory.h"
 #include "pnKeyedObject/hsKeyedObject.h"
 #include "pnKeyedObject/plFixedKey.h"
 #include "pnKeyedObject/plKeyImp.h"
@@ -62,6 +62,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pnNetCommon/plNetApp.h"
 
 #include "plAgeDescription/plAgeDescription.h"
+#include "plMessageBox/hsMessageBox.h"
 #include "plScene/plSceneNode.h"
 #include "plStatusLog/plStatusLog.h"
 
@@ -284,7 +285,7 @@ void plResManager::LogReadTimes(bool logReadTimes)
 
 hsKeyedObject* plResManager::IGetSharedObject(plKeyImp* pKey)
 {
-    plKeyImp* origKey = (plKeyImp*)pKey->GetCloneOwner();
+    plKeyImp* origKey = plKeyImp::GetFromKey(pKey->GetCloneOwner());
 
     // Find the first non-nil key and ask it to clone itself
     size_t count = origKey->GetNumClones();
@@ -583,7 +584,7 @@ plKey plResManager::FindKey(const plUoid& uoid)
 
     // If we're looking for a clone, get the clone instead of the original
     if (key && uoid.IsClone())
-        key = ((plKeyImp*)key)->GetClone(uoid.GetClonePlayerID(), uoid.GetCloneID());
+        key = plKeyImp::GetFromKey(key)->GetClone(uoid.GetClonePlayerID(), uoid.GetCloneID());
 
     return key;
 }
@@ -626,7 +627,7 @@ bool plResManager::AddViaNotify(const plKey &key, plRefMsg* msg, plRefFlags::Typ
         return false;
     }
 
-    ((plKeyImp*)key)->SetupNotify(msg,flags);
+    plKeyImp::GetFromKey(key)->SetupNotify(msg,flags);
     
     if (flags != plRefFlags::kPassiveRef)
     {
@@ -666,7 +667,7 @@ bool plResManager::SendRef(const plKey& key, plRefMsg* refMsg, plRefFlags::Type 
         return false;
     }
 
-    plKeyImp* iKey = (plKeyImp*)key;
+    plKeyImp* iKey = plKeyImp::GetFromKey(key);
     iKey->ISetupNotify(refMsg, flags);
     hsRefCnt_SafeUnRef(refMsg);
 
@@ -713,7 +714,7 @@ plKey plResManager::ReadKeyNotifyMe(hsStream* stream, plRefMsg* msg, plRefFlags:
         return nullptr;
     }
 
-    ((plKeyImp*)key)->SetupNotify(msg,flags);
+    plKeyImp::GetFromKey(key)->SetupNotify(msg,flags);
 
     hsKeyedObject* ko = key->ObjectIsLoaded();
 
@@ -795,7 +796,7 @@ plKey plResManager::ReRegister(const ST::string& nm, const plUoid& oid)
     {
         if (pOrigKey)
         {
-            plKey cloneKey = ((plKeyImp*)pOrigKey)->GetClone(fCurClonePlayerID, fCurCloneID);
+            plKey cloneKey = plKeyImp::GetFromKey(pOrigKey)->GetClone(fCurClonePlayerID, fCurCloneID);
             if (cloneKey)
                 return cloneKey;
         }
@@ -804,8 +805,8 @@ plKey plResManager::ReRegister(const ST::string& nm, const plUoid& oid)
     plKeyImp* pKey = new plKeyImp;
     if (canClone && pOrigKey)
     {   
-        pKey->CopyForClone((plKeyImp*)pOrigKey, fCurClonePlayerID, fCurCloneID);
-        ((plKeyImp*)pOrigKey)->AddClone(pKey);
+        pKey->CopyForClone(plKeyImp::GetFromKey(pOrigKey), fCurClonePlayerID, fCurCloneID);
+        plKeyImp::GetFromKey(pOrigKey)->AddClone(pKey);
     }
     else
     {
@@ -927,7 +928,7 @@ bool plResManager::Unload(const plKey& objKey)
 {
     if (objKey)
     {
-        ((plKeyImp*)objKey)->UnRegister();
+        plKeyImp::GetFromKey(objKey)->UnRegister();
         fDispatch->UnRegisterAll(objKey);
         return true;
     }
@@ -1171,7 +1172,7 @@ void plResManager::PageInRoom(const plLocation& page, uint16_t objClassToRef, pl
 
         ST::string msg = ST::format("Data Problem: Age:{}  Page:{}  Error:{}",
             pageNode->GetPageInfo().GetAge(), pageNode->GetPageInfo().GetPage(), condStr);
-        hsMessageBox(msg.c_str(), "Error", hsMessageBoxNormal, hsMessageBoxIconError);
+        hsMessageBox(msg, ST_LITERAL("Error"), hsMessageBoxNormal, hsMessageBoxIconError);
 
         hsRefCnt_SafeUnRef(refMsg);
         return;
@@ -1366,26 +1367,24 @@ bool plResManager::VerifyPages()
 //  Given an array of pages that are invalid (major version out-of-date or
 //  whatnot), asks the user what we should do about them.
 
-static void ICatPageNames(std::vector<plRegistryPageNode*>& pages, char* buf, int bufSize)
+static ST::string ICatPageNames(std::vector<plRegistryPageNode*>& pages, const ST::string& msg)
 {
+    ST::string_stream ss;
+    ss << msg;
+
     for (size_t i = 0; i < pages.size(); i++)
     {
         if (i >= 25)
         {
-            strcat(buf, "...\n");
+            ss << ST_LITERAL("...\n");
             break;
         }
 
         ST::string pageFile = pages[i]->GetPagePath().GetFileName();
-        if (strlen(buf) + pageFile.size() > bufSize - 5)
-        {
-            strcat(buf, "...\n");
-            break;
-        }
-
-        strcat(buf, pageFile.c_str());
-        strcat(buf, "\n");
+        ss << pageFile << '\n';
     }
+
+    return ss.to_string();
 }
 
 bool plResManager::IDeleteBadPages(std::vector<plRegistryPageNode*>& invalidPages, bool conflictingSeqNums)
@@ -1393,19 +1392,19 @@ bool plResManager::IDeleteBadPages(std::vector<plRegistryPageNode*>& invalidPage
 #ifndef PLASMA_EXTERNAL_RELEASE
     if (!hsMessageBox_SuppressPrompts)
     {
-        char msg[4096];
+        ST::string msg;
 
         // Prompt what to do
         if (conflictingSeqNums)
-            strcpy(msg, "The following pages have conflicting sequence numbers. This usually happens when "
-                        "you copy data files between machines that had random sequence numbers assigned at "
-                        "export. To avoid crashing, these pages will be deleted:\n\n");
+            msg = ST_LITERAL("The following pages have conflicting sequence numbers. This usually happens when "
+                             "you copy data files between machines that had random sequence numbers assigned at "
+                             "export. To avoid crashing, these pages will be deleted:\n\n");
         else
-            strcpy(msg, "The following pages are out of date and will be deleted:\n\n");
+            msg = ST_LITERAL("The following pages are out of date and will be deleted:\n\n");
 
-        ICatPageNames(invalidPages, msg, sizeof(msg));
+        msg = ICatPageNames(invalidPages, msg);
 
-        hsMessageBox(msg, "Warning", hsMessageBoxNormal);
+        hsMessageBox(msg, ST_LITERAL("Warning"), hsMessageBoxNormal);
     }
 #endif // PLASMA_EXTERNAL_RELEASE
 
@@ -1432,14 +1431,13 @@ bool plResManager::IWarnNewerPages(std::vector<plRegistryPageNode*> &newerPages)
 #ifndef PLASMA_EXTERNAL_RELEASE
     if (!hsMessageBox_SuppressPrompts)
     {
-        char msg[4096];
         // Prompt what to do
-        strcpy(msg, "The following pages have newer version numbers than this client and cannot be \nloaded. "
-                    "They will be ignored but their files will NOT be deleted:\n\n");
+        ST::string msg = ST_LITERAL("The following pages have newer version numbers than this client and cannot be \nloaded. "
+                                    "They will be ignored but their files will NOT be deleted:\n\n");
 
-        ICatPageNames(newerPages, msg, sizeof(msg));
+        msg = ICatPageNames(newerPages, msg);
 
-        hsMessageBox(msg, "Warning", hsMessageBoxNormal);
+        hsMessageBox(msg, ST_LITERAL("Warning"), hsMessageBoxNormal);
     }
 #endif // PLASMA_EXTERNAL_RELEASE
 
@@ -1583,7 +1581,7 @@ void plResManager::UnloadPageObjects(plRegistryPageNode* pageNode, uint16_t clas
     public:
         bool EatKey(const plKey& key) override
         {
-            sIReportLeak((plKeyImp*)key, nullptr);
+            sIReportLeak(plKeyImp::GetFromKey(key), nullptr);
             return true;
         }
     };

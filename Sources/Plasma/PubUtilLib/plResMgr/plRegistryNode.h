@@ -43,11 +43,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #define plRegistryNode_h_inc
 
 #include "HeadSpin.h"
-#include "hsStream.h"
+#include "plFileSystem.h"
 #include "plPageInfo.h"
 
 #include <map>
+#include <memory>
 
+class hsStream;
 class plRegistryKeyList;
 class plKeyImp;
 class plRegistryKeyIterator;
@@ -78,12 +80,12 @@ protected:
     plFileName  fPath;          // Path to the page file
     plPageInfo  fPageInfo;      // Info about this page
 
-    hsBufferedStream fStream;   // Stream for reading/writing our page
+    std::unique_ptr<hsStream> fStream; // Stream for reading/writing our page
     uint8_t fOpenRequests;        // How many handles there are to fStream (or
                                 // zero if it's closed)
     bool fIsNewPage;          // True if this page is new (not read off disk)
 
-    plRegistryPageNode() {}
+    plRegistryPageNode();
 
     plRegistryKeyList* IGetKeyList(uint16_t classType) const;
     PageCond IVerify();
@@ -136,6 +138,10 @@ public:
     // returned, make sure to call CloseStream when you're done using it.
     hsStream*   OpenStream();
     void        CloseStream();
+
+    // Export time only.  Before we write to disk, assign all the loaded keys
+    // sequential object IDs that they can use to do fast lookups at load time.
+    void PrepForWrite();
 
     // Takes care of everything involved in writing this page to disk
     void Write();

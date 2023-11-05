@@ -49,6 +49,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include <regex>
 #include "pnEncryption/plChallengeHash.h"
+#include "pnUtils/pnUtStr.h"
+
 #include "plVault/plVaultConstants.h"
 
 namespace Ngl { namespace Auth {
@@ -88,7 +90,6 @@ struct CliAuConn : hsRefCnt {
     void Send (const uintptr_t fields[], unsigned count);
 
     std::recursive_mutex  critsect;
-    LINK(CliAuConn) link;
     AsyncSocket     sock;
     NetCli *        cli;
     ST::string      name;
@@ -1249,7 +1250,7 @@ enum {
 
 static bool                         s_running;
 static std::recursive_mutex         s_critsect;
-static LISTDECL(CliAuConn, link)    s_conns;
+static CliAuConn* s_conn = nullptr;
 static CliAuConn *                  s_active;
 static ST::string                   s_accountName;
 static ShaDigest                    s_accountNamePassHash;
@@ -1327,8 +1328,8 @@ static CliAuConn * GetConnIncRef (const char tag[]) {
 }
 
 //============================================================================
-static void UnlinkAndAbandonConn_CS (CliAuConn * conn) {
-    s_conns.Unlink(conn);
+static void AbandonConn(CliAuConn* conn) {
+    hsLockGuard(s_critsect);
     conn->abandoned = true;
 
     conn->StopAutoReconnect();
@@ -1425,7 +1426,9 @@ static void NotifyConnSocketConnectFailed (CliAuConn * conn) {
     {
         hsLockGuard(s_critsect);
         conn->cancelId = nullptr;
-        s_conns.Unlink(conn);
+        if (s_conn == conn) {
+            s_conn = nullptr;
+        }
 
         if (conn == s_active)
             s_active = nullptr;
@@ -1444,7 +1447,9 @@ static void NotifyConnSocketDisconnect (CliAuConn * conn) {
     {
         hsLockGuard(s_critsect);
         conn->cancelId = nullptr;
-        s_conns.Unlink(conn);
+        if (s_conn == conn) {
+            s_conn = nullptr;
+        }
             
         if (conn == s_active)
             s_active = nullptr;
@@ -1525,24 +1530,24 @@ static void Connect (
 
     {
         hsLockGuard(s_critsect);
-        while (CliAuConn * oldConn = s_conns.Head()) {
-            if (oldConn != conn)
-                UnlinkAndAbandonConn_CS(oldConn);
-            else
-                s_conns.Unlink(oldConn);
+        if (CliAuConn* oldConn = s_conn) {
+            s_conn = nullptr;
+            if (oldConn != conn) {
+                AbandonConn(oldConn);
+            }
         }
-        s_conns.Link(conn);
+        s_conn = conn;
     }
     
     Cli2Auth_Connect connect;
     connect.hdr.connType        = kConnTypeCliToAuth;
-    connect.hdr.hdrBytes        = sizeof(connect.hdr);
-    connect.hdr.buildId         = plProduct::BuildId();
-    connect.hdr.buildType       = plProduct::BuildType();
-    connect.hdr.branchId        = plProduct::BranchId();
+    connect.hdr.hdrBytes        = hsToLE16(sizeof(connect.hdr));
+    connect.hdr.buildId         = hsToLE32(plProduct::BuildId());
+    connect.hdr.buildType       = hsToLE32(plProduct::BuildType());
+    connect.hdr.branchId        = hsToLE32(plProduct::BranchId());
     connect.hdr.productId       = plProduct::UUID();
     connect.data.token          = conn->token;
-    connect.data.dataBytes      = sizeof(connect.data);
+    connect.data.dataBytes      = hsToLE32(sizeof(connect.data));
 
     AsyncSocketConnect(
         &conn->cancelId,
@@ -1643,13 +1648,16 @@ void CliAuConn::TimerReconnect () {
     
     if (!s_running) {
         hsLockGuard(s_critsect);
-        UnlinkAndAbandonConn_CS(this);
+        if (s_conn == this) {
+            s_conn = nullptr;
+        }
+        AbandonConn(this);
     }
     else {
         Ref("Connecting");
 
         // Remember the time we started the reconnect attempt, guarding against
-        // TimeGetMs() returning zero (unlikely), as a value of zero indicates
+        // hsTimer::GetMilliSeconds() returning zero (unlikely), as a value of zero indicates
         // a first-time connect condition to StartAutoReconnect()
         reconnectStartMs = GetNonZeroTimeMs();
 
@@ -1861,7 +1869,7 @@ bool RecvMsg<Auth2Cli_ServerAddr>(const uint8_t in[], unsigned, void*)
     hsLockGuard(s_critsect);
     if (s_active) {
         s_active->token = msg.token;
-        s_active->addr.SetHost(msg.srvAddr);
+        s_active->addr.SetHost(hsToBE32(msg.srvAddr));
 
         LogMsg(kLogPerf, "SrvAuth addr: {}", s_active->addr.GetHostString());
     }
@@ -4671,8 +4679,10 @@ void AuthDestroy (bool wait) {
 
     {
         hsLockGuard(s_critsect);
-        while (CliAuConn * conn = s_conns.Head())
-            UnlinkAndAbandonConn_CS(conn);
+        if (CliAuConn* conn = s_conn) {
+            s_conn = nullptr;
+            AbandonConn(conn);
+        }
         s_active = nullptr;
     }
 
@@ -4769,8 +4779,10 @@ void NetCliAuthAutoReconnectEnable (bool enable) {
 void NetCliAuthDisconnect () {
 
     hsLockGuard(s_critsect);
-    while (CliAuConn * conn = s_conns.Head())
-        UnlinkAndAbandonConn_CS(conn);
+    if (CliAuConn* conn = s_conn) {
+        s_conn = nullptr;
+        AbandonConn(conn);
+    }
     s_active = nullptr;
 }
 

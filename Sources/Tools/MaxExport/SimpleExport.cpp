@@ -75,6 +75,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plGImage/plCubicEnvironmap.h"
 #include "plGImage/plDynamicTextMap.h"
 #include "plGImage/plMipmap.h"
+#include "plMessageBox/hsMessageBox.h"
 #include "plScene/plSceneNode.h"
 
 #include "plExportDlg.h"
@@ -369,7 +370,6 @@ int HSExport2::DoExport(const MCHAR *name,ExpInterface *ei,Interface *gi, BOOL s
             out_name, tm.wMonth, tm.wDay, tm.wYear, exportTime / 60, exportTime % 60
         )
     );
-    dbLog.Close();
 
     // Allow plugins to clean up after export
     BroadcastNotification(NOTIFY_POST_EXPORT);
