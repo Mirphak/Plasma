@@ -157,7 +157,7 @@ def AddCleft(self, args = []):
                 vault = ptVault()
                 entry = vault.findChronicleEntry("TomahnaLoad")
                 if type(entry) != type(None):
-                    entry.chronicleSetValue("yes")
+                    entry.setValue("yes")
                     entry.save()
                     PtDebugPrint("Chronicle entry TomahnaLoad already added, setting to yes")
                 else:
@@ -171,9 +171,9 @@ def AddCleft(self, args = []):
                                         entry = vault.findChronicleEntry("TomahnaLoad")
                                         if type(entry) != type(None):
                                             if linkTitle == "Tomahna":
-                                                entry.chronicleSetValue("yes")
+                                                entry.setValue("yes")
                                             else:
-                                                entry.chronicleSetValue("no")
+                                                entry.setValue("no")
 """
 # Toggle Cleft or Tomahna
 def tct():
@@ -188,13 +188,13 @@ def tct():
         vault.addChronicleEntry("TomahnaLoad",1,"yes")
         PtDebugPrint("Chronicle entry TomahnaLoad not present, adding entry and setting to yes")
     else:
-        entryTomahnaValue = entry.chronicleGetValue()
+        entryTomahnaValue = entry.getValue()
         if entryTomahnaValue == "yes":
-            entry.chronicleSetValue("no")
+            entry.setValue("no")
             entry.save()
             PtDebugPrint("Chronicle entry TomahnaLoad already added, setting to no")
         else:
-            entry.chronicleSetValue("yes")
+            entry.setValue("yes")
             entry.save()
             PtDebugPrint("Chronicle entry TomahnaLoad already added, setting to yes")
 

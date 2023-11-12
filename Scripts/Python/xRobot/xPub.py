@@ -139,6 +139,15 @@
         building a Jalak pillar platform above the pub and warping to it and back again, 
         or making the walls invisible and then opaque again.
 
+    2023-09-23:
+    "mobCartographers":["GuildPub-Cartographers", "GuildPub-Cartographers", "23ac83d3-dc52-4572-9b0a-ad13c298276c", "Mir-o-Bot's", ""],
+    "mobGreeters":["GuildPub-Greeters", "GuildPub-Greeters", "7a69bacf-2dd0-4b8c-88ae-9878ea1157d3", "Mir-o-Bot's", ""],
+    "mobMaintainers":["GuildPub-Maintainers", "GuildPub-Maintainers", "a9e45d08-dfdf-48a7-9539-bdaaa60c13e9", "Mir-o-Bot's", ""],
+    "mobMessengers":["GuildPub-Messengers", "GuildPub-Messengers", "950e27bb-77a5-427a-8d7a-c121feb6a74c", "Mir-o-Bot's", ""],
+    "mobWriters":["GuildPub-Writers", "GuildPub-Writers", "bf869aee-48b7-406b-a717-8e7c04dc24c0", "Mir-o-Bot's", ""],
+
+    "mobgomepub":["GoMePubNew", "GoMePubNew", "da149d57-5671-4302-95d6-8d9ea52167ff", "Mir-o-Bot's", ""],
+
 """
 
 from Plasma import *

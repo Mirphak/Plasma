@@ -1,0 +1,8 @@
+StartDateTime=0672211080
+DayLength=30.230000
+MaxCapacity=50
+LingerTime=180
+SequencePrefix=14972
+ReleaseVersion=0
+Page=mainRoom,1
+Page=Default,0

@@ -29,6 +29,7 @@ List of markers games
 2692182: A Ghost in Space (Ahnonay) (CQ) 02/21/15
 2692225: A Touch of Yellow (Gahreesen) 02/21/15
 12012686: A brief history of D'ni 07/24/22
+12943346: A brief history of Kalamee 08/02/23
 6551440: A la recherche des marqueurs perdus (Debut au Relto) 03/27/17
 6508382: A little wicked game (starts in Relto) 02/15/17
 9557017: ALL AROUND AEGURA 06/16/20
@@ -189,6 +190,7 @@ List of markers games
 2733375: Kadish Spider eggs. 02/25/15
 9464985: Kadish Subworld hiking  05/14/20
 1310099: Kadish Underfloors Guide    11/09/14
+12749702: Kalamee Animal Ride by HM 05/07/23
 2692230: Kirel Auditorium 02/21/15
 2692234: Kirel Heights 02/21/15
 2692232: Kirel Light Garden 02/21/15
@@ -285,6 +287,7 @@ List of markers games
 7114383: N'Chacka's Marker Eder Gira 12/04/17
 6391562: N'Chacka's Marker Game 11/20/16
 7125733: N'Chacka's start Eder Gira 12/08/17
+12948347: N'Chaka's Phil's Relto 08/04/23
 8330464: Nehir's Cleft under the Rain 12/29/18
 2692348: Neighborhood Heights 02/21/15
 2692244: New Rings (Gahreesen Subworld) 02/21/15

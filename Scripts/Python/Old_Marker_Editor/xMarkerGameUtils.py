@@ -207,13 +207,13 @@ class chronicleMarkerGameData(MarkerGameData):
         entry = vault.findChronicleEntry(self.kChronMarkerGameData)
 
         #Only retrieve if the chronicle entry exists; otherwise, we'll just save later.
-        if type(entry) == type(None) or type(entry.chronicleGetValue()) == type(None) or entry.chronicleGetValue() == "":
+        if type(entry) == type(None) or type(entry.getValue()) == type(None) or entry.getValue() == "":
             return
 
         #Here will do a little magic...
         #To protect against versioning issues, we'll initialize whatever data the user has.
         #All other data will remain at default values....
-        temp = eval(entry.chronicleGetValue())
+        temp = eval(entry.getValue())
         self.copy(temp)
 
         #self.printData()
@@ -232,7 +232,7 @@ class chronicleMarkerGameData(MarkerGameData):
         if type(entry) == type(None):
             vault.addChronicleEntry(self.kChronMarkerGameData, 1, str(saveData))
         else:
-            entry.chronicleSetValue(str(saveData))
+            entry.setValue(str(saveData))
             entry.save()
 
         #~self.printData()            
@@ -241,11 +241,11 @@ class chronicleMarkerGameData(MarkerGameData):
         vault = ptVault()
         entry = vault.findChronicleEntry(self.kChronMarkerGameData)
     
-        if type(entry) == type(None) or type(entry.chronicleGetValue()) == type(None):
+        if type(entry) == type(None) or type(entry.getValue()) == type(None):
             PtDebugPrint("chronicleMarkerGameData.printData():\t****ERROR****  Chronicle Entry does not exist, aborting print command")
             return
 
-        temp = eval(entry.chronicleGetValue())
+        temp = eval(entry.getValue())
 
         print("--------------[Start of CZG Marker Data Chronicle Entry]---------------------")
         for x in list(temp.keys()):

@@ -315,8 +315,8 @@ def piln():
     #hood = ptVault().getLinkToMyNeighborhood().getAgeInfo()
     #node = hood.getAgeOwnersFolder()
     
-    print("folderGetName       = " + str(node.folderGetName()))
-    print("folderGetType       = " + str(node.folderGetType()))
+    print("getName       = " + str(node.getName()))
+    print("getType       = " + str(node.getType()))
     print("getChildNodeCount   = " + str(node.getChildNodeCount()))
     print("getChildNodeRefList = " + str(node.getChildNodeRefList()))
     print("getClientID         = " + str(node.getClientID()))
@@ -328,7 +328,6 @@ def piln():
     print("getCreatorNode      = " + str(node.getCreatorNode()))
     print("getCreatorNodeID    = " + str(node.getCreatorNodeID()))
     print("getFolderName       = " + str(node.getFolderName()))
-    print("getFolderNameW      = " + str(node.getFolderNameW()))
     print("getFolderType       = " + str(node.getFolderType()))
     print("getID               = " + str(node.getID()))
     print("getModifyTime       = " + str(node.getModifyTime()))

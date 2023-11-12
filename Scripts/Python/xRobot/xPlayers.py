@@ -74,8 +74,8 @@ def AddBud(playerId):
     try:
         localPlayer = PtGetLocalPlayer()
         if playerId != localPlayer.getPlayerID():
-            if not buddies.playerlistHasPlayer(playerId):
-                buddies.playerlistAddPlayer(playerId)
+            if not buddies.hasPlayer(playerId):
+                buddies.addPlayer(playerId)
                 return True
     except:
         return False
@@ -87,8 +87,8 @@ def AddIgnore(playerId):
     try:
         localPlayer = PtGetLocalPlayer()
         if playerId != localPlayer.getPlayerID():
-            if not ignores.playerlistHasPlayer(playerId):
-                ignores.playerlistAddPlayer(playerId)
+            if not ignores.hasPlayer(playerId):
+                ignores.addPlayer(playerId)
                 return True
     except:
         return False
@@ -100,8 +100,8 @@ def RemoveBuddy(playerId):
     try:
         localPlayer = PtGetLocalPlayer()
         if playerId != localPlayer.getPlayerID():
-            if buddies.playerlistHasPlayer(playerId):
-                buddies.playerlistRemovePlayer(playerId)
+            if buddies.hasPlayer(playerId):
+                buddies.removePlayer(playerId)
                 return True
     except:
         return False
@@ -113,8 +113,8 @@ def RemoveIgnore(playerId):
     try:
         localPlayer = PtGetLocalPlayer()
         if playerId != localPlayer.getPlayerID():
-            if ignores.playerlistHasPlayer(playerId):
-                ignores.playerlistRemovePlayer(playerId)
+            if ignores.hasPlayer(playerId):
+                ignores.removePlayer(playerId)
                 return True
     except:
         return False
@@ -131,7 +131,7 @@ def IsBud(playerId):
             return False
         if playerId == localPlayer.getPlayerID():
             return False
-        if buddies.playerlistHasPlayer(playerId):
+        if buddies.hasPlayer(playerId):
             return True
     except:
         return False
@@ -148,7 +148,7 @@ def IsIgnore(playerId):
             return False
         if playerId == localPlayer.getPlayerID():
             return False
-        if ignores.playerlistHasPlayer(playerId):
+        if ignores.hasPlayer(playerId):
             return True
     except:
         return False
@@ -165,8 +165,8 @@ def UploadImage(imagefile,imagetitle,playerId=0,width=0,height=0):
     try:
         img = PtLoadJPEGFromDisk(imagefile,width,height)
         node = ptVaultImageNode(0)
-        node.imageSetImage(img)
-        node.imageSetTitle(imagetitle)
+        node.setImage(img)
+        node.setTitle(imagetitle)
         playerid = PtGetLocalPlayer().getPlayerID()
         if playerId != playerid and playerId != 0:
             node.sendTo(playerId)

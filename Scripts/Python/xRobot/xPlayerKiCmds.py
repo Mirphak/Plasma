@@ -103,8 +103,9 @@ adminList += [
     9995228, # NDGSeeker
     #10287894, # Thallan
     #10360615, # Thallane
+    11884030, # Patsy
     12348922, # ben2
-    12480587, # Tituss
+    #12480587, # Tituss
 ]
 
 # For the Cavern Tours : Larry Ledeay and CT Hostess Susa'n
@@ -3733,7 +3734,7 @@ def Help(self, cFlags, args = []):
         agefolder = agefolderRef.getChild()
         if agefolder.getType() == PtVaultNodeTypes.kFolderNode:
             agefolder = agefolder.upcastToFolderNode()
-            if agefolder.folderGetName() == 'Nexus':
+            if agefolder.getName() == 'Nexus':
                 journal = agefolder
                 break
     """
@@ -3933,8 +3934,8 @@ def Help(self, cFlags, args = []):
     # create the note
     try:
         helpNote1 = ptVaultTextNoteNode(0)
-        helpNote1.setTextW(msg1)
-        helpNote1.setTitleW(title1)
+        helpNote1.setText(msg1)
+        helpNote1.setTitle(title1)
         #journal.addNode(helpNote1)
     except:
         msg = "An error occured when creating help note 1."
@@ -3942,8 +3943,8 @@ def Help(self, cFlags, args = []):
 
     try:
         helpNote2 = ptVaultTextNoteNode(0)
-        helpNote2.setTextW(msg2)
-        helpNote2.setTitleW(title2)
+        helpNote2.setText(msg2)
+        helpNote2.setTitle(title2)
         #journal.addNode(helpNote2)
     except:
         msg = "An error occured when creating help note 2."
@@ -3951,8 +3952,8 @@ def Help(self, cFlags, args = []):
 
     try:
         helpNote3 = ptVaultTextNoteNode(0)
-        helpNote3.setTextW(msg3)
-        helpNote3.setTitleW(title3)
+        helpNote3.setText(msg3)
+        helpNote3.setTitle(title3)
         #journal.addNode(helpNote3)
     except:
         msg = "An error occured when creating help note 3."
@@ -3960,8 +3961,8 @@ def Help(self, cFlags, args = []):
 
     try:
         helpNote4 = ptVaultTextNoteNode(0)
-        helpNote4.setTextW(msg4)
-        helpNote4.setTitleW(title4)
+        helpNote4.setText(msg4)
+        helpNote4.setTitle(title4)
         #journal.addNode(helpNote4)
     except:
         msg = "An error occured when creating help note 4."
@@ -4046,8 +4047,8 @@ def SendAnimListNote(self, cFlags, args = []):
     # create the note
     try:
         helpNote = ptVaultTextNoteNode(0)
-        helpNote.setTextW(AnimationList.containt)
-        helpNote.setTitleW(AnimationList.title)
+        helpNote.setText(AnimationList.containt)
+        helpNote.setTitle(AnimationList.title)
     except:
         msg = "An error occured when creating the list of animations note."
         SendChatMessage(self, myself, [player], msg, cFlags.flags)

@@ -266,11 +266,11 @@ def init():
         vault = ptVault()
         entry = vault.findChronicleEntry("GotPellet")
         if type(entry) != type(None):
-            entryValue = entry.chronicleGetValue()
+            entryValue = entry.getValue()
             #gotPellet = string.atoi(entryValue)
             gotPellet = int(entryValue)
             if gotPellet != 0:
-                entry.chronicleSetValue("%d" % (0))
+                entry.setValue("%d" % (0))
                 entry.save()
                 avatar = PtGetLocalAvatar()
                 avatar.avatar.registerForBehaviorNotify(self.key)
@@ -301,7 +301,7 @@ def GetPelletCaveSolution():
     for ageInfoChildRef in ageInfoChildren:
         ageInfoChild = ageInfoChildRef.getChild()
         folder = ageInfoChild.upcastToFolderNode()
-        if folder and folder.folderGetName() == "AgeData":
+        if folder and folder.getName() == "AgeData":
             print("Found age data folder")
             ageDataChildren = folder.getChildNodeRefList()
             for ageDataChildRef in ageDataChildren:

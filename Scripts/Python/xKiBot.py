@@ -286,14 +286,14 @@ class SurveyBotAge:
         for val in list(ages.MirobotAgeDict.values()):
             if val[2] == myCurrentAgeInstanceGuid:
                 # I am in a Mir-o-Bot age, it's ok.
-                print("SurveyBotAge:ok mob")
+                #print("SurveyBotAge:ok mob")
                 self._nbTry = 0
                 return
         # Am I in one of MagicBot age?
         for val in list(ages.MagicbotAgeDict.values()):
             if val[2] == myCurrentAgeInstanceGuid:
                 # I am in a Mir-o-Bot age, it's ok.
-                print("SurveyBotAge:ok magic")
+                #print("SurveyBotAge:ok magic")
                 self._nbTry = 0
                 return
         # Am I in one of my own private age?
@@ -302,7 +302,7 @@ class SurveyBotAge:
             ageInfo = age.getChild().upcastToAgeLinkNode().getAgeInfo()
             if ageInfo.getAgeInstanceGuid() == myCurrentAgeInstanceGuid:
                 # OK
-                print("SurveyBotAge:ok own")
+                #print("SurveyBotAge:ok own")
                 self._nbTry = 0
                 return
         # Am I in a Public Age ?
@@ -311,9 +311,13 @@ class SurveyBotAge:
         #    return
         infoNode = ptAgeVault().getAgeInfo()
         if not infoNode.isPublic():
+            # This doesn't work in sub-ages. I have to test parent age.
             print("SurveyBotAge:ok, I am in a private age.")
             return
-        print("This age is not allowed for the bot: {0}, {1}".format(PtGetAgeInfo().getAgeFilename(), myCurrentAgeInstanceGuid))
+        
+        msg = f"This age is not allowed for the bot: {PtGetAgeInfo().getAgeFilename()}, {myCurrentAgeInstanceGuid}"
+        print(msg)
+        PtSendKIMessage(kKIChatStatusMsg, msg)
         # I am not welcome here, link myself in an allowed age
         if self._xKiSelf is None:
             print("SurveyBotAge:Error: self._xKiSelf is none, quit MOULa")
@@ -330,12 +334,13 @@ class SurveyBotAge:
                 PtConsole("App.Quit")
         
     def onAlarm(self, param=1):
-        print("SurveyBotAge:onalarm")
+        #print("SurveyBotAge:onalarm")
         if not self._running:
             print("SurveyBotAge:not running")
             return
-        print("SurveyBotAge:call WhereAmI")
+        #print("SurveyBotAge:call WhereAmI")
         self.WhereAmI()
+        """
         #Check age player positions to see why I have Collision error crash
         agePlayers = PtGetPlayerList()
         for player in agePlayers:
@@ -343,7 +348,7 @@ class SurveyBotAge:
             pos = so.position()
             #PtDebugPrint(f">> Check position of {so.getName()}: {round(pos.getX(), 2)}, {round(pos.getY(), 2)}, {round(pos.getZ())}")
             print(f">> Check position of {player.getPlayerName()}: {round(pos.getX(), 2)}, {round(pos.getY(), 2)}, {round(pos.getZ())}")
-        #
+        """
         PtSetAlarm(15, self, 1)
         
     def Start(self, xKiSelf):
@@ -369,7 +374,7 @@ class CheckPos:
     _nbTry   = 0
     
     def __init__(self):
-        print("CheckPos:")
+        PtDebugPrint("CheckPos:__init__")
     
     def onAlarm(self, param=1):
         #print("CheckPos:onalarm")
@@ -378,14 +383,12 @@ class CheckPos:
             return
         #Check age player positions to see why I have Collision error crash
         agePlayers = PtGetPlayerList()
-        #print(f"CheckPos : Nb players = {len(agePlayers)}")
-        PtDebugPrint(f"CheckPos : Nb players = {len(agePlayers)}")
+        if not PtIsSolo():
+            PtDebugPrint(f"CheckPos : Nb players = {len(agePlayers)}")
         
         for player in agePlayers:
             so = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             pos = so.position()
-            #PtDebugPrint(f">> Check position of {so.getName()}: {round(pos.getX(), 2)}, {round(pos.getY(), 2)}, {round(pos.getZ())}")
-            #print(f">> Check position of {so.getName()}: {round(pos.getX(), 2)}, {round(pos.getY(), 2)}, {round(pos.getZ())}")
             PtDebugPrint(f">> Check position of {player.getPlayerName()}: {round(pos.getX(), 2)}, {round(pos.getY(), 2)}, {round(pos.getZ())}")
         
         PtSetAlarm(5, self, 1)
@@ -394,11 +397,11 @@ class CheckPos:
         self._xKiSelf = xKiSelf
         if not self._running:
             self._running = True
-            print("CheckPos:start")
+            PtDebugPrint("CheckPos:start")
             self.onAlarm()
     
     def Stop(self):
-        print("CheckPos:stop")
+        PtDebugPrint("CheckPos:stop")
         self._running = False
 
 checkPos = CheckPos()

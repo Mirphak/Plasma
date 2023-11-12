@@ -54,3 +54,5 @@ Page=LibraryKadishVis,57,1
 Page=LibraryTeledahnVis,55,1
 Page=MuseumInteriorPage,13,1
 Page=palace,7,1
+Page=libraryDoors,100,1
+Page=museumDoor,101,1

@@ -169,7 +169,7 @@ def GetList():
         agefolder = agefolderRef.getChild()
         if agefolder.getType() == PtVaultNodeTypes.kFolderNode:
             agefolder = agefolder.upcastToFolderNode()
-            ageFolderName = agefolder.getFolderNameW()
+            ageFolderName = agefolder.getFolderName()
             subs = agefolder.getChildNodeRefList()
             for sub in subs:
                 sub = sub.getChild()

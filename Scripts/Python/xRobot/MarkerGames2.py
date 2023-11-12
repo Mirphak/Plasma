@@ -283,8 +283,8 @@ def SendGameList(title, playerId=None):
     # Envoyer le ki-mail
     try:
         note = ptVaultTextNoteNode(0)
-        note.noteSetText(message)
-        note.noteSetTitle(title) 
+        note.setText(message)
+        note.setTitle(title) 
         note.sendTo(playerId)
         print("SendGameList : game list sent to #{}".format(playerId))
         return 1

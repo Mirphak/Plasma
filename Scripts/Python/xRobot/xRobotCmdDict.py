@@ -1017,7 +1017,7 @@ def Help(self, cFlags, args = []):
 #        agefolder = agefolderRef.getChild()
 #        if agefolder.getType() == PtVaultNodeTypes.kFolderNode:
 #            agefolder = agefolder.upcastToFolderNode()
-#            if agefolder.folderGetName() == 'Nexus':
+#            if agefolder.getName() == 'Nexus':
 #                journal = agefolder
 #                break
 
@@ -1076,8 +1076,8 @@ def Help(self, cFlags, args = []):
     # create the note
     try:
         helpNote = ptVaultTextNoteNode(0)
-        helpNote.setTextW(msg)
-        helpNote.setTitleW(title)
+        helpNote.setText(msg)
+        helpNote.setTitle(title)
         #BKCurrentContent = journal.addNode(helpNote)
         #journal.addNode(helpNote)
     except:

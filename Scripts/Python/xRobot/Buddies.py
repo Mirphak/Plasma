@@ -26,22 +26,22 @@ class ptVaultPlayerInfoListNode(ptVaultFolderNode):
         #Returns ptVaultNode if child node found matching template, or None#
         pass
 
-    def folderGetName(self):
+    def getName(self):
         #LEGACY
 Returns the folder's name#
         pass
 
-    def folderGetType(self):
+    def getType(self):
         #LEGACY
 Returns the folder type (of the standard folder types)#
         pass
 
-    def folderSetName(self,name):
+    def setName(self,name):
         #LEGACY
 Set the folder name#
         pass
 
-    def folderSetType(self,type):
+    def setType(self,type):
         #LEGACY
 Set the folder type#
         pass
@@ -280,8 +280,8 @@ def AddBud(idplayer):
     try:
         localPlayer = PtGetLocalPlayer()
         if idplayer != localPlayer.getPlayerID():
-            if not buddies.playerlistHasPlayer(idplayer):
-                buddies.playerlistAddPlayer(idplayer)
+            if not buddies.hasPlayer(idplayer):
+                buddies.addPlayer(idplayer)
                 return True
     except:
         return False

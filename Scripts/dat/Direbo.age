@@ -1,0 +1,9 @@
+StartDateTime=0000000000
+DayLength=24.000000
+MaxCapacity=50
+LingerTime=180
+SequencePrefix=64
+ReleaseVersion=0
+Page=DragonFly,2
+Page=RestAge,1
+Page=OceanRefl,3
