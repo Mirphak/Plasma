@@ -6,7 +6,7 @@
 from Plasma import *
 from PlasmaNetConstants import *
 
-from agm import *
+from .agm import *
 
 kHoodGuid = "6624fb8a-ebec-40ff-b1e2-4f51588e2db5"
 kPubGuid = "9420324e-11f8-41f9-b30b-c896171a8712"
