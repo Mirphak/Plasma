@@ -1102,7 +1102,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
     if (cmdParser.IsSpecified(kArgRenderer))
         gClient.SetRequestedRenderingBackend(ParseRendererArgument(cmdParser.GetString(kArgRenderer)));
 #endif
-    # GoMe : Force local python
+    // GoMe : Force local python
     gPythonLocal = true;
 
     plFileName serverIni = "server.ini";
