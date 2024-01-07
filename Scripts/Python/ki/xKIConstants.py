@@ -348,6 +348,7 @@ class kCommands:
         "/nexus" : "LinkToNexus",
         "/city" : "LinkToCity",
         "/pub" : "LinkToGoMePub",
+        "/kirel" : "LinkToKirel",
         "/hood" : "LinkToGoMeHood",
         "/bump" : "BumpGoMeHood",
         "/agm" : "ProcessAGM",

@@ -10,7 +10,7 @@ from PlasmaTypes import *
 
 import time
 
-kModerators = {"Claidi Song"}
+kModerators = {"Doobes", "GoMeDoobes", "Korov'ev", "Claidi Song"}
 
 # Chat log formatting.
 kHeader = """<html>

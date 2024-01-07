@@ -1663,6 +1663,12 @@ class CommandsProcessor:
         gome.LinkTo("GuildPub-Messengers", guid=gome.kPubGuid)
         self.chatMgr.DisplayStatusMessage("Linking to Guild of Messengers Pub...")
 
+    ## Links the player to Kirel.
+    def LinkToKirel(self, params):
+
+        gome.LinkTo("Neighborhood02", guid=gome.kKirelGuid)
+        self.chatMgr.DisplayStatusMessage("Linking to Kirel...")
+
     ## Links the player to the GoMe Hood if he is a member.
     def LinkToGoMeHood(self, params):
 
