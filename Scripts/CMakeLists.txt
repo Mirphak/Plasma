@@ -1,4 +1,5 @@
 file(GLOB_RECURSE GameScripts "${CMAKE_CURRENT_SOURCE_DIR}/Python/*.py")
+file(GLOB_RECURSE GameScriptsGames "${CMAKE_CURRENT_SOURCE_DIR}/Games/*.txt")
 file(GLOB_RECURSE GameSDL "${CMAKE_CURRENT_SOURCE_DIR}/SDL/*.sdl")
 file(GLOB_RECURSE GameData "${CMAKE_CURRENT_SOURCE_DIR}/dat/*.age" "${CMAKE_CURRENT_SOURCE_DIR}/dat/*.fni")
 
@@ -14,6 +15,11 @@ install(
     DIRECTORY "Python/"
     DESTINATION client/python
     FILES_MATCHING PATTERN "*.py"
+)
+install(
+    DIRECTORY "Games/"
+    DESTINATION client/games
+    FILES_MATCHING PATTERN "*.txt"
 )
 install(
     DIRECTORY "SDL/"
