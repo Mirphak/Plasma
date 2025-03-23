@@ -1,7 +1,7 @@
 # /*==LICENSE==*
 # 
 # CyanWorlds.com Engine - MMOG client, server and tools
-# Copyright (C) 2011  Cyan Worlds, Inc.
+# Copyright (C) 2011 Cyan Worlds, Inc.
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -10,14 +10,14 @@
 # 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# 
 # Additional permissions under GNU GPL version 3 section 7
-#
+# 
 # If you modify this Program, or any covered work, by linking or
 # combining it with any of RAD Game Tools Bink SDK, Autodesk 3ds Max SDK,
 # NVIDIA PhysX SDK, Microsoft DirectX SDK, OpenSSL library, Independent
@@ -40,22 +40,110 @@
 # 
 # *==LICENSE==*/
 #
-# State Description Language for EderDelin
+# State Description Language for the EderDelin
+
 
 STATEDESC EderDelin
 {
-    VERSION 8
+	VERSION 1
+
+#    VAR BOOL      kemoYeeshaPage03Vis[1]       DEFAULT=1   DEFAULTOPTION=VAULT
+
+}
+
+
+STATEDESC EderDelin
+{
+	VERSION 2
+
+    VAR STRING32  dlnBlueSpiralSolution[1]                 DISPLAYOPTION=hidden
+}
+
+
+STATEDESC EderDelin
+{
+	VERSION 3
+
+    VAR STRING32  dlnBlueSpiralSolution[1]                 DISPLAYOPTION=hidden
+    VAR STRING32  dlnBlueSpiralKey[1]                      DISPLAYOPTION=hidden
+}
+
+
+STATEDESC EderDelin
+{
+	VERSION 4
+
+    VAR STRING32  dlnBlueSpiralSolution[1]                 DISPLAYOPTION=hidden
+    VAR STRING32  dlnBlueSpiralKey[1]                      DISPLAYOPTION=hidden
+    VAR BOOL      dlnBlueSpiralRunning[1]      DEFAULT=0   DISPLAYOPTION=hidden
+    VAR INT       dlnBlueSpiralConsecutive[1]  DEFAULT=0   DISPLAYOPTION=hidden
+}
+
+
+STATEDESC EderDelin
+{
+	VERSION 5
 
 ## Vis items
-    VAR BOOL    dlnYeeshaPage21Vis[1]          DEFAULT=0                   DEFAULTOPTION=VAULT
-    VAR BOOL    dlnWinterVis[1]                DEFAULT=0                   DEFAULTOPTION=VAULT
-    VAR BOOL    dlnYeeshaPageBenchVis[1]       DEFAULT=0                   DEFAULTOPTION=VAULT
+    VAR BOOL    dlnYeeshaPage21Vis[1]      DEFAULT=0 DEFAULTOPTION=VAULT
 
 ## Blue Spiral stuff
-    VAR STRING32  dlnBlueSpiralSolution[1]                                 DEFAULTOPTION=hidden
-    VAR STRING32  dlnBlueSpiralKey[1]          DEFAULT=empty               DEFAULTOPTION=hidden
-    VAR BOOL      dlnBlueSpiralRunning[1]      DEFAULT=0                   DEFAULTOPTION=hidden
-    VAR INT       dlnBlueSpiralConsecutive[1]  DEFAULT=0                   DEFAULTOPTION=hidden
+    VAR STRING32  dlnBlueSpiralSolution[1]                 DISPLAYOPTION=hidden
+    VAR STRING32  dlnBlueSpiralKey[1]                      DISPLAYOPTION=hidden
+    VAR BOOL      dlnBlueSpiralRunning[1]      DEFAULT=0   DISPLAYOPTION=hidden
+    VAR INT       dlnBlueSpiralConsecutive[1]  DEFAULT=0   DISPLAYOPTION=hidden
+
+}
+
+
+STATEDESC EderDelin
+{
+	VERSION 6
+
+## Vis items
+    VAR BOOL    dlnYeeshaPage21Vis[1]		DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    dlnWinterVis[1]			DEFAULT=0 DEFAULTOPTION=VAULT
+
+## Blue Spiral stuff
+    VAR STRING32  dlnBlueSpiralSolution[1]                 DISPLAYOPTION=hidden
+    VAR STRING32  dlnBlueSpiralKey[1]                      DISPLAYOPTION=hidden
+    VAR BOOL      dlnBlueSpiralRunning[1]      DEFAULT=0   DISPLAYOPTION=hidden
+    VAR INT       dlnBlueSpiralConsecutive[1]  DEFAULT=0   DISPLAYOPTION=hidden
+
+}
+
+STATEDESC EderDelin
+{
+	VERSION 7
+
+## Vis items
+    VAR BOOL    dlnYeeshaPage21Vis[1]		DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    dlnWinterVis[1]			DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    dlnYeeshaPageBenchVis[1]	DEFAULT=0 DEFAULTOPTION=VAULT
+
+## Blue Spiral stuff
+    VAR STRING32  dlnBlueSpiralSolution[1]                 DISPLAYOPTION=hidden
+    VAR STRING32  dlnBlueSpiralKey[1]                      DISPLAYOPTION=hidden
+    VAR BOOL      dlnBlueSpiralRunning[1]      DEFAULT=0   DISPLAYOPTION=hidden
+    VAR INT       dlnBlueSpiralConsecutive[1]  DEFAULT=0   DISPLAYOPTION=hidden
+
+}
+
+STATEDESC EderDelin
+{
+	VERSION 8
+
+## Vis items
+    VAR BOOL    dlnYeeshaPage21Vis[1]		   DEFAULT=0                   DEFAULTOPTION=VAULT
+    VAR BOOL    dlnWinterVis[1]			       DEFAULT=0                   DEFAULTOPTION=VAULT
+    VAR BOOL    dlnYeeshaPageBenchVis[1]	   DEFAULT=0                   DEFAULTOPTION=VAULT
+
+## Blue Spiral stuff
+    VAR STRING32  dlnBlueSpiralSolution[1]                                 DISPLAYOPTION=hidden
+    VAR STRING32  dlnBlueSpiralKey[1]          DEFAULT=empty               DISPLAYOPTION=hidden
+    VAR BOOL      dlnBlueSpiralRunning[1]      DEFAULT=0                   DISPLAYOPTION=hidden
+    VAR INT       dlnBlueSpiralConsecutive[1]  DEFAULT=0                   DISPLAYOPTION=hidden
+
 }
 
 

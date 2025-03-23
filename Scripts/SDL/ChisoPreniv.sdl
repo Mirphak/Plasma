@@ -54,11 +54,11 @@ STATEDESC ChisoPreniv
     VERSION 1
 
 # Linking Book Visibility SDL Values
-    VAR BOOL    BookVis01[1]    DEFAULT=0 DEFAULTOPTION=VAULT    # Tre'bivdil
-    VAR BOOL    BookVis02[1]    DEFAULT=0 DEFAULTOPTION=VAULT    # Vothol Gallery
+    VAR BOOL    BookVis01[1]    DEFAULT=0 DEFAULTOPTION=VAULT    # Mirtahm
+    VAR BOOL    BookVis02[1]    DEFAULT=0 DEFAULTOPTION=VAULT    # Varia
     VAR BOOL    BookVis03[1]    DEFAULT=0 DEFAULTOPTION=VAULT    # Tiam
-    VAR BOOL    BookVis04[1]    DEFAULT=0 DEFAULTOPTION=VAULT    # Fehnir's House
-    VAR BOOL    BookVis05[1]    DEFAULT=0 DEFAULTOPTION=VAULT    # Empty
+    VAR BOOL    BookVis04[1]    DEFAULT=0 DEFAULTOPTION=VAULT    # Elonin
+    VAR BOOL    BookVis05[1]    DEFAULT=0 DEFAULTOPTION=VAULT    # Fehnir's House
     VAR BOOL    BookVis06[1]    DEFAULT=0 DEFAULTOPTION=VAULT    # Empty
     VAR BOOL    BookVis07[1]    DEFAULT=0 DEFAULTOPTION=VAULT    # Serene
     VAR BOOL    BookVis08[1]    DEFAULT=1 DEFAULTOPTION=VAULT    # Veelay Tsahvahn
@@ -75,13 +75,13 @@ STATEDESC ChisoPreniv
     VAR BOOL    BookVis02[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Vothol Gallery
     VAR BOOL    BookVis03[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Tiam
     VAR BOOL    BookVis04[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Elonin
-    VAR BOOL    BookVis05[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Empty
+    VAR BOOL    BookVis05[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Eder Naybree
     VAR BOOL    BookVis06[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Fahets-Highgarden
     VAR BOOL    BookVis07[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Serene
     VAR BOOL    BookVis08[1]                    DEFAULT=1 DEFAULTOPTION=VAULT    # Veelay Tsahvahn
     VAR BOOL    BookVis09[1]                    DEFAULT=1 DEFAULTOPTION=VAULT    # GoMe Pub Ae'gura
 # Hidden Door Variable
-    VAR BOOL    chisoDoorStatClosed[1]          DEFAULT=0
+    VAR BOOL    chisoDoorStatClosed[1]               DEFAULT=0
 # Naybree Book Show/Hide
     VAR BOOL    chisoBookVisNaybree[1]          DEFAULT=0 DEFAULTOPTION=VAULT 
 
@@ -92,21 +92,21 @@ STATEDESC ChisoPreniv
     VERSION 3
 
 # Linking Book Visibility SDL Values
-    VAR BOOL    BookVis01[1]            DEFAULT=0 DEFAULTOPTION=VAULT    # Tre'bivdil
-    VAR BOOL    BookVis02[1]            DEFAULT=0 DEFAULTOPTION=VAULT    # Vothol Gallery
-    VAR BOOL    BookVis03[1]            DEFAULT=0 DEFAULTOPTION=VAULT    # Tiam
-    VAR BOOL    BookVis04[1]            DEFAULT=0 DEFAULTOPTION=VAULT    # Elonin
-    VAR BOOL    BookVis05[1]            DEFAULT=0 DEFAULTOPTION=VAULT    # Fehnir's House
-    VAR BOOL    BookVis06[1]            DEFAULT=0 DEFAULTOPTION=VAULT    # Fahets-Highgarden
-    VAR BOOL    BookVis07[1]            DEFAULT=0 DEFAULTOPTION=VAULT    # Serene
-    VAR BOOL    BookVis08[1]            DEFAULT=1 DEFAULTOPTION=VAULT    # Veelay Tsahvahn
-    VAR BOOL    BookVis09[1]            DEFAULT=1 DEFAULTOPTION=VAULT    # New Messengers Pub
+    VAR BOOL    BookVis01[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Tre'bivdil
+    VAR BOOL    BookVis02[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Vothol Gallery
+    VAR BOOL    BookVis03[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Tiam
+    VAR BOOL    BookVis04[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Elonin
+    VAR BOOL    BookVis05[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Eder Naybree
+    VAR BOOL    BookVis06[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Fahets-Highgarden
+    VAR BOOL    BookVis07[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Serene
+    VAR BOOL    BookVis08[1]                    DEFAULT=1 DEFAULTOPTION=VAULT    # Empty
+    VAR BOOL    BookVis09[1]                    DEFAULT=1 DEFAULTOPTION=VAULT    # Empty
 # Hidden Door Variable
-    VAR BOOL    chisoDoorStatClosed[1]  DEFAULT=0
+    VAR BOOL    chisoDoorStatClosed[1]          DEFAULT=0
 # Naybree Book Show/Hide
-    VAR BOOL    chisoBookVisNaybree[1]  DEFAULT=0 DEFAULTOPTION=VAULT
-# Podium Speeches
-    VAR BYTE    chisoPodiumSpeech[1]    DEFAULT=0
+    VAR BOOL    chisoBookVisNaybree[1]          DEFAULT=0 DEFAULTOPTION=VAULT
+# Podium Status
+    VAR BYTE    chisoPodiumSpeech[1]            DEFAULT=0
 
 }
 
@@ -115,15 +115,15 @@ STATEDESC ChisoPreniv
     VERSION 4
 
 # Linking Book Visibility SDL Values
-    VAR BOOL    BookVis01[1]                DEFAULT=0 DEFAULTOPTION=VAULT    # Tre'bivdil
-    VAR BOOL    BookVis02[1]                DEFAULT=0 DEFAULTOPTION=VAULT    # Vothol Gallery
+    VAR BOOL    BookVis01[1]                DEFAULT=0 DEFAULTOPTION=VAULT    # Mirtahm
+    VAR BOOL    BookVis02[1]                DEFAULT=0 DEFAULTOPTION=VAULT    # Explorer's Emporium
     VAR BOOL    BookVis03[1]                DEFAULT=0 DEFAULTOPTION=VAULT    # Tiam
     VAR BOOL    BookVis04[1]                DEFAULT=0 DEFAULTOPTION=VAULT    # Elonin
     VAR BOOL    BookVis05[1]                DEFAULT=0 DEFAULTOPTION=VAULT    # Fehnir's House
     VAR BOOL    BookVis06[1]                DEFAULT=0 DEFAULTOPTION=VAULT    # Fahets-Highgarden
     VAR BOOL    BookVis07[1]                DEFAULT=0 DEFAULTOPTION=VAULT    # Serene
     VAR BOOL    BookVis08[1]                DEFAULT=1 DEFAULTOPTION=VAULT    # Kalamee
-    VAR BOOL    BookVis09[1]                DEFAULT=1 DEFAULTOPTION=VAULT    # Empty
+    VAR BOOL    BookVis09[1]                DEFAULT=1 DEFAULTOPTION=VAULT    # D'ni - Memorial Island
 # Hidden Door Variable
     VAR BOOL    chisoDoorStatClosed[1]      DEFAULT=0
 # Naybree Book Show/Hide
@@ -134,4 +134,50 @@ STATEDESC ChisoPreniv
     VAR BOOL    chisoKalameeShirtVis[1]     DEFAULT=0 DEFAULTOPTION=VAULT
     VAR BOOL    chisoKalameeShirtClick[1]   DEFAULT=1 DEFAULTOPTION=VAULT
 
+}
+
+STATEDESC ChisoPreniv
+{
+    VERSION 5
+
+# Linking Book Visibility SDL Values
+    VAR BOOL    BookVis01[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Explorers' Emporium
+    VAR BOOL    BookVis02[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Vothol Gallery
+    VAR BOOL    BookVis03[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Tiam
+    VAR BOOL    BookVis04[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Elonin
+    VAR BOOL    BookVis05[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Eder Naybree
+    VAR BOOL    BookVis06[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Fahets-Highgarden
+    VAR BOOL    BookVis07[1]                    DEFAULT=0 DEFAULTOPTION=VAULT    # Tre'bivdil
+    VAR BOOL    BookVis08[1]                    DEFAULT=1 DEFAULTOPTION=VAULT    # Kalamee
+    VAR BOOL    BookVis09[1]                    DEFAULT=1 DEFAULTOPTION=VAULT    # Memorial Island
+# Hidden Door Variable
+    VAR BOOL    chisoDoorStatClosed[1]          DEFAULT=0
+# Naybree Book Show/Hide
+    VAR BOOL    chisoBookVisNaybree[1]          DEFAULT=0 DEFAULTOPTION=VAULT
+# Podium Speeches
+    VAR BYTE    chisoPodiumSpeech[1]            DEFAULT=0
+# Takable Clothing
+    VAR BOOL    chisoKalameeShirtVis[1]         DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    chisoKalameeShirtClick[1]       DEFAULT=1 DEFAULTOPTION=VAULT
+    VAR BOOL    chisoExpEmpShirtVis[1]          DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    chisoExpEmpShirtClick[1]        DEFAULT=1 DEFAULTOPTION=VAULT
+# Trigon Bracelet
+    VAR BOOL    chisoTrigonStuffVis[1]          DEFAULT=0 DEFAULTOPTION=VAULT
+# Expansion Variables
+## Doors
+    VAR BOOL    chisoLowerDoorClosed[1]         DEFAULT=0
+    VAR BOOL    chisoBlastDoor01Closed[1]       DEFAULT=0
+    VAR BOOL    chisoBlastDoor02Closed[1]       DEFAULT=0
+## Battle Damage
+    VAR BYTE    chisoBattleDamageStatus[1]      DEFAULT=0 DEFAULTOPTION=VAULT
+###                 0 - Undamaged
+###                 1 - Damaged
+###                 2 - Repaired
+###                 3 - Opened
+## Door Buttons On/Off
+    VAR BOOL    chisoLowerDoorBtnEnable[1]      DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    chisoBlastDoor01BtnEnable[1]    DEFAULT=0
+    VAR BOOL    chisoBlastDoor02BtnEnable[1]    DEFAULT=0
+## Power Enable
+    VAR BOOL    chisoPowerEnabled[1]            DEFAULT=0
 }

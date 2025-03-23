@@ -1,7 +1,7 @@
 # /*==LICENSE==*
 # 
 # CyanWorlds.com Engine - MMOG client, server and tools
-# Copyright (C) 2011  Cyan Worlds, Inc.
+# Copyright (C) 2011 Cyan Worlds, Inc.
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -10,14 +10,14 @@
 # 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# 
 # Additional permissions under GNU GPL version 3 section 7
-#
+# 
 # If you modify this Program, or any covered work, by linking or
 # combining it with any of RAD Game Tools Bink SDK, Autodesk 3ds Max SDK,
 # NVIDIA PhysX SDK, Microsoft DirectX SDK, OpenSSL library, Independent
@@ -51,13 +51,40 @@
 
 STATEDESC BaronCityOffice
 {
-    VERSION 7
+    VERSION 5
 
-    # Boolean variables
+# Boolean variables
     VAR BOOL    tldnTreasureBook03Vis[1]    DEFAULT=1 DEFAULTOPTION=VAULT
     VAR BOOL    tldnJourneyCloth03Vis[1]    DEFAULT=1 DEFAULTOPTION=VAULT
-    VAR BOOL    tldnRopeBridgeFromBCOVis[1] DEFAULT=0 DEFAULTOPTION=VAULT
-    VAR BOOL    bcoGZMarkerVis[1]           DEFAULT=0 DEFAULTOPTION=VAULT
-    VAR BOOL    bcoGZBeamVis[1]             DEFAULT=0 DEFAULTOPTION=VAULT
-    VAR BOOL    bcoChristmasVis[1]          DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    tldnRopeBridgeFromBCOVis[1]    DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    bcoGZMarkerVis[1]    DEFAULT=0 DEFAULTOPTION=VAULT
+
+}
+
+STATEDESC BaronCityOffice
+{
+    VERSION 6
+
+# Boolean variables
+    VAR BOOL    tldnTreasureBook03Vis[1]    DEFAULT=1 DEFAULTOPTION=VAULT
+    VAR BOOL    tldnJourneyCloth03Vis[1]    DEFAULT=1 DEFAULTOPTION=VAULT
+    VAR BOOL    tldnRopeBridgeFromBCOVis[1]    DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    bcoGZMarkerVis[1]    DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    bcoChristmasVis[1]    DEFAULT=0 DEFAULTOPTION=VAULT
+
+}
+
+
+STATEDESC BaronCityOffice
+{
+    VERSION 7
+
+# Boolean variables
+    VAR BOOL    tldnTreasureBook03Vis[1]    DEFAULT=1 DEFAULTOPTION=VAULT
+    VAR BOOL    tldnJourneyCloth03Vis[1]    DEFAULT=1 DEFAULTOPTION=VAULT
+    VAR BOOL    tldnRopeBridgeFromBCOVis[1]    DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    bcoGZMarkerVis[1]    DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    bcoGZBeamVis[1]    DEFAULT=0 DEFAULTOPTION=VAULT
+    VAR BOOL    bcoChristmasVis[1]    DEFAULT=0 DEFAULTOPTION=VAULT
+
 }
