@@ -155,6 +155,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pyJournalBook.h"
 
 #include "pyKeyMap.h"
+#include "pyImageLibMod.h"
+#include "pyLayer.h"
 #include "pyStream.h"
 
 #include "pyMoviePlayer.h"
@@ -930,6 +932,9 @@ void PythonInterface::initPython()
 
     // Initialize built-in Plasma modules. For some reason, when using the append-inittab thingy,
     // we get complaints about these modules being leaked :(
+    // Note: If you add a new built-in module,
+    // please add it to the list in Scripts/Python/plasma/generate_stubs.py
+    // so that a stub will be generated for the new module.
     IInitBuiltinModule("Plasma", "Plasma 2.0 Game Library", dbgLog, AddPlasmaClasses, AddPlasmaMethods);
     IInitBuiltinModule("PlasmaConstants", "Plasma 2.0 Constants", dbgLog, AddPlasmaConstantsClasses);
     IInitBuiltinModule("PlasmaGame", "Plasma 2.0 GameMgr Library", dbgLog, AddPlasmaGameClasses);
@@ -1037,6 +1042,7 @@ void PythonInterface::AddPlasmaMethods(PyObject* m)
     pyGUIDialog::AddPlasmaMethods(m);
     pyImage::AddPlasmaMethods(m);
     pyJournalBook::AddPlasmaMethods(m);
+    pyLayer::AddPlasmaMethods(m);
     pySDLModifier::AddPlasmaMethods(m);
     pySpawnPointInfo::AddPlasmaMethods(m);
 }
@@ -1079,8 +1085,10 @@ void PythonInterface::AddPlasmaClasses(PyObject* plasmaMod)
     pyDniInfoSource::AddPlasmaClasses(plasmaMod);
     pyDynamicText::AddPlasmaClasses(plasmaMod);
     pyImage::AddPlasmaClasses(plasmaMod);
+    pyImageLibMod::AddPlasmaClasses(plasmaMod);
     pyJournalBook::AddPlasmaClasses(plasmaMod);
     pyKeyMap::AddPlasmaClasses(plasmaMod);
+    pyLayer::AddPlasmaClasses(plasmaMod);
     pyMarkerMgr::AddPlasmaClasses(plasmaMod);
     pyMoviePlayer::AddPlasmaClasses(plasmaMod);
     pyNetLinkingMgr::AddPlasmaClasses(plasmaMod);

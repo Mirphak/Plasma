@@ -6,6 +6,7 @@ set(CoreLib_SOURCES
     hsExceptions.cpp
     hsExceptionStack.cpp
     hsFastMath.cpp
+    hsFILELock.cpp
     hsGeometry3.cpp
     hsMatrix33.cpp
     hsMatrix44.cpp
@@ -43,6 +44,7 @@ set(CoreLib_HEADERS
     hsExceptions.h
     hsExceptionStack.h
     hsFastMath.h
+    hsFILELock.h
     hsGeometry3.h
     hsLockGuard.h
     hsMatrix44.h
@@ -70,6 +72,7 @@ set(CoreLib_HEADERS
 )
 
 plasma_library(CoreLib
+    FOLDER CoreLib
     SOURCES ${CoreLib_SOURCES} ${CoreLib_HEADERS}
     PRECOMPILED_HEADERS _CoreLibPch.h
 )
@@ -111,4 +114,5 @@ add_custom_target(pcBuildInfo
     COMMAND ${BUILD_INFO_COMMAND}
     BYPRODUCTS "${BUILD_INFO_FILE}"
 )
+set_target_properties(pcBuildInfo PROPERTIES FOLDER CoreLib)
 add_dependencies(CoreLib pcBuildInfo)

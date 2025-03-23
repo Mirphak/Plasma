@@ -1254,6 +1254,7 @@ enum {
     kNumPerf
 };
 
+static NetMsgChannel* s_channel;
 static bool                         s_running;
 static std::recursive_mutex         s_critsect;
 static CliAuConn* s_conn = nullptr;
@@ -1378,7 +1379,7 @@ bool CliAuConn::AsyncNotifySocketConnectSuccess(AsyncSocket sock, const plNetAdd
     TransferRef("Connecting", "Connected");
     cli = NetCliConnectAccept(
         sock,
-        kNetProtocolCli2Auth,
+        s_channel,
         false,
         [this](ENetError error) {
             if (IS_NET_SUCCESS(error)) {
@@ -4577,14 +4578,12 @@ void NetAuthTrans::ReleaseConn () {
 //============================================================================
 void AuthInitialize () {
     s_running = true;
-    NetMsgProtocolRegister(
+    ASSERT(!s_channel);
+    s_channel = NetMsgChannelCreate(
         kNetProtocolCli2Auth,
-        false,
         s_send, std::size(s_send),
         s_recv, std::size(s_recv),
-        kAuthDhGValue,
-        plBigNum(sizeof(kAuthDhXData), kAuthDhXData),
-        plBigNum(sizeof(kAuthDhNData), kAuthDhNData)
+        gNetAuthDhConstants
     );
 }
 
@@ -4604,11 +4603,11 @@ void AuthDestroy (bool wait) {
     NetTransCancelByProtocol(
         kNetProtocolCli2Auth,
         kNetErrRemoteShutdown
-    );    
-    NetMsgProtocolDestroy(
-        kNetProtocolCli2Auth,
-        false
     );
+    if (s_channel != nullptr) {
+        NetMsgChannelDelete(s_channel);
+        s_channel = nullptr;
+    }
 
     {
         hsLockGuard(s_critsect);

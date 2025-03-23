@@ -1,5 +1,9 @@
 include(FetchContent)
 
+if(POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
 FetchContent_Declare(
     metalcpp
     URL_HASH_SHA256 0afd87ca851465191ae4e3980aa036c7e9e02fe32e7c760ac1a74244aae6023b
@@ -11,6 +15,7 @@ FetchContent_MakeAvailable(metalcpp)
 set(pfMetalPipeline_SOURCES
     plMetalDevice.cpp
     plMetalDeviceRefs.cpp
+    plMetalEnumerate.cpp
     plMetalMaterialShaderRef.cpp
     plMetalPipeline.cpp
     plMetalPipelineState.cpp
@@ -19,8 +24,8 @@ set(pfMetalPipeline_SOURCES
     plMetalFragmentShader.cpp
     plMetalVertexShader.cpp
     plMetalTextFont.cpp
-    plMetalEnumerate.mm
     plMetalDevicePerformanceShaders.mm
+    plMetalDeviceLibraryLoader.mm
 )
 
 set(pfMetalPipeline_HEADERS
@@ -39,27 +44,6 @@ set(pfMetalPipeline_HEADERS
     pfMetalPipelineCreatable.h
 )
 
-plasma_library(pfMetalPipeline SOURCES ${pfMetalPipeline_SOURCES} ${pfMetalPipeline_HEADERS})
-target_link_libraries(pfMetalPipeline
-    PUBLIC
-        CoreLib
-        pnNucleusInc
-        plPipeline
-        "-framework Metal"
-        "-framework MetalPerformanceShaders"
-    PRIVATE
-        plStatusLog
-    INTERFACE
-        pnFactory
-)
-
-target_include_directories(pfMetalPipeline PUBLIC ${metalcpp_SOURCE_DIR})
-target_include_directories(pfMetalPipeline PUBLIC "ShaderSrc")
-
-source_group("Source Files" FILES ${pfMetalPipeline_SOURCES})
-source_group("Header Files" FILES ${pfMetalPipeline_HEADERS})
-
-add_library(pfMetalPipelineShaders INTERFACE)
 set(pfMetalPipeline_SHADERS
     ShaderSrc/FixedPipelineShaders.metal
     ShaderSrc/PlateShaders.metal
@@ -75,8 +59,58 @@ set(pfMetalPipeline_SHADERS
     ShaderSrc/GammaCorrection.metal
     ShaderSrc/TextFontShader.metal
 )
-set_source_files_properties(${pfMetalPipeline_SHADERS} TARGET_DIRECTORY plClient PROPERTIES LANGUAGE METAL)
-# source group does not work with an interface library in Xcode, but maybe someday...
-source_group("Metal Shaders" FILES ${pfMetalPipeline_SHADERS})
 
-target_sources(pfMetalPipelineShaders INTERFACE ${pfMetalPipeline_SHADERS})
+plasma_library(pfMetalPipeline
+    FOLDER FeatureLib
+    SOURCES ${pfMetalPipeline_SOURCES} ${pfMetalPipeline_HEADERS}
+)
+
+target_link_libraries(pfMetalPipeline
+    PUBLIC
+        CoreLib
+        pnNucleusInc
+        plPipeline
+        Metal::Metal
+        "-framework MetalPerformanceShaders"
+    PRIVATE
+        plStatusLog
+    INTERFACE
+        pnFactory
+)
+add_dependencies(
+    pfMetalPipeline
+    pfMetalPipelineShadersMSL21
+    pfMetalPipelineShadersMSL23
+)
+
+target_include_directories(pfMetalPipeline PUBLIC ${metalcpp_SOURCE_DIR})
+target_include_directories(pfMetalPipeline PUBLIC "ShaderSrc")
+
+source_group("Source Files" FILES ${pfMetalPipeline_SOURCES})
+source_group("Header Files" FILES ${pfMetalPipeline_HEADERS})
+
+# All supported Macs for Plasma/Metal support MSL 2.1
+add_metal_shader_library(pfMetalPipelineShadersMSL21
+    STANDARD macos-metal2.1
+    ${pfMetalPipeline_SHADERS}
+)
+target_include_directories(pfMetalPipelineShadersMSL21
+    PRIVATE
+    $<TARGET_PROPERTY:pnNucleusInc,INTERFACE_INCLUDE_DIRECTORIES>
+)
+set_target_properties(pfMetalPipelineShadersMSL21 PROPERTIES
+    FOLDER FeatureLib
+)
+
+# Build a 2.3 varient for macOS 11 and/or Apple Silicon specific features
+add_metal_shader_library(pfMetalPipelineShadersMSL23
+    STANDARD macos-metal2.3
+    ${pfMetalPipeline_SHADERS}
+)
+target_include_directories(pfMetalPipelineShadersMSL23
+    PRIVATE
+    $<TARGET_PROPERTY:pnNucleusInc,INTERFACE_INCLUDE_DIRECTORIES>
+)
+set_target_properties(pfMetalPipelineShadersMSL23 PROPERTIES
+    FOLDER FeatureLib
+)

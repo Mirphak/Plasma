@@ -40,10 +40,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
-#include "pyKey.h"
-
 #include "pyCluster.h"
+
+#include "pyGlueHelpers.h"
+#include "pyKey.h"
 
 // glue functions
 PYTHON_CLASS_DEFINITION(ptCluster, pyCluster);
@@ -82,11 +82,11 @@ PYTHON_METHOD_DEFINITION(ptCluster, setVisible, args)
 }
 
 PYTHON_START_METHODS_TABLE(ptCluster)
-    PYTHON_METHOD(ptCluster, setVisible, "Params:visible\nShows or hides the cluster object"),
+    PYTHON_METHOD(ptCluster, setVisible, "Params: visible\nShows or hides the cluster object"),
 PYTHON_END_METHODS_TABLE;
 
 // Type structure definition
-PLASMA_DEFAULT_TYPE(ptCluster, "Params:key\nCreates a new ptCluster");
+PLASMA_DEFAULT_TYPE(ptCluster, "Params: key\nCreates a new ptCluster");
 
 // required functions for PyObject interoperability
 PyObject *pyCluster::New(plKey key)

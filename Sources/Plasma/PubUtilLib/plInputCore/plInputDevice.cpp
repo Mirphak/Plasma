@@ -186,6 +186,8 @@ void plKeyboardDevice::HandleKeyEvent(plKeyDef key, bool bKeyDown, bool bKeyRepe
         {
 #ifdef HS_BUILD_FOR_WIN32
             fCapsLockLock = (GetKeyState(KEY_CAPSLOCK) & 1) == 1;
+#else
+            fCapsLockLock = bKeyDown;
 #endif
             plAvatarInputInterface::GetInstance()->ForceAlwaysRun(fCapsLockLock);
         }
@@ -490,7 +492,7 @@ bool plMouseDevice::MsgReceive(plMessage* msg)
             fXPos = pXMsg->fX;
 
         SetCursorX(fXPos);
-        fWXPos = pXMsg->fWx * fScale;
+        fWXPos = pXMsg->fWx;
         return true;
     }
 
@@ -527,7 +529,7 @@ bool plMouseDevice::MsgReceive(plMessage* msg)
         else
             fYPos = pYMsg->fY;
 
-        fWYPos = pYMsg->fWy * fScale;
+        fWYPos = pYMsg->fWy;
         SetCursorY(fYPos);
         
         return true;

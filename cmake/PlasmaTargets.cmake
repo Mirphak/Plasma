@@ -9,11 +9,17 @@ cmake_dependent_option(
     OFF
 )
 
+# CMake 3.28.2 breaks precompiled headers and unity builds.
+# Debounce this known bad combination.
+if(CMAKE_VERSION VERSION_EQUAL 3.28.2 AND PLASMA_USE_PCH AND CMAKE_GENERATOR MATCHES Ninja|Makefiles)
+    set(_UNITY_BROKEN TRUE)
+endif()
+
 cmake_dependent_option(
     PLASMA_UNITY_BUILD
     "Enable unity build?"
     ON
-    "CMAKE_VERSION VERSION_GREATER_EQUAL 3.16;ALLOW_BUILD_OPTIMIZATIONS"
+    "CMAKE_VERSION VERSION_GREATER_EQUAL 3.16;ALLOW_BUILD_OPTIMIZATIONS;NOT _UNITY_BROKEN"
     OFF
 )
 
@@ -37,7 +43,7 @@ endif()
 function(plasma_executable TARGET)
     cmake_parse_arguments(PARSE_ARGV 1 _pex
         "WIN32;CLIENT;TOOL;QT_GUI;EXCLUDE_FROM_ALL;NO_SANITIZE;INSTALL_PDB"
-        ""
+        "FOLDER"
         "SOURCES"
     )
 
@@ -52,6 +58,10 @@ function(plasma_executable TARGET)
     endif()
     add_executable(${TARGET} ${addexe_args} ${_pex_SOURCES})
     set_target_properties(${TARGET} PROPERTIES XCODE_GENERATE_SCHEME TRUE)
+
+    if(_pex_FOLDER)
+        set_target_properties(${TARGET} PROPERTIES FOLDER ${_pex_FOLDER})
+    endif()
 
     if(_pex_CLIENT)
         set(install_destination client)
@@ -141,7 +151,7 @@ endfunction()
 function(plasma_library TARGET)
     cmake_parse_arguments(PARSE_ARGV 1 _plib
         "UNITY_BUILD;OBJECT;SHARED;NO_SANITIZE"
-        ""
+        "FOLDER"
         "PRECOMPILED_HEADERS;SOURCES"
     )
 
@@ -158,6 +168,10 @@ function(plasma_library TARGET)
     endif()
     add_library(${TARGET} ${libtype} ${_plib_SOURCES})
 
+    if(_plib_FOLDER)
+        set_target_properties(${TARGET} PROPERTIES FOLDER ${_plib_FOLDER})
+    endif()
+
     if(PLASMA_USE_PCH AND _plib_PRECOMPILED_HEADERS)
         target_precompile_headers(${TARGET} PRIVATE ${_plib_PRECOMPILED_HEADERS})
     endif()
@@ -172,7 +186,7 @@ function(plasma_library TARGET)
 endfunction()
 
 function(plasma_test TARGET)
-    plasma_executable(${TARGET} NO_SANITIZE ${ARGN})
+    plasma_executable(${TARGET} NO_SANITIZE FOLDER Tests ${ARGN})
     add_test(NAME ${TARGET} COMMAND ${TARGET})
     add_dependencies(check ${TARGET})
 endfunction()

@@ -2374,6 +2374,9 @@ void plMetalPipeline::IEnableLight(size_t i, plLightInfo* light)
     plDirectionalLightInfo* dirLight = nullptr;
     plOmniLightInfo*        omniLight = nullptr;
     plSpotLightInfo*        spotLight = nullptr;
+    
+    constexpr float         kMaxRange = 32767.f;
+    fLights.lampSources[i].range = kMaxRange;
 
     if ((dirLight = plDirectionalLightInfo::ConvertNoRef(light)) != nullptr) {
         hsVector3 lightDir = dirLight->GetWorldDirection();
@@ -2383,15 +2386,18 @@ void plMetalPipeline::IEnableLight(size_t i, plLightInfo* light)
         fLights.lampSources[i].constAtten = 1.0f;
         fLights.lampSources[i].linAtten = 0.0f;
         fLights.lampSources[i].quadAtten = 0.0f;
+
     } else if ((omniLight = plOmniLightInfo::ConvertNoRef(light)) != nullptr) {
         hsPoint3 pos = omniLight->GetWorldPosition();
         fLights.lampSources[i].position = {pos.fX, pos.fY, pos.fZ, 1.0};
 
-        // TODO: Maximum Range
-
         fLights.lampSources[i].constAtten = omniLight->GetConstantAttenuation();
         fLights.lampSources[i].linAtten = omniLight->GetLinearAttenuation();
         fLights.lampSources[i].quadAtten = omniLight->GetQuadraticAttenuation();
+
+        if (omniLight->GetRadius() != 0.f) {
+            fLights.lampSources[i].range = omniLight->GetRadius();
+        }
 
         if (!omniLight->GetProjection() && (spotLight = plSpotLightInfo::ConvertNoRef(omniLight)) != nullptr) {
             hsVector3 lightDir = spotLight->GetWorldDirection();
@@ -2744,7 +2750,7 @@ void plMetalPipeline::IPreprocessAvatarTextures()
             // But that hash map assumes that it follows the vertex arrangement of the models.
             // After a refactor, this function creation should go there.
             MTL::RenderPipelineDescriptor* descriptor = MTL::RenderPipelineDescriptor::alloc()->init()->autorelease();
-            MTL::Library*                  library = fDevice.fMetalDevice->newDefaultLibrary()->autorelease();
+            MTL::Library*                  library = fDevice.GetShaderLibrary();
 
             MTL::Function* vertFunction = library->newFunction(MTLSTR("PreprocessAvatarVertexShader"))->autorelease();
             MTL::Function* fragFunction = library->newFunction(MTLSTR("PreprocessAvatarFragmentShader"))->autorelease();
@@ -3195,9 +3201,6 @@ bool plMetalPipeline::IPushShadowCastState(plShadowSlave* slave)
     // map. This just goes into a plViewTransform, we translate that into D3D state ourselves below.
     if (!slave->SetupViewTransform(this))
         return false;
-
-    // Set texture to U_LUT
-    fCurrentRenderPassUniforms->specularSrc = 0.0;
 
     // if( !ref->fTexture )
     //{
@@ -3753,6 +3756,7 @@ void plMetalPipeline::IRenderShadowsOntoSpan(const plRenderPrimFunc& render, con
             // The shadow light isn't used in generating the shadow map, it's used
             // in projecting the shadow map onto the scene.
             plShadowState shadowState;
+            shadowState.opacity = first ? mat->GetLayer(0)->GetOpacity() : 1.f;
             ISetupShadowState(fShadows[i], shadowState);
 
             struct plMetalFragmentShaderDescription passDescription{};
@@ -3840,9 +3844,6 @@ void plMetalPipeline::ISetupShadowRcvTextureStages(hsGMaterial* mat)
     // same one.
     fForceMatHandle = true;
 
-    // Set the D3D lighting/material model
-    ISetShadowLightState(mat);
-
     // Zbuffering on read-only
 
     if (fState.fCurrentDepthStencilState != fDevice.fNoZWriteStencilState) {
@@ -3877,26 +3878,6 @@ void plMetalPipeline::ISetupShadowRcvTextureStages(hsGMaterial* mat)
     }
 
     fDevice.CurrentRenderCommandEncoder()->setFragmentBytes(&layerIndex, sizeof(int), FragmentShaderArgumentShadowCastAlphaSrc);
-}
-
-// ISetShadowLightState //////////////////////////////////////////////////////////////////
-// Set the D3D lighting/material model for projecting the shadow map onto this material.
-void plMetalPipeline::ISetShadowLightState(hsGMaterial* mat)
-{
-    fCurrLightingMethod = plSpan::kLiteShadow;
-
-    if (mat && mat->GetNumLayers() && mat->GetLayer(0))
-        fCurrentRenderPassUniforms->diffuseCol.r = fCurrentRenderPassUniforms->diffuseCol.g = fCurrentRenderPassUniforms->diffuseCol.b = mat->GetLayer(0)->GetOpacity();
-    else
-        fCurrentRenderPassUniforms->diffuseCol.r = fCurrentRenderPassUniforms->diffuseCol.g = fCurrentRenderPassUniforms->diffuseCol.b = 1.f;
-    fCurrentRenderPassUniforms->diffuseCol.a = 1.f;
-
-    fCurrentRenderPassUniforms->diffuseSrc = 1.0f;
-    fCurrentRenderPassUniforms->emissiveSrc = 1.0f;
-    fCurrentRenderPassUniforms->emissiveCol = 0.0f;
-    fCurrentRenderPassUniforms->specularSrc = 0.0f;
-    fCurrentRenderPassUniforms->ambientSrc = 0.0f;
-    fCurrentRenderPassUniforms->globalAmb = 0.0f;
 }
 
 // IDisableLightsForShadow ///////////////////////////////////////////////////////////

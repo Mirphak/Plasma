@@ -41,6 +41,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include <cmath>
+#include <string_theory/format>
 #include "hsGMaterial.h"
 
 #include "HeadSpin.h"
@@ -262,7 +263,7 @@ void hsGMaterial::Read(hsStream *stream, hsResMgr *group)
 
 void hsGMaterial::Eval(double secs, uint32_t frame)
 {
-    plProfile_BeginLap(MaterialAnims, GetKeyName().c_str());
+    plProfile_BeginLap(MaterialAnims, GetKeyName());
 
     for (size_t i = 0; i < GetNumLayers(); i++)
     {
@@ -275,7 +276,7 @@ void hsGMaterial::Eval(double secs, uint32_t frame)
             fPiggyBacks[i]->Eval(secs, frame, 0);
     }
 
-    plProfile_EndLap(MaterialAnims, GetKeyName().c_str());
+    plProfile_EndLap(MaterialAnims, GetKeyName());
 }
 
 void hsGMaterial::Reset()

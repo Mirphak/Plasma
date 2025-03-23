@@ -66,5 +66,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #cmakedefine HAVE_SYSCTL
 #cmakedefine HAVE_SYSDIR
 #cmakedefine HAVE_SYSINFO
+#cmakedefine HAVE_SHELLSCALINGAPI
+#cmakedefine HAVE_PTHREAD_SETNAME_NP
 
 #endif

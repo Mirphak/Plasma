@@ -784,7 +784,6 @@ const std::map<uint32_t, ST::string> plKeyMap::fKeyConversionEnglish =
     { KEY_BACKSLASH,        ST_LITERAL("Backslash")},
     { KEY_RBRACKET,         ST_LITERAL("RightBracket")},
     { KEY_QUOTE,            ST_LITERAL("Quote")},
-    { 0xffffffff,           ST_LITERAL("Unused")},
 };
 
 const std::map<uint32_t, ST::string> plKeyMap::fKeyConversionFrench =
@@ -1099,4 +1098,5 @@ const std::map<ControlEventCode, ST::string> plInputMap::fCmdConvert =
     { B_CONTROL_OPEN_BOOK, ST_LITERAL("Open Player Book") },
     { B_CONTROL_EXIT_GUI_MODE, ST_LITERAL("Exit GUI Mode") },
     { B_CONTROL_MODIFIER_STRAFE, ST_LITERAL("Strafe Modifier") },
+    { B_CAMERA_ADJUST_OFFSET, ST_LITERAL("Camera Offset") },
 };

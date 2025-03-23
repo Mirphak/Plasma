@@ -49,8 +49,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 // PURPOSE: Class wrapper for Python to a plMipMap image
 //
 
-#include "pyGlueHelpers.h"
-
 #include <map>
 
 #include "pnKeyedObject/plKey.h"
@@ -58,6 +56,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef BUILDING_PYPLASMA
 #   include "plGImage/plMipmap.h"
 #endif
+
+#include "pyGlueDefinitions.h"
 
 class plFileName;
 class pyColor;
@@ -150,6 +150,8 @@ public:
     uint32_t GetHeight(); // returns the height of the image
     void SaveAsJPEG(const plFileName& fileName, uint8_t quality = 75);
     void SaveAsPNG(const plFileName& fileName, const std::multimap<ST::string, ST::string>& textFields = std::multimap<ST::string, ST::string>());
+
+    static PyObject* Find(const ST::string& name);
     static PyObject* LoadJPEGFromDisk(const plFileName& filename, uint16_t width, uint16_t height); // returns pyImage
     static PyObject* LoadPNGFromDisk(const plFileName& filename, uint16_t width, uint16_t height); // returns pyImage
 #endif
