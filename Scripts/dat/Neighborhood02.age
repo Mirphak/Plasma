@@ -1,6 +1,6 @@
-StartDateTime=0672252840
-DayLength=30.226945
-MaxCapacity=10
+StartDateTime=0000226474
+DayLength=30.226946
+MaxCapacity=50
 LingerTime=180
 SequencePrefix=10
 ReleaseVersion=0
@@ -13,3 +13,4 @@ Page=krelClassRm,2
 Page=krelCommonRm,3
 Page=krelKirel,1
 Page=krelPrivateRm,4
+Page=krelGuildDeco,10
