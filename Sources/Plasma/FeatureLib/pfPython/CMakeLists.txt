@@ -51,9 +51,11 @@ set(pfPython_SOURCES
     pyGUIPopUpMenu.cpp
     pyGUISkin.cpp
     pyImage.cpp
+    pyImageLibMod.cpp
     pyJournalBook.cpp
     pyKey.cpp
     pyKeyMap.cpp
+    pyLayer.cpp
     pyMarkerMgr.cpp
     pyMatrix44.cpp
     pyMoviePlayer.cpp
@@ -142,9 +144,11 @@ set(pfPython_HEADERS
     pyGUIPopUpMenu.h
     pyGUISkin.h
     pyImage.h
+    pyImageLibMod.h
     pyJournalBook.h
     pyKey.h
     pyKeyMap.h
+    pyLayer.h
     pyMarkerMgr.h
     pyMatrix44.h
     pyMoviePlayer.h
@@ -207,6 +211,7 @@ set(pfPython_GLUE
     pyGameScoreGlue.cpp
     pyGameScoreMsgGlue.cpp
     pyGeometry3Glue.cpp
+    pyGlueDefinitions.h
     pyGlueHelpers.h
     pyGmBlueSpiralGlue.cpp
     pyGmMarkerGlue.cpp
@@ -228,9 +233,11 @@ set(pfPython_GLUE
     pyGUIPopUpMenuGlue.cpp
     pyGUISkinGlue.cpp
     pyImageGlue.cpp
+    pyImageLibModGlue.cpp
     pyJournalBookGlue.cpp
     pyKeyGlue.cpp
     pyKeyMapGlue.cpp
+    pyLayerGlue.cpp
     pyMarkerMgrGlue.cpp
     pyMatrix44Glue.cpp
     pyMoviePlayerGlue.cpp
@@ -263,6 +270,7 @@ set(pfPython_GLUE
 )
 
 plasma_library(pfPython
+    FOLDER FeatureLib
     SOURCES ${pfPython_SOURCES} ${pfPython_HEADERS} ${pfPython_GLUE}
     UNITY_BUILD
     PRECOMPILED_HEADERS Pch.h
@@ -292,6 +300,7 @@ target_link_libraries(
         plGImage
         plGLight
         plInputCore
+        plSurface
         plModifier
         plNetClient
         plNetClientComm

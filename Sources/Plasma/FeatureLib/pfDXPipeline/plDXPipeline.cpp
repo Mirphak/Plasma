@@ -232,7 +232,7 @@ inline DWORD F2DW( FLOAT f )
 }
 
 //// Macros for D3D error handling
-#define INIT_ERROR_CHECK( cond, errMsg ) if( FAILED( fSettings.fDXError = cond ) ) { return ICreateFail( errMsg ); }    
+#define INIT_ERROR_CHECK(cond, errMsg) if (FAILED(fSettings.fDXError = cond)) { return ICreateFail(ST_LITERAL(errMsg)); }
 
 #if 1       // DEBUG
 #define STRONG_ERROR_CHECK( cond ) if( FAILED( fSettings.fDXError = cond ) ) { IGetD3DError(); IShowErrorMessage(); }   
@@ -337,7 +337,7 @@ void D3DSURF_MEMNEW(IDirect3DSurface9* surf)
     { 
         D3DSURFACE_DESC info; 
         surf->GetDesc( &info );
-        PROFILE_POOL_MEM(D3DPOOL_DEFAULT, info.Width * info.Height * plDXPipeline::GetDXBitDepth(info.Format) / 8 + sizeof(IDirect3DSurface9), true, "D3DSurface");
+        PROFILE_POOL_MEM(D3DPOOL_DEFAULT, info.Width * info.Height * plDXPipeline::GetDXBitDepth(info.Format) / 8 + sizeof(IDirect3DSurface9), true, ST_LITERAL("D3DSurface"));
         plProfile_NewMem(MemPipelineSurfaces, info.Width * info.Height * plDXPipeline::GetDXBitDepth(info.Format) / 8 + sizeof(IDirect3DSurface9)); 
     }
 }
@@ -381,7 +381,7 @@ void D3DSURF_MEMDEL(IDirect3DSurface9* surf)
     { 
         D3DSURFACE_DESC info; 
         surf->GetDesc( &info );
-        PROFILE_POOL_MEM(D3DPOOL_DEFAULT, info.Width * info.Height * plDXPipeline::GetDXBitDepth(info.Format) / 8 + sizeof(IDirect3DSurface9), false, "D3DSurface");
+        PROFILE_POOL_MEM(D3DPOOL_DEFAULT, info.Width * info.Height * plDXPipeline::GetDXBitDepth(info.Format) / 8 + sizeof(IDirect3DSurface9), false, ST_LITERAL("D3DSurface"));
         plProfile_DelMem(MemPipelineSurfaces, info.Width * info.Height * plDXPipeline::GetDXBitDepth(info.Format) / 8 + sizeof(IDirect3DSurface9)); 
     }
 }
@@ -428,7 +428,7 @@ void D3DSURF_MEMDEL(IDirect3DCubeTexture9* cTex) {}
 #endif // PLASMA_EXTERNAL_RELEASE
 
 #ifndef PLASMA_EXTERNAL_RELEASE
-void plDXPipeline::ProfilePoolMem(D3DPOOL poolType, uint32_t size, bool add, const char *id)
+void plDXPipeline::ProfilePoolMem(D3DPOOL poolType, uint32_t size, bool add, const ST::string& id)
 {
     switch( poolType )
     {
@@ -550,21 +550,20 @@ plDXPipeline::plDXPipeline( hsWinRef hWnd, const hsG3DDeviceModeRecord *devModeR
         fSettings.fNumAASamples = devMode->GetFSAAType( devRec->GetAASetting() - 1 );
 
     hsGDirect3DTnLEnumerate& d3dEnum = hsGDirect3D::EnumerateTnL();
-    if( d3dEnum.GetEnumeErrorStr()[ 0 ] )
-    {
-        IShowErrorMessage( (char *)d3dEnum.GetEnumeErrorStr() );
+    if (!d3dEnum.GetEnumeErrorStr().empty()) {
+        IShowErrorMessage(d3dEnum.GetEnumeErrorStr());
         return;
     }
 
     if( d3dEnum.SelectFromDevMode(devRec, devMode) )
     {
-        IShowErrorMessage( (char *)d3dEnum.GetEnumeErrorStr() );
+        IShowErrorMessage(d3dEnum.GetEnumeErrorStr());
         return;
     }
 
     // Record the requested mode/setup.
-    ISetCurrentDriver( d3dEnum.GetCurrentDriver() );
-    ISetCurrentDevice( d3dEnum.GetCurrentDevice() );
+    ISetCurrentDisplay( d3dEnum.GetCurrentDisplay() );
+    ISetCurrentRenderer( d3dEnum.GetCurrentRenderer() );
     D3DEnum_ModeInfo *pModeInfo = d3dEnum.GetCurrentMode();
     pModeInfo->fWindowed = fInitialPipeParams.Windowed;     // set windowed mode from ini file
     ISetCurrentMode( d3dEnum.GetCurrentMode() );
@@ -580,8 +579,8 @@ plDXPipeline::plDXPipeline( hsWinRef hWnd, const hsG3DDeviceModeRecord *devModeR
     IRestrictCaps( *devRec );
 
     fSettings.fMaxAnisotropicSamples = fInitialPipeParams.AnisotropicLevel;
-    if(fSettings.fMaxAnisotropicSamples > fCurrentDevice->fDDCaps.MaxAnisotropy)
-        fSettings.fMaxAnisotropicSamples = (uint8_t)fCurrentDevice->fDDCaps.MaxAnisotropy;
+    if(fSettings.fMaxAnisotropicSamples > fCurrentRenderer->fDDCaps.MaxAnisotropy)
+        fSettings.fMaxAnisotropicSamples = (uint8_t)fCurrentRenderer->fDDCaps.MaxAnisotropy;
 
     plConst(uint32_t) kDefaultDynVtxSize(32000 * 44);
     plConst(uint32_t) kDefaultDynIdxSize(0 * plGBufferGroup::kMaxNumIndicesPerBuffer * 2);
@@ -591,7 +590,7 @@ plDXPipeline::plDXPipeline( hsWinRef hWnd, const hsG3DDeviceModeRecord *devModeR
     // Go create surfaces and DX-dependent objects
     if( ICreateDeviceObjects() )
     {
-        IShowErrorMessage( "Cannot create Direct3D device" );
+        IShowErrorMessage(ST_LITERAL("Cannot create Direct3D device"));
         return;
     }
 
@@ -609,8 +608,8 @@ plDXPipeline::~plDXPipeline()
     // plScene/plOccluder.cpp and plScene/plOccluderProxy.cpp for more info
     if( fView.HasCullProxy() )
         fView.GetCullProxy()->GetKey()->UnRefObject();
-    delete fCurrentDriver;
-    delete fCurrentDevice;
+    delete fCurrentDisplay;
+    delete fCurrentRenderer;
     delete fCurrentMode;
 
     IReleaseDeviceObjects();
@@ -671,8 +670,8 @@ void    plDXPipeline::IClearMembers()
     fSharedDepthFormat[1] = D3DFMT_UNKNOWN;
 
     fCurrentMode = nullptr;
-    fCurrentDriver = nullptr;
-    fCurrentDevice = nullptr;
+    fCurrentDisplay = nullptr;
+    fCurrentRenderer = nullptr;
 
     for( i = 0; i < 8; i++ )
     {
@@ -715,7 +714,7 @@ void    plDXGeneralSettings::Reset()
     fIsIntel = false;
 
     fDXError = D3D_OK;
-    memset( fErrorStr, 0, sizeof( fErrorStr ) );
+    fErrorStr.clear();
 
     fCurrFVFFormat = 0;
     fCurrVertexShader = nullptr;
@@ -842,33 +841,33 @@ void    plDXPipeline::ISetCaps()
     fSettings.fD3DCaps = kCapsNone;
 
     // Set relevant caps (ones we can do something about).
-    if (fCurrentDevice->fDDCaps.RasterCaps & D3DPRASTERCAPS_DEPTHBIAS)
+    if (fCurrentRenderer->fDDCaps.RasterCaps & D3DPRASTERCAPS_DEPTHBIAS)
         fSettings.fD3DCaps |= kCapsZBias;
-    if (fCurrentDevice->fDDCaps.RasterCaps & D3DPRASTERCAPS_FOGRANGE)
+    if (fCurrentRenderer->fDDCaps.RasterCaps & D3DPRASTERCAPS_FOGRANGE)
         fSettings.fD3DCaps |= kCapsRangeFog;
-    if (fCurrentDevice->fDDCaps.RasterCaps & D3DPRASTERCAPS_FOGTABLE)
+    if (fCurrentRenderer->fDDCaps.RasterCaps & D3DPRASTERCAPS_FOGTABLE)
         fSettings.fD3DCaps |= kCapsLinearFog | kCapsExpFog | kCapsExp2Fog | kCapsPixelFog;
     else
         fSettings.fD3DCaps |= kCapsLinearFog;
-    if (fCurrentDevice->fDDCaps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR)
+    if (fCurrentRenderer->fDDCaps.TextureFilterCaps & D3DPTFILTERCAPS_MIPFLINEAR)
         fSettings.fD3DCaps |= kCapsMipmap;
-    if (fCurrentDevice->fDDCaps.TextureCaps & D3DPTEXTURECAPS_MIPCUBEMAP)
+    if (fCurrentRenderer->fDDCaps.TextureCaps & D3DPTEXTURECAPS_MIPCUBEMAP)
         fSettings.fD3DCaps |= kCapsCubicMipmap;
     if (fSettings.fNumAASamples > 0)
         fSettings.fD3DCaps |= kCapsFSAntiAlias;
-    if (fCurrentDevice->fDDCaps.RasterCaps & D3DPRASTERCAPS_WFOG)
+    if (fCurrentRenderer->fDDCaps.RasterCaps & D3DPRASTERCAPS_WFOG)
         fSettings.fD3DCaps |= kCapsDoesWFog;
-    if (fCurrentDevice->fDDCaps.TextureCaps & D3DPTEXTURECAPS_CUBEMAP)
+    if (fCurrentRenderer->fDDCaps.TextureCaps & D3DPTEXTURECAPS_CUBEMAP)
         fSettings.fD3DCaps |= kCapsCubicTextures;
 
     // Unconditional Non-Power of Two Textures
     // To make life easy for us, we can have non POT textures or we can't
-    if (!(fCurrentDevice->fDDCaps.TextureCaps & D3DPTEXTURECAPS_POW2 &&
-          fCurrentDevice->fDDCaps.TextureCaps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL))
+    if (!(fCurrentRenderer->fDDCaps.TextureCaps & D3DPTEXTURECAPS_POW2 &&
+          fCurrentRenderer->fDDCaps.TextureCaps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL))
           fSettings.fD3DCaps |= kCapsNpotTextures;
 
     /// New 1.5.2000 - cull out mixed vertex processing
-    if (fCurrentDevice->fDDCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT &&
+    if (fCurrentRenderer->fDDCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT &&
         fCurrentMode->fDDBehavior == D3DCREATE_HARDWARE_VERTEXPROCESSING)
         fSettings.fD3DCaps |= kCapsHWTransform;
 
@@ -887,7 +886,7 @@ void    plDXPipeline::ISetCaps()
         fSettings.fD3DCaps |= kCapsLuminanceTextures;
 
     /// Max # of hardware lights
-    fMaxNumLights = fCurrentDevice->fDDCaps.MaxActiveLights;
+    fMaxNumLights = fCurrentRenderer->fDDCaps.MaxActiveLights;
     if ( fMaxNumLights > kD3DMaxTotalLights )
         fMaxNumLights = kD3DMaxTotalLights;
 
@@ -905,8 +904,8 @@ void    plDXPipeline::ISetCaps()
     }
 
     /// Max # of textures at once
-    fMaxLayersAtOnce = fCurrentDevice->fDDCaps.MaxSimultaneousTextures;
-    if ( fCurrentDevice->fDDCaps.DevCaps & D3DDEVCAPS_SEPARATETEXTUREMEMORIES )
+    fMaxLayersAtOnce = fCurrentRenderer->fDDCaps.MaxSimultaneousTextures;
+    if ( fCurrentRenderer->fDDCaps.DevCaps & D3DDEVCAPS_SEPARATETEXTUREMEMORIES )
         fMaxLayersAtOnce = 1;
     // Alloc half our simultaneous textures to piggybacks.
     // Won't hurt us unless we try to many things at once.
@@ -916,14 +915,14 @@ void    plDXPipeline::ISetCaps()
     if (fMaxLayersAtOnce < 4)
         SetDebugFlag(plPipeDbg::kFlagBumpUV, true);
 
-    fSettings.fMaxAnisotropicSamples = (uint8_t)(fCurrentDevice->fDDCaps.MaxAnisotropy);
+    fSettings.fMaxAnisotropicSamples = (uint8_t)(fCurrentRenderer->fDDCaps.MaxAnisotropy);
 
-    fSettings.fNoGammaCorrect = !(fCurrentDevice->fDDCaps.Caps2 & D3DCAPS2_FULLSCREENGAMMA);
+    fSettings.fNoGammaCorrect = !(fCurrentRenderer->fDDCaps.Caps2 & D3DCAPS2_FULLSCREENGAMMA);
 
-    if (!(fCurrentDevice->fDDCaps.TextureCaps & D3DPTEXTURECAPS_PROJECTED))
+    if (!(fCurrentRenderer->fDDCaps.TextureCaps & D3DPTEXTURECAPS_PROJECTED))
         plDynamicCamMap::SetCapable(false);
 
-    ISetGraphicsCapability(fCurrentDevice->fDDCaps.PixelShaderVersion);
+    ISetGraphicsCapability(fCurrentRenderer->fDDCaps.PixelShaderVersion);
 }
 
 // ISetGraphicsCapability ///////////////////////////////////////////////////////
@@ -1141,24 +1140,24 @@ bool  plDXPipeline::ICreateDeviceObjects()
     return false;
 }
 
-//// ISetCurrentDriver ////////////////////////////////////////////////////////
+//// ISetCurrentDisplay ////////////////////////////////////////////////////////
 // Copy over the driver info.
-void    plDXPipeline::ISetCurrentDriver( D3DEnum_DriverInfo *driv )
+void    plDXPipeline::ISetCurrentDisplay( D3DEnum_DisplayInfo *driv )
 {
-    if (fCurrentDriver != nullptr)
-        delete fCurrentDriver;
+    if (fCurrentDisplay != nullptr)
+        delete fCurrentDisplay;
 
-    fCurrentDriver = new D3DEnum_DriverInfo;
+    fCurrentDisplay = new D3DEnum_DisplayInfo;
 
-    fCurrentDriver->fGuid = driv->fGuid;
-    hsStrncpy( fCurrentDriver->fStrDesc, driv->fStrDesc, 40 );
-    hsStrncpy( fCurrentDriver->fStrName, driv->fStrName, 40 );
+    fCurrentDisplay->fGuid = driv->fGuid;
+    fCurrentDisplay->fStrDesc = driv->fStrDesc;
+    fCurrentDisplay->fStrName = driv->fStrName;
 
-    fCurrentDriver->fDesktopMode = driv->fDesktopMode;
-    fCurrentDriver->fAdapterInfo = driv->fAdapterInfo;
+    fCurrentDisplay->fDesktopMode = driv->fDesktopMode;
+    fCurrentDisplay->fAdapterInfo = driv->fAdapterInfo;
 
-    fCurrentDriver->fCurrentMode = nullptr;
-    fCurrentDriver->fCurrentDevice = nullptr;
+    fCurrentDisplay->fCurrentMode = nullptr;
+    fCurrentDisplay->fCurrentRenderer = nullptr;
 
     /// Go looking for an adapter to match this one
     IDirect3D9* d3d = hsGDirect3D::GetDirect3D();
@@ -1169,7 +1168,7 @@ void    plDXPipeline::ISetCurrentDriver( D3DEnum_DriverInfo *driv )
         D3DADAPTER_IDENTIFIER9      adapterInfo;
         d3d->GetAdapterIdentifier( iAdapter, 0, &adapterInfo );
 
-        if( adapterInfo.DeviceIdentifier == fCurrentDriver->fAdapterInfo.DeviceIdentifier )
+        if( adapterInfo.DeviceIdentifier == fCurrentDisplay->fAdapterInfo.DeviceIdentifier )
         {
             fCurrentAdapter = iAdapter;
             break;
@@ -1177,22 +1176,22 @@ void    plDXPipeline::ISetCurrentDriver( D3DEnum_DriverInfo *driv )
     }
 }
 
-//// ISetCurrentDevice ////////////////////////////////////////////////////////
-// Copy over the device info.
-void    plDXPipeline::ISetCurrentDevice( D3DEnum_DeviceInfo *dev )
+//// ISetCurrentRenderer ////////////////////////////////////////////////////////
+// Copy over the renderer info.
+void    plDXPipeline::ISetCurrentRenderer( D3DEnum_RendererInfo *dev )
 {
-    if (fCurrentDevice != nullptr)
-        delete fCurrentDevice;
-    fCurrentDevice = new D3DEnum_DeviceInfo;
+    if (fCurrentRenderer != nullptr)
+        delete fCurrentRenderer;
+    fCurrentRenderer = new D3DEnum_RendererInfo;
 
-    hsStrncpy( fCurrentDevice->fStrName, dev->fStrName, 40 );
+    fCurrentRenderer->fStrName = dev->fStrName;
 
-    fCurrentDevice->fDDCaps = dev->fDDCaps;
-    fCurrentDevice->fDDType = dev->fDDType;
-    fCurrentDevice->fIsHardware = dev->fIsHardware;
-    fCurrentDevice->fCanWindow = dev->fCanWindow;
+    fCurrentRenderer->fDDCaps = dev->fDDCaps;
+    fCurrentRenderer->fDDType = dev->fDDType;
+    fCurrentRenderer->fIsHardware = dev->fIsHardware;
+    fCurrentRenderer->fCanWindow = dev->fCanWindow;
 //  fCurrentDevice->fCanAntialias = dev->fCanAntialias;
-    fCurrentDevice->fCompatibleWithDesktop = dev->fCompatibleWithDesktop;
+    fCurrentRenderer->fCompatibleWithDesktop = dev->fCompatibleWithDesktop;
 
     // copy over supported device modes
     D3DEnum_ModeInfo currMode;
@@ -1209,10 +1208,10 @@ void    plDXPipeline::ISetCurrentDevice( D3DEnum_DeviceInfo *dev )
         currMode.fDepthFormats = mode.fDepthFormats;
         currMode.fFSAATypes = mode.fFSAATypes;
         memcpy(&currMode.fDDmode, &mode.fDDmode, sizeof(D3DDISPLAYMODE));
-        strcpy(currMode.fStrDesc, mode.fStrDesc);
+        currMode.fStrDesc = mode.fStrDesc;
         currMode.fWindowed = mode.fWindowed;
 
-        fCurrentDevice->fModes.emplace_back(currMode);
+        fCurrentRenderer->fModes.emplace_back(currMode);
     }
 }
 
@@ -1244,7 +1243,7 @@ bool  plDXPipeline::IFindCompressedFormats()
 
     for( i = 0; toCheckFor[ i ] != D3DFMT_UNKNOWN; i++ )
     {
-        if( FAILED( hsGDirect3D::GetDirect3D()->CheckDeviceFormat( fCurrentAdapter, fCurrentDevice->fDDType,
+        if( FAILED( hsGDirect3D::GetDirect3D()->CheckDeviceFormat( fCurrentAdapter, fCurrentRenderer->fDDType,
                                                                    fCurrentMode->fDDmode.Format,
                                                                    0, D3DRTYPE_TEXTURE, toCheckFor[ i ] ) ) )
             return false;
@@ -1266,7 +1265,7 @@ bool  plDXPipeline::IFindLuminanceFormats()
 
     for( i = 0; toCheckFor[ i ] != D3DFMT_UNKNOWN; i++ )
     {
-        if (FAILED(hsGDirect3D::GetDirect3D()->CheckDeviceFormat(fCurrentAdapter, fCurrentDevice->fDDType,
+        if (FAILED(hsGDirect3D::GetDirect3D()->CheckDeviceFormat(fCurrentAdapter, fCurrentRenderer->fDDType,
                                                                  fCurrentMode->fDDmode.Format,
                                                                  0, D3DRTYPE_TEXTURE, toCheckFor[ i ] ) ) )
             return false;
@@ -1283,7 +1282,7 @@ bool  plDXPipeline::IFindLuminanceFormats()
 
 bool      plDXPipeline::ITextureFormatAllowed( D3DFORMAT format )
 {
-    if (FAILED( hsGDirect3D::GetDirect3D()->CheckDeviceFormat(fCurrentAdapter, fCurrentDevice->fDDType,
+    if (FAILED( hsGDirect3D::GetDirect3D()->CheckDeviceFormat(fCurrentAdapter, fCurrentRenderer->fDDType,
                                                               fCurrentMode->fDDmode.Format,
                                                               0, D3DRTYPE_TEXTURE, format ) ) )
         return false;
@@ -1305,13 +1304,10 @@ bool plDXPipeline::ICreateDevice(bool windowed)
     /// First, create the D3D Device object
     D3DPRESENT_PARAMETERS       params;
     D3DDISPLAYMODE              dispMode;
-#ifdef DBG_WRITE_FORMATS
-    char                        msg[ 256 ];
-#endif // DBG_WRITE_FORMATS
 
     IDirect3D9* d3d = hsGDirect3D::GetDirect3D();
     if (!d3d)
-        return ICreateFail("Failed to get Direct3D Object");
+        return ICreateFail(ST_LITERAL("Failed to get Direct3D Object"));
 
     INIT_ERROR_CHECK( d3d->GetAdapterDisplayMode( fCurrentAdapter, &dispMode ),
         "Cannot get desktop display mode" );
@@ -1351,8 +1347,7 @@ bool plDXPipeline::ICreateDevice(bool windowed)
 #ifdef DBG_WRITE_FORMATS
     for (D3DFORMAT fmt : fCurrentMode->fDepthFormats)
     {
-        sprintf(msg, "-- Valid depth buffer format: %s", IGetDXFormatName(fmt));
-        hsDebugMessage( msg, 0 );
+        hsDebugMessage(ST::format("-- Valid depth buffer format: {}", IGetDXFormatName(fmt)).c_str(), 0);
     }
 #endif
 
@@ -1375,7 +1370,7 @@ bool plDXPipeline::ICreateDevice(bool windowed)
         params.MultiSampleType = D3DMULTISAMPLE_NONE;
         if( !IFindDepthFormat(params) )
             // Okay, we're screwed here, we might as well bail.
-            return ICreateFail( "Can't find a Depth Buffer format" );
+            return ICreateFail(ST_LITERAL("Can't find a Depth Buffer format"));
     }
 
     /// TEMP HACK--if we're running 16-bit z-buffer or below, use our z-bias (go figure, it works better
@@ -1386,15 +1381,13 @@ bool plDXPipeline::ICreateDevice(bool windowed)
         fSettings.fD3DCaps &= ~kCapsZBias;
 
 #ifdef DBG_WRITE_FORMATS
-    sprintf( msg, "-- Requesting depth buffer format: %s", IGetDXFormatName( params.AutoDepthStencilFormat ) );
-    hsDebugMessage( msg, 0 );
+    hsDebugMessage(ST::format("-- Requesting depth buffer format: {}", IGetDXFormatName(params.AutoDepthStencilFormat)).c_str(), 0);
 #endif
 
 
     params.BackBufferFormat = dispMode.Format;
 #ifdef DBG_WRITE_FORMATS
-    sprintf( msg, "-- Requesting back buffer format: %s", IGetDXFormatName( params.BackBufferFormat ) );
-    hsDebugMessage( msg, 0 );
+    hsDebugMessage(ST::format("-- Requesting back buffer format: {}", IGetDXFormatName(params.BackBufferFormat)).c_str(), 0);
 #endif
 
     params.hDeviceWindow = fDevice.fHWnd;
@@ -1419,14 +1412,14 @@ bool plDXPipeline::ICreateDevice(bool windowed)
             // it as part of the handshake to let NVPerfHUD know we give
             // it permission to analyze us.
             fCurrentAdapter = adapter;
-            fCurrentDevice->fDDType= D3DDEVTYPE_REF;
+            fCurrentRenderer->fDDType= D3DDEVTYPE_REF;
             SetDebugFlag(plPipeDbg::kFlagNVPerfHUD, true);
             break;
         }
     }
 #endif // PLASMA_EXTERNAL_RELEASE
 
-    INIT_ERROR_CHECK( d3d->CreateDevice( fCurrentAdapter, fCurrentDevice->fDDType,
+    INIT_ERROR_CHECK( d3d->CreateDevice( fCurrentAdapter, fCurrentRenderer->fDDType,
                                          fDevice.fHWnd, fCurrentMode->fDDBehavior,
                                          &params, &fD3DDevice ),
                         "Cannot create primary display surface via CreateDevice()" );
@@ -1456,7 +1449,7 @@ bool plDXPipeline::IFindDepthFormat(D3DPRESENT_PARAMETERS& params)
             ||(fmt == D3DFMT_D16) )
         {
             HRESULT hr = d3d->CheckDeviceMultiSampleType(fCurrentAdapter,
-                                                         fCurrentDevice->fDDType,
+                                                         fCurrentRenderer->fDDType,
                                                          fmt,
                                                          fCurrentMode->fWindowed ? TRUE : FALSE,
                                                          params.MultiSampleType, nullptr);
@@ -1476,7 +1469,7 @@ bool plDXPipeline::IFindDepthFormat(D3DPRESENT_PARAMETERS& params)
             if( fmt == D3DFMT_D15S1 || fmt == D3DFMT_D24X4S4 || fmt == D3DFMT_D24S8 )
             {
                 HRESULT hr = d3d->CheckDeviceMultiSampleType(fCurrentAdapter,
-                                                             fCurrentDevice->fDDType,
+                                                             fCurrentRenderer->fDDType,
                                                              fmt,
                                                              fCurrentMode->fWindowed ? TRUE : FALSE,
                                                              params.MultiSampleType, nullptr);
@@ -1768,7 +1761,7 @@ void plDXPipeline::IReleaseDynamicBuffers()
 
             // Actually, if it's volatile, it's sharing the global dynamic vertex buff, so we're already
             // accounting for the memory when we clear the global buffer.
-            //PROFILE_POOL_MEM(D3DPOOL_DEFAULT, vbRef->fCount * vbRef->fVertexSize, false, "VtxBuff");
+            //PROFILE_POOL_MEM(D3DPOOL_DEFAULT, vbRef->fCount * vbRef->fVertexSize, false, ST_LITERAL("VtxBuff"));
         }
         // 9600 THRASH
         else if( fSettings.fBadManaged )
@@ -1787,14 +1780,14 @@ void plDXPipeline::IReleaseDynamicBuffers()
         {
             iRef->fD3DBuffer->Release();
             iRef->fD3DBuffer = nullptr;
-            PROFILE_POOL_MEM(iRef->fPoolType, iRef->fCount * sizeof(uint16_t), false, "IndexBuff");
+            PROFILE_POOL_MEM(iRef->fPoolType, iRef->fCount * sizeof(uint16_t), false, ST_LITERAL("IndexBuff"));
         }
         iRef = iRef->GetNext();
     }
     if (fDynVtxBuff)
     {
         ReleaseObject(fDynVtxBuff);
-        PROFILE_POOL_MEM(D3DPOOL_DEFAULT, fDynVtxSize, false, "DynVtxBuff");
+        PROFILE_POOL_MEM(D3DPOOL_DEFAULT, fDynVtxSize, false, ST_LITERAL("DynVtxBuff"));
         fDynVtxBuff = nullptr;
     }
 
@@ -1837,7 +1830,7 @@ void plDXPipeline::ICreateDynamicBuffers()
     D3DPOOL poolType = D3DPOOL_DEFAULT;
     if( fDynVtxSize )
     {
-        PROFILE_POOL_MEM(poolType, fDynVtxSize, true, "DynVtxBuff");
+        PROFILE_POOL_MEM(poolType, fDynVtxSize, true, ST_LITERAL("DynVtxBuff"));
         if( FAILED( fD3DDevice->CreateVertexBuffer( fDynVtxSize,
                                                     usage, 
                                                     0,
@@ -1896,7 +1889,7 @@ void plDXPipeline::IResetToDefaults(D3DPRESENT_PARAMETERS *params)
     params->BackBufferFormat = D3DFMT_X8R8G8B8;
     fColorDepth = fDefaultPipeParams.ColorDepth;
 
-    for (D3DEnum_ModeInfo& mode : fCurrentDevice->fModes)
+    for (D3DEnum_ModeInfo& mode : fCurrentRenderer->fModes)
     {
         if (mode.fDDmode.Width == params->BackBufferWidth &&
             mode.fDDmode.Height == params->BackBufferHeight &&
@@ -2033,7 +2026,7 @@ void plDXPipeline::ResetDisplayDevice(int Width, int Height, int ColorDepth, boo
 
     fVSync = VSync;
     size_t iMode = 0;
-    std::vector<D3DEnum_ModeInfo>& modes = fCurrentDevice->fModes;
+    std::vector<D3DEnum_ModeInfo>& modes = fCurrentRenderer->fModes;
     // check for supported resolution if we're not going to windowed mode
     if(!Windowed)
     {
@@ -2112,7 +2105,7 @@ void plDXPipeline::ResetDisplayDevice(int Width, int Height, int ColorDepth, boo
 void plDXPipeline::GetSupportedColorDepths(std::vector<int> &ColorDepths)
 {
     // iterate through display modes
-    for (const D3DEnum_ModeInfo& modeInfo : fCurrentDevice->fModes)
+    for (const D3DEnum_ModeInfo& modeInfo : fCurrentRenderer->fModes)
     {
         // Check to see if color depth has been added already
         auto iter = std::find_if(ColorDepths.cbegin(), ColorDepths.cend(),
@@ -2131,7 +2124,7 @@ void plDXPipeline::GetSupportedDisplayModes(std::vector<plDisplayMode> *res, int
 {
     std::vector<plDisplayMode> supported;
     // loop through display modes
-    for (const D3DEnum_ModeInfo& modeInfo : fCurrentDevice->fModes)
+    for (const D3DEnum_ModeInfo& modeInfo : fCurrentRenderer->fModes)
     {
         if (modeInfo.fBitDepth == ColorDepth)
         {
@@ -2162,7 +2155,7 @@ int plDXPipeline::GetMaxAntiAlias(int Width, int Height, int ColorDepth)
 {
     int max = 0;
     D3DEnum_ModeInfo *pCurrMode = nullptr;
-    for (D3DEnum_ModeInfo& mode : fCurrentDevice->fModes)
+    for (D3DEnum_ModeInfo& mode : fCurrentRenderer->fModes)
     {
         if (mode.fDDmode.Width == Width &&
             mode.fDDmode.Height == Height &&
@@ -2184,7 +2177,7 @@ int plDXPipeline::GetMaxAntiAlias(int Width, int Height, int ColorDepth)
 
 int plDXPipeline::GetMaxAnisotropicSamples()
 {
-    return fCurrentDevice ? fCurrentDevice->fDDCaps.MaxAnisotropy : 0;
+    return fCurrentRenderer ? fCurrentRenderer->fDDCaps.MaxAnisotropy : 0;
 }
 
 //// Resize ///////////////////////////////////////////////////////////////////
@@ -2253,14 +2246,14 @@ void    plDXPipeline::Resize( uint32_t width, uint32_t height )
     // Recreate
     if( hsGDirect3D::GetDirect3D(true) )
     {
-        IShowErrorMessage( "Cannot create D3D master object" );
+        IShowErrorMessage(ST_LITERAL("Cannot create D3D master object"));
         return;
     }
 
     // Go recreate surfaces and DX-dependent objects
     if( ICreateDeviceObjects() )
     {
-        IShowErrorMessage( "Cannot create Direct3D device" );
+        IShowErrorMessage(ST_LITERAL("Cannot create Direct3D device"));
         return;
     }
 
@@ -2519,42 +2512,31 @@ bool plDXPipeline::IAvatarSort(plDrawableSpans* d, const std::vector<int16_t>& v
 // which lights a span will use, needs to be stored on the span.
 bool plDXPipeline::PrepForRender(plDrawable* d, std::vector<int16_t>& visList, plVisMgr* visMgr)
 {
-    plProfile_BeginTiming(PrepDrawable);
+    plProfile_TimingGuard(PrepDrawable);
 
     plDrawableSpans *drawable = plDrawableSpans::ConvertNoRef(d);
-    if( !drawable )
-    {
-        plProfile_EndTiming(PrepDrawable);
+    if (!drawable)
         return false;
-    }
 
     // Find our lights
     ICheckLighting(drawable, visList, visMgr);
 
     // Sort our faces
-    if( drawable->GetNativeProperty(plDrawable::kPropSortFaces) )
-    {
+    if (drawable->GetNativeProperty(plDrawable::kPropSortFaces))
         drawable->SortVisibleSpans(visList, this);
-    }
 
     // Prep for render. This is gives the drawable a chance to
     // do any last minute updates for its buffers, including
     // generating particle tri lists.
-    drawable->PrepForRender( this );
+    drawable->PrepForRender(this);
 
     // Any skinning necessary
-    if( !ISoftwareVertexBlend(drawable, visList) )
-    {
-        plProfile_EndTiming(PrepDrawable);
+    if (!ISoftwareVertexBlend(drawable, visList))
         return false;
-    }
-    // Avatar face sorting happens after the software skin.
-    if( drawable->GetNativeProperty(plDrawable::kPropPartialSort) )
-    {
-        IAvatarSort(drawable, visList);
-    }
 
-    plProfile_EndTiming(PrepDrawable);
+    // Avatar face sorting happens after the software skin.
+    if (drawable->GetNativeProperty(plDrawable::kPropPartialSort))
+        IAvatarSort(drawable, visList);
 
     return true;
 }
@@ -3964,7 +3946,7 @@ bool  plDXPipeline::IPrepRenderTargetInfo( plRenderTarget *owner, D3DFORMAT &sur
         }
 
         /// Check the device format
-        if( FAILED( fSettings.fDXError = d3d->CheckDeviceFormat( fCurrentAdapter, fCurrentDevice->fDDType, fCurrentMode->fDDmode.Format,
+        if( FAILED( fSettings.fDXError = d3d->CheckDeviceFormat( fCurrentAdapter, fCurrentRenderer->fDDType, fCurrentMode->fDDmode.Format,
                                                                  D3DUSAGE_RENDERTARGET, resType, surfFormat ) ) )
         {
             if( bitDepth == 16 )
@@ -3977,7 +3959,7 @@ bool  plDXPipeline::IPrepRenderTargetInfo( plRenderTarget *owner, D3DFORMAT &sur
                 bitDepth = 16;
                 surfFormat = D3DFMT_A4R4G4B4;
             }
-            if( FAILED( fSettings.fDXError = d3d->CheckDeviceFormat( fCurrentAdapter, fCurrentDevice->fDDType, fCurrentMode->fDDmode.Format,
+            if( FAILED( fSettings.fDXError = d3d->CheckDeviceFormat( fCurrentAdapter, fCurrentRenderer->fDDType, fCurrentMode->fDDmode.Format,
                                                                      D3DUSAGE_RENDERTARGET, resType, surfFormat ) ) )
             {
                 IGetD3DError();
@@ -3987,7 +3969,7 @@ bool  plDXPipeline::IPrepRenderTargetInfo( plRenderTarget *owner, D3DFORMAT &sur
 
         if( zDepth )
         {
-            while( FAILED( fSettings.fDXError = d3d->CheckDeviceFormat( fCurrentAdapter, fCurrentDevice->fDDType, fCurrentMode->fDDmode.Format,
+            while( FAILED( fSettings.fDXError = d3d->CheckDeviceFormat( fCurrentAdapter, fCurrentRenderer->fDDType, fCurrentMode->fDDmode.Format,
                                                                         D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_SURFACE, depthFormat ) ) )
             {
                 if( stencilIndex < sizeof( depthFormats ) / sizeof( depthFormats[ 0 ] ) - 1 )
@@ -4002,7 +3984,7 @@ bool  plDXPipeline::IPrepRenderTargetInfo( plRenderTarget *owner, D3DFORMAT &sur
                 }
             }
 
-            if( FAILED( fSettings.fDXError = d3d->CheckDepthStencilMatch( fCurrentAdapter, fCurrentDevice->fDDType, fCurrentMode->fDDmode.Format,
+            if( FAILED( fSettings.fDXError = d3d->CheckDepthStencilMatch( fCurrentAdapter, fCurrentRenderer->fDDType, fCurrentMode->fDDmode.Format,
                                                                           surfFormat, depthFormat ) ) )
             {
                 IGetD3DError();
@@ -4051,7 +4033,7 @@ bool  plDXPipeline::IFindRenderTargetInfo( plRenderTarget *owner, D3DFORMAT &sur
         }
 
         /// Check the device format
-        if( FAILED( fSettings.fDXError = d3d->CheckDeviceFormat( fCurrentAdapter, fCurrentDevice->fDDType, fCurrentMode->fDDmode.Format,
+        if( FAILED( fSettings.fDXError = d3d->CheckDeviceFormat( fCurrentAdapter, fCurrentRenderer->fDDType, fCurrentMode->fDDmode.Format,
                                                                  D3DUSAGE_RENDERTARGET, resType, surfFormat ) ) )
         {
             if( bitDepth == 16 )
@@ -4064,7 +4046,7 @@ bool  plDXPipeline::IFindRenderTargetInfo( plRenderTarget *owner, D3DFORMAT &sur
                 bitDepth = 16;
                 surfFormat = D3DFMT_A4R4G4B4;
             }
-            if( FAILED( fSettings.fDXError = d3d->CheckDeviceFormat( fCurrentAdapter, fCurrentDevice->fDDType, fCurrentMode->fDDmode.Format,
+            if( FAILED( fSettings.fDXError = d3d->CheckDeviceFormat( fCurrentAdapter, fCurrentRenderer->fDDType, fCurrentMode->fDDmode.Format,
                                                                      D3DUSAGE_RENDERTARGET, resType, surfFormat ) ) )
             {
                 IGetD3DError();
@@ -4664,22 +4646,22 @@ bool  plDXPipeline::StencilGetCaps( plStencilCaps *caps )
     /// Get supported ops
     caps->fSupportedOps = 0;
 
-    if( fCurrentDevice->fDDCaps.StencilCaps & D3DSTENCILCAPS_DECR )
+    if( fCurrentRenderer->fDDCaps.StencilCaps & D3DSTENCILCAPS_DECR )
         caps->fSupportedOps |= plStencilCaps::kOpDecWrap;
-    if( fCurrentDevice->fDDCaps.StencilCaps & D3DSTENCILCAPS_DECRSAT )
+    if( fCurrentRenderer->fDDCaps.StencilCaps & D3DSTENCILCAPS_DECRSAT )
         caps->fSupportedOps |= plStencilCaps::kOpDecClamp;
-    if( fCurrentDevice->fDDCaps.StencilCaps & D3DSTENCILCAPS_INCR )
+    if( fCurrentRenderer->fDDCaps.StencilCaps & D3DSTENCILCAPS_INCR )
         caps->fSupportedOps |= plStencilCaps::kOpIncWrap;
-    if( fCurrentDevice->fDDCaps.StencilCaps & D3DSTENCILCAPS_INCRSAT )
+    if( fCurrentRenderer->fDDCaps.StencilCaps & D3DSTENCILCAPS_INCRSAT )
         caps->fSupportedOps |= plStencilCaps::kOpIncClamp;
 
-    if( fCurrentDevice->fDDCaps.StencilCaps & D3DSTENCILCAPS_INVERT )
+    if( fCurrentRenderer->fDDCaps.StencilCaps & D3DSTENCILCAPS_INVERT )
         caps->fSupportedOps |= plStencilCaps::kOpInvert;
-    if( fCurrentDevice->fDDCaps.StencilCaps & D3DSTENCILCAPS_KEEP )
+    if( fCurrentRenderer->fDDCaps.StencilCaps & D3DSTENCILCAPS_KEEP )
         caps->fSupportedOps |= plStencilCaps::kOpKeep;
-    if( fCurrentDevice->fDDCaps.StencilCaps & D3DSTENCILCAPS_REPLACE )
+    if( fCurrentRenderer->fDDCaps.StencilCaps & D3DSTENCILCAPS_REPLACE )
         caps->fSupportedOps |= plStencilCaps::kOpReplace;
-    if( fCurrentDevice->fDDCaps.StencilCaps & D3DSTENCILCAPS_ZERO )
+    if( fCurrentRenderer->fDDCaps.StencilCaps & D3DSTENCILCAPS_ZERO )
         caps->fSupportedOps |= plStencilCaps::kOpSetToZero;
 
     return true;
@@ -7290,7 +7272,7 @@ IDirect3DTexture9   *plDXPipeline::IMakeD3DTexture( plDXTextureRef *ref, D3DFORM
                                             ref->fMaxWidth, ref->fMaxHeight, ref->fMMLvs, ref->GetFlags() );
         return nullptr;
     }
-    PROFILE_POOL_MEM(poolType, ref->fDataSize, true, (ref->fOwner ? ref->fOwner->GetKey() ? ref->fOwner->GetKey()->GetUoid().GetObjectName().c_str() : "(UnknownTexture)" : "(UnknownTexture)"));
+    PROFILE_POOL_MEM(poolType, ref->fDataSize, true, ref->fOwner && ref->fOwner->GetKey() ? ref->fOwner->GetKey()->GetUoid().GetObjectName() : ST_LITERAL("(UnknownTexture)"));
     fTexManaged += ref->fDataSize;
 
     return texPtr;
@@ -7329,7 +7311,7 @@ void    plDXPipeline::IFillD3DTexture( plDXTextureRef *ref )
             return;
         }
 
-        memcpy( (char *)lockInfo.pBits, pTexDat, ref->fLevelSizes[ i ] );
+        memcpy(lockInfo.pBits, pTexDat, ref->fLevelSizes[i]);
         pTexDat += ref->fLevelSizes[ i ];
         lpDst->UnlockRect( i );
     }       
@@ -7344,7 +7326,7 @@ IDirect3DCubeTexture9   *plDXPipeline::IMakeD3DCubeTexture( plDXTextureRef *ref,
     IDirect3DCubeTexture9   *texPtr = nullptr;
     fManagedAlloced = true;
     WEAK_ERROR_CHECK(fD3DDevice->CreateCubeTexture( ref->fMaxWidth, ref->fMMLvs, 0, formatType, poolType, &texPtr, nullptr));
-    PROFILE_POOL_MEM(poolType, ref->fDataSize, true, (ref->fOwner ? ref->fOwner->GetKey() ? ref->fOwner->GetKey()->GetUoid().GetObjectName().c_str() : "(UnknownTexture)" : "(UnknownTexture)"));
+    PROFILE_POOL_MEM(poolType, ref->fDataSize, true, ref->fOwner && ref->fOwner->GetKey() ? ref->fOwner->GetKey()->GetUoid().GetObjectName() : ST_LITERAL("(UnknownTexture)"));
     fTexManaged += ref->fDataSize;
     return texPtr;
 }
@@ -7371,7 +7353,7 @@ void    plDXPipeline::IFillD3DCubeTexture( plDXCubeTextureRef *ref )
             D3DLOCKED_RECT      lockInfo;
 
             lpDst->LockRect(faces[f], i, &lockInfo, nullptr, 0);
-            memcpy( (char *)lockInfo.pBits, pTexDat, ref->fLevelSizes[ i ] );
+            memcpy(lockInfo.pBits, pTexDat, ref->fLevelSizes[i]);
             pTexDat += ref->fLevelSizes[ i ];
             lpDst->UnlockRect( faces[ f ], i );
         }       
@@ -8144,7 +8126,7 @@ void plDXPipeline::ICheckStaticVertexBuffer(plDXVertexBufferRef* vRef, plGBuffer
             vRef->fD3DBuffer = nullptr;
             return;
         }
-        PROFILE_POOL_MEM(poolType, numVerts * vertSize, true, "VtxBuff");
+        PROFILE_POOL_MEM(poolType, numVerts * vertSize, true, ST_LITERAL("VtxBuff"));
 
         // Record that we've allocated this into managed memory, in case we're
         // fighting that NVidia driver bug. Search for OSVERSION for mor info.
@@ -8495,7 +8477,7 @@ void plDXPipeline::ICheckIndexBuffer(plDXIndexBufferRef* iRef)
             iRef->fD3DBuffer = nullptr;
             return;
         }
-        PROFILE_POOL_MEM(poolType, sizeof(uint16_t) * iRef->fCount, true, "IndexBuff");
+        PROFILE_POOL_MEM(poolType, sizeof(uint16_t) * iRef->fCount, true, ST_LITERAL("IndexBuff"));
 
         iRef->fPoolType = poolType;
         iRef->SetDirty(true);
@@ -9719,7 +9701,7 @@ void plDXPlateManager::ICreateGeometry(plDXPipeline* pipe)
         fCreatedSucessfully = false;
         return;
     }
-    PROFILE_POOL_MEM(poolType, 4 * sizeof(plPlateVertex), true, "PlateMgrVtxBuff");
+    PROFILE_POOL_MEM(poolType, 4 * sizeof(plPlateVertex), true, ST_LITERAL("PlateMgrVtxBuff"));
 
     /// Lock the buffer
     plPlateVertex *ptr;
@@ -9760,7 +9742,7 @@ void plDXPlateManager::IReleaseGeometry()
     if (fVertBuffer)
     {
         ReleaseObject(fVertBuffer);
-        PROFILE_POOL_MEM(D3DPOOL_DEFAULT, 4 * sizeof(plPlateVertex), false, "PlateMgrVtxBuff");
+        PROFILE_POOL_MEM(D3DPOOL_DEFAULT, 4 * sizeof(plPlateVertex), false, ST_LITERAL("PlateMgrVtxBuff"));
         fVertBuffer = nullptr;
     }
 }
@@ -9911,43 +9893,38 @@ void    plDXPipeline::IDrawPlate( plPlate *plate )
 
 // IAddErrorMessage ////////////////////////////////////////////////////
 // Append the error string to the current error string.
-void plDXPipeline::IAddErrorMessage(const char* errStr)
+void plDXPipeline::IAddErrorMessage(const ST::string& errStr)
 {
-    static char str[ 512 ];
-    if( errStr && strlen( errStr ) + strlen( fSettings.fErrorStr ) < sizeof( fSettings.fErrorStr ) - 4 )
-    {
-        strcpy( str, fSettings.fErrorStr );
-        sprintf( fSettings.fErrorStr, "%s\n(%s)", errStr, str );
+    if (!errStr.empty()) {
+        fSettings.fErrorStr = ST::format("{}\n({})", errStr, fSettings.fErrorStr);
         plStatusLog::AddLineS("pipeline.log", fSettings.fErrorStr);
     }
 }
 
 // ISetErrorMessage //////////////////////////////////////////////////////////
 // Clear the current error string to the input string.
-void plDXPipeline::ISetErrorMessage(const char* errStr)
+void plDXPipeline::ISetErrorMessage(ST::string errStr)
 {
-    if( errStr )
-    {
-        strcpy( fSettings.fErrorStr, errStr );
+    fSettings.fErrorStr = std::move(errStr);
+    if (!fSettings.fErrorStr.empty()) {
         plStatusLog::AddLineS("pipeline.log", fSettings.fErrorStr);
     }
-    else
-        fSettings.fErrorStr[ 0 ] = 0;
 }
 
 // IGetD3DError /////////////////////////////////////////////////////////////////
 // Convert the last D3D error code to a string (probably "Conflicting Render State").
 void    plDXPipeline::IGetD3DError()
 {
-    sprintf( fSettings.fErrorStr, "D3DError : %s", fSettings.fDXError.ToString().c_str() );
+    fSettings.fErrorStr = ST::format("D3DError : {}", fSettings.fDXError.ToString());
 }
 
 // IShowErrorMessage /////////////////////////////////////////////////////////////
 // Append the string to the running error string.
-void plDXPipeline::IShowErrorMessage(const char* errStr)
+void plDXPipeline::IShowErrorMessage(const ST::string& errStr)
 {
-    if (errStr != nullptr)
-        IAddErrorMessage( errStr );
+    if (!errStr.empty()) {
+        IAddErrorMessage(errStr);
+    }
 
 //  hsAssert( false, fSettings.fErrorStr );
 }
@@ -9955,18 +9932,18 @@ void plDXPipeline::IShowErrorMessage(const char* errStr)
 // ICreateFail ////////////////////////////////////////////////////////////////////
 // Called on unrecoverable error during device creation. Frees up anything 
 // allocated so far, sets the error string, and returns true.
-bool plDXPipeline::ICreateFail(const char* errStr)
+bool plDXPipeline::ICreateFail(const ST::string& errStr)
 {
     // Don't overwrite any error string we already had
-    if( fSettings.fErrorStr[ 0 ] == 0 )
+    if (fSettings.fErrorStr.empty()) {
         IGetD3DError();
-
-    if( errStr && *errStr )
-    {
-        IAddErrorMessage( errStr );
     }
-    else if( !*fSettings.fErrorStr )
-        IAddErrorMessage( "unknown" );
+
+    if (!errStr.empty()) {
+        IAddErrorMessage(errStr);
+    } else if (fSettings.fErrorStr.empty()) {
+        IAddErrorMessage(ST_LITERAL("unknown"));
+    }
 
     IReleaseDeviceObjects();
     return true;
@@ -9974,11 +9951,8 @@ bool plDXPipeline::ICreateFail(const char* errStr)
 
 // GetErrorString ///////////////////////////////////////////////////////////////////////////
 // Return the current error string.
-const char* plDXPipeline::GetErrorString()
+ST::string plDXPipeline::GetErrorString()
 {
-    if( fSettings.fErrorStr[ 0 ] == 0 )
-        return nullptr;
-
     return fSettings.fErrorStr;
 }
 
@@ -10076,51 +10050,50 @@ short   plDXPipeline::GetDXBitDepth( D3DFORMAT format )
 //
 //  From a D3DFORMAT enumeration, return the string for it.
 
-const char  *plDXPipeline::IGetDXFormatName( D3DFORMAT format )
+ST::string plDXPipeline::IGetDXFormatName(D3DFORMAT format)
 {
-    switch( format )
-    {
-        case D3DFMT_UNKNOWN: return "D3DFMT_UNKNOWN"; 
-        case D3DFMT_R8G8B8: return "D3DFMT_R8G8B8";
-        case D3DFMT_A8R8G8B8: return "D3DFMT_A8R8G8B8";
-        case D3DFMT_X8R8G8B8: return "D3DFMT_X8R8G8B8";
-        case D3DFMT_R5G6B5: return "D3DFMT_R5G6B5";
-        case D3DFMT_X1R5G5B5: return "D3DFMT_X1R5G5B5";
-        case D3DFMT_A1R5G5B5: return "D3DFMT_A1R5G5B5";
-        case D3DFMT_A4R4G4B4: return "D3DFMT_A4R4G4B4";
-        case D3DFMT_R3G3B2: return "D3DFMT_R3G3B2";
-        case D3DFMT_A8: return "D3DFMT_A8";
-        case D3DFMT_A8R3G3B2: return "D3DFMT_A8R3G3B2";
-        case D3DFMT_X4R4G4B4: return "D3DFMT_X4R4G4B4";
-        case D3DFMT_A8P8: return "D3DFMT_A8P8";
-        case D3DFMT_P8: return "D3DFMT_P8";
-        case D3DFMT_L8: return "D3DFMT_L8";
-        case D3DFMT_A8L8: return "D3DFMT_A8L8";
-        case D3DFMT_A4L4: return "D3DFMT_A4L4";
-        case D3DFMT_V8U8: return "D3DFMT_V8U8";
-        case D3DFMT_L6V5U5: return "D3DFMT_L6V5U5";
-        case D3DFMT_X8L8V8U8: return "D3DFMT_X8L8V8U8";
-        case D3DFMT_Q8W8V8U8: return "D3DFMT_Q8W8V8U8";
-        case D3DFMT_V16U16: return "D3DFMT_V16U16";
-        //case D3DFMT_W11V11U10: return "D3DFMT_W11V11U10";
-        case D3DFMT_UYVY: return "D3DFMT_UYVY";
-        case D3DFMT_YUY2: return "D3DFMT_YUY2";
-        case D3DFMT_DXT1: return "D3DFMT_DXT1";    
-//      case D3DFMT_DXT2: return "D3DFMT_DXT2";    
-//      case D3DFMT_DXT3: return "D3DFMT_DXT3";    
-//      case D3DFMT_DXT4: return "D3DFMT_DXT4";    
-        case D3DFMT_DXT5: return "D3DFMT_DXT5";
-        case D3DFMT_VERTEXDATA: return "D3DFMT_VERTEXDATA";
-        case D3DFMT_D16_LOCKABLE: return "D3DFMT_D16_LOCKABLE";
-        case D3DFMT_D32: return "D3DFMT_D32";
-        case D3DFMT_D15S1: return "D3DFMT_D15S1";
-        case D3DFMT_D24S8: return "D3DFMT_D24S8";
-        case D3DFMT_D16: return "D3DFMT_D16";
-        case D3DFMT_D24X8: return "D3DFMT_D24X8";
-        case D3DFMT_D24X4S4: return "D3DFMT_D24X4S4";
-        case D3DFMT_INDEX16: return "D3DFMT_INDEX16";
-        case D3DFMT_INDEX32: return "D3DFMT_INDEX32";
-        default: return "Bad format";   
+    switch (format) {
+        case D3DFMT_UNKNOWN: return ST_LITERAL("D3DFMT_UNKNOWN");
+        case D3DFMT_R8G8B8: return ST_LITERAL("D3DFMT_R8G8B8");
+        case D3DFMT_A8R8G8B8: return ST_LITERAL("D3DFMT_A8R8G8B8");
+        case D3DFMT_X8R8G8B8: return ST_LITERAL("D3DFMT_X8R8G8B8");
+        case D3DFMT_R5G6B5: return ST_LITERAL("D3DFMT_R5G6B5");
+        case D3DFMT_X1R5G5B5: return ST_LITERAL("D3DFMT_X1R5G5B5");
+        case D3DFMT_A1R5G5B5: return ST_LITERAL("D3DFMT_A1R5G5B5");
+        case D3DFMT_A4R4G4B4: return ST_LITERAL("D3DFMT_A4R4G4B4");
+        case D3DFMT_R3G3B2: return ST_LITERAL("D3DFMT_R3G3B2");
+        case D3DFMT_A8: return ST_LITERAL("D3DFMT_A8");
+        case D3DFMT_A8R3G3B2: return ST_LITERAL("D3DFMT_A8R3G3B2");
+        case D3DFMT_X4R4G4B4: return ST_LITERAL("D3DFMT_X4R4G4B4");
+        case D3DFMT_A8P8: return ST_LITERAL("D3DFMT_A8P8");
+        case D3DFMT_P8: return ST_LITERAL("D3DFMT_P8");
+        case D3DFMT_L8: return ST_LITERAL("D3DFMT_L8");
+        case D3DFMT_A8L8: return ST_LITERAL("D3DFMT_A8L8");
+        case D3DFMT_A4L4: return ST_LITERAL("D3DFMT_A4L4");
+        case D3DFMT_V8U8: return ST_LITERAL("D3DFMT_V8U8");
+        case D3DFMT_L6V5U5: return ST_LITERAL("D3DFMT_L6V5U5");
+        case D3DFMT_X8L8V8U8: return ST_LITERAL("D3DFMT_X8L8V8U8");
+        case D3DFMT_Q8W8V8U8: return ST_LITERAL("D3DFMT_Q8W8V8U8");
+        case D3DFMT_V16U16: return ST_LITERAL("D3DFMT_V16U16");
+        //case D3DFMT_W11V11U10: return ST_LITERAL("D3DFMT_W11V11U10");
+        case D3DFMT_UYVY: return ST_LITERAL("D3DFMT_UYVY");
+        case D3DFMT_YUY2: return ST_LITERAL("D3DFMT_YUY2");
+        case D3DFMT_DXT1: return ST_LITERAL("D3DFMT_DXT1");
+        //case D3DFMT_DXT2: return ST_LITERAL("D3DFMT_DXT2");
+        //case D3DFMT_DXT3: return ST_LITERAL("D3DFMT_DXT3");
+        //case D3DFMT_DXT4: return ST_LITERAL("D3DFMT_DXT4");
+        case D3DFMT_DXT5: return ST_LITERAL("D3DFMT_DXT5");
+        case D3DFMT_VERTEXDATA: return ST_LITERAL("D3DFMT_VERTEXDATA");
+        case D3DFMT_D16_LOCKABLE: return ST_LITERAL("D3DFMT_D16_LOCKABLE");
+        case D3DFMT_D32: return ST_LITERAL("D3DFMT_D32");
+        case D3DFMT_D15S1: return ST_LITERAL("D3DFMT_D15S1");
+        case D3DFMT_D24S8: return ST_LITERAL("D3DFMT_D24S8");
+        case D3DFMT_D16: return ST_LITERAL("D3DFMT_D16");
+        case D3DFMT_D24X8: return ST_LITERAL("D3DFMT_D24X8");
+        case D3DFMT_D24X4S4: return ST_LITERAL("D3DFMT_D24X4S4");
+        case D3DFMT_INDEX16: return ST_LITERAL("D3DFMT_INDEX16");
+        case D3DFMT_INDEX32: return ST_LITERAL("D3DFMT_INDEX32");
+        default: return ST_LITERAL("Bad format");
     }
 }
 
@@ -10590,7 +10563,7 @@ void plDXPipeline::IReleaseBlurVBuffers()
         if (fBlurVBuffers[i])
         {
             ReleaseObject(fBlurVBuffers[i]);
-            PROFILE_POOL_MEM(D3DPOOL_DEFAULT, 4 * kVSize, false, "BlurVtxBuff");
+            PROFILE_POOL_MEM(D3DPOOL_DEFAULT, 4 * kVSize, false, ST_LITERAL("BlurVtxBuff"));
             fBlurVBuffers[i] = nullptr;
         }
     }
@@ -10673,7 +10646,7 @@ bool plDXPipeline::ICreateBlurVBuffers()
             vBuffer->Release();
             return false;
         }
-        PROFILE_POOL_MEM(D3DPOOL_DEFAULT, 4 * kVSize, true, "BlurVtxBuff");
+        PROFILE_POOL_MEM(D3DPOOL_DEFAULT, 4 * kVSize, true, ST_LITERAL("BlurVtxBuff"));
 
         plShadowVertStruct vert;
         vert.fPos[0] = -1.f;

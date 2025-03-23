@@ -44,6 +44,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "HeadSpin.h"
 
+#include <string_theory/string>
+
 #ifndef PLASMA_EXTERNAL_RELEASE
 #define PL_PROFILE_ENABLED
 #endif
@@ -79,23 +81,25 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #ifdef PL_PROFILE_ENABLED
 
-#define plProfile_CreateTimerNoReset(name, group, varName)  plProfileVar gProfileVar##varName(name, group, plProfileVar::kDisplayTime | plProfileVar::kDisplayNoReset)
-#define plProfile_CreateTimer(name, group, varName) plProfileVar gProfileVar##varName(name, group, plProfileVar::kDisplayTime)
-#define plProfile_CreateAsynchTimer(name, group, varName)   plProfileVar gProfileVar##varName(name, group, plProfileVar::kDisplayTime | plProfileVar::kDisplayResetEveryBegin | plProfileVar::kDisplayNoReset)
+#define plProfile_CreateTimerNoReset(name, group, varName)  plProfileVar gProfileVar##varName(ST_LITERAL(name), ST_LITERAL(group), plProfileVar::kDisplayTime | plProfileVar::kDisplayNoReset)
+#define plProfile_CreateTimer(name, group, varName) plProfileVar gProfileVar##varName(ST_LITERAL(name), ST_LITERAL(group), plProfileVar::kDisplayTime)
+#define plProfile_CreateAsynchTimer(name, group, varName)   plProfileVar gProfileVar##varName(ST_LITERAL(name), ST_LITERAL(group), plProfileVar::kDisplayTime | plProfileVar::kDisplayResetEveryBegin | plProfileVar::kDisplayNoReset)
 #define plProfile_BeginTiming(varName)              gProfileVar##varName.BeginTiming()
 #define plProfile_EndTiming(varName)                gProfileVar##varName.EndTiming()
+#define plProfile_TimingGuard(varName)              plProfileVar_TimingGuard hsUniqueIdentifier(ProfileTimer)(gProfileVar##varName)
 #define plProfile_BeginLap(varName, lapName)        gProfileVar##varName.BeginLap(lapName)
 #define plProfile_EndLap(varName, lapName)          gProfileVar##varName.EndLap(lapName)
+#define plProfile_LapGuard(varName, lapName)        plProfileVar_LapGuard hsUniqueIdentifier(ProfileLap)(gProfileVar##varName, lapName)
 
-#define plProfile_CreateCounter(name, group, varName)   plProfileVar gProfileVar##varName(name, group, plProfileVar::kDisplayCount)
-#define plProfile_CreateCounterNoReset(name, group, varName)    plProfileVar gProfileVar##varName(name, group, plProfileVar::kDisplayCount | plProfileVar::kDisplayNoReset)
+#define plProfile_CreateCounter(name, group, varName)   plProfileVar gProfileVar##varName(ST_LITERAL(name), ST_LITERAL(group), plProfileVar::kDisplayCount)
+#define plProfile_CreateCounterNoReset(name, group, varName)    plProfileVar gProfileVar##varName(ST_LITERAL(name), ST_LITERAL(group), plProfileVar::kDisplayCount | plProfileVar::kDisplayNoReset)
 #define plProfile_Inc(varName)                          gProfileVar##varName.Inc()
 #define plProfile_IncCount(varName, count)              gProfileVar##varName.Inc(count)
 #define plProfile_Dec(varName)                          gProfileVar##varName.Dec()
 #define plProfile_Set(varName, value)                   gProfileVar##varName.Set(value)
 
-#define plProfile_CreateMemCounter(name, group, varName)    plProfileVar gProfileVar##varName(name, group, plProfileVar::kDisplayMem | plProfileVar::kDisplayNoReset)
-#define plProfile_CreateMemCounterReset(name, group, varName)   plProfileVar gProfileVar##varName(name, group, plProfileVar::kDisplayMem)
+#define plProfile_CreateMemCounter(name, group, varName)    plProfileVar gProfileVar##varName(ST_LITERAL(name), ST_LITERAL(group), plProfileVar::kDisplayMem | plProfileVar::kDisplayNoReset)
+#define plProfile_CreateMemCounterReset(name, group, varName)   plProfileVar gProfileVar##varName(ST_LITERAL(name), ST_LITERAL(group), plProfileVar::kDisplayMem)
 #define plProfile_NewMem(varName, memAmount)                gProfileVar##varName.NewMem(memAmount)
 #define plProfile_DelMem(varName, memAmount)                gProfileVar##varName.DelMem(memAmount)
 
@@ -111,8 +115,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #define plProfile_CreateAsynchTimer(name, group, varName)
 #define plProfile_BeginTiming(varName)
 #define plProfile_EndTiming(varName)
+#define plProfile_TimingGuard(varName)
 #define plProfile_BeginLap(varName, lapName)
 #define plProfile_EndLap(varName, lapName)
+#define plProfile_LapGuard(varName, lapName)
 
 #define plProfile_CreateCounter(name, group, varName)
 #define plProfile_CreateCounterNoReset(name, group, varName)
@@ -151,7 +157,7 @@ public:
     };
 
 protected:
-    const char* fName;      // Name of timer
+    ST::string fName; // Name of timer
 
     uint64_t fValue;
 
@@ -168,7 +174,7 @@ protected:
 
     void IAddAvg();
 
-    void IPrintValue(uint64_t value, char* buf, bool printType);
+    ST::string IPrintValue(uint64_t value, bool printType);
 
 public:
     plProfileBase();
@@ -181,13 +187,13 @@ public:
 
     uint64_t GetValue();
 
-    void PrintValue(char* buf, bool printType=true);
-    void PrintAvg(char* buf, bool printType=true);
-    void PrintMax(char* buf, bool printType=true);
+    ST::string PrintValue(bool printType = true);
+    ST::string PrintAvg(bool printType = true);
+    ST::string PrintMax(bool printType = true);
 
     uint32_t GetTimerSamples() const { return fTimerSamples; }
 
-    const char* GetName() { return fName; }
+    ST::string GetName() const { return fName; }
 
     void SetActive(bool s) { fActive = s; }
 
@@ -202,7 +208,7 @@ public:
 class plProfileVar : public plProfileBase
 {
 protected:
-    const char* fGroup;
+    ST::string fGroup;
     plProfileLaps* fLaps;
     bool fLapsActive;
 
@@ -210,13 +216,13 @@ protected:
 
     void IBeginTiming();
     void IEndTiming();
-    
-    void IBeginLap(const char* lapName); 
-    void IEndLap(const char* lapName);
+
+    void IBeginLap(const ST::string& lapName);
+    void IEndLap(const ST::string& lapName);
 
 public:
     // Name is the timer name. Each timer group gets its own plStatusLog
-    plProfileVar(const char *name, const char* group, uint8_t flags);
+    plProfileVar(ST::string name, ST::string group, uint8_t flags);
     ~plProfileVar();
 
     // For timing
@@ -238,15 +244,60 @@ public:
     // Will output to log like
     // Timername : lapCnt: (lapName) : 3.22 msec
     //
-    void BeginLap(const char* lapName) { if(fActive && fRunning) IBeginLap(lapName); }
-    void EndLap(const char* lapName) { if(fActive && fRunning) IEndLap(lapName); }
-    
-    const char* GetGroup() { return fGroup; }
+    void BeginLap(const ST::string& lapName) { if (fActive && fRunning) IBeginLap(lapName); }
+    void EndLap(const ST::string& lapName) { if (fActive && fRunning) IEndLap(lapName); }
+
+    ST::string GetGroup() const { return fGroup; }
 
     plProfileLaps* GetLaps() { return fLaps; }
 
     // Enable Lap Sampling
     void SetLapsActive(bool s) { fLapsActive = s; }
+};
+
+class plProfileVar_TimingGuard
+{
+    plProfileVar& fVar;
+
+public:
+    plProfileVar_TimingGuard(plProfileVar& var)
+        : fVar(var)
+    {
+        fVar.BeginTiming();
+    }
+
+    // These are just RAII helpers for the macros, so we don't allow
+    // moving the locks around.
+    plProfileVar_TimingGuard(const plProfileVar_TimingGuard&) = delete;
+    plProfileVar_TimingGuard(plProfileVar_TimingGuard&&) = delete;
+
+    ~plProfileVar_TimingGuard()
+    {
+        fVar.EndTiming();
+    }
+};
+
+class plProfileVar_LapGuard
+{
+    plProfileVar& fVar;
+    ST::string    fLap;
+
+public:
+    plProfileVar_LapGuard(plProfileVar& var, ST::string lap)
+        : fVar(var), fLap(std::move(lap))
+    {
+        fVar.BeginLap(fLap);
+    }
+
+    // These are just RAII helpers for the macros, so we don't allow
+    // moving the locks around.
+    plProfileVar_LapGuard(const plProfileVar_LapGuard&) = delete;
+    plProfileVar_LapGuard(plProfileVar_LapGuard&&) = delete;
+
+    ~plProfileVar_LapGuard()
+    {
+        fVar.EndLap(fLap);
+    }
 };
 
 #endif // plProfile_h_inc

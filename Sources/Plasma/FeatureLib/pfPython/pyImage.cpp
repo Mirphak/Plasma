@@ -40,22 +40,26 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
+#include "pyImage.h"
+
+#include <vector>
+
 #include <string_theory/format>
 
-#include "pyKey.h"
-
-#include "plFileSystem.h"
 #include "hsResMgr.h"
+#include "plFileSystem.h"
 
-#include "pyColor.h"
+#include "pnKeyedObject/plUoid.h"
 
-#include "pyImage.h"
-#include "pyGeometry3.h"
 #include "plGImage/plJPEG.h"
 #include "plGImage/plMipmap.h"
 #include "plGImage/plPNG.h"
-#include "pnKeyedObject/plUoid.h"
+#include "plResMgr/plKeyFinder.h"
+
+#include "pyColor.h"
+#include "pyGeometry3.h"
+#include "pyGlueHelpers.h"
+#include "pyKey.h"
 
 void pyImage::setKey(pyKey& mipmapKey) // only for python glue, do NOT call
 {
@@ -198,6 +202,17 @@ void pyImage::SaveAsJPEG(const plFileName& fileName, uint8_t quality)
 void pyImage::SaveAsPNG(const plFileName& fileName, const std::multimap<ST::string, ST::string>& textFields)
 {
     plPNG::Instance().WriteToFile(fileName, this->GetImage(), textFields);
+}
+
+PyObject* pyImage::Find(const ST::string& name)
+{
+    std::vector<plKey> foundKeys;
+    plKeyFinder::Instance().ReallyStupidSubstringSearch(name, plMipmap::Index(), foundKeys);
+
+    PyObject* tup = PyTuple_New(foundKeys.size());
+    for (size_t i = 0; i < foundKeys.size(); ++i)
+        PyTuple_SET_ITEM(tup, i, pyImage::New(foundKeys[i]));
+    return tup;
 }
 
 PyObject* pyImage::LoadJPEGFromDisk(const plFileName& filename, uint16_t width, uint16_t height)

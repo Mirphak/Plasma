@@ -54,6 +54,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "hsLockGuard.h"
 #include <mutex>
 #include <string>
+#include <utility>
 
 #ifdef HS_DEBUGGING
 # define NCCLI_LOG  LogMsg
@@ -99,7 +100,6 @@ namespace pnNetCli {
 ***/
 
 enum ENetCliMode {
-    kNetCliModeServerStart,
     kNetCliModeClientStart,
     kNetCliModeEncrypted,
     kNumNetCliModes
@@ -119,9 +119,7 @@ struct NetCli {
 
     // communication channel
     AsyncSocket             sock;
-    ENetProtocol            protocol;
     NetMsgChannel *         channel;
-    bool                    server;
 
     // message send/recv
     const NetMsgInitRecv *  recvMsg;
@@ -137,17 +135,15 @@ struct NetCli {
     uint8_t                 seed[kNetMaxSymmetricSeedBytes];
     CryptKey *              cryptIn; // nil if encrytpion is disabled
     CryptKey *              cryptOut; // nil if encrytpion is disabled
-    void *                  encryptParam;
 
     // Message buffers
     uint8_t                    sendBuffer[kAsyncSocketBufferSize];
     std::vector<uint8_t>       recvBuffer;
 
     NetCli()
-        : sock(), protocol(), channel(), server(), recvMsg()
+        : sock(), channel(), recvMsg()
         , recvField(), recvFieldBytes(), recvDispatch(), sendCurr(), mode()
-        , encryptFcn(), seed(), cryptIn(), cryptOut(), encryptParam()
-        , sendBuffer()
+        , encryptFcn(), seed(), cryptIn(), cryptOut(), sendBuffer()
     {
     }
 };
@@ -178,7 +174,7 @@ static void PutBufferOnWire (NetCli * cli, void * data, unsigned bytes) {
     // Write to the netlog
     if (s_netlog) {
         NetLogMessage_Header header;
-        header.m_protocol = cli->protocol;
+        header.m_protocol = NetMsgChannelGetProtocol(cli->channel);
         header.m_direction = 0; // kCli2Srv
         header.m_time = GetAdjustedTimer();
         header.m_size = bytes;
@@ -301,8 +297,6 @@ static void BufferedSendData (
                         *(uint16_t*)&temp[0] = hsToLE16(*(uint16_t*)msg);
                     } else if (cmd->size == sizeof(uint32_t)) {
                         *(uint32_t*)&temp[0] = hsToLE32(*(uint32_t*)msg);
-                    } else if (cmd->size == sizeof(uint64_t)) {
-                        *(uint64_t*)&temp[0] = hsToLE64(*(uint64_t*)msg);
                     }
                 } else {
                     // Value arrays are passed in by ptr
@@ -313,36 +307,6 @@ static void BufferedSendData (
                             *(uint16_t*)&temp[i] = hsToLE16(((uint16_t*)*msg)[i]);
                         } else if (cmd->size == sizeof(uint32_t)) {
                             *(uint32_t*)&temp[i] = hsToLE32(((uint32_t*)*msg)[i]);
-                        } else if (cmd->size == sizeof(uint64_t)) {
-                            *(uint64_t*)&temp[i] = hsToLE64(((uint64_t*)*msg)[i]);
-                        }
-                    }
-                }
-
-                // Write values to send buffer
-                AddToSendBuffer(cli, bytes, temp.get());
-            }
-            break;
-
-            case kNetMsgFieldReal: {
-                const unsigned count = cmd->count ? cmd->count : 1;
-                const unsigned bytes = cmd->size * count;
-                auto temp = std::make_unique<uint8_t[]>(bytes);
-
-                if (count == 1) {
-                    // Single values are passed in by value
-                    if (cmd->size == sizeof(float)) {
-                        *(float*)&temp[0] = hsToLEFloat(*(float*)msg);
-                    } else if (cmd->size == sizeof(double)) {
-                        *(double*)&temp[0] = hsToLEFloat(*(double*)msg);
-                    }
-                } else {
-                    // Value arrays are passed in by ptr
-                    for (size_t i = 0; i < count; i++) {
-                        if (cmd->size == sizeof(float)) {
-                            *(float*)&temp[i] = hsToLEFloat(((float*)*msg)[i]);
-                        } else if (cmd->size == sizeof(double)) {
-                            *(double*)&temp[i] = hsToLEFloat(((double*)*msg)[i]);
                         }
                     }
                 }
@@ -372,8 +336,7 @@ static void BufferedSendData (
             }
             break;
 
-            case kNetMsgFieldData:
-            case kNetMsgFieldRawData: {
+            case kNetMsgFieldData: {
                 // write values to send buffer
                 AddToSendBuffer(cli, cmd->count * cmd->size, (const void *) *msg);
             }
@@ -390,20 +353,12 @@ static void BufferedSendData (
             }
             break;
 
-            case kNetMsgFieldVarPtr:
-            case kNetMsgFieldRawVarPtr: {
+            case kNetMsgFieldVarPtr: {
                 ASSERT(varSize);
                 // write var sized array
                 AddToSendBuffer(cli, varCount * varSize, (const void *) *msg);
                 varCount    = 0;
                 varSize     = 0;
-            }
-            break;
-
-            case kNetMsgFieldPtr:
-            case kNetMsgFieldRawPtr: {
-                // write values
-                AddToSendBuffer(cli, cmd->count * cmd->size, (const void *) *msg);
             }
             break;
 
@@ -471,8 +426,6 @@ static bool DispatchData (NetCli * cli, void * param) {
                             ((uint16_t*)data)[i] = hsToLE16(((uint16_t*)data)[i]);
                         } else if (cli->recvField->size == sizeof(uint32_t)) {
                             ((uint32_t*)data)[i] = hsToLE32(((uint32_t*)data)[i]);
-                        } else if (cli->recvField->size == sizeof(uint64_t)) {
-                            ((uint64_t*)data)[i] = hsToLE64(((uint64_t*)data)[i]);
                         }
                     }
 
@@ -480,37 +433,7 @@ static bool DispatchData (NetCli * cli, void * param) {
                 }
                 break;
 
-                case kNetMsgFieldReal: {
-                    const unsigned count
-                        = cli->recvField->count
-                        ? cli->recvField->count
-                        : 1;
-
-                    // Get float values
-                    const unsigned bytes = count * cli->recvField->size;
-                    const size_t oldSize = cli->recvBuffer.size();
-                    cli->recvBuffer.resize(oldSize + bytes);
-                    uint8_t * data = cli->recvBuffer.data() + oldSize;
-                    if (!cli->input.Get(bytes, data)) {
-                        cli->recvBuffer.resize(oldSize);
-                        goto NEED_MORE_DATA;
-                    }
-
-                    // Convert to platform endianness
-                    for (size_t i = 0; i < count; i++) {
-                        if (cli->recvField->size == sizeof(float)) {
-                            ((float*)data)[i] = hsToLEFloat(((float*)data)[i]);
-                        } else if (cli->recvField->size == sizeof(double)) {
-                            ((double*)data)[i] = hsToLEDouble(((double*)data)[i]);
-                        }
-                    }
-
-                    // Field complete
-                }
-                break;
-
-                case kNetMsgFieldData:
-                case kNetMsgFieldRawData: {
+                case kNetMsgFieldData: {
                     // Read fixed-length data into destination buffer
                     const unsigned bytes = cli->recvField->count * cli->recvField->size;
                     const size_t oldSize = cli->recvBuffer.size();
@@ -546,8 +469,7 @@ static bool DispatchData (NetCli * cli, void * param) {
                 }
                 break;
 
-                case kNetMsgFieldVarPtr:
-                case kNetMsgFieldRawVarPtr: {
+                case kNetMsgFieldVarPtr: {
                     // Read var-length data into destination buffer
                     const unsigned bytes = cli->recvFieldBytes;
                     const size_t oldSize = cli->recvBuffer.size();
@@ -729,72 +651,6 @@ static void ClientConnect (NetCli * cli) {
 }
 
 //============================================================================
-static bool ServerRecvConnect (
-    NetCli *                    cli,
-    const NetCli_PacketHeader & pkt
-) {
-    // Validate connection state
-    if (cli->mode != kNetCliModeServerStart)
-        return false;
-
-    // Validate message size
-    const NetCli_Cli2Srv_Connect & msg =
-        * (const NetCli_Cli2Srv_Connect *) &pkt;
-    if (pkt.length < sizeof(msg))
-        return false;
-    int seedLength = msg.length - sizeof(pkt);
-
-    // Send the server seed to the client (unencrypted)
-    if (cli->sock) {
-        NetCli_Srv2Cli_Encrypt reply;
-        reply.message   = kNetCliSrv2CliEncrypt;
-        reply.length    = seedLength == 0 ? 0 : sizeof(reply); // reply with empty seed if we got empty seed (this means: no encryption)
-        memcpy(reply.serverSeed, cli->seed, sizeof(reply.serverSeed));
-        AsyncSocketSend(cli->sock, &reply, reply.length);
-    }
-
-    if (seedLength == 0) { // client wishes no encryption (that's okay, nobody else can "fake" us as nobody has the private key, so if the client actually wants encryption it will only work with the correct peer)
-        cli->cryptIn = nullptr;
-        cli->cryptOut = nullptr;
-    }
-    else {
-        // Compute client seed
-        uint8_t clientSeed[kNetMaxSymmetricSeedBytes];
-        plBigNum clientSeedValue;
-        {
-            NetMsgCryptServerConnect(
-                cli->channel,
-                seedLength,
-                msg.dh_y_data,
-                &clientSeedValue
-            );
-
-            memset(&clientSeed, 0, sizeof(clientSeed));
-            unsigned bytes;
-            unsigned char * data = clientSeedValue.GetData_LE(&bytes);
-            memcpy(clientSeed, data, std::min(size_t(bytes), sizeof(clientSeed)));
-            delete [] data;
-        }
-
-        // Create the symmetric key from a combination
-        // of the client seed and the server seed
-        uint8_t sharedSeed[kNetMaxSymmetricSeedBytes];
-        CreateSymmetricKey(
-            sizeof(cli->seed),  cli->seed,  // server seed
-            sizeof(clientSeed), clientSeed, // client seed
-            sizeof(sharedSeed), sharedSeed  // combined seed
-        );
-
-        // Switch to encrypted mode
-        cli->cryptIn  = CryptKeyCreate(kCryptRc4, sizeof(sharedSeed), sharedSeed);
-        cli->cryptOut = CryptKeyCreate(kCryptRc4, sizeof(sharedSeed), sharedSeed);
-    }
-    
-    cli->mode = kNetCliModeEncrypted; // should rather be called "established", but whatever
-    return cli->encryptFcn(kNetSuccess, cli->encryptParam);
-}
-
-//============================================================================
 static bool ClientRecvEncrypt (
     NetCli *                    cli,
     const NetCli_PacketHeader & pkt
@@ -836,7 +692,7 @@ static bool ClientRecvEncrypt (
     }
 
     cli->mode = kNetCliModeEncrypted; // should rather be called "established", but whatever
-    return cli->encryptFcn(kNetSuccess, cli->encryptParam);
+    return cli->encryptFcn(kNetSuccess);
 }
 
 //============================================================================
@@ -854,21 +710,9 @@ static bool ClientRecvError (
     if (pkt.length < sizeof(msg))
         return false;
 
-    cli->encryptFcn((ENetError) msg.error, cli->encryptParam);
+    cli->encryptFcn((ENetError)msg.error);
     return false;
 }
-
-//============================================================================
-typedef bool (* FNetCliPacket)(
-    NetCli *                    cli,
-    const NetCli_PacketHeader & pkt
-);
-
-static const FNetCliPacket s_recvTbl[kNumNetCliMsgs] = {
-    ServerRecvConnect,
-    ClientRecvEncrypt,
-    ClientRecvError,
-};
 
 //===========================================================================
 static unsigned DispatchPacket (
@@ -884,10 +728,22 @@ static unsigned DispatchPacket (
             break;
         if (pkt.message >= kNumNetCliMsgs)
             break;
-        if (!s_recvTbl[pkt.message])
+
+        bool result = false;
+        switch (pkt.message) {
+            case kNetCliCli2SrvConnect:
+                hsAssert(false, "Server sent a client-to-server encryption packet!?");
+                break;
+            case kNetCliSrv2CliEncrypt:
+                result = ClientRecvEncrypt(cli, pkt);
+                break;
+            case kNetCliSrv2CliError:
+                result = ClientRecvError(cli, pkt);
+                break;
+        }
+        if (!result) {
             break;
-        if (!s_recvTbl[pkt.message](cli, pkt))
-            break;
+        }
 
         // Success!
         return pkt.length;
@@ -918,26 +774,14 @@ static void ResetSendRecv (NetCli * cli) {
 }
 
 //===========================================================================
-static NetCli * ConnCreate (
-    AsyncSocket     sock,
-    unsigned        protocol,
-    ENetCliMode     mode
-) {
-    // find channel
-    unsigned largestRecv;
-    NetMsgChannel * channel = NetMsgChannelLock(
-        protocol,
-        mode == kNetCliModeServerStart,
-        &largestRecv
-    );
-    if (!channel)
-        return nullptr;
+static NetCli* ConnCreate(AsyncSocket sock, NetMsgChannel* channel)
+{
+    NetMsgChannelLock(channel);
 
     NetCli * const cli  = new NetCli;
     cli->sock           = sock;
-    cli->protocol       = (ENetProtocol) protocol;
     cli->channel        = channel;
-    cli->mode           = mode;
+    cli->mode           = kNetCliModeClientStart;
 
 #if !defined(PLASMA_EXTERNAL_RELEASE) && defined(HS_BUILD_FOR_WIN32)
     // Network debug pipe
@@ -990,22 +834,18 @@ static void SetConnSeed (
 //============================================================================
 NetCli * NetCliConnectAccept (
     AsyncSocket         sock,
-    unsigned            protocol,
+    NetMsgChannel*      channel,
     bool                unbuffered,
     FNetCliEncrypt      encryptFcn,
     unsigned            seedBytes,
-    const uint8_t          seedData[],
-    void *              encryptParam
+    const uint8_t       seedData[]
 ) {
     // Create connection
-    NetCli * cli = ConnCreate(sock, protocol, kNetCliModeClientStart);
-    if (cli) {
-        AsyncSocketEnableNagling(sock, !unbuffered);
-        cli->encryptFcn     = encryptFcn;
-        cli->encryptParam   = encryptParam;
-        SetConnSeed(cli, seedBytes, seedData);
-        Connect::ClientConnect(cli);
-    }
+    NetCli* cli = ConnCreate(sock, channel);
+    AsyncSocketEnableNagling(sock, !unbuffered);
+    cli->encryptFcn = std::move(encryptFcn);
+    SetConnSeed(cli, seedBytes, seedData);
+    Connect::ClientConnect(cli);
     return cli;
 }
 
@@ -1100,7 +940,7 @@ bool NetCliDispatch (
             // Write to the netlog
             if (s_netlog) {
                 NetLogMessage_Header header;
-                header.m_protocol = cli->protocol;
+                header.m_protocol = NetMsgChannelGetProtocol(cli->channel);
                 header.m_direction = 1; // kSrv2Cli
                 header.m_time = GetAdjustedTimer();
                 header.m_size = bytes;

@@ -155,6 +155,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pyJournalBook.h"
 
 #include "pyKeyMap.h"
+#include "pyImageLibMod.h"
+#include "pyLayer.h"
 #include "pyStream.h"
 
 #include "pyMoviePlayer.h"
@@ -930,6 +932,9 @@ void PythonInterface::initPython()
 
     // Initialize built-in Plasma modules. For some reason, when using the append-inittab thingy,
     // we get complaints about these modules being leaked :(
+    // Note: If you add a new built-in module,
+    // please add it to the list in Scripts/Python/plasma/generate_stubs.py
+    // so that a stub will be generated for the new module.
     IInitBuiltinModule("Plasma", "Plasma 2.0 Game Library", dbgLog, AddPlasmaClasses, AddPlasmaMethods);
     IInitBuiltinModule("PlasmaConstants", "Plasma 2.0 Constants", dbgLog, AddPlasmaConstantsClasses);
     IInitBuiltinModule("PlasmaGame", "Plasma 2.0 GameMgr Library", dbgLog, AddPlasmaGameClasses);
@@ -1037,6 +1042,7 @@ void PythonInterface::AddPlasmaMethods(PyObject* m)
     pyGUIDialog::AddPlasmaMethods(m);
     pyImage::AddPlasmaMethods(m);
     pyJournalBook::AddPlasmaMethods(m);
+    pyLayer::AddPlasmaMethods(m);
     pySDLModifier::AddPlasmaMethods(m);
     pySpawnPointInfo::AddPlasmaMethods(m);
 }
@@ -1079,8 +1085,10 @@ void PythonInterface::AddPlasmaClasses(PyObject* plasmaMod)
     pyDniInfoSource::AddPlasmaClasses(plasmaMod);
     pyDynamicText::AddPlasmaClasses(plasmaMod);
     pyImage::AddPlasmaClasses(plasmaMod);
+    pyImageLibMod::AddPlasmaClasses(plasmaMod);
     pyJournalBook::AddPlasmaClasses(plasmaMod);
     pyKeyMap::AddPlasmaClasses(plasmaMod);
+    pyLayer::AddPlasmaClasses(plasmaMod);
     pyMarkerMgr::AddPlasmaClasses(plasmaMod);
     pyMoviePlayer::AddPlasmaClasses(plasmaMod);
     pyNetLinkingMgr::AddPlasmaClasses(plasmaMod);
@@ -1724,69 +1732,21 @@ bool PythonInterface::RunPYC(PyObject* code, PyObject* module)
     return true;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//
-//  Function   : RunFunction
-//  PARAMETERS : module - module name to run 'name' in
-//             : name - name of function
-//             : args - tuple with arguments
-//
-//
-PyObject* PythonInterface::RunFunction(PyObject* module, const char* name, PyObject* args)
+bool PythonInterface::RunFunctionStringArg(const char* module, const char* name, const ST::string& arg)
 {
-    if (module == nullptr)
-        return nullptr;
-
-    PyObject* function = PyObject_GetAttrString(module, name);
-
-    PyObject* result = nullptr;
-    if (function != nullptr)
-    {
-        result = PyObject_Call(function, args, nullptr);
-        Py_DECREF(function);
-    }
-
-    return result;
-}
-
-PyObject* PythonInterface::ParseArgs(const char* args)
-{
-    PyObject* result = nullptr;
-    PyObject* scope = PyDict_New();
-    if (scope) 
-    {
-        //- Py_eval_input makes this function accept only single expresion (not statement)
-        //- When using empty scope, functions and classes like 'file' or '__import__' are not visible
-        result = PyRun_String(args, Py_eval_input, scope, nullptr);
-        Py_DECREF(scope);
-    }
-   
-    return result;
-}
-
-bool PythonInterface::RunFunctionSafe(const char* module, const char* function, const char* args) 
-{
-    PyObject* moduleObj = ImportModule(module);
+    pyObjectRef moduleObj = ImportModule(module);
     bool result = false;
-    if (moduleObj) 
-    {
-        PyObject* argsObj = ParseArgs(args);
-        if (argsObj) 
-        {
-            PyObject* callResult = RunFunction(moduleObj, function, argsObj);
-            if (callResult) 
-            {
+    if (moduleObj) {
+        pyObjectRef functionObj = PyObject_GetAttrString(moduleObj.Get(), name);
+        if (functionObj) {
+            pyObjectRef callResult = plPython::CallObject(functionObj, arg);
+            if (callResult) {
                 result = true;
-                Py_DECREF(callResult);
             }
-
-            Py_DECREF(argsObj);
         }
-        Py_DECREF(moduleObj);
     }
 
-    if (!result)
-    {
+    if (!result) {
         PyErr_Print();
     }
 

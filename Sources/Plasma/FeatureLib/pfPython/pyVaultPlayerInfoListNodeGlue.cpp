@@ -40,10 +40,11 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
-
 #include "pyVaultPlayerInfoListNode.h"
+
 #include "plVault/plVault.h"
+
+#include "pyGlueHelpers.h"
 
 // glue functions
 PYTHON_CLASS_DEFINITION(ptVaultPlayerInfoListNode, pyVaultPlayerInfoListNode);
@@ -120,7 +121,7 @@ PYTHON_START_METHODS_TABLE(ptVaultPlayerInfoListNode)
 PYTHON_END_METHODS_TABLE;
 
 // Type structure definition
-PLASMA_DEFAULT_TYPE_WBASE(ptVaultPlayerInfoListNode, pyVaultFolderNode, "Plasma vault player info list node");
+PLASMA_DEFAULT_TYPE_WBASE(ptVaultPlayerInfoListNode, pyVaultFolderNode, "Params: n=0\nPlasma vault player info list node");
 
 // required functions for PyObject interoperability
 PYTHON_CLASS_VAULT_NODE_NEW_IMPL(ptVaultPlayerInfoListNode, pyVaultPlayerInfoListNode)

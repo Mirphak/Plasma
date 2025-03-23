@@ -40,19 +40,20 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
-#include <string_theory/string>
+#include "cyMisc.h"
+
+#include <string_theory/string_stream>
 #include <vector>
 
-#include "pyGeometry3.h"
-#include "pyKey.h"
 #include "plPipeline.h"
 
-#include "cyMisc.h"
-#include "pyGlueHelpers.h"
-#include "pySceneObject.h"
-#include "pyAgeInfoStruct.h"
 #include "pnNetBase/pnNetBase.h"
+
+#include "pyAgeInfoStruct.h"
+#include "pyGeometry3.h"
+#include "pyGlueHelpers.h"
+#include "pyKey.h"
+#include "pySceneObject.h"
 
 PYTHON_GLOBAL_METHOD_DEFINITION(PtRequestLOSScreen, args, "Params: selfKey,ID,xPos,yPos,distance,what,reportType\nRequest a LOS check from a point on the screen")
 {
@@ -379,7 +380,7 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtDebugAssert, args, "Params: cond, msg\nDebug o
     PYTHON_RETURN_NONE;
 }
 
-PYTHON_GLOBAL_METHOD_DEFINITION_WKEY(PtDebugPrint, args, kwargs, "Params: *msgs, level, sep, end\n"
+PYTHON_GLOBAL_METHOD_DEFINITION_WKEY(PtDebugPrint, args, kwargs, "Params: *msgs, level=3, sep=\" \", end=\"\\n\"\n"
                                      "Prints msgs to the Python log given the message's level, "
                                      "optionally separated and terminated by the given strings")
 {
@@ -610,6 +611,11 @@ PYTHON_GLOBAL_METHOD_DEFINITION(PtEnablePlanarReflections, args, "Params: on\nEn
     PYTHON_RETURN_NONE;
 }
 
+PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtSupportsPlanarReflections, "Type: () -> bool\nReturns if planar reflections are supported")
+{
+    return PyBool_FromLong(cyMisc::ArePlanarReflectionsSupported() ? 1 : 0);
+}
+
 PYTHON_GLOBAL_METHOD_DEFINITION_NOARGS(PtGetSupportedDisplayModes, "Returns a list of supported resolutions")
 {
     std::vector<plDisplayMode> res;
@@ -818,6 +824,7 @@ void cyMisc::AddPlasmaMethods4(PyObject* m)
         PYTHON_GLOBAL_METHOD_NOARGS(PtCheckVisLOSFromCursor)
 
         PYTHON_GLOBAL_METHOD(PtEnablePlanarReflections)
+        PYTHON_GLOBAL_METHOD_NOARGS(PtSupportsPlanarReflections)
         PYTHON_GLOBAL_METHOD_NOARGS(PtGetSupportedDisplayModes)
         PYTHON_GLOBAL_METHOD_NOARGS(PtGetDesktopWidth)
         PYTHON_GLOBAL_METHOD_NOARGS(PtGetDesktopHeight)

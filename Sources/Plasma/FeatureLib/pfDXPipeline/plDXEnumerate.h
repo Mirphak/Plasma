@@ -42,6 +42,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef hsGDirect3DTnLEnumerate_h
 #define hsGDirect3DTnLEnumerate_h
 
+#include <string_theory/string>
 #include <vector>
 
 #include "HeadSpin.h"
@@ -60,9 +61,9 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 struct D3DEnum_ModeInfo
 {
     D3DDISPLAYMODE      fDDmode;
-    CHAR                fStrDesc[40];
+    ST::string fStrDesc;
     BOOL                fWindowed;
-    char                fBitDepth;
+    uint8_t fBitDepth;
     DWORD               fDDBehavior;
     std::vector<D3DFORMAT> fDepthFormats;
     std::vector<D3DMULTISAMPLE_TYPE> fFSAATypes;
@@ -79,10 +80,10 @@ struct D3DEnum_ModeInfo
 //       primary information recorded here is the D3DDEVICEDESC and a ptr to a
 //       list of valid display modes.
 //-----------------------------------------------------------------------------
-struct D3DEnum_DeviceInfo
+struct D3DEnum_RendererInfo
 {
     D3DDEVTYPE          fDDType;
-    CHAR                fStrName[40];
+    ST::string fStrName;
     D3DCAPS9            fDDCaps;
     BOOL                fCanWindow;
     BOOL                fCompatibleWithDesktop;
@@ -90,7 +91,7 @@ struct D3DEnum_DeviceInfo
 
     std::vector<D3DEnum_ModeInfo> fModes;
 
-    D3DEnum_DeviceInfo()
+    D3DEnum_RendererInfo()
         : fDDType(), fStrName(), fDDCaps(), fCanWindow(),
           fCompatibleWithDesktop(), fIsHardware() { }
 };
@@ -99,19 +100,19 @@ struct D3DEnum_DeviceInfo
 
 
 //-----------------------------------------------------------------------------
-// Name: D3DEnum_DriverInfo
-// Desc: Linked-list structure to hold information about a DirectX driver. The
-//       info stored is the capability bits for the driver plus a list
-//       of valid Direct3D devices for the driver. Note: most systems will only
-//       have one driver. The exception are multi-monitor systems, and systems
+// Name: D3DEnum_DisplayInfo
+// Desc: Linked-list structure to hold information about a DirectX display. The
+//       info stored is the capability bits for the display plus a list
+//       of valid Direct3D renderers for the display. Note: most systems will only
+//       have one display. The exception are multi-monitor systems, and systems
 //       with non-GDI 3D video cards.
 //-----------------------------------------------------------------------------
-struct D3DEnum_DriverInfo
+struct D3DEnum_DisplayInfo
 {
     GUID                 fGuid;
 
-    CHAR                 fStrDesc[40];
-    CHAR                 fStrName[40];
+    ST::string fStrDesc;
+    ST::string fStrName;
 
     unsigned int         fMemory;
 
@@ -121,12 +122,12 @@ struct D3DEnum_DriverInfo
     std::vector<D3DEnum_ModeInfo> fModes;
     D3DEnum_ModeInfo*       fCurrentMode;
 
-    std::vector<D3DEnum_DeviceInfo> fDevices;
-    D3DEnum_DeviceInfo*     fCurrentDevice;
+    std::vector<D3DEnum_RendererInfo> fRenderers;
+    D3DEnum_RendererInfo*     fCurrentRenderer;
 
-    D3DEnum_DriverInfo()
+    D3DEnum_DisplayInfo()
         : fGuid(), fStrDesc(), fStrName(), fMemory(), fAdapterInfo(),
-          fDesktopMode(), fCurrentMode(), fCurrentDevice() { }
+          fDesktopMode(), fCurrentMode(), fCurrentRenderer() { }
 };
 
 
@@ -136,16 +137,16 @@ class hsG3DDeviceMode;
 class hsGDirect3DTnLEnumerate
 {
 protected:
-    char    fEnumeErrorStr[128];            // Driver & device enumeration error message buffer
+    ST::string fEnumeErrorStr; // Driver & device enumeration error message buffer
 
-    std::vector<D3DEnum_DriverInfo> fDrivers;
+    std::vector<D3DEnum_DisplayInfo> fDisplays;
 
-    D3DEnum_DriverInfo*  fCurrentDriver;    // The selected DD driver
+    D3DEnum_DisplayInfo*  fCurrentDisplay;    // The selected DD driver
 
     static short    IGetDXBitDepth( D3DFORMAT format );
 
     /// DirectX Helper Functions
-    void    IEnumAdapterDevices( IDirect3D9 *pD3D, UINT iAdapter, D3DEnum_DriverInfo *drivInfo );
+    void    IEnumAdapterDevices( IDirect3D9 *pD3D, UINT iAdapter, D3DEnum_DisplayInfo *drivInfo );
     bool    IFindDepthFormats( IDirect3D9 *pD3D, UINT iAdapter, D3DDEVTYPE deviceType, D3DEnum_ModeInfo *modeInfo );
     bool    IFindFSAATypes( IDirect3D9 *pD3D, UINT iAdapter, D3DDEVTYPE deviceType, D3DEnum_ModeInfo *modeInfo );
     bool    ICheckCubicRenderTargets( IDirect3D9 *pD3D, UINT iAdapter, D3DDEVTYPE deviceType, D3DEnum_ModeInfo *modeInfo );
@@ -160,25 +161,22 @@ public:
 
     VOID    D3DEnum_FreeResources();
 
-    char* GetErrorString() { return (fEnumeErrorStr[0] ? fEnumeErrorStr : nullptr); }
-
     bool SelectFromDevMode(const hsG3DDeviceRecord* devRec, const hsG3DDeviceMode* devMode);
     HRESULT D3DEnum_SelectDefaultMode(int width, int height, int depth);
-    HRESULT D3DEnum_SelectDefaultDriver( DWORD dwFlags );
+    HRESULT D3DEnum_SelectDefaultDisplay( DWORD dwFlags );
 
-    size_t GetNumDrivers() { return fDrivers.size(); }
-    D3DEnum_DriverInfo* GetDriver(size_t i) { return &fDrivers[i]; }
+    size_t GetNumDisplays() { return fDisplays.size(); }
+    D3DEnum_DisplayInfo* GetDisplay(size_t i) { return &fDisplays[i]; }
 
-    D3DEnum_DriverInfo* GetCurrentDriver() { return fCurrentDriver; }
-    D3DEnum_DeviceInfo* GetCurrentDevice() { return GetCurrentDriver() ? GetCurrentDriver()->fCurrentDevice : nullptr; }
-    D3DEnum_ModeInfo* GetCurrentMode() { return GetCurrentDevice() ? GetCurrentDriver()->fCurrentMode : nullptr; }
+    D3DEnum_DisplayInfo* GetCurrentDisplay() { return fCurrentDisplay; }
+    D3DEnum_RendererInfo* GetCurrentRenderer() { return GetCurrentDisplay() ? GetCurrentDisplay()->fCurrentRenderer : nullptr; }
+    D3DEnum_ModeInfo* GetCurrentMode() { return GetCurrentRenderer() ? GetCurrentDisplay()->fCurrentMode : nullptr; }
 
-    void SetCurrentDriver(D3DEnum_DriverInfo* d) { fCurrentDriver = d; }
-    void SetCurrentDevice(D3DEnum_DeviceInfo* d) { hsAssert(GetCurrentDriver(), "Set Driver first"); GetCurrentDriver()->fCurrentDevice = d; } 
-    void SetCurrentMode(D3DEnum_ModeInfo* m) { hsAssert(GetCurrentDriver(), "Set Driver first"); GetCurrentDriver()->fCurrentMode = m; } 
+    void SetCurrentDisplay(D3DEnum_DisplayInfo* d) { fCurrentDisplay = d; }
+    void SetCurrentRenderer(D3DEnum_RendererInfo* d) { hsAssert(GetCurrentDisplay(), "Set Display first"); GetCurrentDisplay()->fCurrentRenderer = d; } 
+    void SetCurrentMode(D3DEnum_ModeInfo* m) { hsAssert(GetCurrentDisplay(), "Set Display first"); GetCurrentDisplay()->fCurrentMode = m; } 
 
-    char* GetEnumeErrorStr() { return fEnumeErrorStr; }
-    void SetEnumeErrorStr(const char* s);
+    ST::string GetEnumeErrorStr() const { return fEnumeErrorStr; }
 };
 
 

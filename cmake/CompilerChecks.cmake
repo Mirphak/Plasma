@@ -10,9 +10,11 @@ if(NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION)
     endif()
 endif()
 
-# Check for Linux sysinfo.
 include(CheckCXXSymbolExists)
+# Check for Linux sysinfo.
 check_cxx_symbol_exists("sysinfo" "sys/sysinfo.h" HAVE_SYSINFO)
+# Check for pthread setname_np API
+check_cxx_symbol_exists(pthread_setname_np pthread.h HAVE_PTHREAD_SETNAME_NP)
 
 # Check for BSD style sysctl.
 try_compile(HAVE_SYSCTL ${PROJECT_BINARY_DIR}
@@ -39,6 +41,9 @@ CHECK_INCLUDE_FILE("tmmintrin.h" HAVE_SSE4)
 CHECK_INCLUDE_FILE("pmmintrin.h" HAVE_SSE3)
 CHECK_INCLUDE_FILE("emmintrin.h" HAVE_SSE2)
 CHECK_INCLUDE_FILE("xmmintrin.h" HAVE_SSE1)
+
+# Check for Windows Shell Scaling DPI support
+CHECK_INCLUDE_FILE("ShellScalingApi.h" HAVE_SHELLSCALINGAPI)
 
 # GCC requires us to set the -m<instructionset> flag for the source file using the intrinsics.
 # We can't do that project-wide or we'll just crash on launch with an illegal instruction on some

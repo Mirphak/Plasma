@@ -71,11 +71,17 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
     typedef HWND hsWindowHndl;
     typedef HINSTANCE hsWindowInst;
     typedef HINSTANCE HMODULE;
+    typedef HMODULE hsLibraryHndl;
     typedef long HRESULT;
     typedef void* HANDLE;
+#elif HS_BUILD_FOR_MACOS
+    typedef void* hsWindowHndl;
+    typedef void* hsWindowInst;
+    typedef void* hsLibraryHndl;
 #else
     typedef int32_t* hsWindowHndl;
     typedef int32_t* hsWindowInst;
+    typedef void* hsLibraryHndl;
 #endif // HS_BUILD_FOR_WIN32
 
 //======================================
@@ -251,20 +257,6 @@ template <> inline double hsToLE(double value) { return hsToLEDouble(value); }
     void    hsStatusMessage(const char* message);
     void    hsStatusMessageF(const char * fmt, ...);
 #endif // PLASMA_EXTERNAL_RELEASE
-
-char*   hsStrcpy(char* dstOrNil, const char* src);
-
-inline char* hsStrcpy(const char* src)
-{
-    return hsStrcpy(nullptr, src);
-}
-
-inline char *hsStrncpy(char *strDest, const char *strSource, size_t count)
-{
-    char *temp = strncpy(strDest, strSource, count-1);
-    strDest[count-1] = 0;
-    return temp;
-}
 
 // Use "correct" non-standard string functions based on the
 // selected compiler / library

@@ -30,6 +30,7 @@ set(plNetClient_HEADERS
 )
 
 plasma_library(plNetClient
+    FOLDER PubUtilLib
     SOURCES ${plNetClient_SOURCES} ${plNetClient_HEADERS}
     PRECOMPILED_HEADERS Pch.h
     UNITY_BUILD
@@ -47,7 +48,6 @@ target_link_libraries(plNetClient
         plNetTransport
         plUnifiedTime
     PRIVATE
-        pnAsyncCore
         pnDispatch
         pnMessage
         pnModifier

@@ -64,6 +64,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 {
     NSString* urlString = [NSString stringWithSTString:GetServerStatusUrl()];
     NSURL* url = [NSURL URLWithString:urlString];
+    
+    if (!url || !url.host) {
+        self.serverStatusString = @"";
+        return;
+    }
+    
     NSURLSessionConfiguration* URLSessionConfiguration =
         [NSURLSessionConfiguration ephemeralSessionConfiguration];
     NSURLSession* session = [NSURLSession sessionWithConfiguration:URLSessionConfiguration

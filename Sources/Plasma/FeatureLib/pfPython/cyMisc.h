@@ -48,21 +48,22 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 // PURPOSE: Class wrapper to map misc functions, such as the console
 //
-class pyKey;
-class pySceneObject;
-class pyPlayer;
-class pyColor;
-class pyAgeInfoStruct;
-class pyPoint3;
 
 #include "HeadSpin.h"
+#include <vector>
 
-class pyGUIDialog;
-class plPipeline;
-class plDisplayMode;
-class plUUID;
-class plFileName;
 struct PipelineParams;
+class plDisplayMode;
+class plFileName;
+class plPipeline;
+class plUUID;
+class pyAgeInfoStruct;
+class pyColor;
+class pyGUIDialog;
+class pyKey;
+class pyPlayer;
+class pyPoint3;
+class pySceneObject;
 namespace ST { class string; }
 
 typedef struct _object PyObject;
@@ -897,6 +898,7 @@ public:
     static ST::string GetLocalizedString(const ST::string& name, const std::vector<ST::string> & arguments);
 
     static void EnablePlanarReflections(bool enable = true);
+    static bool ArePlanarReflectionsSupported();
     static void SetGraphicsOptions(int Width, int Height, int ColorDepth, bool Windowed, int NumAASamples, int MaxAnisotropicSamples, bool VSync);
     static void GetSupportedDisplayModes(std::vector<plDisplayMode> *res);
     static int GetDesktopWidth();

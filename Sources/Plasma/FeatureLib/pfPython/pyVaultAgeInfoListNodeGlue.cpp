@@ -40,10 +40,11 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
-
 #include "pyVaultAgeInfoListNode.h"
+
 #include "plVault/plVault.h"
+
+#include "pyGlueHelpers.h"
 
 // glue functions
 PYTHON_CLASS_DEFINITION(ptVaultAgeInfoListNode, pyVaultAgeInfoListNode);
@@ -104,7 +105,7 @@ PYTHON_START_METHODS_TABLE(ptVaultAgeInfoListNode)
 PYTHON_END_METHODS_TABLE;
 
 // Type structure definition
-PLASMA_DEFAULT_TYPE_WBASE(ptVaultAgeInfoListNode, pyVaultFolderNode, "Plasma vault age info list node");
+PLASMA_DEFAULT_TYPE_WBASE(ptVaultAgeInfoListNode, pyVaultFolderNode, "Params: n=0\nPlasma vault age info list node");
 
 // required functions for PyObject interoperability
 PYTHON_CLASS_VAULT_NODE_NEW_IMPL(ptVaultAgeInfoListNode, pyVaultAgeInfoListNode);

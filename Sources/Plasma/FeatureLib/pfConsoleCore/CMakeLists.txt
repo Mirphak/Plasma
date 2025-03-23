@@ -1,9 +1,9 @@
 set(pfConsoleCore_SOURCES
     pfConsoleCmd.cpp
-    pfConsoleCommandsCore.cpp
     pfConsoleContext.cpp
     pfConsoleEngine.cpp
     pfConsoleParser.cpp
+    pfServerIni.cpp
 )
 
 set(pfConsoleCore_HEADERS
@@ -11,9 +11,13 @@ set(pfConsoleCore_HEADERS
     pfConsoleContext.h
     pfConsoleEngine.h
     pfConsoleParser.h
+    pfServerIni.h
 )
 
-plasma_library(pfConsoleCore SOURCES ${pfConsoleCore_SOURCES} ${pfConsoleCore_HEADERS})
+plasma_library(pfConsoleCore
+    FOLDER FeatureLib
+    SOURCES ${pfConsoleCore_SOURCES} ${pfConsoleCore_HEADERS}
+)
 target_link_libraries(
     pfConsoleCore
     PUBLIC

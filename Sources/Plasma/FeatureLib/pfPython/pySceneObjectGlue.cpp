@@ -40,14 +40,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
+#include "pySceneObject.h"
+
 #include <string_theory/string>
 
 #include "pyGeometry3.h"
-#include "pyKey.h"
+#include "pyGlueHelpers.h"
 #include "pyMatrix44.h"
-
-#include "pySceneObject.h"
 
 // glue functions
 PYTHON_CLASS_DEFINITION(ptSceneobject, pySceneObject);
@@ -178,6 +177,15 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptSceneobject, getPythonMods)
     PyObject *retVal = PyList_New(vecList.size());
     for (int curKey = 0; curKey < vecList.size(); curKey++)
         PyList_SetItem(retVal, curKey, vecList[curKey]); // steals the vecList ref
+    return retVal;
+}
+
+PYTHON_METHOD_DEFINITION_NOARGS(ptSceneobject, getImageLibMods)
+{
+    std::vector<PyObject*> vecList = self->fThis->GetImageLibMods();
+    PyObject* retVal = PyTuple_New(vecList.size());
+    for (int curKey = 0; curKey < vecList.size(); curKey++)
+        PyTuple_SET_ITEM(retVal, curKey, vecList[curKey]);
     return retVal;
 }
 
@@ -484,6 +492,7 @@ PYTHON_START_METHODS_TABLE(ptSceneobject)
                 "- If there are more than one sceneobject attached, return just the first one"),
     PYTHON_METHOD_NOARGS(ptSceneobject, getResponders, "Returns list of ptKeys of the responders attached to this sceneobject"),
     PYTHON_METHOD_NOARGS(ptSceneobject, getPythonMods, "Returns list of ptKeys of the python modifiers attached to this sceneobject"),
+    PYTHON_METHOD_NOARGS(ptSceneobject, getImageLibMods, "Returns list of ptKeys of the image library modifiers attached to this sceneobject"),
     PYTHON_METHOD_NOARGS(ptSceneobject, isLocallyOwned, "Returns true(1) if this object is locally owned by this client\n"
                 "or returns false(0) if it is not or don't know"),
 

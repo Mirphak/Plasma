@@ -42,6 +42,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 // System Frameworks
 #import <Cocoa/Cocoa.h>
+#ifdef PLASMA_PIPELINE_GL
+#import <OpenGL/gl.h>
+#endif
+#ifdef PLASMA_PIPELINE_METAL
+#import <Metal/Metal.h>
+#endif
 #import <QuartzCore/QuartzCore.h>
 
 // Cocoa client
@@ -55,6 +61,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 // stdlib
 #include <algorithm>
 #include <regex>
+#include <string_theory/format>
 #include <unordered_set>
 
 // Plasma engine
@@ -62,8 +69,15 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plClient/plClientLoader.h"
 #include "plCmdParser.h"
 #include "pfConsoleCore/pfConsoleEngine.h"
+#include "pfConsoleCore/pfServerIni.h"
 #include "pfGameGUIMgr/pfGameGUIMgr.h"
+#ifdef PLASMA_PIPELINE_GL
+#include "pfGLPipeline/plGLPipeline.h"
+#endif
 #include "plInputCore/plInputDevice.h"
+#ifdef PLASMA_PIPELINE_METAL
+#include "pfMetalPipeline/plMetalPipeline.h"
+#endif
 #include "plMessage/plDisplayScaleChangedMsg.h"
 #include "plMessageBox/hsMessageBox.h"
 #include "plNetClient/plNetClientMgr.h"
@@ -120,8 +134,6 @@ void plClient::IResizeNativeDisplayDevice(int width, int height, bool windowed)
 }
 void plClient::IChangeResolution(int width, int height) {}
 void plClient::IUpdateProgressIndicator(plOperationProgress* progress) {}
-void plClient::InitDLLs() {}
-void plClient::ShutdownDLLs() {}
 void plClient::ShowClientWindow() {}
 void plClient::FlashWindow()
 {
@@ -140,7 +152,8 @@ enum {
     kArgStartUpAgeName,
     kArgPvdFile,
     kArgSkipIntroMovies,
-    kArgRenderer
+    kArgRenderer,
+    kArgNoSelfPatch
 };
 
 static const plCmdArgDef s_cmdLineArgs[] = {
@@ -154,6 +167,7 @@ static const plCmdArgDef s_cmdLineArgs[] = {
     { kCmdArgFlagged  | kCmdTypeString,     "PvdFile",         kArgPvdFile },
     { kCmdArgFlagged  | kCmdTypeBool,       "SkipIntroMovies", kArgSkipIntroMovies },
     { kCmdArgFlagged  | kCmdTypeString,     "Renderer",        kArgRenderer },
+    { kCmdArgFlagged  | kCmdTypeBool,       "NoSelfPatch",     kArgNoSelfPatch }
 };
 
 plCmdParser cmdParser(s_cmdLineArgs, std::size(s_cmdLineArgs));
@@ -161,6 +175,8 @@ plCmdParser cmdParser(s_cmdLineArgs, std::size(s_cmdLineArgs));
 PF_CONSOLE_LINK_ALL()
 
 @implementation AppDelegate
+
+static void* const DeviceDidChangeContext = (void*)&DeviceDidChangeContext;
 
 - (id)init
 {
@@ -181,6 +197,9 @@ PF_CONSOLE_LINK_ALL()
     self.plsView = view;
     window.contentView = view;
     [window setDelegate:self];
+    
+    gClient.SetClientWindow((__bridge void *)view.layer);
+    gClient.SetClientDisplay((hsWindowHndl)NULL);
 
     self = [super initWithWindow:window];
     self.window.acceptsMouseMovedEvents = YES;
@@ -302,8 +321,12 @@ dispatch_queue_t loadingQueue = dispatch_queue_create("", DISPATCH_QUEUE_SERIAL)
     FILE* serverIniFile = plFileSystem::Open(serverIni, "rb");
     if (serverIniFile) {
         fclose(serverIniFile);
-        pfConsoleEngine tempConsole;
-        tempConsole.ExecuteFile(serverIni);
+        try {
+            pfServerIni::Load(serverIni);
+        } catch (const pfServerIniParseException& exc) {
+            hsMessageBox(ST::format("Error in server.ini file. Please check your URU installation.\n{}", exc.what()), ST_LITERAL("Error"), hsMessageBoxNormal);
+            [NSApplication.sharedApplication terminate:nil];
+        }
     } else {
         hsMessageBox(ST_LITERAL("No server.ini file found.  Please check your URU installation."), ST_LITERAL("Error"), hsMessageBoxNormal);
         [NSApplication.sharedApplication terminate:nil];
@@ -336,7 +359,8 @@ dispatch_queue_t loadingQueue = dispatch_queue_create("", DISPATCH_QUEUE_SERIAL)
     NetCommConnect();
     [[PLSServerStatus sharedStatus] loadServerStatus];
 
-    if (gDataServerLocal) {
+    BOOL skipPatch = cmdParser.IsSpecified(kArgNoSelfPatch);
+    if (gDataServerLocal || skipPatch) {
         [self initializeClient];
     } else {
         [self prepatch];
@@ -401,12 +425,37 @@ dispatch_queue_t loadingQueue = dispatch_queue_create("", DISPATCH_QUEUE_SERIAL)
     [self.patcherWindow patcher:patcher beganDownloadOfFile:file];
 }
 
-- (void)patcherCompleted:(PLSPatcher*)patcher
+- (void)patcherCompleted:(PLSPatcher*)patcher didSelfPatch:(BOOL)selfPatched
 {
     self.patcher = nil;
     [NSApp endModalSession:self.currentModalSession];
     [self.patcherWindow.window close];
-    [self initializeClient];
+    if (selfPatched) {
+        NSError* error;
+        NSURL* finalURL = [patcher completeSelfPatch:&error];
+        
+        if (error) {
+            // uh oh, we couldn't self patch, present the error and bail
+            // this should be very rare and could be related to permissions issues
+            // we expect the game directory to be writable by all
+            NSAlert* errorAlert = [NSAlert alertWithError:error];
+            [errorAlert runModal];
+            [NSApp terminate:self];
+            // return just in case we ever reach here
+            return;
+        }
+        
+        // Pass the "we've already patched" argument
+        NSArray* applicationArguments = [[[NSProcessInfo processInfo] arguments] arrayByAddingObject:@"-NoSelfPatch"];
+        
+        // no longer current, bye bye
+        [[NSWorkspace sharedWorkspace] launchApplicationAtURL:finalURL options:NSWorkspaceLaunchNewInstance configuration:@{NSWorkspaceLaunchConfigurationArguments: applicationArguments} error:nil];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [NSApp terminate:self];
+        });
+    } else {
+        [self initializeClient];
+    }
 }
 
 - (void)patcherCompletedWithError:(PLSPatcher*)patcher error:(NSError*)error
@@ -414,9 +463,8 @@ dispatch_queue_t loadingQueue = dispatch_queue_create("", DISPATCH_QUEUE_SERIAL)
     NSAlert* failureAlert = [NSAlert alertWithError:error];
     [failureAlert beginSheetModalForWindow:self.patcherWindow.window
                          completionHandler:^(NSModalResponse returnCode){
-
+                                [NSApp terminate:self];
                          }];
-    [NSApp terminate:self];
 }
 
 - (void)patcher:(PLSPatcher*)patcher
@@ -445,17 +493,15 @@ dispatch_queue_t loadingQueue = dispatch_queue_create("", DISPATCH_QUEUE_SERIAL)
 
     // Window controller
     [self.window setContentSize:NSMakeSize(800, 600)];
-    // #if 0
-    // allow this executation path to start in full screen
-    //[self.window toggleFullScreen:self];
-    // #endif
     [self.window center];
     [self.window makeKeyAndOrderFront:self];
     self.renderLayer = self.window.contentView.layer;
-
-    gClient.SetClientWindow((hsWindowHndl)(__bridge void*)self.window);
-    gClient.SetClientDisplay((hsWindowHndl)NULL);
-
+    
+    [self.renderLayer addObserver:self
+                       forKeyPath:@"device"
+                          options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionInitial
+                          context:DeviceDidChangeContext];
+    
     if (!gClient) {
         exit(0);
     }
@@ -473,8 +519,25 @@ dispatch_queue_t loadingQueue = dispatch_queue_create("", DISPATCH_QUEUE_SERIAL)
 
 - (void)updateWindowTitle
 {
-    NSString* productTitle = [NSString stringWithSTString:plProduct::LongName()];
+#ifdef PLASMA_PIPELINE_METAL
+    NSString *productTitle = [NSString stringWithSTString:plProduct::LongName()];
+    id<MTLDevice> device = ((CAMetalLayer *) self.window.contentView.layer).device;
+#ifdef HS_DEBUGGING
+    [self.window setTitle:[NSString stringWithFormat:@"%@ - %@, %@",
+                           productTitle,
+#ifdef __arm64__
+                           @"ARM64",
+#else
+                           @"x86_64",
+#endif
+                           device.name]];
+#else
     [self.window setTitle:productTitle];
+#endif
+    
+#else
+    [NSString stringWithSTString:plProduct::LongName()];
+#endif
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender
@@ -515,6 +578,23 @@ dispatch_queue_t loadingQueue = dispatch_queue_create("", DISPATCH_QUEUE_SERIAL)
                                   NSApplicationPresentationAutoHideMenuBar];
     return NSApplicationPresentationFullScreen | NSApplicationPresentationHideDock |
            NSApplicationPresentationAutoHideMenuBar;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if (context == DeviceDidChangeContext) {
+        // this may not happen on the main queue
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self updateWindowTitle];
+        });
+    } else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
+- (void)dealloc
+{
+    [_renderLayer removeObserver:self forKeyPath:@"device" context:DeviceDidChangeContext];
 }
 
 @end

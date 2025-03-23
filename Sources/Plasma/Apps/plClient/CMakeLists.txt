@@ -90,7 +90,7 @@ if(WIN32)
         win32/res/headspin.ico
     )
 elseif(APPLE)
-    set(plClient_SOURCES ${plClient_SOURCES}
+    list(APPEND plClient_SOURCES
         Mac-Cocoa/main.mm
         Mac-Cocoa/NSString+StringTheory.mm
         Mac-Cocoa/PLSKeyboardEventMonitor.mm
@@ -100,7 +100,7 @@ elseif(APPLE)
         Mac-Cocoa/PLSPatcher.mm
         Mac-Cocoa/PLSServerStatus.mm
     )
-    set(plClient_HEADERS ${plClient_HEADERS}
+    list(APPEND plClient_HEADERS
         Mac-Cocoa/NSString+StringTheory.h
         Mac-Cocoa/PLSKeyboardEventMonitor.h
         Mac-Cocoa/PLSView.h
@@ -109,17 +109,12 @@ elseif(APPLE)
         Mac-Cocoa/PLSPatcher.h
         Mac-Cocoa/PLSServerStatus.h
     )
-    set(RESOURCES 
+    list(APPEND plClient_RESOURCES
+        Mac-Cocoa/banner.png
+        Mac-Cocoa/banner@2x.png
         Mac-Cocoa/MainMenu.xib
         Mac-Cocoa/PLSLoginWindowController.xib
         Mac-Cocoa/PLSPatcherWindowController.xib
-        Mac-Cocoa/banner.png
-        Mac-Cocoa/banner@2x.png
-        win32/res/Dirt.ICO
-    )
-    
-    list(APPEND plClient_RESOURCES
-        win32/res/Dirt.ICO
     )
 else()
     list(APPEND plClient_SOURCES
@@ -127,10 +122,19 @@ else()
     )
 endif()
 
+plasma_executable(plClient CLIENT INSTALL_PDB
+    FOLDER Apps
+    SOURCES
+        ${plClient_SOURCES} ${plClient_HEADERS}
+        ${plClient_TEXT} ${plClient_RESOURCES}
+)
+
 if(APPLE)
-    plasma_executable(plClient CLIENT INSTALL_PDB SOURCES ${plClient_SOURCES} ${plClient_HEADERS} ${RESOURCES})
+    # We need to filter out the XIB files so the source XML files don't get bundled
+    set(plClient_XCODE_RESOURCES ${plClient_RESOURCES})
+    list(FILTER plClient_XCODE_RESOURCES EXCLUDE REGEX "\\.x(ib|cassets)$")
+
     set_target_properties(plClient PROPERTIES
-        BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Mac-Cocoa/Info.plist.in"
         # Hard coding the app name here intentionally.
         # Should prevent macOS from tripping over secured resources being
@@ -141,41 +145,35 @@ if(APPLE)
         MACOSX_BUNDLE_GUI_IDENTIFIER org.Huru.UruExplorer
         MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+        RESOURCE "${plClient_XCODE_RESOURCES}"
         XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
-        XCODE_ATTRIBUTE_MTL_FAST_MATH "YES"
-        XCODE_ATTRIBUTE_MTL_ENABLE_DEBUG_INFO[variant=Debug] "INCLUDE_SOURCE"
-        XCODE_ATTRIBUTE_MTL_ENABLE_DEBUG_INFO[variant=RelWithDebInfo] "INCLUDE_SOURCE"
         XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS[variant=Debug] "YES"
         XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS[variant=RelWithDebInfo] "YES"
-        XCODE_ATTRIBUTE_MTL_HEADER_SEARCH_PATHS ${Plasma_SOURCE_DIR}/Sources/Plasma/NucleusLib/inc/
         XCODE_ATTRIBUTE_INSTALL_PATH "/Applications"
         XCODE_ATTRIBUTE_SKIP_INSTALL "NO"
-        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS ${CMAKE_CURRENT_SOURCE_DIR}/Mac-Cocoa/plClient.entitlements
+        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/Mac-Cocoa/plClient.entitlements"
         XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME "YES"
+        XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC "YES"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER org.Huru.UruExplorer
     )
     target_compile_options(plClient PRIVATE -fobjc-arc)
     target_sources(plClient PRIVATE Mac-Cocoa/Assets.xcassets)
     set_source_files_properties(Mac-Cocoa/Assets.xcassets ${RESOURCES} PROPERTIES
          MACOSX_PACKAGE_LOCATION Resources
     )
-    target_link_libraries(plClient PRIVATE "-framework Cocoa")
-    target_link_libraries(plClient PRIVATE "-framework QuartzCore")
-    install(
-        TARGETS plClient
-        DESTINATION client
-    )
-    
+
     if(PLASMA_APPLE_DEVELOPMENT_TEAM_ID)
             set_target_properties(plClient PROPERTIES
                 XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development"
                 XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ${PLASMA_APPLE_DEVELOPMENT_TEAM_ID}
             )
     endif()
-else()
-    plasma_executable(plClient WIN32 CLIENT INSTALL_PDB
-        SOURCES
-            ${plClient_SOURCES} ${plClient_HEADERS}
-            ${plClient_TEXT} ${plClient_RESOURCES}
+endif()
+
+if(PLASMA_PIPELINE_METAL)
+    target_embed_metal_shader_libraries(plClient
+        pfMetalPipelineShadersMSL21
+        pfMetalPipelineShadersMSL23
     )
 endif()
 
@@ -239,7 +237,11 @@ target_link_libraries(
         pfPython
         $<$<BOOL:${PLASMA_PIPELINE_DX}>:pfDXPipeline>
         $<$<BOOL:${PLASMA_PIPELINE_GL}>:pfGLPipeline>
+        $<$<BOOL:${PLASMA_PIPELINE_METAL}>:pfMetalPipeline>
         CURL::libcurl
+        "$<$<PLATFORM_ID:Darwin>:-framework Cocoa>"
+        "$<$<PLATFORM_ID:Darwin>:-framework QuartzCore>"
+        $<$<PLATFORM_ID:Darwin>:${LibArchive_LIBRARIES}>
 )
 target_include_directories(plClient PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -269,4 +271,4 @@ endif()
 source_group("Source Files" FILES ${plClient_SOURCES})
 source_group("Header Files" FILES ${plClient_HEADERS})
 source_group("Text" FILES ${plClient_TEXT})
-source_group("Windows Resource Files" FILES ${plClient_RESOURCES})
+source_group("Resources" FILES ${plClient_RESOURCES})

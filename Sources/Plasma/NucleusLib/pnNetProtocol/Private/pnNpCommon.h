@@ -56,6 +56,64 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "hsRefCnt.h"
 
 
+/****************************************************************************
+*
+*   Connection type functions
+*
+***/
+
+// These codes may not be changed unless ALL servers and clients are
+// simultaneously replaced; so basically forget it =)
+enum EConnType {
+    kConnTypeNil                    = 0,
+    
+    // For test applications
+    kConnTypeDebug                  = 1,
+
+    // Binary connections
+    kConnTypeCliToAuth              = 10,
+    kConnTypeCliToGame              = 11,
+    kConnTypeSrvToAgent             = 12,
+    kConnTypeSrvToMcp               = 13,
+    kConnTypeSrvToVault             = 14,
+    kConnTypeSrvToDb                = 15,
+    kConnTypeCliToFile              = 16,
+    kConnTypeSrvToState             = 17,
+    kConnTypeSrvToLog               = 18,
+    kConnTypeSrvToScore             = 19,
+    kConnTypeCliToCsr               = 20, // DEAD
+    kConnTypeSimpleNet              = 21, // DEAD
+    kConnTypeCliToGateKeeper        = 22,
+    
+    // Text connections
+    kConnTypeAdminInterface         = 97,   // 'a'
+
+    kNumConnTypes
+};
+static_assert(kNumConnTypes <= 0xFF, "EConnType overflows uint8");
+
+#define IS_TEXT_CONNTYPE(c)     \
+    (((int)(c)) == kConnTypeAdminInterface)
+
+
+/****************************************************************************
+*
+*   Socket connect packet
+*
+***/
+
+#pragma pack(push,1)
+struct AsyncSocketConnectPacket {
+    uint8_t     connType;
+    uint16_t    hdrBytes;
+    uint32_t    buildId;
+    uint32_t    buildType;
+    uint32_t    branchId;
+    plUUID      productId;
+};
+#pragma pack(pop)
+
+
 /*****************************************************************************
 *
 *   Client message field types
@@ -68,7 +126,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 const NetMsgField kNetMsgFieldAccountName   = NET_MSG_FIELD_STRING(kMaxAccountNameLength);
 const NetMsgField kNetMsgFieldPlayerName    = NET_MSG_FIELD_STRING(kMaxPlayerNameLength);
-const NetMsgField kNetMsgFieldShaDigest     = NET_MSG_FIELD_RAW_DATA(sizeof(ShaDigest));
+const NetMsgField kNetMsgFieldShaDigest     = NET_MSG_FIELD_DATA(sizeof(ShaDigest));
 const NetMsgField kNetMsgFieldUuid          = NET_MSG_FIELD_DATA(sizeof(plUUID));
 const NetMsgField kNetMsgFieldTransId       = NET_MSG_FIELD_DWORD();
 const NetMsgField kNetMsgFieldTimeMs        = NET_MSG_FIELD_DWORD();

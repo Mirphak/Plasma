@@ -1,7 +1,10 @@
 set(pfFeatureInc_HEADERS
     pfAllCreatables.h
 )
-plasma_library(pfFeatureInc OBJECT SOURCES ${pfFeatureInc_HEADERS})
+plasma_library(pfFeatureInc OBJECT
+    FOLDER FeatureLib
+    SOURCES ${pfFeatureInc_HEADERS}
+)
 target_link_libraries(pfFeatureInc
     PUBLIC
         pfAnimation
@@ -14,6 +17,9 @@ target_link_libraries(pfFeatureInc
         pfGameMgr
         pfJournalBook
         pfMessage
+        $<$<BOOL:${PLASMA_PIPELINE_DX}>:pfDXPipeline>
+        $<$<BOOL:${PLASMA_PIPELINE_GL}>:pfGLPipeline>
+        $<$<BOOL:${PLASMA_PIPELINE_METAL}>:pfMetalPipeline>
         pfPython
         pfSurface
 )

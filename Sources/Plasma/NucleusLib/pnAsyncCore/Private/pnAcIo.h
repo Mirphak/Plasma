@@ -51,6 +51,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #define PLASMA20_SOURCES_PLASMA_NUCLEUSLIB_PNASYNCCORE_PRIVATE_PNACIO_H
 
 #include <functional>
+#include <optional>
 
 #include "pnNetCommon/plNetAddress.h"
 #include "pnUUID/pnUUID.h"
@@ -67,128 +68,14 @@ typedef struct AsyncCancelIdStruct *   AsyncCancelId;
 
 constexpr unsigned kAsyncSocketBufferSize   = 1460;
 
-/****************************************************************************
-*
-*   Socket connect packet
-*
-***/
-
-#pragma pack(push,1)
-struct AsyncSocketConnectPacket {
-    uint8_t     connType;
-    uint16_t    hdrBytes;
-    uint32_t    buildId;
-    uint32_t    buildType;
-    uint32_t    branchId;
-    plUUID      productId;
+class AsyncNotifySocketCallbacks
+{
+public:
+    virtual void AsyncNotifySocketConnectFailed(plNetAddress remoteAddr) = 0;
+    virtual bool AsyncNotifySocketConnectSuccess(AsyncSocket sock, const plNetAddress& localAddr, const plNetAddress& remoteAddr) = 0;
+    virtual void AsyncNotifySocketDisconnect(AsyncSocket sock) = 0;
+    virtual std::optional<size_t> AsyncNotifySocketRead(AsyncSocket sock, uint8_t* buffer, size_t bytes) = 0;
 };
-#pragma pack(pop)
-
-
-/****************************************************************************
-*
-*   Socket event notifications
-*
-***/
-
-enum EAsyncNotifySocket {
-    kNotifySocketConnectFailed,
-    kNotifySocketConnectSuccess,
-    kNotifySocketDisconnect,
-    kNotifySocketRead,
-    kNotifySocketWrite
-};
-
-struct AsyncNotifySocket {
-    void *          param;
-
-    AsyncNotifySocket() : param() { }
-};
-
-struct AsyncNotifySocketConnect : AsyncNotifySocket {
-    plNetAddress    localAddr;
-    plNetAddress    remoteAddr;
-    unsigned        connType;
-
-    AsyncNotifySocketConnect() : connType(0) { }
-};
-
-struct AsyncNotifySocketListen : AsyncNotifySocketConnect {
-    unsigned        buildId;
-    unsigned        buildType;
-    unsigned        branchId;
-    plUUID          productId;
-    plNetAddress    addr;
-    uint8_t *       buffer;
-    unsigned        bytes;
-    unsigned        bytesProcessed;
-
-    AsyncNotifySocketListen()
-        : buildId(), buildType(), branchId(), buffer(), bytes(),
-          bytesProcessed() { }
-};
-
-struct AsyncNotifySocketRead : AsyncNotifySocket {
-    uint8_t *       buffer;
-    size_t          bytes;
-    size_t          bytesProcessed;
-
-    AsyncNotifySocketRead() : buffer(), bytes(), bytesProcessed() { }
-};
-
-
-struct AsyncNotifySocketWrite : AsyncNotifySocketRead {
-    size_t          bytesCommitted;
-    
-    AsyncNotifySocketWrite() : AsyncNotifySocketRead(), bytesCommitted() { }
-};
-
-/*! \brief return false to disconnect
-    \param sock
-    \param code
-    \param notify
-*/
-using FAsyncNotifySocketProc = std::function<bool(AsyncSocket, EAsyncNotifySocket, AsyncNotifySocket*, void**)> ;
-
-
-/****************************************************************************
-*
-*   Connection type functions
-*
-***/
-
-// These codes may not be changed unless ALL servers and clients are
-// simultaneously replaced; so basically forget it =)
-enum EConnType {
-    kConnTypeNil                    = 0,
-    
-    // For test applications
-    kConnTypeDebug                  = 1,
-
-    // Binary connections
-    kConnTypeCliToAuth              = 10,
-    kConnTypeCliToGame              = 11,
-    kConnTypeSrvToAgent             = 12,
-    kConnTypeSrvToMcp               = 13,
-    kConnTypeSrvToVault             = 14,
-    kConnTypeSrvToDb                = 15,
-    kConnTypeCliToFile              = 16,
-    kConnTypeSrvToState             = 17,
-    kConnTypeSrvToLog               = 18,
-    kConnTypeSrvToScore             = 19,
-    kConnTypeCliToCsr               = 20, // DEAD
-    kConnTypeSimpleNet              = 21, // DEAD
-    kConnTypeCliToGateKeeper        = 22,
-    
-    // Text connections
-    kConnTypeAdminInterface         = 97,   // 'a'
-
-    kNumConnTypes
-};
-static_assert(kNumConnTypes <= 0xFF, "EConnType overflows uint8");
-
-#define IS_TEXT_CONNTYPE(c)     \
-    (((int)(c)) == kConnTypeAdminInterface)
 
 
 /****************************************************************************
@@ -200,8 +87,7 @@ static_assert(kNumConnTypes <= 0xFF, "EConnType overflows uint8");
 void AsyncSocketConnect (
     AsyncCancelId *         cancelId,
     const plNetAddress&     netAddr,
-    FAsyncNotifySocketProc  notifyProc,
-    void *                  param = nullptr,
+    AsyncNotifySocketCallbacks* callbacks,
     const void *            sendData = nullptr,
     unsigned                sendBytes = 0
 );
@@ -237,12 +123,10 @@ void AsyncSocketEnableNagling (
 *
 ***/
 
-typedef std::function<void (void* /* param */, const ST::string& /* name */,
-                            const std::vector<plNetAddress>& /* addrs */)> FAsyncLookupProc;
+typedef std::function<void(const std::vector<plNetAddress>& /* addrs */)> FAsyncLookupProc;
 
 void AsyncAddressLookupName (
-    FAsyncLookupProc    lookupProc,
-    const ST::string &  name,
-    unsigned            port,
-    void *              param
+    const ST::string& name,
+    unsigned port,
+    FAsyncLookupProc lookupProc
 );

@@ -40,13 +40,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
+#include "pyGUIControlEditBox.h"
+
 #include <string_theory/string>
 
-#include "pyKey.h"
-
-#include "pyGUIControlEditBox.h"
 #include "pyColor.h"
+#include "pyGlueHelpers.h"
+#include "pyKey.h"
 
 // glue functions
 PYTHON_CLASS_DEFINITION(ptGUIControlEditBox, pyGUIControlEditBox);
@@ -167,12 +167,12 @@ PYTHON_METHOD_DEFINITION(ptGUIControlEditBox, setSpecialCaptureKeyMode, args)
 
 PYTHON_METHOD_DEFINITION_NOARGS(ptGUIControlEditBox, getLastKeyCaptured)
 {
-    return PyLong_FromLong(self->fThis->GetLastKeyCaptured());
+    return PyLong_FromUnsignedLong(self->fThis->GetLastKeyCaptured());
 }
 
 PYTHON_METHOD_DEFINITION_NOARGS(ptGUIControlEditBox, getLastModifiersCaptured)
 {
-    return PyLong_FromLong(self->fThis->GetLastModifiersCaptured());
+    return PyLong_FromUnsignedLong(self->fThis->GetLastModifiersCaptured());
 }
 
 PYTHON_METHOD_DEFINITION(ptGUIControlEditBox, setLastKeyCapture, args)
