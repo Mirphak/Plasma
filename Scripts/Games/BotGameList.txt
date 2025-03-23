@@ -72,6 +72,7 @@ List of markers games
 228629: BRIDGE TO BALCONY by Zesty of Xeniphers 09/28/14
 2692006: Back in The Watcher's (The Watcher's Pub) 02/21/15
 1669656: Bahro Stone Marker Quest - 14 Total 12/05/14
+14115405: Bahvahnter Marker Game 02/06/25
 2692287: Baskets, Bones, & Caves (Gira) 02/21/15
 253552: Be Mine, Valentine 09/28/14
 4298108: Bridge to strip mall direct 08/22/15
@@ -110,6 +111,10 @@ List of markers games
 5007676: ER'CANA: Top to Turbine 11/16/15
 3080013: Easter Marker Hunt 03/30/15
 5912794: Easy Marker Quest begins at Plaza Map 04/11/16
+13864613: Eder Bahvahnter Peak 09/29/24
+13748017: Eder Bahvahnter Rock Climbing 08/11/24
+12824840: Eder Bahvahnter climber's paradise 06/12/23
+13867820: Eder Bahvahnter mystery tour v2 10/02/24
 2560196: Eder Delin's & Tsogal's Hood Numbers 02/10/15
 12166005: Eder NayBree Fountain Art 09/11/22
 12167303: Eder Naybree Top of Fountain 09/12/22
@@ -170,6 +175,8 @@ List of markers games
 1024184: How to become a Monument - dedicated to Isobel 10/23/14
 6891274: I love MOULa 09/26/17
 430904: INTERNATIONAL/WIZARD HOOD Cloth Numbers 10/01/14
+14173326: IWD 2025 - Kalamee Marker Game 03/05/25
+14176743: IWD Bahvahnter-Elonin 2025 03/06/25
 2692248: Into Fortress' Darkness (Gahreesen) 02/21/15
 7894794: It's a beautiful day in the neighborhood 07/18/18
 10506680: IwonK's Chiso Game 03/05/21
@@ -252,6 +259,7 @@ List of markers games
 6434147: Master of Markers (Aegura) Start in the tree to the arch 12/18/16
 202990: Meet the Rocks 09/28/14
 202990: Meet the Rocks 09/28/14
+8293150: MelisRee73's sitting in air marker 12/16/18
 4368821: Melynn's kiva2 to kiva5 08/30/15
 253708: Mermaid, Merman 09/28/14
 6368649: Merry Christmas Hood 11/05/16
@@ -282,17 +290,22 @@ List of markers games
 3032984: Museum Door 03/24/15
 2692228: Museum Hardcore 02/21/15
 12042464: Mysterium 2022 - Naryan Poems (Rules In Relto) 08/05/22
+13619542: Mysterium 2024 Marker Mission 06/23/24
 10757221: Mysterium Marker test 06/05/21
 8744808: N'Chacka's  "Start Relto" 06/03/19
 7114383: N'Chacka's Marker Eder Gira 12/04/17
 6391562: N'Chacka's Marker Game 11/20/16
 7125733: N'Chacka's start Eder Gira 12/08/17
+13485404: N'Chaka's Fahets 04/23/24
+13825341: N'Chaka's Markers Game Eder Naybree (Beach) 09/03/24
 12948347: N'Chaka's Phil's Relto 08/04/23
 8330464: Nehir's Cleft under the Rain 12/29/18
 2692348: Neighborhood Heights 02/21/15
 2692244: New Rings (Gahreesen Subworld) 02/21/15
 7351005: Nicci d'Harra's PHIL 90 02/16/18
 7188870: Nicci d'Harra's Teledahn : impossible mission 12/28/17
+13851257: Nougarock's Naybree  09/22/24
+13855373: Nougarock's Naybree + (Beach) 09/24/24
 6460464: Odyssey (start at Relto) 01/06/17
 6647827: Oh the places you'll go! 07/06/17
 1414020: Old Bridge to Gate. 11/16/14
@@ -336,6 +349,7 @@ List of markers games
 1920074: Scrambled Must play in Cavern Events hood  12/26/14
 2692277: Seaside Teledahn 02/21/15
 11640464: Securicor's Marker Game 03/01/22
+13491200: Shroomie positions 04/27/24
 6491741: So you think you know MYST URU - Begin at Relto 02/02/17
 727513: Soccer Ball 10/10/14
 2692208: Some Levitation (Ahnonay) 02/21/15
@@ -495,6 +509,7 @@ List of markers games
 3505101: enders' Minkata Marker Game 05/19/15
 3553602: enders' Minkata kiva 2 &  kiva 5 05/25/15
 6560800: fun in ahnonay!! d's Marker Game 04/04/17
+13849420: gwendal' Naybree (BEACH) 09/20/24
 7626382: handyman's quest 05/08/18
 6100664: how to find res  05/29/16
 10168823: just a for a code 11/13/20

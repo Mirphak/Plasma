@@ -1,0 +1,85 @@
+RE: This coming Saturday's tour (Kadish Tolesa)
+Larry F <lwf58@hotmail.com>	19 mai 2024 à 02:29
+À : Guild of Instructors <shokhootahntee@comcast.net>, Zeke Matthew <newzeke365studio@yahoo.com>, "Susan K. Ashabraner" <skashabraner@protonmail.com>, Mirphak Mir-o-Bot <mirphak1@gmail.com>
+
+The next tour is in a week, so I guess it’s time to talk about it.
+
+We’ll start the Tour in Mir-o-Bot’s Ae’gura Island, inside the Kadish Gallery. 
+The only actual effect we’ll need is making it possible to enter the dead space under the balcony, 
+the area that I call “the secret room”.
+
+From there, we’ll want to warp to the link-in area of the Age.
+
+After that, we’ll walk to the various points of interest. 
+We’ll want the revolving door at the end of the path to be open in advance. 
+If we can do an on-lake effect at the Vista, that’d be a good thing to do when we get there.
+
+We’ll want to warp past the elevator inside the pyramid. 
+Then we’ll want to have the floor puzzle in the Moon Room already open.
+
+When we get to the Pillar Room, 
+we’ll want to warp up to the corridor at the top of it instead of climbing anything.
+
+We’ll also want the Vault door to be opened in advance.
+
+When we are inside the Vault, I’ve got a surprise for everyone. 
+This month I worked with RAWA and I now know the complete, accurate translation of Kadish’s note. 
+I’ll be reading it as part of the tour.
+
+Once we are done with the normal vault, 
+we’ll want to warp to the Empty Vault with the butterflies turned on.
+==> SDL : kdshYeeshaPageButterfliesVis
+
+If we have time after the tour is done, 
+we can do an on-lake in the normal vault and let everyone run around and climb on the pipes.
+
+As far as I can remember, that’s it for the tour. 
+We might be able to do the whole thing in one session. 
+Or at least I hope we will.
+
+-Larry
+---------------------------------------------------
+The next Cavern Tour
+Larry F <lwf58@hotmail.com>	21 mai 2024 à 01:59
+À : "Susan K. Ashabraner" <skashabraner@protonmail.com>, Guild of Instructors <shokhootahntee@comcast.net>, Zeke Matthew <newzeke365studio@yahoo.com>, Mirphak Mir-o-Bot <mirphak1@gmail.com>
+
+One special effect request I forgot about is for the Pyramid puzzle. 
+While we are standing outside the pyramid, I’d like to activate and de-activate the light inside it so that the tour guests can see the ball atop it rotating.
+
+--Larry
+---------------------------------------------------
+La prochaine tournée a lieu dans une semaine, il est donc temps d'en parler.
+
+Nous commencerons la visite sur l'île Ae'gura de Mir-o-Bot, à l'intérieur de la galerie Kadish. 
+Le seul effet dont nous aurons besoin est de rendre possible l'accès à l'espace mort sous le balcon, 
+la zone que j'appelle "la pièce secrète".
+
+De là, nous devrons nous téléporter dans la zone de liaison de l'Age.
+
+Ensuite, nous marcherons vers les différents points d'intérêt. 
+Nous voulons que la porte tournante au bout du chemin soit ouverte à l'avance. 
+Si nous pouvons faire un effet sur le lac à la Vista, 
+ce serait une bonne chose à faire une fois sur place.
+
+Nous devrons passer par l'ascenseur à l'intérieur de la pyramide. 
+Ensuite, il faudra que le puzzle de l'étage de la salle de la Lune soit déjà ouvert.
+
+Lorsque nous arriverons dans la salle du pilier, 
+nous devrons nous diriger vers le couloir en haut de la salle au lieu d'escalader quoi que ce soit.
+
+Nous voudrons également que la porte de la chambre forte soit ouverte à l'avance.
+
+Une fois à l'intérieur de la chambre forte, j'ai une surprise pour tout le monde. 
+Ce mois-ci, j'ai travaillé avec RAWA et je connais maintenant la traduction complète 
+et précise de la note de Kadish. 
+Je la lirai pendant la visite.
+
+Une fois que nous aurons terminé la voûte normale, 
+nous devrons nous rendre dans la voûte vide avec les papillons activés.
+
+Si nous avons le temps après la visite, 
+nous pourrons faire un on-lake dans la chambre forte normale et laisser 
+tout le monde courir et grimper sur les tuyaux.
+
+Pour autant que je me souvienne, c'est tout pour la visite. 
+Nous pourrons peut-être tout faire en une seule session. Du moins, je l'espère.

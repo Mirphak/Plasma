@@ -1,0 +1,4 @@
+group|12143260
+ws|1|m|0.5
+sitidle|1|0.00
+talksit|1|0.00

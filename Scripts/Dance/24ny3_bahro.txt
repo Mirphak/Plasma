@@ -1,0 +1,55 @@
+#Bahvahnter Brunnen Tanz 3 - Bahro dance
+#I saved 10 positions for mob. 
+#ws 0 is on the rock (waiting position) 
+#ws 1 to ws 8 for the small Bahros
+#ws 9 a little later for a larger Bahro in the center of the fountain.
+#In the script there are about 6 seconds in each position to set the Bahro. 
+#Is that enough time for you to set the bahros? Otherwise I'll think of something to give you more time.
+
+definegroup|c:2332508
+
+aliasgroup|c
+vis|0|1.00
+ws|1|bahro|1.00
+bahro|1|0.5|1.00
+
+aliasgroup|c
+ws|2|bahro|1.00
+bahro|2|0.6|1.00
+
+aliasgroup|c
+ws|3|bahro|1.00
+bahro|3|0.7|1.00
+
+aliasgroup|c
+ws|4|bahro|1.00
+bahro|4|0.8|1.00
+
+aliasgroup|c
+ws|5|bahro|1.00
+bahro|5|0.9|1.00
+
+aliasgroup|c
+ws|6|bahro|1.00
+bahro|6|0.8|1.00
+
+aliasgroup|c
+ws|7|bahro|1.00
+bahro|7|0.7|1.00
+
+aliasgroup|c
+ws|8|bahro|1.00
+bahro|8|0.6|1.00
+
+aliasgroup|c
+ws|0|bahro|1.00
+
+aliasgroup|c
+ws|9|bahro|6.00
+bahro|9|4.0|1.00
+
+aliasgroup|c
+ws|0|bahro|1.00
+vis|1|0.50
+
+ENDE

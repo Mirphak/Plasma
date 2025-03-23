@@ -1,0 +1,3 @@
+fog|on|0.50
+fogcolor|green|0.50
+fogshape|40|10000|100|0.50
