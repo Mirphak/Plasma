@@ -44,8 +44,11 @@ Mead, WA   99021
 #include "plFileSystem.h"
 #include "plProduct.h"
 
+#include "pfConsoleCore/pfServerIni.h"
 #include "pfPatcher/plManifests.h"
 #include "pfPatcher/pfPatcher.h"
+
+#include "plWinDpi/plWinDpi.h"
 
 #include "plClientLauncher.h"
 
@@ -55,15 +58,21 @@ Mead, WA   99021
 #include <commctrl.h>
 #include <shellapi.h>
 #include <shlobj.h>
+#include <ShellScalingApi.h>
 
 // ===================================================
+
+#ifndef ERROR_ELEVATION_REQUIRED
+    // MinGW is missing this definition
+#   define ERROR_ELEVATION_REQUIRED 740
+#endif
 
 #define PLASMA_PHAILURE 1
 #define PLASMA_OK 0
 
 static HWND             s_dialog;
 static ST::string       s_error; // This is highly unfortunate.
-static plClientLauncher s_launcher;
+static plClientLauncher* s_launcher;
 static UINT             s_taskbarCreated = RegisterWindowMessageW(L"TaskbarButtonCreated");
 static ITaskbarList3*   s_taskbar = nullptr;
 
@@ -95,10 +104,10 @@ static void WaitForOldPatcher()
 
 // ===================================================
 
-static inline void IShowErrorDialog(const wchar_t* msg)
+static inline void IShowErrorDialog(const ST::string& msg)
 {
-    // This bypasses all that hsClientMinimizeGuard crap we have in CoreLib.
-    MessageBoxW(nullptr, msg, L"Error", MB_ICONERROR | MB_OK);
+    // This bypasses all that hsMinimizeClientGuard crap we have in plMessageBox.
+    MessageBoxW(nullptr, msg.to_wchar().c_str(), L"Error", MB_ICONERROR | MB_OK);
 }
 
 static inline void IQuit(int exitCode=PLASMA_OK)
@@ -117,10 +126,17 @@ static inline void IShowMarquee(bool marquee=true)
     PostMessageW(GetDlgItem(s_dialog, IDC_MARQUEE), PBM_SETMARQUEE, static_cast<WPARAM>(marquee), 0);
 }
 
-BOOL CALLBACK PatcherDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK PatcherDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+    // DPI Helper can eat messages.
+    auto result = plWinDpi::Instance().WndProc(hwndDlg, uMsg, wParam, lParam, nullptr);
+    if (result.has_value())
+        return result.value();
+
     // NT6 Taskbar Majick
     if (uMsg == s_taskbarCreated) {
+        hsRequireCOM();
+
         if (s_taskbar)
             s_taskbar->Release();
         HRESULT result = CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_ALL, IID_ITaskbarList3, (void**)&s_taskbar);
@@ -144,10 +160,10 @@ BOOL CALLBACK PatcherDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
         s_dialog = nullptr;
         break;
     case WM_NCHITTEST:
-        SetWindowLongW(hwndDlg, DWL_MSGRESULT, (LONG_PTR)HTCAPTION);
+        SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, (LONG_PTR)HTCAPTION);
         return TRUE;
     case WM_QUIT:
-        s_launcher.ShutdownNetCore();
+        s_launcher->ShutdownNetCore();
         DestroyWindow(hwndDlg);
         break;
     }
@@ -170,7 +186,7 @@ static void PumpMessages()
     MSG msg;
     do {
         // Pump all Win32 messages
-        while (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE)) {
+        while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
             if (!IsDialogMessageW(s_dialog, &msg)) {
                 TranslateMessage(&msg);
                 DispatchMessageW(&msg);
@@ -178,7 +194,7 @@ static void PumpMessages()
         }
 
         // Now we need to pump the netcore while we have some spare time...
-    } while (s_launcher.PumpNetCore());
+    } while (s_launcher->PumpNetCore());
 }
 
 // ===================================================
@@ -331,7 +347,7 @@ static void ILaunchClientExecutable(const plFileName& exe, const ST::string& arg
 
     // Only launch a client executable if we're given one. If not, that's probably a cue that we're
     // done with some service operation and need to go away.
-    if (!exe.AsString().is_empty()) {
+    if (!exe.AsString().empty()) {
         handleptr_t hEvent = handleptr_t(CreateEventW(nullptr, TRUE, FALSE, L"UruPatcherEvent"), CloseHandle);
         handleptr_t process = ICreateProcess(exe, args);
 
@@ -373,36 +389,43 @@ static pfPatcher* IPatcherFactory()
 
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLink, int nCmdShow)
 {
+    plWinDpi::Instance();
+
+    plClientLauncher launcher;
+    s_launcher = &launcher;
+
     // Let's initialize our plClientLauncher friend
-    s_launcher.ParseArguments();
-    s_launcher.SetErrorProc(IOnNetError);
-    s_launcher.SetInstallerProc(IInstallRedist);
-    s_launcher.SetLaunchClientProc(ILaunchClientExecutable);
-    s_launcher.SetPatcherFactory(IPatcherFactory);
-    s_launcher.SetShardProc(ISetShardStatus);
-    s_launcher.SetStatusProc(ISetDownloadStatus);
+    launcher.ParseArguments();
+    launcher.SetErrorProc(IOnNetError);
+    launcher.SetInstallerProc(IInstallRedist);
+    launcher.SetLaunchClientProc(ILaunchClientExecutable);
+    launcher.SetPatcherFactory(IPatcherFactory);
+    launcher.SetShardProc(ISetShardStatus);
+    launcher.SetStatusProc(ISetDownloadStatus);
 
     // If we're newly updated, then our filename will be something we don't expect!
     // Let's go ahead and take care of that nao.
-    if (s_launcher.CompleteSelfPatch(WaitForOldPatcher))
+    if (launcher.CompleteSelfPatch(WaitForOldPatcher))
         return PLASMA_OK; // see you on the other side...
 
     // Load the doggone server.ini
-    if (!s_launcher.LoadServerIni()) {
-        IShowErrorDialog(L"No server.ini file found.  Please check your URU installation.");
+    ST::string errorMsg;
+    try {
+        launcher.LoadServerIni();
+    } catch (const pfServerIniParseException& exc) {
+        IShowErrorDialog(ST::format("server.ini file not found or invalid. Please check your URU installation.\n{}", exc.what()));
         return PLASMA_PHAILURE;
     }
 
     // Ensure there is only ever one patcher running...
     if (IsPatcherRunning()) {
-        ST::string text = ST::format("{} is already running", plProduct::LongName());
-        IShowErrorDialog(text.to_wchar().data());
+        IShowErrorDialog(ST::format("{} is already running", plProduct::LongName()));
         return PLASMA_OK;
     }
     HANDLE _onePatcherMut = CreatePatcherMutex().release();
 
     // Initialize the network core
-    s_launcher.InitializeNetCore();
+    launcher.InitializeNetCore();
 
     // Welp, now that we know we're (basically) sane, let's create our client window
     // and pump window messages until we're through.
@@ -411,8 +434,9 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 
     // So there appears to be some sort of issue with calling MessageBox once we've set up our dialog...
     // WTF?!?! So, to hack around that, we'll wait until everything shuts down to display any error.
-    if (!s_error.is_empty())
-        IShowErrorDialog(s_error.to_wchar().data());
+    if (!s_error.empty()) {
+        IShowErrorDialog(s_error);
+    }
 
     // Alrighty now we just need to clean up behind ourselves!
     // NOTE: We shut down the netcore in the WM_QUIT handler so
@@ -422,10 +446,6 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
     CloseHandle(_onePatcherMut);
 
     // kthxbai
-    return s_error.is_empty() ? PLASMA_OK : PLASMA_PHAILURE;
+    return s_error.empty() ? PLASMA_OK : PLASMA_PHAILURE;
 }
 
-/* Enable themes in Windows XP and later */
-#pragma comment(linker,"\"/manifestdependency:type='win32' \
-                name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
-                processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")

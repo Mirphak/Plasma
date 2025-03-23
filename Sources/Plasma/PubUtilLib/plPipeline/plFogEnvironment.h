@@ -48,11 +48,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef _plFogEnvironment_h
 #define _plFogEnvironment_h
 
-#include "pnKeyedObject/hsKeyedObject.h"
 #include "HeadSpin.h"
 #include "hsColorRGBA.h"
-#include "hsTemplates.h"
 
+#include "pnKeyedObject/hsKeyedObject.h"
 
 
 //// plFogEnvironment Class Definition ////////////////////////////////////////////
@@ -89,22 +88,22 @@ class plFogEnvironment : public hsKeyedObject
         plFogEnvironment &operator=(const plFogEnvironment &copy);
 
         // Sets the parameters for linear fog
-        void    Set( float start, float end, float density, const hsColorRGBA *color = nil );
+        void    Set(float start, float end, float density, const hsColorRGBA *color = nullptr);
 
         // Sets the parameters for exp or exp^2 fog
-        void    SetExp( FogType type, float end, float density, const hsColorRGBA *color = nil );
+        void    SetExp(FogType type, float end, float density, const hsColorRGBA *color = nullptr);
 
         // Sets the color
         void    SetColor( hsColorRGBA &color ) { fColor = color; }
 
         // Clear the environment to no fog
-        void    Clear( void ) { fType = kNoFog; }
+        void    Clear() { fType = kNoFog; }
 
         // Gets the type
-        uint8_t   GetType( void ) const { return fType; }
+        uint8_t   GetType() const { return fType; }
 
         // Gets the color
-        hsColorRGBA &GetColor( void ) { return fColor; }
+        hsColorRGBA &GetColor() { return fColor; }
 
         // Gets the parameters. Sets start to 0 if the type is not linear (can be nil)
         void    GetParameters( float *start, float *end, float *density, hsColorRGBA *color ) const;
@@ -115,8 +114,8 @@ class plFogEnvironment : public hsKeyedObject
         // Gets exp or exp^2 pipeline (DX) specific parameters.
         void    GetPipelineParams( float *density, hsColorRGBA *color ) const;
 
-        virtual void Read(hsStream *s, hsResMgr *mgr);
-        virtual void Write(hsStream *s, hsResMgr *mgr);
+        void Read(hsStream *s, hsResMgr *mgr) override;
+        void Write(hsStream *s, hsResMgr *mgr) override;
 };
 
 #endif //_plFogEnvironment_h

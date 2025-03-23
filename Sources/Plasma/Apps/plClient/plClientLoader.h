@@ -47,18 +47,20 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 class plClientLoader : private hsThread
 {
     class plClient* fClient;
-    HWND fWindow;
+    hsWindowHndl fWindow;
+    hsWindowHndl fDisplay;
+    uint32_t fDevType;
 
-    virtual void OnQuit() HS_OVERRIDE
+    void OnQuit() override
     {
         SetQuit(true);
     }
 
     /** Does the heavy lifting of client init */
-    virtual void Run() HS_OVERRIDE;
+    void Run() override;
 
 public:
-    plClientLoader() : fClient(nullptr) { }
+    plClientLoader() : fClient(), fWindow(), fDisplay(), fDevType() { }
 
     /**
      * Initializes the client asyncrhonouslynn including: loading the localization, 
@@ -76,9 +78,19 @@ public:
     bool IsInited() const { return hsThread::GetQuit(); }
 
     /**
-     * Sets the client HWND
+     * Sets the client window handle.
      */
-    void SetClientWindow(HWND hWnd) { fWindow = hWnd; }
+    void SetClientWindow(hsWindowHndl hWnd) { fWindow = hWnd; }
+
+    /**
+     * Sets the client display handle.
+     */
+    void SetClientDisplay(hsWindowHndl hDC) { fDisplay = hDC; }
+
+    /**
+     * Sets the preferred rendering backend for the client pipeline.
+     */
+    void SetRequestedRenderingBackend(uint32_t devType) { fDevType = devType; }
 
     /**
      * Initial shutdown request received from Windows (or something)... start tear down
@@ -94,7 +106,7 @@ public:
      * Launches the client window and starts the game.
      * This will block if the client is not initialized.
      */
-    void Start();
+    void Start() override;
 
     /**
      * Waits for the client to finish initing

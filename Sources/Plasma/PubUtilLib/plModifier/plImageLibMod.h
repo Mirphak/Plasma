@@ -43,37 +43,40 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef plImageLibMod_inc
 #define plImageLibMod_inc
 
-#include "hsTemplates.h"
+#include <vector>
+
 #include "pnModifier/plSingleModifier.h"
-#include "pnKeyedObject/plKey.h"
 
 class plBitmap;
+
 class plImageLibMod : public plSingleModifier
 {
 protected:
 
-    hsTArray<plBitmap *>    fImages;
+    std::vector<plBitmap *> fImages;
 
-    virtual bool IEval(double secs, float del, uint32_t dirty) { return false; }
+    bool IEval(double secs, float del, uint32_t dirty) override { return false; }
 
 public:
-    plImageLibMod();
-    virtual ~plImageLibMod();
+    plImageLibMod() {};
 
     CLASSNAME_REGISTER( plImageLibMod );
     GETINTERFACE_ANY( plImageLibMod, plSingleModifier );
 
-    virtual bool MsgReceive(plMessage* msg);
+    bool MsgReceive(plMessage* msg) override;
     
-    virtual void Read(hsStream* stream, hsResMgr* mgr);
-    virtual void Write(hsStream* stream, hsResMgr* mgr);
+    void Read(hsStream* stream, hsResMgr* mgr) override;
+    void Write(hsStream* stream, hsResMgr* mgr) override;
 
     enum Refs
     {
         kRefImage = 0
     };
 
-    uint32_t  GetNumImages( void ) const { return fImages.GetCount(); }
+    size_t  GetNumImages() const { return fImages.size(); }
+    plBitmap* GetImage(const ST::string&) const;
+    std::vector<plBitmap*> GetImages() const { return fImages; }
+    std::vector<ST::string> GetImageNames() const;
 };
 
 #endif // plImageLibMod_inc

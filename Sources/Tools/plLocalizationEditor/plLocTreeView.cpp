@@ -99,7 +99,7 @@ void plLocTreeView::LoadData(const ST::string &selectionPath)
                     scrollToItem(subItem);
                     elementMatched = true;
 
-                    if (targetLang.is_empty())
+                    if (targetLang.empty())
                         targetLang = ST_LITERAL("English");
                 }
                 else
@@ -130,5 +130,5 @@ ST::string plLocTreeView::CurrentPath() const
 {
     return (currentItem() != nullptr)
         ? ST::string(currentItem()->data(0, kLocPathRole).toString().toUtf8().constData())
-        : ST::null;
+        : ST::string();
 }

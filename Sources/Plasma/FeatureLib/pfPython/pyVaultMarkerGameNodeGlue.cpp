@@ -40,13 +40,14 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
-#include "pyGeometry3.h"
-#pragma hdrstop
-
 #include "pyVaultMarkerGameNode.h"
+
+#include <string_theory/string>
+
 #include "plVault/plVault.h"
-#include "pnUUID/pnUUID.h"
+
+#include "pyGeometry3.h"
+#include "pyGlueHelpers.h"
 
 // glue functions
 PYTHON_CLASS_DEFINITION(ptVaultMarkerGameNode, pyVaultMarkerGameNode);
@@ -66,6 +67,11 @@ PYTHON_INIT_DEFINITION(ptVaultMarkerGameNode, args, keywords)
     PYTHON_RETURN_INIT_OK;
 }
 
+PYTHON_METHOD_DEFINITION_NOARGS(ptVaultMarkerGameNode, getGameGuid)
+{
+    return PyUnicode_FromSTString(self->fThis->GetGameGuid());
+}
+
 PYTHON_METHOD_DEFINITION_NOARGS(ptVaultMarkerGameNode, getGameName)
 {
     return PyUnicode_FromSTString(self->fThis->GetGameName());
@@ -76,15 +82,26 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptVaultMarkerGameNode, getMarkers)
     return self->fThis->GetMarkers();
 }
 
+PYTHON_METHOD_DEFINITION(ptVaultMarkerGameNode, setGameGuid, args)
+{
+    ST::string guid;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &guid)) {
+        PyErr_SetString(PyExc_TypeError, "setGameGuid expects a string");
+        PYTHON_RETURN_ERROR;
+    }
+    self->fThis->SetGameGuid(guid);
+    PYTHON_RETURN_NONE;
+}
+
 PYTHON_METHOD_DEFINITION(ptVaultMarkerGameNode, setGameName, args)
 {
-    PyObject* name;
-    if (!PyArg_ParseTuple(args, "O", &name) || !PyString_CheckEx(name))
+    ST::string name;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &name))
     {
         PyErr_SetString(PyExc_TypeError, "setGameName expects a string");
         PYTHON_RETURN_ERROR;
     }
-    self->fThis->SetGameName(PyString_AsStringEx(name));
+    self->fThis->SetGameName(name);
     PYTHON_RETURN_NONE;
 }
 
@@ -95,12 +112,12 @@ PYTHON_METHOD_DEFINITION_NOARGS(ptVaultMarkerGameNode, getReward)
 
 PYTHON_METHOD_DEFINITION(ptVaultMarkerGameNode, setReward, args)
 {
-    PyObject* reward;
-    if (!PyArg_ParseTuple(args, "O", &reward) || !PyString_CheckEx(reward)) {
+    ST::string reward;
+    if (!PyArg_ParseTuple(args, "O&", PyUnicode_STStringConverter, &reward)) {
         PyErr_SetString(PyExc_TypeError, "setReward expects a string");
         PYTHON_RETURN_ERROR;
     }
-    self->fThis->SetReward(PyString_AsStringEx(reward));
+    self->fThis->SetReward(reward);
     PYTHON_RETURN_NONE;
 }
 
@@ -130,17 +147,13 @@ PYTHON_METHOD_DEFINITION(ptVaultMarkerGameNode, setMarkers, args)
         PyObject* age  = PySequence_GetItem(marker_seq, 1);
         PyObject* pos  = PySequence_GetItem(marker_seq, 2);
         PyObject* desc = PySequence_GetItem(marker_seq, 3);
-        if (!(PyInt_Check(id) && PyString_CheckEx(age) && pyPoint3::Check(pos) && PyString_CheckEx(desc))) {
+        if (!(PyLong_Check(id) && PyUnicode_Check(age) && pyPoint3::Check(pos) && PyUnicode_Check(desc))) {
             PyErr_SetString(PyExc_TypeError, errmsg);
             PYTHON_RETURN_ERROR;
         }
 
-        VaultMarker marker;
-        marker.id = PyLong_AsUnsignedLong(id);
-        marker.age = PyString_AsStringEx(age);
-        marker.pos = pyPoint3::ConvertFrom(pos)->fPoint;
-        marker.description = PyString_AsStringEx(desc);
-        collector.push_back(marker);
+        collector.emplace_back(PyLong_AsUnsignedLong(id), PyUnicode_AsSTString(age),
+                               pyPoint3::ConvertFrom(pos)->fPoint, PyUnicode_AsSTString(desc));
     }
 
     self->fThis->SetMarkers(collector);
@@ -148,9 +161,11 @@ PYTHON_METHOD_DEFINITION(ptVaultMarkerGameNode, setMarkers, args)
 }
 
 PYTHON_START_METHODS_TABLE(ptVaultMarkerGameNode)
+    PYTHON_METHOD_NOARGS(ptVaultMarkerGameNode, getGameGuid, "Returns the marker game's guid"),
     PYTHON_METHOD_NOARGS(ptVaultMarkerGameNode, getGameName, "Returns the marker game's name"),
     PYTHON_METHOD_NOARGS(ptVaultMarkerGameNode, getMarkers, "Returns a tuple of markers associated with this game"),
     PYTHON_METHOD_NOARGS(ptVaultMarkerGameNode, getReward, "Returns a string representing the reward for completing this game"),
+    PYTHON_METHOD(ptVaultMarkerGameNode, setGameGuid, "Params: guid\nSets the marker game's guid"),
     PYTHON_METHOD(ptVaultMarkerGameNode, setGameName, "Params: name\nSets marker game's name"),
     PYTHON_METHOD(ptVaultMarkerGameNode, setMarkers, "Params: markers\nSets markers associated with this game"),
     PYTHON_METHOD(ptVaultMarkerGameNode, setReward, "Params: reward\nSets the reward for completing this marker game"),
@@ -160,19 +175,7 @@ PYTHON_END_METHODS_TABLE;
 PLASMA_DEFAULT_TYPE_WBASE(ptVaultMarkerGameNode, pyVaultNode, "Params: n=0\nPlasma vault age info node");
 
 // required functions for PyObject interoperability
-PyObject *pyVaultMarkerGameNode::New(RelVaultNode* nfsNode)
-{
-    ptVaultMarkerGameNode *newObj = (ptVaultMarkerGameNode*)ptVaultMarkerGameNode_type.tp_new(&ptVaultMarkerGameNode_type, NULL, NULL);
-    newObj->fThis->fNode = nfsNode;
-    return (PyObject*)newObj;
-}
-
-PyObject *pyVaultMarkerGameNode::New(int n /* =0 */)
-{
-    ptVaultMarkerGameNode *newObj = (ptVaultMarkerGameNode*)ptVaultMarkerGameNode_type.tp_new(&ptVaultMarkerGameNode_type, NULL, NULL);
-    // oddly enough, nothing to do here
-    return (PyObject*)newObj;
-}
+PYTHON_CLASS_VAULT_NODE_NEW_IMPL(ptVaultMarkerGameNode, pyVaultMarkerGameNode)
 
 PYTHON_CLASS_CHECK_IMPL(ptVaultMarkerGameNode, pyVaultMarkerGameNode)
 PYTHON_CLASS_CONVERT_FROM_IMPL(ptVaultMarkerGameNode, pyVaultMarkerGameNode)

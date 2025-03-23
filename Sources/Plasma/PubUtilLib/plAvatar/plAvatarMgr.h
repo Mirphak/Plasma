@@ -47,12 +47,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "HeadSpin.h"
 #include <map>
+#include <vector>
 
 #include "plFileSystem.h"
 #include "hsGeometry3.h"
 
 #include "pnKeyedObject/hsKeyedObject.h"
-#include "plMessage/plLoadAvatarMsg.h"
 
 // This is still pretty much a hack, but it's a compartmentalized hack instead of the previous
 // interwoven spaghetti hack.
@@ -71,6 +71,7 @@ class plNotifyMsg;
 class plCoopCoordinator;
 class plLoadCloneMsg;
 class plStatusLog;
+class plAvTask;
 
 /** \class plAvatarMgr
     Gathering place for global animations and miscellaneous avatar data.
@@ -117,8 +118,8 @@ public:
     plKey LoadPlayer(const ST::string &name, const ST::string &account);
     plKey LoadPlayer(const ST::string &name, const ST::string &account, const ST::string &linkName);
     plKey LoadPlayerFromFile(const ST::string &name, const ST::string &account, const plFileName &clothingFile);
-    plKey LoadAvatar(ST::string name, const ST::string &accountName, bool isPlayer, plKey spawnPoint, plAvTask *initialTask,
-                     const ST::string &userStr = ST::null, const plFileName &clothingFile = ST::null);
+    plKey LoadAvatar(ST::string name, const ST::string &accountName, bool isPlayer, const plKey& spawnPoint, plAvTask *initialTask,
+                     const ST::string &userStr = {}, const plFileName &clothingFile = {});
 
     /**
      * Unload an avatar clone
@@ -145,7 +146,7 @@ public:
     plArmatureMod *FindAvatarByPlayerID(uint32_t pid);
     plArmatureMod *FindAvatarByModelName(const ST::string& name); // Probably only useful for custom NPCs. All players are
                                                       // either "Male" or "Female".
-    void FindAllAvatarsByModelName(const char* name, plArmatureModPtrVec& outVec);
+    void FindAllAvatarsByModelName(const ST::string& name, plArmatureModPtrVec& outVec);
     plArmatureMod *GetFirstRemoteAvatar();
 
     // \{
@@ -159,15 +160,15 @@ public:
     int NumSpawnPoints() { return fSpawnPoints.size(); }
     int FindSpawnPoint( const char *name ) const;
     // \}
-    static int WarpPlayerToAnother(bool iMove, uint32_t remoteID);
-    static int WarpPlayerToXYZ(float x, float y, float z);
-    static int WarpPlayerToXYZ(int pid, float x, float y, float z);
+    static bool WarpPlayerToAnother(bool iMove, uint32_t remoteID);
+    static bool WarpPlayerToXYZ(float x, float y, float z);
+    static bool WarpPlayerToXYZ(int pid, float x, float y, float z);
 
     static plAvatarMgr *GetInstance();
     static void ShutDown();
 
 
-    bool MsgReceive(plMessage *msg);
+    bool MsgReceive(plMessage *msg) override;
     bool HandleCoopMsg(plAvCoopMsg *msg);
     bool HandleNotifyMsg(plNotifyMsg *msg);
     bool IPassMessageToActiveCoop(plMessage *msg, uint32_t id, uint16_t serial);
@@ -179,7 +180,7 @@ public:
     void PointToDniCoordinate(hsPoint3 pt, plDniCoordinateInfo* ret);
     void GetDniCoordinate(plDniCoordinateInfo* ret);
 
-    static void OfferLinkingBook(plKey hostKey, plKey guestKey, plMessage *linkMsg, plKey replyKey);
+    static void OfferLinkingBook(const plKey& hostKey, const plKey& guestKey, plMessage *linkMsg, const plKey& replyKey);
 
     bool IsACoopRunning();
     plStatusLog *GetLog() { return fLog; }
@@ -203,10 +204,10 @@ protected:
         We'll get that notification via the AddAvatar call later. In this function
         we're going to squirrel away an initialization message to pass to the armature
         modifier when it arrives. */
-    void IDeferInit(plKey playerSOKey, plMessage *initMsg);
+    void IDeferInit(const plKey& playerSOKey, plMessage *initMsg);
     
     /** See if we have an avatar type message saved for the given avatar and send them. */
-    void ISendDeferredInit(plKey playerSOKey);
+    void ISendDeferredInit(const plKey& playerSOKey);
 
     static plAvatarMgr* fInstance;      // the single instance of the avatar manager
 
@@ -226,7 +227,7 @@ protected:
     typedef std::vector<const plSpawnModifier*> plSpawnVec;
     plSpawnVec  fSpawnPoints;
 
-    hsTArray<plMaintainersMarkerModifier*> fMaintainersMarkers;
+    std::vector<plMaintainersMarkerModifier*> fMaintainersMarkers;
 
     // we're using a multimap, which is a map which allows multiple entries to
     // share the same key. the key we use is the initiator's player id; in the vast
@@ -237,7 +238,7 @@ protected:
     typedef std::multimap<uint32_t, plCoopCoordinator *> plCoopMap;
     plCoopMap fActiveCoops;
 
-    hsTArray<plLoadCloneMsg*> fCloneMsgQueue;
+    std::vector<plLoadCloneMsg*> fCloneMsgQueue;
     plStatusLog *fLog;  
 };
 

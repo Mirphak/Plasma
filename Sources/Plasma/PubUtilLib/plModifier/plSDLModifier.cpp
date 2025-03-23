@@ -42,15 +42,15 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plSDLModifier.h"
 
 #include "pnNetCommon/plSynchedObject.h"
-#include "pnDispatch/plDispatch.h"
 #include "pnSceneObject/plSceneObject.h"
 #include "pnMessage/plSDLModifierMsg.h"
 
+#include "plMessage/plSDLModifierStateMsg.h"
 #include "plNetCommon/plNetObjectDebugger.h"
 #include "plNetMessage/plNetMessage.h"
 #include "plSDL/plSDL.h"
 
-plSDLModifier::plSDLModifier() : fStateCache(nil), fSentOrRecvdState(false)
+plSDLModifier::plSDLModifier() : fStateCache(), fSentOrRecvdState()
 {
 }
 
@@ -61,7 +61,7 @@ plSDLModifier::~plSDLModifier()
 
 plKey plSDLModifier::GetStateOwnerKey() const
 { 
-    return GetTarget() ? GetTarget()->GetKey() : nil; 
+    return GetTarget() ? GetTarget()->GetKey() : nullptr;
 }
 
 void plSDLModifier::AddTarget(plSceneObject* so) 
@@ -80,7 +80,7 @@ uint32_t plSDLModifier::IApplyModFlags(uint32_t sendFlags)
 //
 // write to net msg and send to server
 //
-void plSDLModifier::ISendNetMsg(plStateDataRecord*& state, plKey senderKey, uint32_t sendFlags)
+void plSDLModifier::ISendNetMsg(plStateDataRecord*& state, const plKey& senderKey, uint32_t sendFlags)
 {
     hsAssert(senderKey, "nil senderKey?");
 
@@ -102,7 +102,6 @@ void plSDLModifier::ISendNetMsg(plStateDataRecord*& state, plKey senderKey, uint
 
     // send to server
     plNetMsgSDLState* msg = state->PrepNetMsg(0, writeOptions);
-    msg->SetNetProtocol(kNetProtocolCli2Game);
     msg->ObjectInfo()->SetUoid(senderKey->GetUoid());
 
     if (sendFlags & plSynchedObject::kNewState)
@@ -159,8 +158,11 @@ bool plSDLModifier::MsgReceive(plMessage* msg)
         else
         if (sdlMsg->GetAction()==plSDLModifierMsg::kRecv)
         {
-            plStateDataRecord* sdRec=sdlMsg->GetState();
-            plStateChangeNotifier::SetCurrentPlayerID(sdlMsg->GetPlayerID());   // remote player changed the state
+            plSDLModifierStateMsg* stateMsg = plSDLModifierStateMsg::ConvertNoRef(msg);
+            hsAssert(stateMsg != nullptr, "Malformed SDL State Message");
+
+            plStateDataRecord* sdRec=stateMsg->GetState();
+            plStateChangeNotifier::SetCurrentPlayerID(stateMsg->GetPlayerID());   // remote player changed the state
             ReceiveState(sdRec);
         }
 
@@ -182,7 +184,6 @@ void plSDLModifier::SendState(uint32_t sendFlags)
             plNetObjectDebugger::GetInstance()->IsDebugObject(GetStateOwnerKey()->ObjectIsLoaded()));
     
     bool force = (sendFlags & plSynchedObject::kForceFullSend) != 0;
-    bool broadcast = (sendFlags & plSynchedObject::kBCastToClients) != 0;
 
     // record current state
     plStateDataRecord* curState = new plStateDataRecord(GetSDLName());
@@ -256,7 +257,7 @@ void plSDLModifier::ReceiveState(const plStateDataRecord* srcState)
 void plSDLModifier::AddNotifyForVar(plKey key, const ST::string& varName, float tolerance) const
 {
     // create a SDL notifier object
-    plStateChangeNotifier notifier(tolerance, key);
+    plStateChangeNotifier notifier(tolerance, std::move(key));
     // set the notification
     plStateDataRecord* rec = GetStateCache();
     if (rec)
@@ -264,6 +265,6 @@ void plSDLModifier::AddNotifyForVar(plKey key, const ST::string& varName, float 
         plSimpleStateVariable* var = rec->FindVar(varName);
         // was the variable found?
         if (var)
-            var->AddStateChangeNotification(notifier);
+            var->AddStateChangeNotification(std::move(notifier));
     }
 }

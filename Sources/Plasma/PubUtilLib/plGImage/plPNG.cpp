@@ -48,7 +48,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include <ctime>
 
 #include "plPNG.h"
-#include "plGImage/plMipmap.h"
+#include "plMipmap.h"
 
 #include <png.h>
 #define PNGSIGSIZE 8
@@ -69,7 +69,7 @@ void pngWriteDelegate(png_structp png_ptr, png_bytep png_data, png_size_t length
 
 //// Singleton Instance ///////////////////////////////////////////////////////
 
-plPNG& plPNG::Instance(void)
+plPNG& plPNG::Instance()
 {
     static plPNG theInstance;
     return theInstance;
@@ -83,7 +83,7 @@ plPNG& plPNG::Instance(void)
 
 plMipmap* plPNG::IRead(hsStream* inStream)
 {
-    plMipmap* newMipmap = NULL;
+    plMipmap* newMipmap = nullptr;
     png_structp png_ptr;
     png_infop info_ptr;
     png_infop end_info;
@@ -91,11 +91,11 @@ plMipmap* plPNG::IRead(hsStream* inStream)
     try {
         //  Check PNG Signature
         png_byte sig[PNGSIGSIZE];
-        inStream->Read8Bytes((char*) sig);
+        inStream->Read(PNGSIGSIZE, sig);
 
         if (!png_sig_cmp(sig, 0, PNGSIGSIZE)) {
             //  Allocate required structs
-            png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+            png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 
             if (!png_ptr) {
                 throw false;
@@ -104,14 +104,14 @@ plMipmap* plPNG::IRead(hsStream* inStream)
             info_ptr = png_create_info_struct(png_ptr);
 
             if (!info_ptr) {
-                png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
+                png_destroy_read_struct(&png_ptr, nullptr, nullptr);
                 throw false;
             }
 
             end_info = png_create_info_struct(png_ptr);
 
             if (!end_info) {
-                png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+                png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
                 throw false;
             }
 
@@ -133,12 +133,13 @@ plMipmap* plPNG::IRead(hsStream* inStream)
                     channels = 3;
                     break;
                 case PNG_COLOR_TYPE_GRAY:
-
-                    if (bitdepth < 8) {
+                    if (bitdepth < 8)
                         png_set_expand_gray_1_2_4_to_8(png_ptr);
-                    }
-
                     bitdepth = 8;
+                    [[fallthrough]];
+                case PNG_COLOR_TYPE_GRAY_ALPHA:
+                    png_set_gray_to_rgb(png_ptr);
+                    channels = 3;
                     break;
             }
 
@@ -184,12 +185,10 @@ plMipmap* plPNG::ReadFromFile(const plFileName& fileName)
     hsUNIXStream in;
 
     if (!in.Open(fileName, "rb")) {
-        return nil;
+        return nullptr;
     }
 
-    plMipmap* ret = IRead(&in);
-    in.Close();
-    return ret;
+    return IRead(&in);
 }
 
 bool plPNG::IWrite(plMipmap* source, hsStream* outStream, const std::multimap<ST::string, ST::string>& textFields)
@@ -198,7 +197,7 @@ bool plPNG::IWrite(plMipmap* source, hsStream* outStream, const std::multimap<ST
 
     try {
         //  Allocate required structs
-        png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 
         if (!png_ptr) {
             throw false;
@@ -207,13 +206,12 @@ bool plPNG::IWrite(plMipmap* source, hsStream* outStream, const std::multimap<ST
         png_infop info_ptr = png_create_info_struct(png_ptr);
 
         if (!info_ptr) {
-            png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
+            png_destroy_write_struct(&png_ptr, nullptr);
             throw false;
         }
 
         //  Assign delegate function for writing to hsStream
-        png_set_write_fn(png_ptr, (png_voidp)outStream, pngWriteDelegate, NULL);
-        uint8_t psize = source->GetPixelSize();
+        png_set_write_fn(png_ptr, (png_voidp)outStream, pngWriteDelegate, nullptr);
         png_set_IHDR(png_ptr, info_ptr, source->GetWidth(), source->GetHeight(), 8, PNG_COLOR_TYPE_RGB_ALPHA,
                      PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
         // Invert color byte-order as used by plMipmap for DirectX
@@ -294,7 +292,5 @@ bool plPNG::WriteToFile(const plFileName& fileName, plMipmap* sourceData, const 
         return false;
     }
 
-    bool ret = IWrite(sourceData, &out, textFields);
-    out.Close();
-    return ret;
+    return IWrite(sourceData, &out, textFields);
 }

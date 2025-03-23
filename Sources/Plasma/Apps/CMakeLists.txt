@@ -1,24 +1,20 @@
-if(WIN32)
-    add_subdirectory(plClient)
-    add_subdirectory(plCrashHandler)
+include_directories("${PLASMA_SOURCE_ROOT}/Apps")
+include_directories("${PLASMA_SOURCE_ROOT}/FeatureLib")
+include_directories("${PLASMA_SOURCE_ROOT}/NucleusLib")
+include_directories("${PLASMA_SOURCE_ROOT}/PubUtilLib")
 
-    if(PLASMA_BUILD_LAUNCHER)
-        add_subdirectory(plUruLauncher)
+if(PLASMA_BUILD_CLIENT)
+    add_subdirectory(plClient)
+
+    if(WIN32)
+        add_subdirectory(plCrashHandler)
     endif()
 endif()
 
-if(PLASMA_BUILD_TOOLS)
-    add_subdirectory(plPythonPack)
-    add_subdirectory(plFileSecure)
-    add_subdirectory(plFileEncrypt)
-    add_subdirectory(plPageInfo)
-    add_subdirectory(plPageOptimizer)
+if(PLASMA_BUILD_LAUNCHER AND WIN32)
+    add_subdirectory(plUruLauncher)
+endif()
 
-    add_dependencies(tools
-        plPythonPack
-        plFileSecure
-        plFileEncrypt
-        plPageInfo
-        plPageOptimizer
-    )
+if(PLASMA_BUILD_TOOLS)
+    add_subdirectory(SoundDecompress)
 endif()

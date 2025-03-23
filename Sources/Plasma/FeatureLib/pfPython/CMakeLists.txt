@@ -1,13 +1,4 @@
-include_directories(../../CoreLib)
-include_directories(../../FeatureLib)
-include_directories(../../NucleusLib)
-include_directories(../../NucleusLib/inc)
-include_directories(../../PubUtilLib)
-include_directories(../../)
-
-include_directories(${PYTHON_INCLUDE_DIR})
-include_directories(${OPENAL_INCLUDE_DIR})
-
+include_directories(${PLASMA_SOURCE_ROOT})
 set(pfPython_SOURCES
     cyAccountManagement.cpp
     cyAnimation.cpp
@@ -19,6 +10,7 @@ set(pfPython_SOURCES
     cyParticleSys.cpp
     cyPhysics.cpp
     cyPythonInterface.cpp
+    cyPythonModule451.cpp
     plPythonFileMod.cpp
     plPythonPack.cpp
     plPythonSDLModifier.cpp
@@ -27,7 +19,6 @@ set(pfPython_SOURCES
     pyAgeVault.cpp
     pyAlarm.cpp
     pyAudioControl.cpp
-    pyCCRMgr.cpp
     pyCluster.cpp
     pyColor.cpp
     pyCritterBrain.cpp
@@ -36,10 +27,12 @@ set(pfPython_SOURCES
     pyDrawControl.cpp
     pyDynamicText.cpp
     pyEnum.cpp
+    pyGameCli.cpp
     pyGameScore.cpp
     pyGameScoreMsg.cpp
-    pyGeometry3.cpp
     pyGlueHelpers.cpp
+    pyGmBlueSpiral.cpp
+    pyGmMarker.cpp
     pyGrassShader.cpp
     pyGUIControl.cpp
     pyGUIControlButton.cpp
@@ -58,14 +51,15 @@ set(pfPython_SOURCES
     pyGUIPopUpMenu.cpp
     pyGUISkin.cpp
     pyImage.cpp
+    pyImageLibMod.cpp
     pyJournalBook.cpp
     pyKey.cpp
     pyKeyMap.cpp
+    pyLayer.cpp
     pyMarkerMgr.cpp
     pyMatrix44.cpp
     pyMoviePlayer.cpp
     pyNetLinkingMgr.cpp
-    pyNetServerSessionInfo.cpp
     pyNotify.cpp
     pyPlayer.cpp
     pySceneObject.cpp
@@ -104,9 +98,10 @@ set(pfPython_HEADERS
     cyParticleSys.h
     cyPhysics.h
     cyPythonInterface.h
+    plPythonCallable.h
+    plPythonConvert.h
     pfPythonCreatable.h
     plPythonFileMod.h
-    plPythonHelpers.h
     plPythonPack.h
     plPythonParameter.h
     plPythonSDLModifier.h
@@ -115,7 +110,6 @@ set(pfPython_HEADERS
     pyAgeVault.h
     pyAlarm.h
     pyAudioControl.h
-    pyCCRMgr.h
     pyCluster.h
     pyColor.h
     pyCritterBrain.h
@@ -124,9 +118,14 @@ set(pfPython_HEADERS
     pyDrawControl.h
     pyDynamicText.h
     pyEnum.h
+    pyGameCli.h
+    pyGameHandler.h
+    pyGameMgr.h
     pyGameScore.h
     pyGameScoreMsg.h
     pyGeometry3.h
+    pyGmBlueSpiral.h
+    pyGmMarker.h
     pyGrassShader.h
     pyGUIControl.h
     pyGUIControlButton.h
@@ -145,15 +144,17 @@ set(pfPython_HEADERS
     pyGUIPopUpMenu.h
     pyGUISkin.h
     pyImage.h
+    pyImageLibMod.h
     pyJournalBook.h
     pyKey.h
     pyKeyMap.h
+    pyLayer.h
     pyMarkerMgr.h
     pyMatrix44.h
     pyMoviePlayer.h
     pyNetLinkingMgr.h
-    pyNetServerSessionInfo.h
     pyNotify.h
+    pyObjectRef.h
     pyPlayer.h
     pySceneObject.h
     pySDL.h
@@ -205,10 +206,15 @@ set(pfPython_GLUE
     pyDniInfoSourceGlue.cpp
     pyDrawControlGlue.cpp
     pyDynamicTextGlue.cpp
+    pyGameCliGlue.cpp
+    pyGameMgrGlue.cpp
     pyGameScoreGlue.cpp
     pyGameScoreMsgGlue.cpp
     pyGeometry3Glue.cpp
+    pyGlueDefinitions.h
     pyGlueHelpers.h
+    pyGmBlueSpiralGlue.cpp
+    pyGmMarkerGlue.cpp
     pyGrassShaderGlue.cpp
     pyGUIControlButtonGlue.cpp
     pyGUIControlCheckBoxGlue.cpp
@@ -227,14 +233,15 @@ set(pfPython_GLUE
     pyGUIPopUpMenuGlue.cpp
     pyGUISkinGlue.cpp
     pyImageGlue.cpp
+    pyImageLibModGlue.cpp
     pyJournalBookGlue.cpp
     pyKeyGlue.cpp
     pyKeyMapGlue.cpp
+    pyLayerGlue.cpp
     pyMarkerMgrGlue.cpp
     pyMatrix44Glue.cpp
     pyMoviePlayerGlue.cpp
     pyNetLinkingMgrGlue.cpp
-    pyNetServerSessionInfoGlue.cpp
     pyNotifyGlue.cpp
     pyPlayerGlue.cpp
     pySceneObjectGlue.cpp
@@ -262,8 +269,61 @@ set(pfPython_GLUE
     pyWaveSetGlue.cpp
 )
 
-use_precompiled_header(Pch.h Pch.cpp pfPython_HEADERS pfPython_SOURCES)
-add_library(pfPython STATIC ${pfPython_SOURCES} ${pfPython_HEADERS} ${pfPython_GLUE})
+plasma_library(pfPython
+    FOLDER FeatureLib
+    SOURCES ${pfPython_SOURCES} ${pfPython_HEADERS} ${pfPython_GLUE}
+    UNITY_BUILD
+    PRECOMPILED_HEADERS Pch.h
+)
+target_link_libraries(
+    pfPython
+    PUBLIC
+        CoreLib
+        pnNucleusInc
+        plMessage
+    PRIVATE
+        pnEncryption
+        pnInputCore
+        pnKeyedObject
+        pnMessage
+        pnModifier
+        pnNetCommon
+        pnNucleusInc
+        pnSceneObject
+        pnUUID
+        plAgeDescription
+        plAnimation
+        plAudio
+        plAvatar
+        plDrawable
+        plFile
+        plGImage
+        plGLight
+        plInputCore
+        plSurface
+        plModifier
+        plNetClient
+        plNetClientComm
+        plNetCommon
+        plNetTransport
+        plPipeline
+        plResMgr
+        plSDL
+        plStatusLog
+        plSurface
+        plVault
+        pfCamera
+        pfCharacter
+        pfGameGUIMgr
+        pfGameMgr
+        pfGameScoreMgr
+        pfJournalBook
+        pfLocalizationMgr
+        pfMessage
+        Python3::Python
+    INTERFACE
+        pnFactory
+)
 
 source_group("Source Files" FILES ${pfPython_SOURCES})
 source_group("Header Files" FILES ${pfPython_HEADERS})

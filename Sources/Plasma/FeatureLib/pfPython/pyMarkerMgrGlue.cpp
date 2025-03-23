@@ -40,12 +40,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
-#pragma hdrstop
-
 #include "pyMarkerMgr.h"
+
 #include "pfMessage/pfMarkerMsg.h"
+
 #include "pyEnum.h"
+#include "pyGeometry3.h"
+#include "pyGlueHelpers.h"
 
 // glue functions
 PYTHON_CLASS_DEFINITION(ptMarkerMgr, pyMarkerMgr);
@@ -200,7 +201,7 @@ void pyMarkerMgr::AddPlasmaClasses(PyObject *m)
 
 void pyMarkerMgr::AddPlasmaConstantsClasses(PyObject *m)
 {
-    PYTHON_ENUM_START(PtMarkerMsgType);
-    PYTHON_ENUM_ELEMENT(PtMarkerMsgType, kMarkerCaptured,   pfMarkerMsg::kMarkerCaptured);
-    PYTHON_ENUM_END(m, PtMarkerMsgType);
+    PYTHON_ENUM_START(PtMarkerMsgType)
+    PYTHON_ENUM_ELEMENT(PtMarkerMsgType, kMarkerCaptured,   pfMarkerMsg::kMarkerCaptured)
+    PYTHON_ENUM_END(m, PtMarkerMsgType)
 }

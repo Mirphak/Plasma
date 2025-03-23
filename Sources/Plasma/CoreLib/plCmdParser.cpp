@@ -40,12 +40,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include "HeadSpin.h"
 #include "plCmdParser.h"
 
-#include <vector>
+#include "HeadSpin.h"
+
 #include <algorithm>
 #include <regex>
+#include <vector>
 
 #define  WHITESPACE     " \"\t\r\n\x1A"
 #define  FLAGS          "-/"
@@ -84,9 +85,9 @@ class plCmdParserImpl
 protected:
     ST::string                  fProgramName;
     std::vector<plCmdArgData>   fArgArray;
-    std::vector<uint32_t>       fLookupArray;
-    std::vector<uint32_t>       fUnflaggedArray;
-    uint32_t                    fRequiredCount;
+    std::vector<size_t>         fLookupArray;
+    std::vector<size_t>         fUnflaggedArray;
+    size_t                      fRequiredCount;
     CmdError                    fError;
 
     void SetDefaultValue(plCmdArgData& arg);
@@ -128,12 +129,12 @@ plCmdParserImpl::plCmdParserImpl(const plCmdArgDef* defs, size_t defCount)
                                        kCmdArgMask);
 
         // Disallow names on unflagged arguments
-        ASSERT(flagged || !def.name.is_empty());
+        ASSERT(flagged || !def.name.empty());
 
         // Store the argument data
         plCmdArgData& arg = fArgArray[loop];
         arg.def           = def;
-        arg.buffer        = ST::null;
+        arg.buffer        = ST::string();
         arg.nameChars     = def.name.size();
         arg.isSpecified   = false;
 
@@ -227,7 +228,7 @@ bool plCmdParserImpl::Tokenize(plCmdTokenState* state, std::vector<ST::string>& 
     bool result = true;
 
     for (auto it = strs.begin(); result && it != strs.end(); ++it) {
-        if (fProgramName.is_empty()) {
+        if (fProgramName.empty()) {
             fProgramName = *it;
             continue;
         }
@@ -276,7 +277,7 @@ bool plCmdParserImpl::ProcessValue(plCmdTokenState* state, size_t index, const S
             arg.val.boolVal = true;
         else if (str.compare_i("false") == 0)
             arg.val.boolVal = false;
-        else if (str.is_empty())
+        else if (str.empty())
             arg.val.boolVal = hsCheckFlagBits(arg.def.flags,
                                               kCmdBoolSet,
                                               kCmdBoolMask);
@@ -310,15 +311,17 @@ bool plCmdParserImpl::ProcessValue(plCmdTokenState* state, size_t index, const S
 bool plCmdParserImpl::TokenizeFlags(plCmdTokenState* state, const ST::string& str)
 {
     bool result = true;
-    std::vector<ST::string> tokens = str.tokenize(ALL);
+    std::vector<ST::string> tokens = str.tokenize(WHITESPACE SEPARATORS);
 
     for (auto it = tokens.begin(); result && it != tokens.end(); ++it) {
         size_t lastIndex = size_t(-1);
         ST::string buffer = *it;
 
-        if (buffer.is_empty()) {
+        if (buffer.empty()) {
             continue;
         }
+        
+        buffer = buffer.trim_left(FLAGS);
 
         while (result) {
             // Lookup the argument name
@@ -337,7 +340,7 @@ bool plCmdParserImpl::TokenizeFlags(plCmdTokenState* state, const ST::string& st
 
         // Check for an argument value provided using a separator
         static const std::regex re_separators(".+[" SEPARATORS "].+");
-        if (std::regex_match(str.c_str(), re_separators) && !(*(++it)).is_empty()) {
+        if (std::regex_match(str.c_str(), re_separators) && !(*(++it)).empty()) {
             result = ProcessValue(state, lastIndex, *it);
             break;
         }
@@ -348,14 +351,14 @@ bool plCmdParserImpl::TokenizeFlags(plCmdTokenState* state, const ST::string& st
 
         // Process values for boolean arguments
         if (isBool) {
-            result = ProcessValue(state, lastIndex, ST::null);
+            result = ProcessValue(state, lastIndex, ST::string());
             continue;
         }
 
         // Process values for non-boolean arguments
         else {
             // Check for an argument value immediately following the name
-            if (!buffer.is_empty()) {
+            if (!buffer.empty()) {
                 result = ProcessValue(state, lastIndex, buffer);
                 break;
             }

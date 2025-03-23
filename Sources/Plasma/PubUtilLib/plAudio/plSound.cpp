@@ -48,6 +48,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plProfile.h"
 #include "plgDispatch.h"
 
+#include <algorithm>
+
 #include "plAudioSystem.h"
 #include "plSound.h"
 #include "plWin32Sound.h"
@@ -73,78 +75,38 @@ plProfile_CreateCounterNoReset( "Loaded", "Sound", SoundNumLoaded );
 plProfile_CreateCounterNoReset( "Waiting to Die", "Sound", WaitingToDie );
 plProfile_CreateAsynchTimer( "Sound Load Time", "Sound", SoundLoadTime );
 
-plGraphPlate    *plSound::fDebugPlate = nil;
-plSound         *plSound::fCurrDebugPlateSound = nil;
+plGraphPlate    *plSound::fDebugPlate = nullptr;
+plSound         *plSound::fCurrDebugPlateSound = nullptr;
 bool            plSound::fLoadOnDemandFlag = true;
 bool            plSound::fLoadFromDiskOnDemand = true;
 unsigned        plSound::fIncidentalsPlaying = 0;
 
-plSound::plSound() :
-fPlaying(false),
-fActive(false),
-fTime(0),
-fMaxFalloff(0),
-fMinFalloff(0),
-fCurrVolume(0.f),
-fOuterVol(0),
-fOuterCone(360),
-fInnerCone(360),
-fLength(0.0f),
-fDesiredVol(0.f),
-fFading(false),
-fRegisteredForTime(false),
-fMuted(true),
-fFadedVolume(0.f),
-fSoftRegion(nil),
-fSoftOcclusionRegion(nil),
-fSoftVolume(0.f),
-fCurrFadeParams(nil),
-fRegistered(false),
-fDistAttenuation(0.f),
-fProperties(0),
-fNotHighEnoughPriority(false),
-fVirtualStartTime(0),
-fOwningSceneObject(nil),
-fPriority(0),
-fType(plSound::kSoundFX),
-fQueued(false),
-fLoading(false),
-fSynchedStartTimeSec(0),
-fMaxVolume(0),
-fFreeData(false)
+plSound::plSound()
+    : fPlaying(), fActive(), fTime(), fMaxFalloff(), fMinFalloff(), fCurrVolume(),
+      fOuterVol(), fOuterCone(360), fInnerCone(360), fLength(), fDesiredVol(), fFading(),
+      fRegisteredForTime(), fMuted(true), fFadedVolume(), fSoftRegion(), fSoftOcclusionRegion(),
+      fSoftVolume(), fCurrFadeParams(), fRegistered(), fDistAttenuation(), fProperties(),
+      fNotHighEnoughPriority(), fVirtualStartTime(), fOwningSceneObject(), fPriority(),
+      fType(plSound::kSoundFX), fQueued(), fLoading(), fSynchedStartTimeSec(), fMaxVolume(),
+      fFreeData(), fDataBuffer(), fDataBufferKey(), fPlayOnReactivate(), fDataBufferLoaded(),
+      f3DPosition(0.f, 0.f, 0.f), f3DVelocity(0.f, 0.f, 0.f), fPlayWhenLoaded(), fDistToListenerSquared()
 {
-    plProfile_Inc( SoundNumLoaded );
-    f3DPosition.Set( 0.f, 0.f, 0.f );
-    f3DVelocity.Set( 0.f, 0.f, 0.f );
-    fDataBuffer = nil;
-    fDataBufferKey = nil;
-    fPlayOnReactivate = false;
-    fDataBufferLoaded = false;
+    plProfile_Inc(SoundNumLoaded);
 }
 
 plSound::~plSound()
 {
-    IStopFade( true );
-    plProfile_Dec( SoundNumLoaded );
+    IStopFade(true);
+    plProfile_Dec(SoundNumLoaded);
 }
 
-void plSound::IPrintDbgMessage( const char *msg, bool isError )
+void plSound::IPrintDbgMessage( const ST::string& msg, bool isError )
 {
-    static plStatusLog  *ourLog = nil;
-
-    // Print to our log file (create it if necessary)
-    if( ourLog == nil )
-    {
-//      ourLog = plStatusLogMgr::GetInstance().CreateStatusLog( 15, 
-//              "audio.log", plStatusLog::kFilledBackground | plStatusLog::kDeleteForMe | plStatusLog::kAlignToTop );
-    }
-
+    ST::string keyName = GetKey() ? GetKeyName() : ST_LITERAL("unkeyed");
     if( isError )
-//      ourLog->AddLineF( plStatusLog::kRed, "ERROR: %s (%s)", msg, GetKey() ? GetKeyName().c_str() : "unkeyed" );
-        ourLog->AddLineS( "audio.log", plStatusLog::kRed, "ERROR: %s (%s)", msg, GetKey() ? GetKeyName().c_str() : "unkeyed" );
+        plStatusLog::AddLineSF("audio.log", plStatusLog::kRed, "ERROR: {} ({})", msg, keyName);
     else
-//      ourLog->AddLineF( "%s (%s)", msg, GetKey() ? GetKeyName().c_str() : "unkeyed" );
-        ourLog->AddLineS( "audio.log", "%s (%s)", msg, GetKey() ? GetKeyName().c_str() : "unkeyed" );
+        plStatusLog::AddLineSF("audio.log", "{} ({})", msg, keyName);
 }
 
 ///////////////////////////////////////////////////////////
@@ -152,21 +114,21 @@ void plSound::IPrintDbgMessage( const char *msg, bool isError )
 //  sound. Should be called every time any of the values change, which means
 //  the best place is inside ISetActualVolume(). Since that's a pure virtual,
 //  it makes the placement of the call a bit annoying, but oh well.
-void plSound::IUpdateDebugPlate( void )
+void plSound::IUpdateDebugPlate()
 {
     if( this == fCurrDebugPlateSound )
     {
-        if( fDebugPlate == nil )
+        if (fDebugPlate == nullptr)
         {
             plPlateManager::Instance().CreateGraphPlate( &fDebugPlate );
             fDebugPlate->SetSize( 0.50, 0.25 );
             fDebugPlate->SetPosition( -0.5, 0 );
             fDebugPlate->SetDataRange( 0, 100, 100 );
             fDebugPlate->SetColors( 0x80202000 );
-            fDebugPlate->SetLabelText( "Desired", "Curr", "Soft", "Dist" );
+            fDebugPlate->SetLabelText({ST_LITERAL("Desired"), ST_LITERAL("Curr"), ST_LITERAL("Soft"), ST_LITERAL("Dist")});
         }
 
-        fDebugPlate->SetTitle(GetKeyName().c_str());      // Bleah
+        fDebugPlate->SetTitle(GetKeyName()); // Bleah
         fDebugPlate->SetVisible( true );
         fDebugPlate->AddData( (int32_t)( fDesiredVol * 100.f ), 
                               (int32_t)( fCurrVolume * 100.f ),
@@ -177,10 +139,10 @@ void plSound::IUpdateDebugPlate( void )
 
 void plSound::SetCurrDebugPlate( const plKey& soundKey )
 {
-    if( soundKey == nil )
+    if (soundKey == nullptr)
     {
-        fCurrDebugPlateSound = nil;
-        if( fDebugPlate != nil )
+        fCurrDebugPlateSound = nullptr;
+        if (fDebugPlate != nullptr)
             fDebugPlate->SetVisible( false );
     }
     else
@@ -345,7 +307,7 @@ void plSound::ISynchedPlay( double virtualStartTime )
 ///////////////////////////////////////////////////////////
 //  Takes the virtual start time and sets us to the real time we should be at,
 //  then starts us playing via ITryPlay().
-void plSound::ISynchToStartTime( void )
+void plSound::ISynchToStartTime()
 {
     if( !plgAudioSys::Active() )
         return;
@@ -392,22 +354,22 @@ void plSound::ISynchToStartTime( void )
     }
 } 
 
-void plSound::SetPosition(const hsPoint3 pos)
+void plSound::SetPosition(const hsPoint3& pos)
 {
     f3DPosition = pos;
 }
 
-void plSound::SetVelocity(const hsVector3 vel)
+void plSound::SetVelocity(const hsVector3& vel)
 {
     f3DVelocity = vel;
 }
 
-hsPoint3 plSound::GetPosition( void ) const
+hsPoint3 plSound::GetPosition() const
 {
     return f3DPosition;
 }
 
-hsVector3 plSound::GetVelocity( void ) const
+hsVector3 plSound::GetVelocity() const
 {
     return f3DVelocity;
 }
@@ -458,7 +420,7 @@ void plSound::SetVolume(const float v)
     RefreshVolume();
 }
 
-void plSound::RefreshVolume( void )
+void plSound::RefreshVolume()
 {
     this->ISetActualVolume( fCurrVolume );
 }
@@ -477,7 +439,7 @@ void plSound::SetMuted( bool muted )
     }
 }
 
-void plSound::IRefreshParams( void )
+void plSound::IRefreshParams()
 {
     SetMax( fMaxFalloff );
     SetMin( fMinFalloff );
@@ -491,7 +453,7 @@ void plSound::IRefreshParams( void )
 ////////////////////////////////////////////////////////////////////////
 //  The public interface to stopping, which also synchs the state with the
 //  server.
-void plSound::Stop( void )
+void plSound::Stop()
 {
     fPlaying = false;
 
@@ -519,7 +481,7 @@ void plSound::Stop( void )
     }
 }
 
-void plSound::IActuallyStop( void )
+void plSound::IActuallyStop()
 {
     if( fLoadOnDemandFlag && !IsPropertySet( kPropDisableLOD ) && !IsPropertySet( kPropLoadOnlyOnCall ) )
     {
@@ -556,18 +518,13 @@ void plSound::Update()
     }
 }
 
-float plSound::IGetChannelVolume( void ) const
+float plSound::IGetChannelVolume() const
 {
     float channelVol = plgAudioSys::GetChannelVolume( (plgAudioSys::ASChannel)fType );
-
-    // if not using hardware acceleration then apply 2D/3D bias to non 3D sounds
-    if( !plgAudioSys::Hardware() && !IsPropertySet( kPropIs3DSound ) )
-        channelVol *= plgAudioSys::Get2D3Dbias();
-
-    if( IsPropertySet( kPropDontFade ) )
+    if (IsPropertySet(kPropDontFade))
         return channelVol;
-    
-    return channelVol * plgAudioSys::GetGlobalFadeVolume();
+    else
+        return channelVol * plgAudioSys::GetGlobalFadeVolume();
 }
 
 void plSound::IStartFade( plFadeParams *params, float offsetIntoFade )
@@ -585,7 +542,7 @@ void plSound::IStartFade( plFadeParams *params, float offsetIntoFade )
         fFadeInParams.fVolStart = fCurrVolume;  // Hopefully, we got to fFadedVolume, but maybe not
         fFadeInParams.fVolEnd = fDesiredVol;
         fCurrFadeParams = &fFadeInParams;
-        plStatusLog::AddLineS("audio.log", "Fading in %s", GetKeyName().c_str());
+        plStatusLog::AddLineSF("audio.log", "Fading in {}", GetKeyName());
     }
     else
         fCurrFadeParams = params;
@@ -602,7 +559,7 @@ void plSound::IStartFade( plFadeParams *params, float offsetIntoFade )
 
 void plSound::IStopFade( bool shuttingDown, bool SetVolEnd)
 {
-    if( fCurrFadeParams != nil )
+    if (fCurrFadeParams != nullptr)
     {
         if( fCurrFadeParams == &fCoolSoftVolumeTrickParams )
         {
@@ -628,7 +585,7 @@ void plSound::IStopFade( bool shuttingDown, bool SetVolEnd)
     }
 
     fFading = false;
-    fCurrFadeParams = nil;
+    fCurrFadeParams = nullptr;
 
     // Fade done, unregister for time message
     if( fRegisteredForTime )
@@ -641,10 +598,10 @@ void plSound::IStopFade( bool shuttingDown, bool SetVolEnd)
 bool plSound::MsgReceive( plMessage* pMsg )
 {
     plTimeMsg   *time = plTimeMsg::ConvertNoRef( pMsg );
-    if( time != nil )
+    if (time != nullptr)
     {
         /// Time message for handling fade ins/outs
-        if( fCurrFadeParams == nil )
+        if (fCurrFadeParams == nullptr)
             return true;
 
         fCurrFadeParams->fCurrTime += time->DelSeconds();
@@ -678,7 +635,7 @@ bool plSound::MsgReceive( plMessage* pMsg )
             }
 
             // Done with this one!
-            fCurrFadeParams = nil;
+            fCurrFadeParams = nullptr;
             fFading = false;
         }   
         else
@@ -707,7 +664,7 @@ bool plSound::MsgReceive( plMessage* pMsg )
             }
             else if( refMsg->GetContext() & (plRefMsg::kOnRemove | plRefMsg::kOnDestroy) )
             {
-                ISetSoftRegion( nil );
+                ISetSoftRegion(nullptr);
                 return true;
             }
         }
@@ -720,7 +677,7 @@ bool plSound::MsgReceive( plMessage* pMsg )
             }
             else if( refMsg->GetContext() & (plRefMsg::kOnRemove | plRefMsg::kOnDestroy) )
             {
-                ISetSoftOcclusionRegion( nil );
+                ISetSoftOcclusionRegion(nullptr);
                 return true;
             }
         }
@@ -728,11 +685,28 @@ bool plSound::MsgReceive( plMessage* pMsg )
         {
             if( refMsg->GetContext() & (plRefMsg::kOnCreate|plRefMsg::kOnRequest|plRefMsg::kOnReplace) )
             {
+                // Only plugins should be doing this, but for safety, if someone does this
+                // in client code, toss any anonymous ref we might be holding.
+                if (fDataBufferLoaded && fDataBuffer != refMsg->GetRef()) {
+                    fDataBufferKey->UnRefObject();
+                    fDataBufferLoaded = false; // More like we aren't holding a ref
+                }
+
+                fDataBufferKey = refMsg->GetRef()->GetKey();
                 fDataBuffer = plSoundBuffer::ConvertNoRef( refMsg->GetRef() );
                 SetLength( fDataBuffer->GetDataLengthInSecs() );
             }
             else
-                fDataBuffer = nil;
+            {
+                // Only plugins should be doing this, but for safety, if someone does this
+                // in client code, toss any anonymous ref we might be holding.
+                if (fDataBufferLoaded && fDataBufferKey) {
+                    fDataBufferKey->UnRefObject();
+                    fDataBufferLoaded = false;
+                }
+                fDataBuffer = nullptr;
+                fDataBufferKey = nullptr;
+            }
 
             return true;
         }
@@ -741,14 +715,14 @@ bool plSound::MsgReceive( plMessage* pMsg )
             if( refMsg->GetContext() & (plRefMsg::kOnCreate|plRefMsg::kOnRequest|plRefMsg::kOnReplace) )
                 fOwningSceneObject = plSceneObject::ConvertNoRef( refMsg->GetRef() );
             else
-                fOwningSceneObject = nil;
+                fOwningSceneObject = nullptr;
 
             return true;
         }
     }
 
     plSoundMsg *pSoundMsg = plSoundMsg::ConvertNoRef( pMsg );
-    if( pSoundMsg != nil )
+    if (pSoundMsg != nullptr)
     {   
         if( pSoundMsg->Cmd( plSoundMsg::kAddCallbacks ) )
         {
@@ -764,9 +738,9 @@ bool plSound::MsgReceive( plMessage* pMsg )
     }
 
     plListenerMsg *listenMsg = plListenerMsg::ConvertNoRef( pMsg );
-    if( listenMsg != nil )
+    if (listenMsg != nullptr)
     {
-        if( fSoftOcclusionRegion != nil )
+        if (fSoftOcclusionRegion != nullptr)
         {
             // The EAX settings have 0 as the start value and 1 as the end, and since start
             // translates to "inside the soft region", it's reversed of what the region gives us
@@ -787,7 +761,7 @@ void plSound::ForceLoad()
     LoadSound( IsPropertySet( kPropIs3DSound ) );
 }
 
-void plSound::ForceUnload( void )
+void plSound::ForceUnload()
 {
     if( !IsPropertySet( kPropLoadOnlyOnCall ) )
         return;
@@ -796,18 +770,18 @@ void plSound::ForceUnload( void )
     IFreeBuffers();
 }
 
-bool plSound::ILoadDataBuffer( void )
+bool plSound::ILoadDataBuffer()
 {
     if(!fDataBufferLoaded)
     {
-        plSoundBuffer *buffer = (plSoundBuffer *)fDataBufferKey->RefObject();
-        if(!buffer)
+        fDataBuffer = plSoundBuffer::ConvertNoRef(fDataBufferKey->RefObject());
+        if (!fDataBuffer)
         {
             hsAssert(false, "unable to load sound buffer");
-            plStatusLog::AddLineS("audio.log", "Unable to load sound buffer: %s", GetKeyName().c_str());
+            plStatusLog::AddLineSF("audio.log", "Unable to load sound buffer: {}", GetKeyName());
             return false;
         }
-        SetLength( buffer->GetDataLengthInSecs() );
+        SetLength( fDataBuffer->GetDataLengthInSecs() );
         fDataBufferLoaded = true;
     }
     return true;
@@ -815,19 +789,17 @@ bool plSound::ILoadDataBuffer( void )
 
 void plSound::FreeSoundData() 
 {
-    if(!fDataBufferKey) return; // for plugins
-    plSoundBuffer *buffer = (plSoundBuffer *) fDataBufferKey->ObjectIsLoaded();
-    if(buffer)
-    {
-        buffer->UnLoad();
-    }
+    if (!fDataBuffer)
+        return; // for plugins
+    fDataBuffer->UnLoad();
 }
 
-void plSound::IUnloadDataBuffer( void )
+void plSound::IUnloadDataBuffer()
 {
     if(fDataBufferLoaded)
     {
         fDataBufferLoaded = false;
+        fDataBuffer = nullptr;
         fDataBufferKey->UnRefObject();
     }
 }
@@ -841,12 +813,10 @@ plSoundBuffer::ELoadReturnVal plSound::IPreLoadBuffer( bool playWhenLoaded, bool
         return plSoundBuffer::kError;
     }
 
-    plSoundBuffer *buffer = (plSoundBuffer *)fDataBufferKey->ObjectIsLoaded();
-
-    if(buffer && buffer->IsValid() )
+    if (fDataBuffer && fDataBuffer->IsValid())
     {
         plProfile_BeginTiming( SoundLoadTime );
-        plSoundBuffer::ELoadReturnVal retVal = buffer->AsyncLoad(buffer->HasFlag(plSoundBuffer::kStreamCompressed) ? plAudioFileReader::kStreamNative : plAudioFileReader::kStreamWAV);
+        plSoundBuffer::ELoadReturnVal retVal = fDataBuffer->AsyncLoad(fDataBuffer->HasFlag(plSoundBuffer::kStreamCompressed) ? plAudioFileReader::kStreamNative : plAudioFileReader::kStreamWAV);
         if(retVal == plSoundBuffer::kPending)
         {
             fPlayWhenLoaded = playWhenLoaded;
@@ -863,14 +833,11 @@ plSoundBuffer::ELoadReturnVal plSound::IPreLoadBuffer( bool playWhenLoaded, bool
     }
 }
 
-plFileName plSound::GetFileName( void ) const
+plFileName plSound::GetFileName() const
 {
-    if (fDataBufferKey->ObjectIsLoaded())
-    {
-        return ((plSoundBuffer *)fDataBufferKey->ObjectIsLoaded())->GetFileName();
-    }
-
-    return "";
+    if (fDataBuffer)
+        return fDataBuffer->GetFileName();
+    return {};
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -881,7 +848,7 @@ plFileName plSound::GetFileName( void ) const
 //  Note that if we already set the length (like at export time), we never need
 //  to load the sound, so the optimization at export time is all ready to plug-
 //  and-play...
-double plSound::GetLength( void )
+double plSound::GetLength()
 {
     if( ( (double)fLength == 0.f ) )
         ILoadDataBuffer();
@@ -892,9 +859,9 @@ double plSound::GetLength( void )
 void plSound::ISetSoftRegion( plSoftVolume *region )
 {
     /// We're either registering or unregistering
-    if( fSoftRegion == nil && region != nil )
+    if (fSoftRegion == nullptr && region != nullptr)
         RegisterOnAudioSys();
-    else if( fSoftRegion != nil && region == nil )
+    else if (fSoftRegion != nullptr && region == nullptr)
         UnregisterOnAudioSys();
 
     fSoftRegion = region;
@@ -904,11 +871,11 @@ void plSound::ISetSoftRegion( plSoftVolume *region )
 void plSound::ISetSoftOcclusionRegion( plSoftVolume *region )
 {
     /// We're either registering or unregistering for listener messages
-    if( fSoftOcclusionRegion == nil && region != nil )
+    if (fSoftOcclusionRegion == nullptr && region != nullptr)
     {
         plgDispatch::Dispatch()->RegisterForExactType( plListenerMsg::Index(), GetKey() );
     }
-    else if( fSoftOcclusionRegion != nil && region == nil )
+    else if (fSoftOcclusionRegion != nullptr && region == nullptr)
     {
         plgDispatch::Dispatch()->UnRegisterForExactType( plListenerMsg::Index(), GetKey() );
     }
@@ -982,7 +949,7 @@ float plSound::CalcSoftVolume( bool enable, float distToListenerSquared )
     if( !enable )
         // We apparently don't know jack. Let the audioSystem's decision rule
         fSoftVolume = 0.f;
-    else if( fSoftRegion != nil )
+    else if (fSoftRegion != nullptr)
         fSoftVolume = fSoftRegion->GetListenerStrength();
     else
         fSoftVolume = 1.f;
@@ -994,7 +961,7 @@ float plSound::CalcSoftVolume( bool enable, float distToListenerSquared )
 //  Wee function for the audio system. This basically returns the effective
 //  current volume of this sound. Useful for doing things like ranking all
 //  sounds based on volume.
-float plSound::GetVolumeRank( void )
+float plSound::GetVolumeRank()
 {
     if( !IsPlaying() && !this->IActuallyPlaying() )
         return 0.f;
@@ -1005,7 +972,6 @@ float plSound::GetVolumeRank( void )
     {
         float minDistSquared = (float)( GetMin() * GetMin() );
         float maxDistSquared = (float) (GetMax() * GetMax());
-        hsPoint3 listenerPos = plgAudioSys::Sys()->GetCurrListenerPos();
         if( fDistToListenerSquared > minDistSquared )
         {
             float diff = maxDistSquared - minDistSquared;
@@ -1020,12 +986,12 @@ float plSound::GetVolumeRank( void )
 //  Tests to see whether, if we try to play this sound now, it'll actually
 //  be able to play. Takes into account whether the sound is within range
 //  of the listener and the current soft region value.
-bool plSound::IWillBeAbleToPlay( void )
+bool plSound::IWillBeAbleToPlay()
 {
     if( fSoftVolume == 0.f )
         return false;
 
-    return IsWithinRange( plgAudioSys::Sys()->GetCurrListenerPos(), nil );
+    return IsWithinRange(plgAudioSys::GetCurrListenerPos(), nullptr);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -1035,7 +1001,7 @@ bool plSound::IsWithinRange( const hsPoint3 &listenerPos, float *distSquared )
 {
     if( !IsPropertySet( plSound::kPropIs3DSound ) )
     {
-        if( distSquared != nil )
+        if (distSquared != nullptr)
             *distSquared = 1.f;
         return true;
     }
@@ -1045,7 +1011,7 @@ bool plSound::IsWithinRange( const hsPoint3 &listenerPos, float *distSquared )
 
     distance.Set( &listenerPos, &soundPos );
 
-    if( distSquared != nil )
+    if (distSquared != nullptr)
         *distSquared = distance.MagnitudeSquared();
 
     if( GetMax() == 1000000000 )
@@ -1120,7 +1086,7 @@ void plSound::UpdateSoftVolume( bool enable, bool firstTime )
 
 /////////////////////////////////////////////////////////////////////////
 // Returns the current volume, attenuated
-float plSound::QueryCurrVolume( void ) const
+float plSound::QueryCurrVolume() const
 {
     return IAttenuateActualVolume( fCurrVolume ) * IGetChannelVolume();
 }
@@ -1157,7 +1123,7 @@ void plSound::Activate(bool forcePlay)
     SetMuted(plgAudioSys::IsMuted());
 }
 
-void plSound::DeActivate( void )
+void plSound::DeActivate()
 {
     UnregisterOnAudioSys();
 
@@ -1177,7 +1143,7 @@ void plSound::DeActivate( void )
 
 /////////////////////////////////////////////////////////////////////////
 //  Tell the audio system about ourselves.
-void plSound::RegisterOnAudioSys( void )
+void plSound::RegisterOnAudioSys()
 {
     if( !fRegistered )
     {
@@ -1188,7 +1154,7 @@ void plSound::RegisterOnAudioSys( void )
 
 /////////////////////////////////////////////////////////////////////////
 //  Tell the audio system to stop caring about us
-void plSound::UnregisterOnAudioSys( void )
+void plSound::UnregisterOnAudioSys()
 {
     if( fRegistered )
     {
@@ -1202,7 +1168,7 @@ void plSound::UnregisterOnAudioSys( void )
 //  shutting down). Normally, we should already be shut down, but in case
 //  we're not, this function makes sure everything is cleaned up before
 //  the audio system itself shuts down.
-void plSound::ForceUnregisterFromAudioSys( void )
+void plSound::ForceUnregisterFromAudioSys()
 {
     DeActivate();
     fRegistered = false;
@@ -1260,8 +1226,8 @@ void plSound::IRead( hsStream *s, hsResMgr *mgr )
     fTime = s->ReadLEDouble();
     fMaxFalloff = s->ReadLE32();
     fMinFalloff = s->ReadLE32();
-    s->ReadLE( &fCurrVolume );
-    s->ReadLE( &fDesiredVol );
+    s->ReadLEFloat(&fCurrVolume);
+    s->ReadLEFloat(&fDesiredVol);
 
     /// mcn debugging - Thanks to some of my older sound code, it's possible that a few volumes
     /// will come in too large. This will only happen with scenes that were exported with that intermediate
@@ -1274,11 +1240,12 @@ void plSound::IRead( hsStream *s, hsResMgr *mgr )
         fCurrVolume = 1.f;
     fMaxVolume = fDesiredVol;
 
-    fOuterVol = s->ReadLE32();
+    // Many plWin32Sound objects in PRPs have fOuterVol set to -10000 even though the actual minimum is -5000.
+    fOuterVol = std::clamp(static_cast<int>(s->ReadLE32()), -5000, 0);
     fInnerCone = s->ReadLE32();
     fOuterCone = s->ReadLE32();
-    s->ReadLE( &fFadedVolume );
-    s->ReadLE( &fProperties );
+    s->ReadLEFloat(&fFadedVolume);
+    s->ReadLE32(&fProperties);
 
     fType = s->ReadByte();
     fPriority = s->ReadByte();
@@ -1310,13 +1277,13 @@ void plSound::IWrite( hsStream *s, hsResMgr *mgr )
     s->WriteLEDouble(fTime);
     s->WriteLE32(fMaxFalloff);
     s->WriteLE32(fMinFalloff);
-    s->WriteLE( fCurrVolume );
-    s->WriteLE( fDesiredVol );
+    s->WriteLEFloat(fCurrVolume);
+    s->WriteLEFloat(fDesiredVol);
     s->WriteLE32(fOuterVol);
     s->WriteLE32(fInnerCone);
     s->WriteLE32(fOuterCone);
-    s->WriteLE( fFadedVolume );
-    s->WriteLE( fProperties );
+    s->WriteLEFloat(fFadedVolume);
+    s->WriteLE32(fProperties);
     s->WriteByte( fType );
     s->WriteByte( fPriority );
     
@@ -1342,27 +1309,27 @@ void plSound::IWrite( hsStream *s, hsResMgr *mgr )
 
 void plSound::plFadeParams::Read( hsStream *s )
 {
-    s->ReadLE( &fLengthInSecs );
-    s->ReadLE( &fVolStart );
-    s->ReadLE( &fVolEnd );
-    s->ReadLE( &fType );
-    s->ReadLE( &fCurrTime );
+    s->ReadLEFloat(&fLengthInSecs);
+    s->ReadLEFloat(&fVolStart);
+    s->ReadLEFloat(&fVolEnd);
+    s->ReadByte(&fType);
+    s->ReadLEFloat(&fCurrTime);
     fStopWhenDone = s->ReadBOOL();
     fFadeSoftVol = s->ReadBOOL();
 }
 
 void plSound::plFadeParams::Write( hsStream *s )
 {
-    s->WriteLE( fLengthInSecs );
-    s->WriteLE( fVolStart );
-    s->WriteLE( fVolEnd );
-    s->WriteLE( fType );
-    s->WriteLE( fCurrTime );
+    s->WriteLEFloat(fLengthInSecs);
+    s->WriteLEFloat(fVolStart);
+    s->WriteLEFloat(fVolEnd);
+    s->WriteByte(fType);
+    s->WriteLEFloat(fCurrTime);
     s->WriteBOOL( fStopWhenDone );
     s->WriteBOOL( fFadeSoftVol );
 }
 
-float plSound::plFadeParams::InterpValue( void )
+float plSound::plFadeParams::InterpValue()
 {
     float    val;
 
@@ -1411,7 +1378,7 @@ void plSound::SetFadeOutEffect( plSound::plFadeParams::Type type, float length )
     fFadeOutParams.fStopWhenDone = true;
 }
 
-plDrawableSpans* plSound::CreateProxy(const hsMatrix44& l2w, hsGMaterial* mat, hsTArray<uint32_t>& idx, plDrawableSpans* addTo)
+plDrawableSpans* plSound::CreateProxy(const hsMatrix44& l2w, hsGMaterial* mat, std::vector<uint32_t>& idx, plDrawableSpans* addTo)
 {
     plDrawableSpans* myDraw = addTo;
 
@@ -1478,10 +1445,10 @@ plDrawableSpans* plSound::CreateProxy(const hsMatrix44& l2w, hsGMaterial* mat, h
 bool plSound::DirtySynchState(const ST::string& sdlName /* kSDLSound */, uint32_t sendFlags)
 {
     /*
-    if( sdlName.is_empty() )
+    if( sdlName.empty() )
         sdlName = kSDLSound;
 
-    if( fOwningSceneObject != nil )
+    if (fOwningSceneObject != nullptr)
         return fOwningSceneObject->DirtySynchState(sdlName, sendFlags);
 */
     return false;
@@ -1503,13 +1470,13 @@ void plSoundVolumeApplicator::IApply( const plAGModifier *mod, double time )
 
         // Find the audio interface and thus the plSound from it
         plSceneObject *so = mod->GetTarget( 0 );
-        if( so != nil )
+        if (so != nullptr)
         {
             const plAudioInterface *ai = so->GetAudioInterface();
-            if( ai != nil && fIndex < ai->GetNumSounds() )
+            if (ai != nullptr && fIndex < ai->GetNumSounds())
             {
                 plSound *sound = ai->GetSound( fIndex );
-                if( sound != nil )
+                if (sound != nullptr)
                 {
                     sound->SetVolume( digitalVolume );
                     return;

@@ -46,11 +46,15 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //  and interface to the ChatLog (ptChatStatusLog)
 //////////////////////////////////////////////////////////////////////
 
-#include "pyColor.h"
 #include "pyStatusLog.h"
+
+#include <string_theory/string>
+
 #include "plStatusLog/plStatusLog.h"
 
-pyStatusLog::pyStatusLog( plStatusLog* log/*=nil */)
+#include "pyColor.h"
+
+pyStatusLog::pyStatusLog(plStatusLog* log/*=nullptr */)
 : fLog( log )
 , fICreatedLog( false )
 {
@@ -97,7 +101,7 @@ bool pyStatusLog::WriteColor(const ST::string &text, pyColor& color)
                                 ((uint32_t)(color.getRed()*255)<<16) +
                                 ((uint32_t)(color.getGreen()*255)<<8) + 
                                 ((uint32_t)(color.getBlue()*255));
-        fLog->AddLine( text.c_str(), st_color );
+        fLog->AddLine(st_color, text);
         return true;
     }
 
@@ -110,5 +114,5 @@ void pyStatusLog::Close()
     {
         delete fLog;
     }
-    fLog = nil;
+    fLog = nullptr;
 }

@@ -40,17 +40,30 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include "hsWindows.h"
-#include "hsTimer.h"
 #include "pfDispatchLog.h"
-#include "plStatusLog/plStatusLog.h"
-#include "pnMessage/plMessage.h"
+
+#include "hsTimer.h"
+#include "hsWindows.h"
+
+#include <string_theory/format>
+#include <string_theory/string>
+
+#include "pnFactory/plFactory.h"
 #include "pnKeyedObject/plKey.h"
+#include "pnKeyedObject/hsKeyedObject.h"
+#include "pnMessage/plClientMsg.h"
+#include "pnMessage/plMessage.h"
+
+#include "plResMgr/plKeyFinder.h"
+#include "plResMgr/plPageInfo.h"
+#include "plStatusLog/plStatusLog.h"
+
+#include "pfMessage/pfKIMsg.h"
 
 static bool DumpSpecificMsgInfo(plMessage* msg, ST::string& info);
 
 plDispatchLog::plDispatchLog() :
-    fLog(nil),
+    fLog(),
     fStartTicks(hsTimer::GetTicks())
 {
     fLog = plStatusLogMgr::GetInstance().CreateStatusLog(20, "Dispatch.log", plStatusLog::kAlignToTop | plStatusLog::kFilledBackground | plStatusLog::kRawTimeStamp);
@@ -68,9 +81,9 @@ void plDispatchLog::InitInstance()
     fInstance = &dispatchLog;
 }
 
-void plDispatchLog::LogStatusBarChange(const char* name, const char* action)
+void plDispatchLog::LogStatusBarChange(const ST::string& name, const char* action)
 {
-    fLog->AddLineF("----- Status bar '%s' %s -----", name, action);
+    fLog->AddLineF("----- Status bar '{}' {} -----", name, action);
 
 #ifdef HS_BUILD_FOR_WIN32
     MEMORYSTATUS ms;
@@ -80,8 +93,8 @@ void plDispatchLog::LogStatusBarChange(const char* name, const char* action)
     memset(&mbi, 0, sizeof(MEMORY_BASIC_INFORMATION));
 
     // Note: this will return shared mem too on Win9x.  There's a way to catch that, but it's too slow -Colin
-    uint32_t processMemUsed = 0;
-    void* curAddress = 0;
+    size_t processMemUsed = 0;
+    void* curAddress = nullptr;
     while (VirtualQuery(curAddress, &mbi, sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(MEMORY_BASIC_INFORMATION))
     {
         if (mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE)
@@ -90,21 +103,21 @@ void plDispatchLog::LogStatusBarChange(const char* name, const char* action)
     }
     
     #define ToMB(mem) float(mem) / (1024.f*1024.f)
-    fLog->AddLineF("# Mem stats");
-    fLog->AddLineF("#   Physical: %.1f MB used %.1f MB free", ToMB(ms.dwTotalPhys-ms.dwAvailPhys), ToMB(ms.dwAvailPhys));
-    fLog->AddLineF("#   Virtual:  %.1f MB used %.1f MB free", ToMB(ms.dwTotalVirtual-ms.dwAvailVirtual), ToMB(ms.dwAvailVirtual));
-    fLog->AddLineF("#   Pagefile: %.1f MB used %.1f MB free", ToMB(ms.dwTotalPageFile-ms.dwAvailPageFile), ToMB(ms.dwAvailPageFile));
-    fLog->AddLineF("#   Process:  %.1f MB used", ToMB(processMemUsed));
+    fLog->AddLine("# Mem stats");
+    fLog->AddLineF("#   Physical: {.1f} MB used {.1f} MB free", ToMB(ms.dwTotalPhys-ms.dwAvailPhys), ToMB(ms.dwAvailPhys));
+    fLog->AddLineF("#   Virtual:  {.1f} MB used {.1f} MB free", ToMB(ms.dwTotalVirtual-ms.dwAvailVirtual), ToMB(ms.dwAvailVirtual));
+    fLog->AddLineF("#   Pagefile: {.1f} MB used {.1f} MB free", ToMB(ms.dwTotalPageFile-ms.dwAvailPageFile), ToMB(ms.dwAvailPageFile));
+    fLog->AddLineF("#   Process:  {.1f} MB used", ToMB(processMemUsed));
 #endif // HS_BUILD_FOR_WIN32
 }
 
-void plDispatchLog::LogLongReceive(const char* keyname, const char* className, uint32_t clonePlayerID, plMessage* msg, float ms)
+void plDispatchLog::LogLongReceive(const ST::string& keyname, const char* className, uint32_t clonePlayerID, plMessage* msg, float ms)
 {
     ST::string info;
     if (DumpSpecificMsgInfo(msg, info))
-        fLog->AddLineF("%-30s[%7u](%-20s) took %6.1f ms to receive %s[%s]\n", keyname, clonePlayerID, className, ms, msg->ClassName(), info.c_str());
+        fLog->AddLineF("{<30}[{7d}]({<20}) took {6.1f} ms to receive {}[{}]\n", keyname, clonePlayerID, className, ms, msg->ClassName(), info);
     else
-        fLog->AddLineF("%-30s[%7u](%-20s) took %6.1f ms to receive %s\n", keyname, clonePlayerID, className, ms, msg->ClassName());
+        fLog->AddLineF("{<30}[{7d}]({<20}) took {6.1f} ms to receive {}\n", keyname, clonePlayerID, className, ms, msg->ClassName());
 }
 
 void plDispatchLog::DumpMsg(plMessage* msg, int numReceivers, int sendTimeMs, int32_t indent)
@@ -136,12 +149,12 @@ void plDispatchLog::DumpMsg(plMessage* msg, int numReceivers, int sendTimeMs, in
     memset(indentStr, ' ', indent);
     indentStr[indent] = '\0';
 
-    fLog->AddLineF("%sDispatched (%d) %d ms: time=%d CName=%s, sndr=%s, rcvr(%d)=%s, flags=0x%lx, tstamp=%f\n",
-        indentStr, numReceivers, sendTimeMs,
-        int(sendTime), msg->ClassName(), msg->fSender?msg->fSender->GetName().c_str():"nil",
-        msg->GetNumReceivers(), msg->GetNumReceivers() && msg->GetReceiver(0)
-            ? msg->GetReceiver(0)->GetName().c_str():"nil",
-        msg->fBCastFlags, msg->fTimeStamp);
+    fLog->AddLineF("{}Dispatched ({}) {} ms: time={.0f} CName={}, sndr={}, rcvr({})={}, flags=0x{8X}, tstamp={}\n",
+                   indentStr, numReceivers, sendTimeMs, sendTime, msg->ClassName(),
+                   msg->fSender ? msg->fSender->GetName() : ST_LITERAL("nil"),
+                   msg->GetNumReceivers(),
+                   msg->GetNumReceivers() && msg->GetReceiver(0) ? msg->GetReceiver(0)->GetName() : ST_LITERAL("nil"),
+                   msg->fBCastFlags, msg->fTimeStamp);
 
     lastTime=curTime;
 }
@@ -187,12 +200,6 @@ void plDispatchLog::RemoveFilterExactType(uint16_t type)
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-
-#include "pnMessage/plClientMsg.h"
-#include "pfMessage/pfKIMsg.h"
-#include "pnKeyedObject/hsKeyedObject.h"
-#include "plResMgr/plKeyFinder.h"
-#include "plResMgr/plPageInfo.h"
 
 static bool DumpSpecificMsgInfo(plMessage* msg, ST::string& info)
 {
@@ -313,7 +320,7 @@ static bool DumpSpecificMsgInfo(plMessage* msg, ST::string& info)
     plRefMsg* refMsg = plRefMsg::ConvertNoRef(msg);
     if (refMsg)
     {
-        const char* typeName = nil;
+        const char* typeName = nullptr;
         #define GetType(type)   if (refMsg->GetContext() == plRefMsg::type) typeName = #type;
         GetType(kOnCreate);
         GetType(kOnDestroy);

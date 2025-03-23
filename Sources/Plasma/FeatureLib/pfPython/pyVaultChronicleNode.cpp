@@ -45,23 +45,16 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 //////////////////////////////////////////////////////////////////////
 
-#pragma hdrstop
 
 #include "pyVaultChronicleNode.h"
-#include "plVault/plVault.h"
-#ifndef BUILDING_PYPLASMA
-#   include "pyVault.h"
-#endif
 
-// should only be created from C++ side
-pyVaultChronicleNode::pyVaultChronicleNode(RelVaultNode* nfsNode)
-: pyVaultNode(nfsNode)
-{
-}
+#include <string_theory/string>
+
+#include "plVault/plVault.h"
 
 //create from the Python side
-pyVaultChronicleNode::pyVaultChronicleNode(int n)
-: pyVaultNode(new RelVaultNode)
+pyVaultChronicleNode::pyVaultChronicleNode()
+    : pyVaultNode()
 {
     fNode->SetNodeType(plVault::kNodeType_Chronicle);
 }
@@ -70,7 +63,7 @@ pyVaultChronicleNode::pyVaultChronicleNode(int n)
 //==================================================================
 // class RelVaultNode : public plVaultNode
 //
-void pyVaultChronicleNode::Chronicle_SetName( const char * text )
+void pyVaultChronicleNode::Chronicle_SetName( const ST::string& text )
 {
     if (!fNode)
         return;
@@ -85,10 +78,10 @@ ST::string pyVaultChronicleNode::Chronicle_GetName() const
         VaultChronicleNode chron(fNode);
         return chron.GetEntryName();
     }
-    return ST::null;
+    return ST::string();
 }
 
-void pyVaultChronicleNode::Chronicle_SetValue( const char * text )
+void pyVaultChronicleNode::Chronicle_SetValue( const ST::string& text )
 {
     if (fNode) {
         VaultChronicleNode chron(fNode);
@@ -102,7 +95,7 @@ ST::string pyVaultChronicleNode::Chronicle_GetValue() const
         VaultChronicleNode chron(fNode);
         return chron.GetEntryValue();
     }
-    return ST::null;
+    return ST::string();
 }
 
 void pyVaultChronicleNode::Chronicle_SetType( uint32_t type )
@@ -114,7 +107,7 @@ void pyVaultChronicleNode::Chronicle_SetType( uint32_t type )
     chron.SetEntryType(type);
 }
 
-uint32_t pyVaultChronicleNode::Chronicle_GetType( void )
+uint32_t pyVaultChronicleNode::Chronicle_GetType()
 {
     if (!fNode)
         return 0;

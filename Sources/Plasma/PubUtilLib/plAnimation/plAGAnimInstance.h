@@ -49,24 +49,20 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef PLAGANIMINSTANCE_INC
 #define PLAGANIMINSTANCE_INC
 
-// disable warning C4503: dcorated name length exceeded, name was truncated
-// disable warning C4786: symbol greater than 255 characters,
-#pragma warning(disable: 4503 4786)
-
 #include "HeadSpin.h"
 #include <map>
 
 // local
 #include "plScalarChannel.h"
 
-// other
-#include "plInterp/plAnimTimeConvert.h"
-
 // declarations
 class plAGChannel;
 class plAGAnim;
 class plAGMasterMod;
 class plAGChannelApplicator;
+class plAnimCmdMsg;
+class plAnimTimeConvert;
+class plATCAnim;
 class plOneShotCallbacks;
 
 /////////////////
@@ -111,7 +107,7 @@ public:
 
     /** Set the speed of the animation. This is expressed as a fraction of
         the speed with which the animation was defined. */
-    void SetSpeed(float speed) { if (fTimeConvert) fTimeConvert->SetSpeed(speed); };
+    void SetSpeed(float speed);
 
     // \{
     /**
@@ -210,7 +206,7 @@ public:
         May include the effects of looping or wraparound.
         If the local time passes the end of the animation, the returned
         time will be pinned appropriately. */
-    double WorldToAnimTime(double foo) { return (fTimeConvert ? fTimeConvert->WorldToAnimTimeNoUpdate(foo) : 0); };
+    double WorldToAnimTime(double foo);
 
     /** Attach a sequence of callback messages to the animation instance.
         Messages are each associated with a specific (local) time
@@ -257,7 +253,7 @@ protected:
 
 };
 
-//#ifdef _DEBUG
+//#ifdef HS_DEBUGGING
 //#define TRACK_AG_ALLOCS       // for now, automatically track AG allocations in debug
 //#endif
 #ifdef TRACK_AG_ALLOCS
@@ -265,7 +261,7 @@ protected:
 extern ST::string gGlobalAnimName;
 extern ST::string gGlobalChannelName;
 
-void RegisterAGAlloc(plAGChannel *object, const char *chanName, const char *animName, uint16_t classIndex);
+void RegisterAGAlloc(plAGChannel *object, ST::string chanName, ST::string animName, uint16_t classIndex);
 void UnRegisterAGAlloc(plAGChannel *object);
 void DumpAGAllocs();
 

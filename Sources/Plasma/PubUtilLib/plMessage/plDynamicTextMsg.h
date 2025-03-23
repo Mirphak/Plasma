@@ -51,6 +51,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "pnMessage/plMessage.h"
 #include "hsColorRGBA.h"
+#include <string_theory/string>
 
 class plDynamicTextMap;
 
@@ -119,12 +120,12 @@ public:
 
     // Commands
     void    ClearToColor( hsColorRGBA &c ) { fCmd |= kClear; fClearColor = c; }
-    void    Flush( void ) { fCmd |= kFlush; }
-    void    PurgeImage( void ) { fCmd |= kPurgeImage; }
+    void    Flush() { fCmd |= kFlush; }
+    void    PurgeImage() { fCmd |= kPurgeImage; }
 
     // The following are mutually exclusive commands 'cause they share some parameters
     void    SetTextColor( hsColorRGBA &c, bool blockRGB = false );
-    void    SetFont( const char *face, int16_t size, bool isBold = false );
+    void    SetFont(ST::string face, int16_t size, bool isBold = false);
     void    SetLineSpacing( int16_t spacing );
     void    FillRect( uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, hsColorRGBA &c );
     void    FrameRect( uint16_t left, uint16_t top, uint16_t right, uint16_t bottom, hsColorRGBA &c );
@@ -135,13 +136,13 @@ public:
     void    DrawClippedImage( int16_t x, int16_t y, plKey &image, uint16_t clipX, uint16_t clipY, uint16_t clipWidth, uint16_t clipHeight, bool respectAlpha = false );
     void    SetJustify( uint8_t justifyFlags );
     // IO
-    void Read(hsStream* stream, hsResMgr* mgr);
-    void Write(hsStream* stream, hsResMgr* mgr);
+    void Read(hsStream* stream, hsResMgr* mgr) override;
+    void Write(hsStream* stream, hsResMgr* mgr) override;
     
     // WriteVersion writes the current version of this creatable and ReadVersion will read in
     // any previous version.
-    virtual void ReadVersion(hsStream* s, hsResMgr* mgr);
-    virtual void WriteVersion(hsStream* s, hsResMgr* mgr);
+    void ReadVersion(hsStream* s, hsResMgr* mgr) override;
+    void WriteVersion(hsStream* s, hsResMgr* mgr) override;
 };
 
 #endif // _plDynamicTextMsg_h

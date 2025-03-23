@@ -64,7 +64,9 @@ public:
     plUUID();
     plUUID(const char* s);
     plUUID(const ST::string& s);
-    plUUID(const plUUID& other);
+    plUUID(const plUUID&) = default;
+
+    plUUID& operator=(const plUUID&) = default;
 
     void     Clear();
     bool     IsNull() const;
@@ -91,7 +93,7 @@ public:
     bool operator<(const plUUID& other) const {
         return CompareTo(&other) == -1;
     }
-    operator ST::string (void) const { return AsString(); }
+    operator ST::string () const { return AsString(); }
 
     static plUUID Generate();
 };

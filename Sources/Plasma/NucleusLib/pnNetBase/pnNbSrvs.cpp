@@ -43,17 +43,19 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pnNbSrvs.h"
 #include <string_theory/string>
 
+#include "pnNbConst.h"
+
 /*****************************************************************************
 *
 *   Local data
 *
 ***/
 
-static ST::string s_authAddrs[] = { ST::null };
-static ST::string s_fileAddrs[] = { ST::null };
-static ST::string s_gateKeeperAddrs[] = { ST::null };
+static ST::string s_authAddrs[] = { ST::string() };
+static ST::string s_fileAddrs[] = { ST::string() };
+static ST::string s_gateKeeperAddrs[] = { ST::string() };
 
-static unsigned s_clientPort = 14617;
+static unsigned s_clientPort = kDefaultClientPort;
 
 
 /*****************************************************************************
@@ -67,7 +69,7 @@ static unsigned s_clientPort = 14617;
 //============================================================================
 unsigned GetAuthSrvHostnames (const ST::string*& addrs) {
     addrs = s_authAddrs;
-    return arrsize(s_authAddrs);
+    return std::size(s_authAddrs);
 }
 
 //============================================================================
@@ -80,7 +82,7 @@ void SetAuthSrvHostname (const ST::string& addr) {
 //============================================================================
 unsigned GetFileSrvHostnames (const ST::string*& addrs) {
     addrs = s_fileAddrs;
-    return arrsize(s_fileAddrs);
+    return std::size(s_fileAddrs);
 }
 
 //============================================================================
@@ -93,7 +95,7 @@ void SetFileSrvHostname (const ST::string& addr) {
 //============================================================================
 unsigned GetGateKeeperSrvHostnames (const ST::string*& addrs) {
     addrs = s_gateKeeperAddrs;
-    return arrsize(s_gateKeeperAddrs);
+    return std::size(s_gateKeeperAddrs);
 }
 
 //============================================================================

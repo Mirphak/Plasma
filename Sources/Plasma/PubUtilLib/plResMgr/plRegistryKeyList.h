@@ -42,12 +42,16 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef plRegistryKeyList_h_inc
 #define plRegistryKeyList_h_inc
 
+#include "HeadSpin.h"
+
 #include <vector>
 
 class plKeyImp;
 class plRegistryKeyIterator;
 class hsStream;
 class plUoid;
+
+namespace ST { class string; }
 
 //
 //  List of keys for a single class type.
@@ -92,6 +96,10 @@ public:
     void AddKey(plKeyImp* key, LoadStatus& loadStatusChange);
     void SetKeyUsed(plKeyImp* key) { ++fReffedKeys; }
     bool SetKeyUnused(plKeyImp* key, LoadStatus& loadStatusChange);
+
+    // Export time only.  Before we write to disk, assign all the loaded keys
+    // sequential object IDs that they can use to do fast lookups at load time.
+    void PrepForWrite();
 
     void Read(hsStream* s);
     void Write(hsStream* s);

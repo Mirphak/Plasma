@@ -54,7 +54,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 //// Singleton Instance ///////////////////////////////////////////////////////
 
-plClientResMgr& plClientResMgr::Instance(void)
+plClientResMgr& plClientResMgr::Instance()
 {
     static plClientResMgr theInstance;
     return theInstance;
@@ -76,7 +76,7 @@ void plClientResMgr::ILoadResources(const plFileName& resfile)
     hsUNIXStream in;
 
     if (in.Open(resfile, "rb")) {
-        uint32_t header = in.ReadLE32();
+        (void)in.ReadLE32();        // header
         uint32_t version = in.ReadLE32();
         uint32_t num_resources = 0;
 
@@ -87,7 +87,10 @@ void plClientResMgr::ILoadResources(const plFileName& resfile)
                 for (int i = 0; i < num_resources; i++) {
                     plMipmap* res_data = nullptr;
                     uint32_t res_size = 0;
-                    ST::string res_name = in.ReadSafeStringLong();
+                    ST::char_buffer res_name;
+                    uint32_t numChars = in.ReadLE32();
+                    res_name.allocate(numChars);
+                    in.Read(numChars, res_name.data());
                     ST::string extension = plFileName(res_name).GetFileExt();
 
                     // Version 1 doesn't encode format, so we'll try some simple
@@ -116,8 +119,6 @@ void plClientResMgr::ILoadResources(const plFileName& resfile)
             default:
                 break;
         }
-
-        in.Close();
     }
 }
 
@@ -133,4 +134,16 @@ plMipmap* plClientResMgr::getResource(const ST::string& resname)
     }
 
     return resmipmap;
+}
+
+
+std::vector<ST::string> plClientResMgr::getResourceNames()
+{
+    std::vector<ST::string> names;
+    names.reserve(ClientResources.size());
+
+    for (const auto& resource : ClientResources)
+        names.push_back(resource.first);
+
+    return names;
 }

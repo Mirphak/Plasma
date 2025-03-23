@@ -39,14 +39,15 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
       Mead, WA   99021
 
 *==LICENSE==*/
-#include <algorithm>
-#include "hsTimer.h"
-#include "hsTemplates.h"
-#include "hsStream.h"
 #include "plSDL.h"
 
-#include "plNetMessage/plNetMessage.h"
+#include "hsStream.h"
+#include "hsTimer.h"
+
 #include "pnNetCommon/plNetApp.h"
+#include "pnNetCommon/pnNetCommon.h"
+
+#include "plNetMessage/plNetMessage.h"
 
 const ST::string plSDL::kAgeSDLObjectName = ST_LITERAL("AgeSDLHook");
 
@@ -79,13 +80,13 @@ void plSDL::VariableLengthWrite(hsStream* s, int size, int val)
     if (size < (1<<8))
     {
         hsAssert(val < (1<<8), "SDL data loss");
-        s->WriteByte(val);
+        s->WriteByte((uint8_t)val);
     }
     else
     if (size < (1<<16))
     {
         hsAssert(val < (1<<16), "SDL data loss");
-        s->WriteLE16(val);
+        s->WriteLE16((uint16_t)val);
     }
     else
         s->WriteLE32(val);
@@ -95,13 +96,13 @@ void plSDL::VariableLengthWrite(hsStream* s, int size, int val)
 // State Data
 /////////////////////////////////////////////////////////////////////////////////
 plStateDataRecord::plStateDataRecord(const ST::string& name, int version) : fFlags(0)
-, fDescriptor( nil )
+, fDescriptor()
 {
     SetDescriptor(name, version);
 }
 
 plStateDataRecord::plStateDataRecord(plStateDescriptor* sd) : fFlags(0)
-, fDescriptor( nil )
+, fDescriptor()
 {
     IInitDescriptor(sd);
 }
@@ -120,9 +121,8 @@ void plStateDataRecord::SetDescriptor(const ST::string& name, int version)
 
 void plStateDataRecord::IDeleteVarsList(VarsList& vars)
 {
-    std::for_each( vars.begin(), vars.end(),
-        [](plStateVariable* var) { delete var; }
-    );
+    for (plStateVariable* var : vars)
+        delete var;
     vars.clear();
 }
 
@@ -235,6 +235,7 @@ bool plStateDataRecord::IHasUsedVars(const VarsList& vars) const
 //
 // read state vars and indices, return true on success
 //
+// Options: kSkipNotificationInfo, kTimeStampOnRead, kKeepDirty, kMakeDirty, kDirtyNonDefaults, kForceConvert
 bool plStateDataRecord::Read(hsStream* s, float timeConvert, uint32_t readOptions)
 {
     fFlags = s->ReadLE16();
@@ -274,7 +275,7 @@ bool plStateDataRecord::Read(hsStream* s, float timeConvert, uint32_t readOption
             }
         }
     }
-    catch (std::exception &e)
+    catch (const std::exception &e)
     {
         hsAssert(false,
             ST::format("Something bad happened ({}) while reading simple var data, desc:{}",
@@ -315,7 +316,7 @@ bool plStateDataRecord::Read(hsStream* s, float timeConvert, uint32_t readOption
             }
         }
     }
-    catch (std::exception &e)
+    catch (const std::exception &e)
     {
         hsAssert(false,
             ST::format("Something bad happened ({}) while reading nested var data, desc:{}",
@@ -348,6 +349,7 @@ bool plStateDataRecord::Read(hsStream* s, float timeConvert, uint32_t readOption
 //
 // write out the state vars, along with their index
 //
+// Options: kDirtyOnly, kSkipNotificationInfo, kWriteTimeStamps, kTimeStampOnRead, kTimeStampOnWrite, kDontWriteDirtyFlag, kMakeDirty, kDirtyNonDefaults
 void plStateDataRecord::Write(hsStream* s, float timeConvert, uint32_t writeOptions) const
 {
 #ifdef HS_DEBUGGING
@@ -409,8 +411,7 @@ void plStateDataRecord::Write(hsStream* s, float timeConvert, uint32_t writeOpti
 //
 bool plStateDataRecord::ReadStreamHeader(hsStream* s, ST::string* name, int* version, plUoid* objUoid)
 {
-    uint16_t savFlags;
-    s->ReadLE(&savFlags);
+    uint16_t savFlags = s->ReadLE16();
     if (!(savFlags & plSDL::kAddedVarLengthIO))     // using to establish a new version in the header, can delete in 8/03
     {
         *name = "";
@@ -448,7 +449,7 @@ void plStateDataRecord::WriteStreamHeader(hsStream* s, plUoid* objUoid) const
     if (objUoid)
         savFlags |= plSDL::kHasUoid;
 
-    s->WriteLE(savFlags);
+    s->WriteLE16(savFlags);
     s->WriteSafeString(GetDescriptor()->GetName());         
     s->WriteLE16((int16_t)GetDescriptor()->GetVersion());
     if (objUoid)
@@ -458,6 +459,7 @@ void plStateDataRecord::WriteStreamHeader(hsStream* s, plUoid* objUoid) const
 //
 // create and prepare a net msg with this data
 //
+// Options: kDirtyOnly, kSkipNotificationInfo, kBroadcast, kWriteTimeStamps, kTimeStampOnRead, kTimeStampOnWrite, kDontWriteDirtyFlag, kMakeDirty, kDirtyNonDefaults
 plNetMsgSDLState* plStateDataRecord::PrepNetMsg(float timeConvert, uint32_t writeOptions) const
 {
     // save to stream
@@ -479,6 +481,7 @@ plNetMsgSDLState* plStateDataRecord::PrepNetMsg(float timeConvert, uint32_t writ
 //
 // Destroys 'this' and makes a total copy of other
 //
+// Options: all except for kDirtyOnly, kBroadcast, kForceConvert
 void plStateDataRecord::CopyFrom(const plStateDataRecord& other, uint32_t writeOptions/*=0*/)
 {
     fFlags = other.GetFlags();
@@ -502,6 +505,7 @@ void plStateDataRecord::CopyFrom(const plStateDataRecord& other, uint32_t writeO
 // copy them to my corresponding item.
 // Requires that records have the same descriptor.
 //
+// Options: all except for kBroadcast, kForceConvert
 void plStateDataRecord::UpdateFrom(const plStateDataRecord& other, uint32_t writeOptions/*=0*/)
 {
     if ( GetDescriptor()->GetVersion()!=other.GetDescriptor()->GetVersion() )
@@ -678,7 +682,7 @@ plStateVariable* plStateDataRecord::IFindVar(const VarsList& vars, const ST::str
     if (plSDLMgr::GetInstance()->GetNetApp())
         plSDLMgr::GetInstance()->GetNetApp()->ErrorMsg("Failed to find SDL var {}", name);
 
-    return nil;
+    return nullptr;
 }
 
 //
@@ -755,12 +759,12 @@ void plStateDataRecord::DumpToObjectDebugger(const char* msg, bool dirtyOnly, in
     int numVars = dirtyOnly ? GetNumDirtyVars() : GetNumUsedVars();
     int numSDVars = dirtyOnly ? GetNumDirtySDVars() : GetNumUsedSDVars();
 
-    dbg->LogMsg(fAssocObject.IsValid() ? fAssocObject.GetObjectName().c_str() : " ");
+    dbg->LogMsg(fAssocObject.IsValid() ? fAssocObject.GetObjectName() : ST_LITERAL(" "));
     if (msg)
-        dbg->LogMsg(ST::format("{}{}", pad, msg).c_str());
+        dbg->LogMsg(ST::format("{}{}", pad, msg));
 
     dbg->LogMsg(ST::format("{}SDR({#x}), desc={}, showDirty={}, numVars={}, vol={}",
-        pad, (uintptr_t)this, fDescriptor->GetName(), dirtyOnly, numVars+numSDVars, fFlags&kVolatile).c_str());
+        pad, (uintptr_t)this, fDescriptor->GetName(), dirtyOnly, numVars+numSDVars, fFlags&kVolatile));
 
     // dump simple vars
     for (size_t i=0; i<fVarsList.size(); i++)

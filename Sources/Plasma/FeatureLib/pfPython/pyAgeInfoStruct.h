@@ -42,9 +42,11 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef pyAgeInfoStruct_h_inc
 #define pyAgeInfoStruct_h_inc
 
+#include <string_theory/string>
+
 #include "plNetCommon/plNetServerSessionInfo.h"
 
-#include "pyGlueHelpers.h"
+#include "pyGlueDefinitions.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -52,7 +54,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 //////////////////////////////////////////////////////////////////////
 
-class pyVaultAgeInfoNode;
 class pyAgeInfoStructRef;
 
 
@@ -68,8 +69,6 @@ protected:
     pyAgeInfoStruct(plAgeInfoStruct * info);
 
 public:
-    ~pyAgeInfoStruct();
-
     // required functions for PyObject interoperability
     PYTHON_CLASS_NEW_FRIEND(ptAgeInfoStruct);
     PYTHON_CLASS_NEW_DEFINITION;
@@ -83,7 +82,6 @@ public:
     bool operator!=(const pyAgeInfoStruct &other) const { return !(other==*this); }
     plAgeInfoStruct * GetAgeInfo() { return &fAgeInfo; }
     const plAgeInfoStruct * GetAgeInfo() const { return &fAgeInfo; }
-    static void PythonModDef();
     void    CopyFrom( const pyAgeInfoStruct & other );
     void    CopyFromRef( const pyAgeInfoStructRef & other );
     ST::string GetAgeFilename() const;
@@ -94,8 +92,8 @@ public:
     void    SetAgeUserDefinedName( const ST::string & v );
     ST::string GetAgeDescription() const;
     void    SetAgeDescription( const ST::string & v );
-    const char * GetAgeInstanceGuid() const;
-    void    SetAgeInstanceGuid( const char * guid );
+    ST::string GetAgeInstanceGuid() const;
+    void    SetAgeInstanceGuid(const ST::string& guid);
     int32_t   GetAgeSequenceNumber() const;
     void    SetAgeSequenceNumber( int32_t v );
     int32_t   GetAgeLanguage() const;
@@ -117,8 +115,6 @@ protected:
     pyAgeInfoStructRef(plAgeInfoStruct & info): fAgeInfo( info ){}
 
 public:
-    ~pyAgeInfoStructRef() {}
-
     // required functions for PyObject interoperability
     PYTHON_CLASS_NEW_FRIEND(ptAgeInfoStructRef);
     static PyObject *New(plAgeInfoStruct &info);
@@ -137,8 +133,8 @@ public:
     void    SetAgeInstanceName( const ST::string & v );
     ST::string GetAgeUserDefinedName() const;
     void    SetAgeUserDefinedName( const ST::string & v );
-    const char * GetAgeInstanceGuid() const;
-    void    SetAgeInstanceGuid( const char * guid );
+    ST::string GetAgeInstanceGuid() const;
+    void    SetAgeInstanceGuid(const ST::string& guid);
     int32_t   GetAgeSequenceNumber() const;
     void    SetAgeSequenceNumber( int32_t v );
     ST::string GetDisplayName() const;

@@ -48,13 +48,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include <algorithm>
 
 #include "pnNetCommon/plNetApp.h"
+#include "pnNetCommon/pnNetCommon.h"
 #include "pnKeyedObject/plKey.h"
 
 #include "plMessage/plAgeLoadedMsg.h"
 #include "plNetMessage/plNetMessage.h"
-#include "plProgressMgr/plProgressMgr.h"
 #include "plSDL/plSDL.h"
-#include "pnDispatch/plDispatch.h"
 #include "plResMgr/plResManager.h"
 
 #include "plNetClient/plNetClientMgr.h"
@@ -69,7 +68,7 @@ bool ReportRoomToServer(const plKey &key)
     plLocation keyLoc=key->GetUoid().GetLocation();
     bool skip=(keyLoc.IsReserved() || keyLoc.IsVirtual() ||
                 // HACK ALERT - replace with new uoid type flags
-                (!key->GetName().is_empty() &&
+                (!key->GetName().empty() &&
                     (!key->GetName().compare_ni("global", 6) ||
                     key->GetName().contains("_Male") ||
                     key->GetName().contains("_Female")
@@ -98,7 +97,6 @@ void plAgeLoader::FinishedPagingInRoom(plKey* rmKey, int numRms)
 
     // Send a msg to the server indicating that we have this room paged in
     plNetMsgPagingRoom * pagingMsg = new plNetMsgPagingRoom;
-    pagingMsg->SetNetProtocol(kNetProtocolCli2Game);
     int i;
     for(i=0;i<numRms;i++)
     {
@@ -169,7 +167,6 @@ void plAgeLoader::StartPagingOutRoom(plKey* rmKey, int numRms)
     plNetClientApp* nc = plNetClientApp::GetInstance();
 
     plNetMsgPagingRoom pagingMsg;
-    pagingMsg.SetNetProtocol(kNetProtocolCli2Game);
     pagingMsg.SetPagingOut(true);
     int i;
     for(i=0;i<numRms;i++)
@@ -217,14 +214,14 @@ void plAgeLoader::IgnorePagingOutRoom(plKey* rmKey, int numRms)
 
 ///////////////////////////////////
 
-bool plAgeLoader::IsPendingPageInRoomKey(plKey pKey, int *idx) 
+bool plAgeLoader::IsPendingPageInRoomKey(const plKey& pKey, int *idx) 
 {
     if (pKey)
     {
         plKeyVec::iterator result=std::find(fPendingPageIns.begin(), fPendingPageIns.end(), pKey);
         bool found = result!=fPendingPageIns.end();
         if (idx)
-            *idx = found ? result-fPendingPageIns.begin() : -1;
+            *idx = found ? (int)(result-fPendingPageIns.begin()) : -1;
         return found;
     }
     return false;
@@ -234,11 +231,11 @@ void plAgeLoader::AddPendingPageInRoomKey(plKey pKey)
 {
     if (!IsPendingPageInRoomKey(pKey))
     {
-        fPendingPageIns.push_back(pKey);
+        fPendingPageIns.emplace_back(std::move(pKey));
     }
 }
 
-bool plAgeLoader::RemovePendingPageInRoomKey(plKey pKey)
+bool plAgeLoader::RemovePendingPageInRoomKey(const plKey& pKey)
 {
     int idx;
     if (IsPendingPageInRoomKey(pKey, &idx))
@@ -268,16 +265,16 @@ class plExcludePage
         { }
 };
 
-static hsTArray<plExcludePage>  sExcludeList;
+static std::vector<plExcludePage>  sExcludeList;
 
-void    plAgeLoader::ClearPageExcludeList( void )
+void    plAgeLoader::ClearPageExcludeList()
 {
-    sExcludeList.Reset();
+    sExcludeList.clear();
 }
 
 void    plAgeLoader::AddExcludedPage( const ST::string& pageName, const ST::string& ageName )
 {
-    sExcludeList.Append( plExcludePage( pageName, ageName ) );
+    sExcludeList.emplace_back(pageName, ageName);
 }
 
 bool    plAgeLoader::IsPageExcluded( const plAgePage *page, const ST::string& ageName )
@@ -288,13 +285,12 @@ bool    plAgeLoader::IsPageExcluded( const plAgePage *page, const ST::string& ag
 
     // check exclude list
     ST::string pageName = page->GetName();
-    int     i;
-    for( i = 0; i < sExcludeList.GetCount(); i++ )
+    for (const plExcludePage& exclude : sExcludeList)
     {
-        if( pageName.compare_i( sExcludeList[ i ].fPageName ) == 0 )
+        if (pageName.compare_i(exclude.fPageName) == 0)
         {
-            if( ageName.is_empty() || sExcludeList[ i ].fAgeName.is_empty() ||
-                ageName.compare_i(sExcludeList[ i ].fAgeName) == 0 )
+            if (ageName.empty() || exclude.fAgeName.empty() ||
+                ageName.compare_i(exclude.fAgeName) == 0)
             {
                 return true;
             }

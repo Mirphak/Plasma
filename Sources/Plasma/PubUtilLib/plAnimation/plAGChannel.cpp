@@ -43,13 +43,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plAGChannel.h"
 
 // local
+#include "plAGAnimInstance.h"
 #include "plAGModifier.h"
 
 // global
 #include "HeadSpin.h"
 #include "hsResMgr.h"
-
-#include "plAGAnimInstance.h"
+#include "hsStream.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -61,14 +61,13 @@ plAGChannel::plAGChannel()
 {
 #ifdef TRACK_AG_ALLOCS
     fName = gGlobalAnimName;
-    RegisterAGAlloc(this, gGlobalChannelName.c_str(), gGlobalAnimName.c_str(), this->ClassIndex());
+    RegisterAGAlloc(this, gGlobalChannelName, gGlobalAnimName, this->ClassIndex());
 #endif // TRACK_AG_ALLOCS
 }
 
 // DTOR
 plAGChannel::~plAGChannel()
 {
-    // we do not own the "fName" string, so don't delete it!
 #ifdef TRACK_AG_ALLOCS
     UnRegisterAGAlloc(this);
 #endif // TRACK_AG_ALLOCS
@@ -77,13 +76,13 @@ plAGChannel::~plAGChannel()
 // MAKECOMBINE
 plAGChannel * plAGChannel::MakeCombine(plAGChannel *channelA)
 {
-    return nil;
+    return nullptr;
 }
 
 // MAKEBLEND
 plAGChannel * plAGChannel::MakeBlend(plAGChannel *channelA, plScalarChannel *blend, int blendPriority)
 {
-    return nil;
+    return nullptr;
 }
 
 // DETACH
@@ -93,7 +92,7 @@ plAGChannel * plAGChannel::Detach(plAGChannel *channel)
 {
     if (this == channel)
     {
-        return nil;
+        return nullptr;
     } else {
         return this;
     }

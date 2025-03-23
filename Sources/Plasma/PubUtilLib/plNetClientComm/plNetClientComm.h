@@ -44,7 +44,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *   $/Plasma20/Sources/Plasma/PubUtilLib/plNetClientComm/plNetClientComm.h
 *
 *   This module is the translation layer between simple network types
-*   such as uint8_t arrays, and higher-level Plasma-specific types such
+*   such as byte arrays, and higher-level Plasma-specific types such
 *   as the plFactory-managed types.
 *   
 ***/
@@ -52,13 +52,16 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef PLASMA20_SOURCES_PLASMA_PUBUTILLIB_PLNETCLIENTCOMM_PLNETCLIENTCOMM_H
 #define PLASMA20_SOURCES_PLASMA_PUBUTILLIB_PLNETCLIENTCOMM_PLNETCLIENTCOMM_H
 
+#include "pnEncryption/plChecksum.h"
+#include "pnNetBase/pnNbError.h"
+#include "pnUUID/pnUUID.h"
 
-#include "HeadSpin.h"
-#include "pnUtils/pnUtils.h"
-#include "pnNetBase/pnNetBase.h"
-#include "plNetCommon/plNetServerSessionInfo.h"
-#include "plNetCommon/plNetCommonHelpers.h"
 #include "plMessage/plNetCommMsgs.h"
+#include "plNetCommon/plNetCommonHelpers.h"
+#include "plNetCommon/plNetMsgHandler.h"
+
+#include <string_theory/string>
+#include <vector>
 
 
 class plNetMessage;
@@ -76,7 +79,7 @@ struct NetCommPlayer {
     ST::string  avatarDatasetName;
     unsigned    explorer;
 
-    NetCommPlayer() { }
+    NetCommPlayer() : playerInt(), explorer() { }
     NetCommPlayer(unsigned id, const ST::string& name, const ST::string& shape, unsigned ex)
         : playerInt(id), playerName(name), avatarDatasetName(shape), explorer(ex)
     { }
@@ -112,7 +115,7 @@ bool                                NetCommIsLoginComplete ();
 void                                NetCommSetIniPlayerId(unsigned playerId);
 void                                NetCommSetIniStartUpAge(const ST::string& ageName);
 void                                NetCommSetAccountUsernamePassword (const ST::string& username, const ShaDigest &  namePassHash);
-void                                NetCommSetAuthTokenAndOS (wchar_t authToken[], wchar_t os[]);
+void                                NetCommSetAuthTokenAndOS (const char16_t* authToken, const char16_t* os);
 ENetError                           NetCommGetAuthResult ();
 
 bool                                NetCommNeedToLoadAvatar ();
@@ -140,69 +143,12 @@ void NetCommActivateMsgDispatchers();
 
 /*****************************************************************************
 *
-*   Net message handlers
-*
-***/
-
-// Return this value from your registered msg handler
-// to stop further dispatching of incoming msg.
-const unsigned kOK_MsgConsumed  = hsOK + 1;
-
-typedef int (FNetCommMsgHandler)(
-    plNetMessage *  msg,
-    void *          userState
-);
-
-// Adds a msg handler for a msg that is convertable to specified type.
-void NetCommAddMsgHandlerForType (
-    unsigned                msgClassIdx,
-    FNetCommMsgHandler *    handler,
-    void *                  userState
-);
-// Adds a msg handler for a specific msg type.
-void NetCommAddMsgHandlerForExactType (
-    unsigned                msgClassIdx,
-    FNetCommMsgHandler *    handler,
-    void *                  userState
-);
-
-extern const unsigned       kNetCommAllMsgClasses;
-extern FNetCommMsgHandler * kNetCommAllMsgHandlers;
-extern const void *         kNetCommAllUserStates;
-
-void NetCommRemoveMsgHandler (
-    unsigned                msgClassIdx,
-    FNetCommMsgHandler *    handler,
-    const void *            userState
-);
-
-void NetCommSetDefaultMsgHandler (
-    FNetCommMsgHandler *    handler,
-    void *                  userState
-);
-void NetCommSetMsgPreHandler (
-    FNetCommMsgHandler *    handler,
-    void *                  userState
-);
-
-/*****************************************************************************
-*
 *   Network requests
 *   Network replies are posted via plDispatch
 *
 ***/
 
 void NetCommAuthenticate (  // --> plNetCommAuthMsg
-    void *                  param
-);
-void NetCommGetFileList (   // --> plNetCommFileListMsg
-    const wchar_t             dir[],
-    const wchar_t             ext[],
-    void *                  param
-);
-void NetCommGetFile (       // --> plNetCommFileDownloadMsg
-    const wchar_t             filename[],
-    hsStream *              writer,
     void *                  param
 );
 void NetCommLinkToAge (     // --> plNetCommLinkToAgeMsg
@@ -233,46 +179,6 @@ void NetCommSetAgePublic (  // --> no msg
     unsigned                ageInfoId,
     bool                    makePublic
 );
-void NetCommCreatePublicAge (// --> plNetCommPublicAgeMsg
-    const char              ageName[],
-    const plUUID&           ageInstId,
-    void *                  param
-);
-void NetCommRemovePublicAge(// --> plNetCommPublicAgeMsg
-    const plUUID&           ageInstId,
-    void *                  param
-);
-void NetCommRegisterOwnedAge (
-    const NetCommAge &      age,
-    const char              ageInstDesc[],
-    unsigned                playerInt,
-    void *                  param
-);
-void NetCommUnregisterOwnedAge (
-    const char              ageName[],
-    unsigned                playerInt,
-    void *                  param
-);
-void NetCommRegisterVisitAge (
-    const NetCommAge &      age,
-    const char              ageInstDesc[],
-    unsigned                playerInt,
-    void *                  param
-);
-void NetCommUnregisterVisitAge (
-    const plUUID&           ageInstId,
-    unsigned                playerInt,
-    void *                  param
-);
-void NetCommConnectPlayerVault (
-    void *                  param
-);
-void NetCommDisconnectPlayerVault ();
-void NetCommConnectAgeVault (
-    const plUUID&           ageInstId,
-    void *                  param
-);
-void NetCommDisconnectAgeVault ();
 void NetCommUpgradeVisitorToExplorer (
     unsigned                playerInt,
     void *                  param
@@ -285,6 +191,8 @@ void NetCommSendFriendInvite (
     const ST::string& toName,
     const plUUID&     inviteUuid
 );
+void NetCommLogPythonTraceback(const ST::string& traceback);
+void NetCommLogStackDump(const ST::string& stackDump);
 
 #endif // PLASMA20_SOURCES_PLASMA_PUBUTILLIB_PLNETCLIENTCOMM_PLNETCLIENTCOMM_H
 
@@ -298,17 +206,6 @@ void NetCommSendFriendInvite (
 ***/
 #ifndef plNetClientComm_h_inc
 #define plNetClientComm_h_inc
-
-
-////////////////////////////////////////////////////////////////////
-
-class plCreatable;
-class plStatusLog;
-class plAgeLinkStruct;
-class plNetClientCommTask;
-class plNetMessage;
-class   plNetMsgTerminated;
-class plPlayerMigrationPkg;
 
 ////////////////////////////////////////////////////////////////////
 // plNetClientComm
@@ -328,67 +225,7 @@ class plPlayerMigrationPkg;
 class plNetClientComm
 {
 public:
-    ////////////////////////////////////////////////////////////////
-    // CALLBACK CLASSES
-
-    // Callback object sent with calls to our API as optional arg.
-    class Callback
-    {
-    public:
-        // OPERATION-SPECIFIC RESULT ARGS.
-        //-------------------------------
-        // Auth:            0=guid of server that authenticated us, if success.
-        // Leave:           None
-        // Alive:           None
-        // Ping:            0=The plNetMsgPing rcvd.
-        // FindAge:         0=plNetServerSessionInfo for spawned game server.
-        // Join:            0=fireWalled bool, 1=joinOrder int, 2=experimentalLevel int, 3=initialAgeSDL rec
-        // GetPlayerList:   0=numPlayers int, 1=player1ID int, 2=player1Name string, 3=flags ...
-        // SetActivePlayer: None
-        // CreatePlayer:    0=newPlayerID int
-        // DeletePlayer:    None
-        // GetPublicAgeList:0=plCreatableStream of plAgeInfoStruct, 1=plCreatableStream of nPlayers
-        // PublicAgeCreated:0=plAgeInfoStruct
-        plCreatableListHelper   fCbArgs;
-        //-------------------------------
-        virtual ~Callback(){}
-        virtual void OperationStarted( uint32_t context ) = 0;
-        virtual void OperationComplete( uint32_t context, int resultCode ) = 0;
-    };
-    class StubbedCallback : public Callback
-    {
-    public:
-        void OperationStarted( uint32_t context ) {}
-        void OperationComplete( uint32_t context, int resultCode ) {}
-    };
-
-    // Message handler for unsolicited msgs or registered for specific msg types.
-    class MsgHandler
-    {
-    public:
-        static int StaticMsgHandler(plNetMessage * msg, void * userState);
-        virtual int HandleMessage( plNetMessage* msg ) = 0;
-    };
-
-    ////////////////////////////////////////////////////////////////
-
-    plNetClientComm();
-    ~plNetClientComm();
-
-    ////////////////////////////////////////////////////////////////
-
-    // Adds a msg handler for a msg that is convertable to specified type.
-    void    AddMsgHandlerForType( uint16_t msgClassIdx, MsgHandler* handler );
-
-    // Adds a msg handler for a specific msg type.
-    void    AddMsgHandlerForExactType( uint16_t msgClassIdx, MsgHandler* handler );
-
-    bool    RemoveMsgHandler( MsgHandler* handler );
-
-    // Msgs not part of a task controlled by this
-    // object, and doesn't have a handler set for its type
-    // are sent to this handler (if set).
-    void    SetDefaultHandler( MsgHandler* msgHandler );
+    void SetMsgHandler(plNetMsgHandler* msgHandler);
 };
 
 ////////////////////////////////////////////////////////////////////

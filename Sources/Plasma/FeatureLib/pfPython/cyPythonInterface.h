@@ -39,6 +39,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
       Mead, WA   99021
 
 *==LICENSE==*/
+
+#ifndef _cyPythonInterface_h_
+#define _cyPythonInterface_h_
+
 //////////////////////////////////////////////////////////////////////
 //
 // PythonInterface   - The Python interface to the Python dll
@@ -46,10 +50,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 // NOTE: Eventually, this will be made into a separate dll, because there should
 //       only be one instance of this interface. 
 //
-#include "HeadSpin.h"
-#include <string_theory/string>
-#include <string>
-#include <vector>
 
 #if defined(HAVE_CYPYTHONIDE) && !defined(PLASMA_EXTERNAL_RELEASE)
 #include "../../Apps/CyPythonIDE/plCyDebug/plCyDebServer.h"
@@ -58,7 +58,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 class plStatusLog;
 class pyKey;
 typedef struct _object PyObject;
-typedef struct PyMethodDef PyMethodDef;
+namespace ST { class string; }
 
 class  PythonInterface
 {
@@ -68,11 +68,6 @@ private:
     static bool FirstTimeInit;
     static bool IsInShutdown; // whether we are _really_ in shutdown mode
 
-    static PyMethodDef* plasmaMethods;
-    static PyObject* plasmaMod; // python object that holds the Plasma module
-    static PyObject* plasmaConstantsMod; // python object that holds the PlasmaConstants module
-    static PyObject* plasmaNetConstantsMod; // python object that holds the PlasmaNetConstants module
-    static PyObject* plasmaVaultConstantsMod; // python object that holds the PlasmaVaultConstants module
     static PyObject* stdOut;    // python object of the stdout file
     static PyObject* stdErr;    // python object of the err file
 
@@ -96,18 +91,27 @@ public:
     // Initialize the Python dll
     static void initPython();
 
+    /** Initialize the PythonPack module hook */
+    static void initPyPackHook();
+
     // Initialize the Plasma module
-    static void AddPlasmaMethods(std::vector<PyMethodDef> &methods);
-    static void AddPlasmaClasses();
+    static void AddPlasmaMethods(PyObject* m);
+    static void AddPlasmaClasses(PyObject* m);
 
     // Initialize the PlasmaConstants module
-    static void AddPlasmaConstantsClasses();
+    static void AddPlasmaConstantsClasses(PyObject* m);
+
+    // Initialize the PlasmaGame module
+    static void AddPlasmaGameClasses(PyObject* m);
+
+    // Initialize the PlasmaGameConstants module
+    static void AddPlasmaGameConstantsClasses(PyObject* m);
 
     // Initialize the PlasmaNetConstants module;
-    static void AddPlasmaNetConstantsClasses();
+    static void AddPlasmaNetConstantsClasses(PyObject* m);
 
     // Initialize the PlasmaVaultConstants module;
-    static void AddPlasmaVaultConstantsClasses();
+    static void AddPlasmaVaultConstantsClasses(PyObject* m);
 
     // Initialize the Python to Plasma 
     static void initDebugInterface();
@@ -123,13 +127,13 @@ public:
     static PyObject* GetStdErr();
 
     // get the Output to the error file to be displayed
-    static int getOutputAndReset(std::string* output = nil);
+    static ST::string getOutputAndReset();
 
     // Writes 'text' to the Python log
-    static void WriteToLog(const char* text);
+    static void WriteToLog(const ST::string& text);
 
     // Writes 'text' to stderr specified in the python interface
-    static void WriteToStdErr(const char* text);
+    static void WriteToStdErr(const ST::string& text);
 
     static PyObject* ImportModule(const char* module);
 
@@ -139,22 +143,18 @@ public:
     // create a new module with built-ins
     static PyObject* CreateModule(const char* module);
 
-    // checks to see if a specific function is defined in this module
-    // get an item (probably a function) from the Plasma module
-    static PyObject* GetPlasmaItem(char* item);
-
     // Determine if the module name is unique
     static bool IsModuleNameUnique(const ST::string& module);
     // get an item (probably a function) from a specific module
-    static PyObject* GetModuleItem(char* item, PyObject* module);
+    static PyObject* GetModuleItem(const char* item, PyObject* module);
 
     // check a specific module for the define funcitons
     static void CheckModuleForFunctions(PyObject* module, char** funcNames, PyObject** funcTable);
 
     //  checks to see if a specific function is defined in this instance of a class
-    //  and will fill out the funcTable with object instances of where the funciton is
+    //  and will fill out the funcTable with pointers to the function objects
     //
-    static void CheckInstanceForFunctions(PyObject* instance, char** funcNames, PyObject** funcTable);
+    static void CheckInstanceForFunctions(PyObject* instance, const char** funcNames, PyObject** funcTable);
 
     //  run a python string in a specific module name
     //  PARAMETERS : command       - string of commands to execute in the...
@@ -203,6 +203,11 @@ public:
     //
     static bool RunString(const char *command, PyObject* module);
 
+    /**
+     * Runs a python file in any arbitrary module
+     */
+    static bool RunFile(const class plFileName& filename, PyObject* module=nullptr);
+
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -214,11 +219,8 @@ public:
     //
     static bool RunPYC(PyObject* code, PyObject* module);
 
-    static PyObject* RunFunction(PyObject* module, const char* name, PyObject* args);
+    static bool RunFunctionStringArg(const char* module, const char* name, const ST::string& arg);
 
-    static PyObject* ParseArgs(const char* args);
-
-    static bool RunFunctionSafe(const char* module, const char* function, const char* args);
     /////////////////////////////////////////////////////////////////////////////
     //
     //  Function   : GetpyKeyFromPython
@@ -237,3 +239,5 @@ public:
     static void DebuggerRequestedExit(bool reqExit) {requestedExit = reqExit;}
 #endif
 };
+
+#endif

@@ -45,25 +45,18 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 //////////////////////////////////////////////////////////////////////
 
-#pragma hdrstop
 
 #include "pyVaultFolderNode.h"
+
+#include <string_theory/string>
+
 #include "plVault/plVault.h"
 
-// should only be created from C++ side
-pyVaultFolderNode::pyVaultFolderNode( RelVaultNode* nfsNode )
-: pyVaultNode( nfsNode )
-{
-}
-
 //create from the Python side
-pyVaultFolderNode::pyVaultFolderNode(int n)
-: pyVaultNode(new RelVaultNode)
+pyVaultFolderNode::pyVaultFolderNode()
+    : pyVaultNode()
 {
     fNode->SetNodeType(plVault::kNodeType_Folder);
-}
-
-pyVaultFolderNode::~pyVaultFolderNode () {
 }
 
 //==================================================================
@@ -78,7 +71,7 @@ void pyVaultFolderNode::Folder_SetType( int type )
     folder.SetFolderType(type);
 }
 
-int pyVaultFolderNode::Folder_GetType( void )
+int pyVaultFolderNode::Folder_GetType()
 {
     if (!fNode)
         return 0;
@@ -87,19 +80,11 @@ int pyVaultFolderNode::Folder_GetType( void )
     return folder.GetFolderType();
 }
 
-void pyVaultFolderNode::Folder_SetName(const char* name)
+void pyVaultFolderNode::Folder_SetName(const ST::string& name)
 {
     if (fNode) {
         VaultFolderNode folder(fNode);
         folder.SetFolderName(name);
-    }
-}
-
-void pyVaultFolderNode::Folder_SetNameW(const wchar_t* name)
-{
-    if (fNode) {
-        VaultFolderNode folder(fNode);
-        folder.SetFolderName(ST::string::from_wchar(name));
     }
 }
 
@@ -109,5 +94,5 @@ ST::string pyVaultFolderNode::Folder_GetName() const
         VaultFolderNode folder(fNode);
         return folder.GetFolderName();
     }
-    return ST::null;
+    return ST::string();
 }

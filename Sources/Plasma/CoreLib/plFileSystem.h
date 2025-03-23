@@ -44,7 +44,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #define plFileSystem_Defined
 
 #include <string_theory/formatter>
-#include <cstdio>
 #include <cstddef>
 
 #if HS_BUILD_FOR_WIN32
@@ -65,9 +64,6 @@ public:
     /** Construct an empty filename. */
     plFileName() { }
 
-    /** Construct an empty filename. */
-    plFileName(const ST::null_t &) { }
-
     /** Construct a filename from the UTF-8 character data in \a cstr. */
     plFileName(const char *cstr) : fName(cstr) { }
 
@@ -77,17 +73,13 @@ public:
     /** Copy constructor. */
     plFileName(const plFileName &copy) : fName(copy.fName) { }
 
+    /** Move constructor. */
+    plFileName(plFileName &&move) : fName(std::move(move.fName)) { }
+
     /** Assignment operator.  Same as plFileName(const char *). */
     plFileName &operator=(const char *cstr)
     {
         fName.operator=(cstr);
-        return *this;
-    }
-
-    /** Assignment operator.  Same as plFileName(const ST::null_t &). */
-    plFileName &operator=(const ST::null_t &)
-    {
-        fName.operator=(ST::null);
         return *this;
     }
 
@@ -102,6 +94,13 @@ public:
     plFileName &operator=(const plFileName &copy)
     {
         fName.operator=(copy.fName);
+        return *this;
+    }
+
+    /** Assignment operator.  Same as plFileName(plFileName &&). */
+    plFileName &operator=(plFileName &&move)
+    {
+        fName.operator=(std::move(move.fName));
         return *this;
     }
 
@@ -123,12 +122,12 @@ public:
     /** Functor which compares two filenames case-insensitively for sorting. */
     struct less_i
     {
-        bool operator()(const plFileName &_L, const plFileName &_R) const
-        { return _L.fName.compare_i(_R.fName) < 0; }
+        bool operator()(const plFileName &lhs, const plFileName &rhs) const
+        { return lhs.fName.compare_i(rhs.fName) < 0; }
     };
 
     /** Return whether this filename is valid (not empty). */
-    bool IsValid() const { return !fName.is_empty(); }
+    bool IsValid() const { return !fName.empty(); }
 
     /** Return the length of the filename string (UTF-8). */
     size_t GetSize() const { return fName.size(); }

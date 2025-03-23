@@ -46,15 +46,19 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //////////////////////////////////////////////////////////////////////////////
 
 #include "pfConsoleDirSrc.h"
+
+#include <string_theory/string_stream>
+
 #include "HeadSpin.h"
 #include "hsExceptions.h"
-#include <string_theory/string_stream>
+#include "plMessageBox/hsMessageBox.h"
+
 
 //// ParseDirectory //////////////////////////////////////////////////////////
 
 bool pfConsoleDirSrc::ParseDirectory(const plFileName& path, const char* mask /* = L"*.*" */)
 {
-    hsAssert( fEngine != nil, "Cannot do a dir execute without an engine!" );
+    hsAssert(fEngine != nullptr, "Cannot do a dir execute without an engine!");
 
     std::vector<plFileName> files = plFileSystem::ListDir(path, mask);
     for (auto iter = files.begin(); iter != files.end(); ++iter)
@@ -73,7 +77,7 @@ bool pfConsoleDirSrc::ParseDirectory(const plFileName& path, const char* mask /*
             error << fEngine->GetErrorMsg() << ":\n\nCommand: '" << fEngine->GetLastErrorLine()
                   << "'\n\nPress OK to continue parsing files.";
 
-            hsMessageBox(error.to_string().c_str(), caption.to_string().c_str(), hsMessageBoxNormal);
+            hsMessageBox(error.to_string(), caption.to_string(), hsMessageBoxNormal);
 
             SetCheckProcessedFiles(true);
             return false;

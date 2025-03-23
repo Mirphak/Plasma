@@ -46,9 +46,11 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "hsRefCnt.h"
 #include "plLoadMask.h"
 #include "plRefFlags.h"
-#include "pnKeyedObject/plKey.h"
+
+namespace ST { class string; }
 
 class hsStream;
+class plKey;
 class plKeyImp;
 class hsKeyedObject;
 class plRefMsg;
@@ -142,6 +144,9 @@ private:
 
 public:
     static hsResMgr* ResMgr() { return (hsResMgr*)fResMgr; }
+
+    // External modifier use only
+    static void SetTheResMgr(hsResMgr* mgr) { fResMgr = mgr; }
 
     static plDispatchBase* Dispatch() { hsAssert(fResMgr, "No resmgr"); return fResMgr->Dispatch(); }
 

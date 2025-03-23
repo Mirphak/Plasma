@@ -40,24 +40,25 @@ Mead, WA   99021
 
 *==LICENSE==*/
 
-#include "HeadSpin.h"
 #include "plClientLauncher.h"
+
+#include "HeadSpin.h"
+#include "plCmdParser.h"
 #include "plFileSystem.h"
 #include "plProduct.h"
 #include "hsThread.h"
 #include "hsTimer.h"
-#include "plCmdParser.h"
 
-#include "pnUtils/pnUtils.h"
 #include "pnAsyncCore/pnAsyncCore.h"
+
+#include "plMessageBox/hsMessageBox.h"
 #include "plNetGameLib/plNetGameLib.h"
 #include "plStatusLog/plStatusLog.h"
 
 #include "pfPatcher/plManifests.h"
 #include "pfPatcher/pfPatcher.h"
 
-#include "pfConsoleCore/pfConsoleEngine.h"
-PF_CONSOLE_LINK_FILE(Core)
+#include "pfConsoleCore/pfServerIni.h"
 
 #include <algorithm>
 #include <curl/curl.h>
@@ -85,7 +86,7 @@ public:
 
     plShardStatus() : fLastUpdate() { }
 
-    void Run() HS_OVERRIDE;
+    void Run() override;
     void Shutdown();
     void Update();
 };
@@ -94,14 +95,17 @@ static size_t ICurlCallback(void* buffer, size_t size, size_t nmemb, void* threa
 {
     static char status[256];
 
-    strncpy(status, (const char *)buffer, std::min<size_t>(size * nmemb, arrsize(status)));
-    status[arrsize(status) - 1] = 0;
+    size_t count = std::min<size_t>(size * nmemb, std::size(status) - 1);
+    memcpy(status, buffer, count);
+    status[count] = 0;
     static_cast<plShardStatus*>(thread)->fShardFunc(status);
     return size * nmemb;
 }
 
 void plShardStatus::Run()
 {
+    SetThisThreadName(ST_LITERAL("plShardStatus"));
+
     ST::string url = GetServerStatusUrl();
 
     // initialize CURL
@@ -109,6 +113,8 @@ void plShardStatus::Run()
     curl_easy_setopt(curl.get(), CURLOPT_ERRORBUFFER, fCurlError);
     curl_easy_setopt(curl.get(), CURLOPT_USERAGENT, "UruClient/1.0");
     curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl.get(), CURLOPT_FOLLOWLOCATION, 1);
+    curl_easy_setopt(curl.get(), CURLOPT_MAXREDIRS, 5);
     curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, this);
     curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, ICurlCallback);
 
@@ -121,7 +127,7 @@ void plShardStatus::Run()
         if (GetQuit())
             break;
 
-        if (!url.is_empty() && curl_easy_perform(curl.get()))
+        if (!url.empty() && curl_easy_perform(curl.get()))
             fShardFunc(fCurlError);
         fLastUpdate = hsTimer::GetSysSeconds();
     } while (!GetQuit());
@@ -152,7 +158,7 @@ public:
     std::deque<plFileName> fRedistQueue;
 
     plRedistUpdater()
-        : fSuccess(true)
+        : fParent(), fSuccess(true)
     { }
 
     ~plRedistUpdater()
@@ -166,15 +172,17 @@ public:
         );
     }
 
-    void OnQuit() HS_OVERRIDE
+    void OnQuit() override
     {
         // If we succeeded, then we should launch the game client...
         if (fSuccess)
             fParent->LaunchClient();
     }
 
-    void Run() HS_OVERRIDE
+    void Run() override
     {
+        SetThisThreadName(ST_LITERAL("plRedistUpdater"));
+
         while (!fRedistQueue.empty()) {
             if (fInstallProc(fRedistQueue.back()))
                 fRedistQueue.pop_back();
@@ -186,7 +194,7 @@ public:
         }
     }
 
-    void Start() HS_OVERRIDE
+    void Start() override
     {
         if (fRedistQueue.empty())
             OnQuit();
@@ -206,7 +214,7 @@ plClientLauncher::plClientLauncher() :
     fInstallerThread(new plRedistUpdater()),
     fNetCoreState(kNetCoreInactive)
 {
-    pfPatcher::GetLog()->AddLine(plProduct::ProductString().c_str());
+    pfPatcher::GetLog()->AddLine(plProduct::ProductString());
 }
 
 plClientLauncher::~plClientLauncher() { }
@@ -217,7 +225,7 @@ ST::string plClientLauncher::GetAppArgs() const
 {
     // If -Repair was specified, there are no args for the next call...
     if (hsCheckBits(fFlags, kRepairGame)) {
-        return ST::null;
+        return ST::string();
     }
 
     ST::string_stream ss;
@@ -231,6 +239,8 @@ ST::string plClientLauncher::GetAppArgs() const
         ss << " -PatchOnly";
     if (hsCheckBits(fFlags, kSkipLoginDialog))
         ss << " -SkipLoginDialog";
+    if (hsCheckBits(fFlags, kSkipIntroMovies))
+        ss << " -SkipIntroMovies";
 
     return ss.to_string();
 }
@@ -309,7 +319,7 @@ void plClientLauncher::PatchClient()
     patcher->Start();
 }
 
-bool plClientLauncher::CompleteSelfPatch(std::function<void(void)> waitProc) const
+bool plClientLauncher::CompleteSelfPatch(const std::function<void()>& waitProc) const
 {
     if (hsCheckBits(fFlags, kHaveSelfPatched))
         return false;
@@ -321,11 +331,11 @@ bool plClientLauncher::CompleteSelfPatch(std::function<void(void)> waitProc) con
         // so now we need to unlink the old patcher, and move ME into that fool's place...
         // then we can continue on our merry way!
         if (!plFileSystem::Unlink(plManifest::PatcherExecutable())) {
-            hsMessageBox("Failed to delete old patcher executable!", "Error", hsMessageBoxNormal, hsMessageBoxIconError);
+            hsMessageBox(ST_LITERAL("Failed to delete old patcher executable!"), ST_LITERAL("Error"), hsMessageBoxNormal, hsMessageBoxIconError);
             return true;
         }
         if (!plFileSystem::Move(plFileSystem::GetCurrentAppPath(), plManifest::PatcherExecutable())) {
-            hsMessageBox("Failed to move patcher executable!", "Error", hsMessageBoxNormal, hsMessageBoxIconError);
+            hsMessageBox(ST_LITERAL("Failed to move patcher executable!"), ST_LITERAL("Error"), hsMessageBoxNormal, hsMessageBoxIconError);
             return true;
         }
 
@@ -430,12 +440,9 @@ void plClientLauncher::ShutdownNetCore()
 
 // ===================================================
 
-bool plClientLauncher::LoadServerIni() const
+void plClientLauncher::LoadServerIni() const
 {
-    PF_CONSOLE_INITIALIZE(Core);
-
-    pfConsoleEngine console;
-    return console.ExecuteFile(fServerIni);
+    pfServerIni::Load(fServerIni);
 }
 
 void plClientLauncher::ParseArguments()
@@ -445,14 +452,15 @@ void plClientLauncher::ParseArguments()
         fFlags |= flag;
 
     enum { kArgServerIni, kArgNoSelfPatch, kArgImage, kArgRepairGame, kArgPatchOnly,
-           kArgSkipLoginDialog };
+           kArgSkipLoginDialog, kArgSkipIntroMovies };
     const plCmdArgDef cmdLineArgs[] = {
         { kCmdArgFlagged | kCmdTypeString, "ServerIni", kArgServerIni },
         { kCmdArgFlagged | kCmdTypeBool, "NoSelfPatch", kArgNoSelfPatch },
         { kCmdArgFlagged | kCmdTypeBool, "Image", kArgImage },
         { kCmdArgFlagged | kCmdTypeBool, "Repair", kArgRepairGame },
         { kCmdArgFlagged | kCmdTypeBool, "PatchOnly", kArgPatchOnly },
-        { kCmdArgFlagged | kCmdTypeBool, "SkipLoginDialog", kArgSkipLoginDialog }
+        { kCmdArgFlagged | kCmdTypeBool, "SkipLoginDialog", kArgSkipLoginDialog },
+        { kCmdArgFlagged | kCmdTypeBool, "SkipIntroMovies", kArgSkipIntroMovies }
     };
 
     std::vector<ST::string> args;
@@ -461,7 +469,7 @@ void plClientLauncher::ParseArguments()
         args.push_back(ST::string::from_utf8(__argv[i]));
     }
 
-    plCmdParser cmdParser(cmdLineArgs, arrsize(cmdLineArgs));
+    plCmdParser cmdParser(cmdLineArgs, std::size(cmdLineArgs));
     cmdParser.Parse(args);
 
     // cache 'em
@@ -472,10 +480,11 @@ void plClientLauncher::ParseArguments()
     APPLY_FLAG(kArgRepairGame, kRepairGame);
     APPLY_FLAG(kArgPatchOnly, kPatchOnly);
     APPLY_FLAG(kArgSkipLoginDialog, kSkipLoginDialog);
+    APPLY_FLAG(kArgSkipIntroMovies, kSkipIntroMovies);
 
     // last chance setup
     if (hsCheckBits(fFlags, kPatchOnly))
-        fClientExecutable = ST::null;
+        fClientExecutable = plFileName();
     else if (hsCheckBits(fFlags, kRepairGame))
         fClientExecutable = plManifest::PatcherExecutable();
 
@@ -484,15 +493,15 @@ void plClientLauncher::ParseArguments()
 
 void plClientLauncher::SetErrorProc(ErrorFunc proc)
 {
-    s_errorProc = proc;
+    s_errorProc = std::move(proc);
 }
 
 void plClientLauncher::SetInstallerProc(InstallRedistFunc proc)
 {
-    fInstallerThread->fInstallProc = proc;
+    fInstallerThread->fInstallProc = std::move(proc);
 }
 
 void plClientLauncher::SetShardProc(StatusFunc proc)
 {
-    fStatusThread->fShardFunc = proc;
+    fStatusThread->fShardFunc = std::move(proc);
 }

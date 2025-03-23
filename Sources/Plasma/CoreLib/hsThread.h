@@ -43,13 +43,18 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #define hsThread_Defined
 
 #include "HeadSpin.h"
-#include <atomic>
-#include <mutex>
-#include <condition_variable>
-#include <thread>
 #include "hsLockGuard.h"
 
+#include <atomic>
+#include <condition_variable>
+#include <limits>
+#include <mutex>
+#include <thread>
+
+#include <string_theory/string>
+
 typedef uint32_t hsMilliseconds;
+static constexpr hsMilliseconds kWaitForever = std::numeric_limits<hsMilliseconds>::max();
 
 #ifdef HS_BUILD_FOR_UNIX
     #include <pthread.h>
@@ -94,6 +99,11 @@ public:
     // must be able to manage itself -- destroying the hsThread object
     // WILL NOT stop a detached thread!
     void StartDetached();
+
+    // Set a name for the current thread, to be displayed in debuggers and such.
+    // If possible, don't use names longer than 15 characters,
+    // because Linux has a really low limit.
+    static void SetThisThreadName(const ST::string& name);
 
     static inline size_t ThisThreadHash()
     {
@@ -153,14 +163,14 @@ class hsGlobalSemaphore {
 #endif
 #endif
 public:
-    hsGlobalSemaphore(int initialValue = 0, const char* name = nullptr);
+    hsGlobalSemaphore(int initialValue = 0, const ST::string& name = {});
     ~hsGlobalSemaphore();
 
 #ifdef HS_BUILD_FOR_WIN32
     HANDLE GetHandle() const { return fSemaH; }
 #endif
 
-    bool Wait(hsMilliseconds timeToWait = kPosInfinity32);
+    bool Wait(hsMilliseconds timeToWait = kWaitForever);
     void Signal();
 };
 

@@ -49,21 +49,17 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 /* Get the pfPasswordStore instance */
 pfPasswordStore* pfPasswordStore::Instance()
 {
-    static pfPasswordStore* store = nullptr;
-
-    if (store == nullptr) {
 #if defined(HS_BUILD_FOR_WIN32)
-        store = new pfWin32PasswordStore();
-#elif defined(HS_BUILD_FOR_OSX)
-        store = new pfMacPasswordStore();
+    static pfWin32PasswordStore store;
+#elif defined(HAVE_SECURITY)
+    static pfApplePasswordStore store;
 #elif defined(HAVE_LIBSECRET)
-        store = new pfUnixPasswordStore();
+    static pfUnixPasswordStore store;
 #else
-        store = new pfFilePasswordStore();
+    static pfFilePasswordStore store;
 #endif
-    }
 
-    return store;
+    return &store;
 }
 
 
@@ -85,16 +81,16 @@ pfFilePasswordStore::pfFilePasswordStore()
 ST::string pfFilePasswordStore::GetPassword(const ST::string& username)
 {
     plFileName loginDat = plFileName::Join(plFileSystem::GetInitPath(), "login.dat");
-    ST::string password = ST::null;
+    ST::string password;
 
 #ifndef PLASMA_EXTERNAL_RELEASE
     // internal builds can use the local init directory
-    plFileName local("init\\login.dat");
+    plFileName local = plFileName::Join("init", "login.dat");
     if (plFileInfo(local).Exists())
         loginDat = local;
 #endif
 
-    hsStream* stream = plEncryptedStream::OpenEncryptedFile(loginDat, fCryptKey);
+    std::unique_ptr<hsStream> stream = plEncryptedStream::OpenEncryptedFile(loginDat, fCryptKey);
     if (stream && !stream->AtEnd())
     {
         uint32_t savedKey[4];
@@ -107,9 +103,6 @@ ST::string pfFilePasswordStore::GetPassword(const ST::string& username)
                 password = stream->ReadSafeString();
             }
         }
-
-        stream->Close();
-        delete stream;
     }
 
     return password;
@@ -122,20 +115,17 @@ bool pfFilePasswordStore::SetPassword(const ST::string& username, const ST::stri
 
 #ifndef PLASMA_EXTERNAL_RELEASE
     // internal builds can use the local init directory
-    plFileName local("init\\login.dat");
+    plFileName local = plFileName::Join("init", "login.dat");
     if (plFileInfo(local).Exists())
         loginDat = local;
 #endif
 
-    hsStream* stream = plEncryptedStream::OpenEncryptedFileWrite(loginDat, fCryptKey);
+    std::unique_ptr<hsStream> stream = plEncryptedStream::OpenEncryptedFileWrite(loginDat, fCryptKey);
     if (stream)
     {
         stream->Write(sizeof(fCryptKey), fCryptKey);
         stream->WriteSafeString(username);
         stream->WriteSafeString(password);
-
-        stream->Close();
-        delete stream;
 
         return true;
     }

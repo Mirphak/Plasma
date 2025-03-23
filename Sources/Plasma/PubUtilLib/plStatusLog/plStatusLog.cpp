@@ -55,18 +55,16 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //                                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
-#include <cstdarg>
-#include <cstdlib>
-#include "hsThread.h"
-#include "hsTemplates.h"
-#include "hsTimer.h"
-#include "hsWindows.h"
 #include "plStatusLog.h"
-#include "plUnifiedTime/plUnifiedTime.h"
-#include "plProduct.h"
-
 #include "plEncryptLogLine.h"
 
+#include "hsFILELock.h"
+#include "plProduct.h"
+#include "hsThread.h"
+#include "hsTimer.h"
+#include "hsWindows.h"
+
+#include "plUnifiedTime/plUnifiedTime.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //// plStatusLogMgr Stuff ////////////////////////////////////////////////////
@@ -81,17 +79,14 @@ plFileName plStatusLogMgr::IGetBasePath()
 //// Constructor & Destructor ////////////////////////////////////////////////
 
 plStatusLogMgr::plStatusLogMgr()
+    : fDisplays(), fCurrDisplay(), fDrawer(), fLastLogChangeTime()
 {
-    fDisplays = nil;
-    fCurrDisplay = nil;
-    fDrawer = nil;
-    fLastLogChangeTime = 0;
 }
 
 plStatusLogMgr::~plStatusLogMgr()
 {
     // Unlink all the displays, but don't delete them; leave that to whomever owns them
-    while( fDisplays != nil )
+    while (fDisplays != nullptr)
     {
         plStatusLog *log = fDisplays;
 
@@ -102,7 +97,7 @@ plStatusLogMgr::~plStatusLogMgr()
     }
 }
 
-plStatusLogMgr  &plStatusLogMgr::GetInstance( void )
+plStatusLogMgr  &plStatusLogMgr::GetInstance()
 {
     static plStatusLogMgr   theManager;
     return theManager;
@@ -110,12 +105,12 @@ plStatusLogMgr  &plStatusLogMgr::GetInstance( void )
 
 //// Draw ////////////////////////////////////////////////////////////////////
 
-void    plStatusLogMgr::Draw( void )
+void    plStatusLogMgr::Draw()
 {
     /// Just draw current plStatusLog
-    if( fCurrDisplay != nil && fDrawer != nil )
+    if (fCurrDisplay != nullptr && fDrawer != nullptr)
     {
-        plStatusLog* firstLog = nil;
+        plStatusLog* firstLog = nullptr;
         if (hsTimer::GetSysSeconds() - fLastLogChangeTime < 1)
             firstLog = fDisplays;
 
@@ -150,7 +145,7 @@ plStatusLog *plStatusLogMgr::CreateStatusLog( uint8_t numDisplayLines, const plF
 void    plStatusLogMgr::ToggleStatusLog( plStatusLog *logToDisplay )
 {
     if( fCurrDisplay == logToDisplay )
-        fCurrDisplay = nil;
+        fCurrDisplay = nullptr;
     else
         fCurrDisplay = logToDisplay;
 
@@ -162,15 +157,15 @@ void    plStatusLogMgr::ToggleStatusLog( plStatusLog *logToDisplay )
 void plStatusLogMgr::SetCurrStatusLog(const plFileName& logName)
 {
     plStatusLog* log = FindLog(logName, false);
-    if (log != nil)
+    if (log != nullptr)
         fCurrDisplay = log;
 }
 
 //// NextStatusLog ///////////////////////////////////////////////////////////
 
-void    plStatusLogMgr::NextStatusLog( void )
+void    plStatusLogMgr::NextStatusLog()
 {
-    if( fCurrDisplay == nil )
+    if (fCurrDisplay == nullptr)
         fCurrDisplay = fDisplays;
     else
         fCurrDisplay = fCurrDisplay->fNext;
@@ -178,9 +173,9 @@ void    plStatusLogMgr::NextStatusLog( void )
     fLastLogChangeTime = hsTimer::GetSysSeconds();
 }
 
-void    plStatusLogMgr::PrevStatusLog( void )
+void    plStatusLogMgr::PrevStatusLog()
 {
-    if( fCurrDisplay == nil )
+    if (fCurrDisplay == nullptr)
     {
         fCurrDisplay = fDisplays;
         while (fCurrDisplay && fCurrDisplay->fNext)
@@ -204,7 +199,7 @@ plStatusLog *plStatusLogMgr::FindLog( const plFileName &filename, bool createIfN
 {
     plStatusLog *log = fDisplays;
 
-    while( log != nil )
+    while (log != nullptr)
     {
         if (log->GetFileName().AsString().compare_i(filename.AsString()) == 0)
             return log;
@@ -213,7 +208,7 @@ plStatusLog *plStatusLogMgr::FindLog( const plFileName &filename, bool createIfN
     }
 
     if( !createIfNotFound )
-        return nil;
+        return nullptr;
 
     // Didn't find one, so create one! (make it a nice default one :)
     log = CreateStatusLog( kDefaultNumLines, filename, plStatusLog::kFilledBackground |
@@ -228,7 +223,7 @@ void plStatusLogMgr::BounceLogs()
 {
     plStatusLog *log = fDisplays;
 
-    while( log != nil )
+    while (log != nullptr)
     {
         plStatusLog * tmp = log;
         log = log->fNext;
@@ -265,24 +260,17 @@ bool plStatusLogMgr::DumpLogs( const plFileName &newFolderName )
 uint32_t plStatusLog::fLoggingOff = false;
 
 plStatusLog::plStatusLog( uint8_t numDisplayLines, const plFileName &filename, uint32_t flags )
+    : fFileHandle(), fSize(), fForceLog(), fMaxNumLines(numDisplayLines),
+      fDisplayPointer()
 {
-    fFileHandle = nil;
-    fSema = nil;
-    fSize = 0;
-    fForceLog = false;
-
-    fMaxNumLines = numDisplayLines;
     if (filename.IsValid())
     {
         fFilename = filename;
-        fSema = new hsGlobalSemaphore(1, fFilename.AsString().c_str());
     }
     else
     {
         fFilename = "";
         flags |= kDontWriteFile;
-
-        fSema = new hsGlobalSemaphore(1);
     }
 
     fOrigFlags = fFlags = flags;
@@ -301,25 +289,24 @@ void    plStatusLog::IInit()
 
     fFlags = fOrigFlags;
 
-    fLines = new char *[ fMaxNumLines ];
+    fLines = new ST::string[fMaxNumLines];
     fColors = new uint32_t[ fMaxNumLines ];
     for( i = 0; i < fMaxNumLines; i++ )
     {
-        fLines[ i ] = nil;
         fColors[ i ] = kWhite;
     }
 
-    fNext = nil;
-    fBack = nil;
+    fNext = nullptr;
+    fBack = nullptr;
 
 }
 
-bool plStatusLog::IReOpen( void )
+bool plStatusLog::IReOpen()
 {
-    if( fFileHandle != nil )
+    if (fFileHandle != nullptr)
     {
         fclose( fFileHandle );
-        fFileHandle = nil;
+        fFileHandle = nullptr;
     }
 
     // Open the file, clearing it, if necessary
@@ -358,30 +345,24 @@ bool plStatusLog::IReOpen( void )
     else
         fSize = 0;
 
-    return fFileHandle != nil;
+    return fFileHandle != nullptr;
 }
 
-void    plStatusLog::IFini( void )
+void    plStatusLog::IFini()
 {
     int     i;
 
-    if( fFileHandle != nil )
+    if (fFileHandle != nullptr)
     {
         fclose( fFileHandle );
-        fFileHandle = nil;
+        fFileHandle = nullptr;
     }
 
     if( *fDisplayPointer == this )
-        *fDisplayPointer = nil;
+        *fDisplayPointer = nullptr;
 
-    if( fBack != nil || fNext != nil )
+    if (fBack != nullptr || fNext != nullptr)
         IUnlink();
-
-    for( i = 0; i < fMaxNumLines; i++ )
-        delete [] fLines[ i ];
-
-    if (fSema)
-        delete fSema;
 
     delete [] fLines;
     delete [] fColors;
@@ -403,24 +384,29 @@ void plStatusLog::IParseFileName(plFileName& fileNoExt, ST::string& ext) const
     ext = file.GetFileExt();
 }
 
+plStatusLog* plStatusLog::IFindLog(const plFileName& filename)
+{
+    return plStatusLogMgr::GetInstance().FindLog(filename);
+}
+
 //// IUnlink /////////////////////////////////////////////////////////////////
 
-void    plStatusLog::IUnlink( void )
+void    plStatusLog::IUnlink()
 {
     hsAssert( fBack, "plStatusLog not in list" );
     if( fNext )
         fNext->fBack = fBack;
     *fBack = fNext;
 
-    fBack = nil;
-    fNext = nil;
+    fBack = nullptr;
+    fNext = nullptr;
 }
 
 //// ILink ///////////////////////////////////////////////////////////////////
 
 void    plStatusLog::ILink( plStatusLog **back )
 {
-    hsAssert( fNext == nil && fBack == nil, "Trying to link a plStatusLog that's already linked" );
+    hsAssert(fNext == nullptr && fBack == nullptr, "Trying to link a plStatusLog that's already linked");
 
     fNext = *back;
     if( *back )
@@ -432,7 +418,7 @@ void    plStatusLog::ILink( plStatusLog **back )
 //// IAddLine ////////////////////////////////////////////////////////////////
 //  Actually add a stinking line.
 
-bool plStatusLog::IAddLine( const char *line, int32_t count, uint32_t color )
+bool plStatusLog::IAddLine(const ST::string& line, uint32_t color)
 {
     int     i;
 
@@ -440,183 +426,66 @@ bool plStatusLog::IAddLine( const char *line, int32_t count, uint32_t color )
         return true;
 
     /// Scroll pointers up
-    fSema->Wait();
-
-    bool ret = true;
+    hsFILELock fileLock(fFileHandle);
+    hsLockGuard(fileLock);
 
     if (fMaxNumLines > 0)
     {
-        delete [] fLines[ 0 ];
         for( i = 0; i < fMaxNumLines - 1; i++ )
         {
-            fLines[ i ] = fLines[ i + 1 ];
+            fLines[ i ] = std::move(fLines[ i + 1 ]);
             fColors[ i ] = fColors[ i + 1 ];
         }
+
+        /// Add new
+        fLines[i] = line;
+        fColors[i] = color;
     }
 
-    /// Add new
-    if( line == nil || strlen( line ) == 0 )
-    {
-        if (fMaxNumLines > 0)
-        {
-            fColors[ i ] = 0;
-            fLines[ i ] = nil;
-        }
-        ret = IPrintLineToFile( "", 0 );
-    }
-    else
-    {
-        if( count < 0 )
-            count = strlen( line );
-
-        if (fMaxNumLines > 0)
-        {
-            fLines[ i ] = new char[ count + 1 ];
-            hsStrncpy( fLines[ i ], line, count + 1 );
-            fLines[ i ][ count ] = 0;
-
-            char *c = strchr( fLines[ i ], '\n' );
-            if( c != nil )
-            {
-                *c = 0;
-                count--;
-            }
-
-            fColors[ i ] = color;
-        }
-
-        ret = IPrintLineToFile( line, count );
-    }
-
-    fSema->Signal();
+    bool ret = IPrintLineToFile(line);
 
     return ret;
 }
 
 //// AddLine /////////////////////////////////////////////////////////////////
 
-bool plStatusLog::AddLine(const ST::string& line)
+bool plStatusLog::AddLine(uint32_t color, const ST::string& line)
 {
-    if (fLoggingOff && !fForceLog) {
-        return true;
-    }
-
-    bool ret = true;
-    std::vector<ST::string> lines = line.split('\n');
-
-    for (const ST::string& str : lines)
-    {
-        ret &= IAddLine(str.c_str(), -1, kWhite);
-    }
-
-    return ret;
-}
-
-bool plStatusLog::AddLine( const char *line, uint32_t color )
-{
-    char    *c, *str;
     if(fLoggingOff && !fForceLog)
         return true;
 
     bool ret = true;
 
     /// Scan for carriage returns and feed each section into IAddLine()
-    for( str = (char *)line; ( c = strchr( str, '\n' ) ) != nil; str = c + 1 )
+    size_t startPos = 0;
+    ST_ssize_t pos = line.find('\n');
+    while (pos != -1)
     {
-        // So if we got here, c points to a carriage return...
-        ret = IAddLine( str, (uintptr_t)c - (uintptr_t)str, color );
+        // So if we got here, pos points to a carriage return...
+        ret &= IAddLine(line.substr(startPos, pos - startPos), color);
+        startPos = pos + 1;
+        pos = line.find(startPos, '\n');
     }
 
     /// We might have some left over
-    if( strlen( str ) > 0 )
+    if (startPos < line.size())
     {
-        ret &= IAddLine( str, -1, color );
+        ret &= IAddLine(line.substr(startPos), color);
     }
 
     return ret;
 }
 
-//// AddLine printf-style Variations /////////////////////////////////////////
-
-bool plStatusLog::AddLineV( const char *format, va_list arguments )
-{
-    if(fLoggingOff && !fForceLog)
-        return true;
-    return AddLineV( kWhite, format, arguments );
-}
-
-bool plStatusLog::AddLineV( uint32_t color, const char *format, va_list arguments )
-{
-    if(fLoggingOff && !fForceLog)
-        return true;
-    char buffer[2048];
-    vsnprintf(buffer, arrsize(buffer), format, arguments);
-    return AddLine( buffer, color );
-}
-
-bool plStatusLog::AddLineF( const char *format, ... )
-{
-    if(fLoggingOff && !fForceLog)
-        return true;
-    va_list arguments;
-    va_start( arguments, format );
-
-    return AddLineV( kWhite, format, arguments );
-}
-
-bool plStatusLog::AddLineF( uint32_t color, const char *format, ... )
-{
-    if(fLoggingOff && !fForceLog)
-        return true;
-    va_list arguments;
-    va_start( arguments, format );
-
-    return AddLineV( color, format, arguments );
-}
-
-//// AddLine Static Variations ///////////////////////////////////////////////
-
-bool plStatusLog::AddLineS( const plFileName &filename, const char *format, ... )
-{
-    plStatusLog *log = plStatusLogMgr::GetInstance().FindLog( filename );
-    if (!log)
-        return false;
-
-    if(fLoggingOff && !log->fForceLog)
-        return true;
-
-    va_list arguments;
-    va_start( arguments, format );
-
-    return log->AddLineV( format, arguments );
-}
-
-bool plStatusLog::AddLineS( const plFileName &filename, uint32_t color, const char *format, ... )
-{
-    plStatusLog *log = plStatusLogMgr::GetInstance().FindLog( filename );
-    if (!log)
-        return false;
-
-    if(fLoggingOff && !log->fForceLog)
-        return true;
-
-    va_list arguments;
-    va_start( arguments, format );
-
-    return log->AddLineV( color, format, arguments );
-}
-
 //// Clear ///////////////////////////////////////////////////////////////////
 
-void    plStatusLog::Clear( void )
+void    plStatusLog::Clear()
 {
     int     i;
 
 
     for( i = 0; i < fMaxNumLines; i++ )
     {
-        delete [] fLines[ i ];
-        fLines[ i ] = nil;
+        fLines[i] = ST::string();
     }
 }
 
@@ -628,91 +497,65 @@ void    plStatusLog::Bounce( uint32_t flags)
     if (flags)
         fOrigFlags=flags;
     Clear();
-    if( fFileHandle != nil )
+    if (fFileHandle != nullptr)
     {
         fclose( fFileHandle );
-        fFileHandle = nil;
+        fFileHandle = nullptr;
     }
     AddLine( "--------- Bounced Log ---------" );
 }
 
 //// IPrintLineToFile ////////////////////////////////////////////////////////
 
-bool plStatusLog::IPrintLineToFile( const char *line, uint32_t count )
+bool plStatusLog::IPrintLineToFile(const ST::string& line)
 {
     if( fFlags & kDontWriteFile )
         return true;
 
-#ifdef PLASMA_EXTERNAL_RELEASE
-    uint8_t hint = 0;
-    if( fFlags & kAppendToLast )
-    {
-        hint = (uint8_t)fSize;
-    }
-#endif
-
     if (!fFileHandle)
         IReOpen();
 
-    bool ret = ( fFileHandle!=nil );
+    bool ret = (fFileHandle != nullptr);
 
-    if( fFileHandle != nil )
+    if (fFileHandle != nullptr)
     {
-        char work[256];
-        char buf[2000];
-        buf[0] = 0;
+        ST::string_stream buf;
 
-        //build line to encrypt
+        //build line to write to log file
 
-        if( count != 0 )
+        if (!line.empty())
         {
             if ( fFlags & kTimestamp )
             {
-                snprintf(work, arrsize(work), "(%s) ", plUnifiedTime(kNow).Format("%m/%d %H:%M:%S").c_str());
-                strncat(buf, work, arrsize(work));
+                buf << '(' << plUnifiedTime::GetCurrent(plUnifiedTime::kLocal).Format("%m/%d %H:%M:%S") << ") ";
             }
             if ( fFlags & kTimestampGMT )
             {
-                snprintf(work, arrsize(work), "(%s) ", plUnifiedTime::GetCurrent().Format("%m/%d %H:%M:%S UTC").c_str());
-                strncat(buf, work, arrsize(work));
+                buf << '(' << plUnifiedTime::GetCurrent().Format("%m/%d %H:%M:%S UTC") << ") ";
             }
             if ( fFlags & kTimeInSeconds )
             {
-                snprintf(work, arrsize(work), "(%lu) ", (unsigned long)plUnifiedTime(kNow).GetSecs());
-                strncat(buf, work, arrsize(work));
+                buf << '(' << plUnifiedTime::GetCurrent(plUnifiedTime::kLocal).GetSecs() << ") ";
             }
             if ( fFlags & kTimeAsDouble )
             {
-                snprintf(work, arrsize(work), "(%f) ", plUnifiedTime(kNow).GetSecsDouble());
-                strncat(buf, work, arrsize(work));
+                buf << '(' << plUnifiedTime::GetCurrent(plUnifiedTime::kLocal).GetSecsDouble() << ") ";
             }
             if (fFlags & kRawTimeStamp)
             {
-                snprintf(work, arrsize(work), "[t=%10f] ", hsTimer::GetSeconds());
-                strncat(buf, work, arrsize(work));
+                buf << ST::format("[t={10f}] ", hsTimer::GetSeconds());
             }
             if (fFlags & kThreadID)
             {
-                snprintf(work, arrsize(work), "[t=%lu] ", hsThread::ThisThreadHash());
-                strncat(buf, work, arrsize(work));
+                buf << "[t=" << hsThread::ThisThreadHash() << "] ";
             }
 
-            size_t remaining = arrsize(buf) - strlen(buf) - 1;
-            remaining -= 1;
-            if (count <= remaining) {
-                strncat(buf, line, count);
-            } else {
-                strncat(buf, line, remaining);
-            }
-
-            strncat(buf, "\n", 1);
+            buf << line << '\n';
         }
-
-        unsigned length = strlen(buf);
 
         {
             int err;
-            err = fwrite(buf,1,length,fFileHandle);
+            err = fwrite(buf.raw_buffer(), 1, buf.size(), fFileHandle);
             ret = ( ferror( fFileHandle )==0 );
 
             if ( ret )
@@ -730,22 +573,25 @@ bool plStatusLog::IPrintLineToFile( const char *line, uint32_t count )
 
     }
 
-    ST::string out_str = ST::string::from_utf8(line, count) + "\n";
     if (fFlags & kDebugOutput)
     {
 
 #if HS_BUILD_FOR_WIN32
 #ifndef PLASMA_EXTERNAL_RELEASE
-        OutputDebugString(out_str.c_str());
+        ST::wchar_buffer buf = line.to_wchar();
+        OutputDebugStringW(buf.c_str());
+        OutputDebugStringW(L"\n");
 #endif
 #else
-        fputs(out_str.c_str(), stderr);
+        fwrite(line.c_str(), 1, line.size(), stderr);
+        fputc('\n', stderr);
 #endif
     }
 
     if (fFlags & kStdout)
     {
-        fputs(out_str.c_str(), stdout);
+        fwrite(line.c_str(), 1, line.size(), stdout);
+        fputc('\n', stdout);
     }
 
     return ret;

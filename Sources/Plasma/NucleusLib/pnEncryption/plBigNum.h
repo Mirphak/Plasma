@@ -69,7 +69,6 @@ public:
     plBigNum();
     plBigNum(const plBigNum& a);
     plBigNum(uint32_t a);
-    plBigNum(uint32_t bytess, const void* data, bool le=false);
     ~plBigNum();
 
     plBigNum& operator=(const plBigNum& a)
@@ -113,14 +112,6 @@ public:
         *remainder = (uint32_t)BN_div_word(m_number, b);
     }
 
-    void Div(const plBigNum& a, const plBigNum& b, plBigNum* remainder)
-    {
-        // this = a / b, remainder = a % b
-        // either this or remainder may be nil
-        BN_div(this ? m_number : nil, remainder ? remainder->m_number : nil,
-               a.m_number, b.m_number, GetContext());
-    }
-
     void FromData_BE(uint32_t bytess, const void* data)
     {
         BN_bin2bn((const uint8_t*)data, bytess, m_number);
@@ -133,15 +124,19 @@ public:
 
     bool IsPrime() const
     {
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
         // Cyan's code uses 3 checks, so we'll follow suit.
         // This provides an accurate answer to p < 0.015625
-        return BN_is_prime_fasttest(m_number, 3, nil, GetContext(), nil, 1) > 0;
+        return BN_is_prime_fasttest_ex(m_number, 3, GetContext(), 1, nullptr) > 0;
+#else
+        return BN_check_prime(m_number, GetContext(), nullptr) > 0;
+#endif
     }
 
     void Mod(const plBigNum& a, const plBigNum& b)
     {
         // this = a % b
-        BN_div(nil, m_number, a.m_number, b.m_number, GetContext());
+        BN_div(nullptr, m_number, a.m_number, b.m_number, GetContext());
     }
 
     void Mul(const plBigNum& a, uint32_t b)
@@ -182,7 +177,7 @@ public:
 
     void RandPrime(uint32_t bits, plBigNum* seed)
     {
-        BN_generate_prime(m_number, bits, 1, nil, nil, nil, nil);
+        BN_generate_prime_ex(m_number, bits, 1, nullptr, nullptr, nullptr);
     }
 
     void Set(const plBigNum& a)

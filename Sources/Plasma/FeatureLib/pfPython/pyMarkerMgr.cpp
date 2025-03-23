@@ -45,10 +45,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 //////////////////////////////////////////////////////////////////////
 
-#pragma hdrstop
 
 #include "pyMarkerMgr.h"
+
 #include "pfCharacter/pfMarkerMgr.h"
+
+#include "pyGeometry3.h"
 
 void pyMarkerMgr::AddMarker(pyPoint3* pos, uint32_t id, bool justCreated)
 {

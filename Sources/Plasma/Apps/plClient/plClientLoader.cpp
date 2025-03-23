@@ -45,68 +45,38 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plFileSystem.h"
 #include "plPipeline.h"
 
-#include "hsWindows.h"
-#include <shellapi.h>
-
 #include "plClientResMgr/plClientResMgr.h"
+#include "plMessageBox/hsMessageBox.h"
 #include "plNetClient/plNetClientMgr.h"
 #include "plPhysX/plSimulationMgr.h"
 #include "plResMgr/plResManager.h"
 
-static plFileName s_physXSetupExe = "PhysX_Setup.exe";
-
-static bool InitPhysX()
-{
-#ifdef HS_BUILD_FOR_WIN32
-    plSimulationMgr::Init();
-    if (!plSimulationMgr::GetInstance()) {
-        if (plFileInfo(s_physXSetupExe).Exists()) {
-            // launch the PhysX installer
-            SHELLEXECUTEINFOW info;
-            memset(&info, 0, sizeof(info));
-            info.cbSize = sizeof(info);
-            ST::wchar_buffer exeW = s_physXSetupExe.WideString();
-            info.lpFile = exeW.data();
-            info.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NOASYNC;
-            ShellExecuteExW(&info);
-
-            // wait for completion
-            WaitForSingleObject(info.hProcess, INFINITE);
-
-            // cleanup
-            CloseHandle(info.hProcess);
-        } else {
-            hsMessageBox("You must install PhysX before you can play URU.", "Error", hsMessageBoxNormal, hsMessageBoxIconError);
-            return false;
-        }
-    }
-    if (plSimulationMgr::GetInstance()) {
-        plSimulationMgr::GetInstance()->Suspend();
-        return true;
-    } else {
-        hsMessageBox("PhysX install failed. You will not be able to play URU.", "Error", hsMessageBoxNormal, hsMessageBoxIconError);
-        return false;
-    }
-#else
-    return false;
-#endif // HS_BUILD_FOR_WIN32
-}
-
 void plClientLoader::Run()
 {
+    SetThisThreadName(ST_LITERAL("plClientLoader"));
+
     plResManager *resMgr = new plResManager;
     resMgr->SetDataPath("dat");
     hsgResMgr::Init(resMgr);
 
     if (!plFileInfo("resource.dat").Exists()) {
-        hsMessageBox("Required file 'resource.dat' not found.", "Error", hsMessageBoxNormal);
+        hsMessageBox(ST_LITERAL("Required file 'resource.dat' not found."), ST_LITERAL("Error"), hsMessageBoxNormal);
         return;
     }
     plClientResMgr::Instance().ILoadResources("resource.dat");
 
     fClient = new plClient;
     fClient->SetWindowHandle(fWindow);
-    if (!InitPhysX() || fClient->InitPipeline() || !fClient->StartInit()) {
+
+    plSimulationMgr::Init();
+    if (plSimulationMgr::GetInstance()) {
+        plSimulationMgr::GetInstance()->Suspend();
+    } else {
+        fClient->SetDone(true);
+        return;
+    }
+
+    if (fClient->InitPipeline(fDisplay, fDevType) || !fClient->StartInit()) {
         fClient->SetDone(true);
     }
 }
@@ -114,10 +84,7 @@ void plClientLoader::Run()
 void plClientLoader::Start()
 {
     fClient->ResizeDisplayDevice(fClient->GetPipeline()->Width(), fClient->GetPipeline()->Height(), !fClient->GetPipeline()->IsFullScreen());
-
-    // Show the client window
-    ShowWindow(fWindow, SW_SHOW);
-    BringWindowToTop(fWindow);
+    fClient->ShowClientWindow();
 
     // Now, show the intro video, patch the global ages, etc...
     fClient->BeginGame();

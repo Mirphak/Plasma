@@ -39,40 +39,42 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
       Mead, WA   99021
 
 *==LICENSE==*/
+
 #include "plAutoProfile.h"
-
-#include "plgDispatch.h"
-#include "plNetClient/plNetClientMgr.h"
-#include "plNetClient/plNetLinkingMgr.h"
-
-#include "hsStream.h"
-#include "hsTimer.h"
-#include "plMessage/plAgeLoadedMsg.h"
-#include "plTimerCallbackManager.h"
-#include "plMessage/plTimerCallbackMsg.h"
-#include "plAvatar/plAvatarMgr.h"
-#include "plAvatar/plArmatureMod.h"
-#include "plModifier/plSpawnModifier.h"
-#include "plMessage/plConsoleMsg.h"
-#include "pnMessage/plClientMsg.h"
-#include "plAgeLoader/plAgeLoader.h"
 #include "plProfileManagerFull.h"
 
-#include "plPipeline/plDebugText.h"
+#include "plgDispatch.h"
+#include "hsResMgr.h"
+#include "hsStream.h"
+#include "hsTimer.h"
+#include "plTimerCallbackManager.h"
+#include "hsWindows.h"
+
+#include "pnMessage/plClientMsg.h"
 #include "pnMessage/plTimeMsg.h"
 
+#include "plAvatar/plArmatureMod.h"
+#include "plAvatar/plAvatarMgr.h"
+#include "plContainer/plConfigInfo.h" // for plStringList
+#include "plMessage/plAgeLoadedMsg.h"
+#include "plMessage/plConsoleMsg.h"
+#include "plMessage/plTimerCallbackMsg.h"
+#include "plModifier/plSpawnModifier.h"
+#include "plNetClient/plNetClientMgr.h"
+#include "plNetClient/plNetLinkingMgr.h"
+#include "plPipeline/plDebugText.h"
 #include "plStatusLog/plStatusLog.h"
 #include "plVault/plVault.h"
 
-#include "plContainer/plConfigInfo.h" // for plStringList
-
 // For taking screenshots
-#include "plGImage/plMipmap.h"
-#include "../../Apps/plClient/plClient.h"
-#include "plGImage/plJPEG.h"
 #include "plPipeline.h"
+#include "../../Apps/plClient/plClient.h" // FIXME FIXME FIXME DAMMIT
+#include "plGImage/plJPEG.h"
+#include "plGImage/plMipmap.h"
 
 #include <algorithm>
+#include <string_theory/string>
+#include <utility>
 
 class plAutoProfileImp : public plAutoProfile
 {
@@ -82,7 +84,7 @@ protected:
     int fNextSpawnPoint;
     ST::string fLastSpawnPointName;
     // For profiling a single age
-    std::string fAgeName;
+    ST::string fAgeName;
     bool fLinkedToSingleAge;
     bool fJustLinkToAges;
 
@@ -98,12 +100,14 @@ protected:
     void IShutdown();
 
 public:
-    plAutoProfileImp();
+    plAutoProfileImp()
+        : fNextAge(), fNextSpawnPoint(), fLinkedToSingleAge(), fJustLinkToAges(), fLinkTime()
+    { }
 
-    virtual void StartProfile(const char* ageName);
-    virtual void LinkToAllAges();
+    void StartProfile(ST::string ageName) override;
+    void LinkToAllAges() override;
 
-    virtual bool MsgReceive(plMessage* msg);
+    bool MsgReceive(plMessage* msg) override;
 };
 
 plAutoProfile* plAutoProfile::Instance()
@@ -114,16 +118,9 @@ plAutoProfile* plAutoProfile::Instance()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-plAutoProfileImp::plAutoProfileImp() : fNextAge(0), fNextSpawnPoint(0), fLinkedToSingleAge(false), fJustLinkToAges(false)
+void plAutoProfileImp::StartProfile(ST::string ageName)
 {
-}
-
-void plAutoProfileImp::StartProfile(const char* ageName)
-{
-    if (ageName)
-        fAgeName = ageName;
-    else
-        fAgeName = "";
+    fAgeName = std::move(ageName);
 
     IInit();
 
@@ -182,7 +179,7 @@ void plAutoProfileImp::IShutdown()
                        plFileName::Join(plProfileManagerFull::Instance().GetProfilePath(), kAgeTimingLog));
 
 #ifdef HS_BUILD_FOR_WIN32
-    ShellExecute(nil, nil, "PostRun.bat", nil, nil, SW_SHOWNORMAL);
+    ShellExecute(nullptr, nullptr, "PostRun.bat", nullptr, nullptr, SW_SHOWNORMAL);
 #endif
 
     plgDispatch::Dispatch()->UnRegisterForExactType(plEvalMsg::Index(), GetKey());
@@ -208,7 +205,7 @@ void plAutoProfileImp::INextProfile()
     else
     {
         // Log the stats for this spawn point
-        if (!fLastSpawnPointName.is_empty())
+        if (!fLastSpawnPointName.empty())
         {
             ST::string ageName = NetCommGetAge()->ageDatasetName;
             plProfileManagerFull::Instance().LogStats(ageName, fLastSpawnPointName);
@@ -224,7 +221,7 @@ void plAutoProfileImp::INextProfile()
                 plJPEG::Instance().WriteToFile(fileName.c_str(), &mipmap);
             }
 
-            fLastSpawnPointName = ST::null;
+            fLastSpawnPointName = ST::string();
         }
 
         // Try to go to the next spawn point
@@ -242,22 +239,19 @@ void plAutoProfileImp::INextProfile()
 
 bool plAutoProfileImp::INextAge()
 {
-    const char* ageName = nil;
+    ST::string ageName;
 
-    if (fAgeName.length() > 0)
-    {
+    if (!fAgeName.empty()) {
         if (fLinkedToSingleAge)
             return false;
 
         fLinkedToSingleAge = true;
-        ageName = fAgeName.c_str();
-    }
-    else
-    {
+        ageName = fAgeName;
+    } else {
         if (fNextAge >= fAges.size())
             return false;
 
-        ageName = fAges[fNextAge].c_str();
+        ageName = fAges[fNextAge];
     }
 
     fNextAge++;
@@ -302,7 +296,7 @@ bool plAutoProfileImp::INextSpawnPoint()
 
     if (!foundGood)
     {
-        fLastSpawnPointName = ST::null;
+        fLastSpawnPointName = ST::string();
         fStatusMessage = "No profile spawn point found";
         return false;
     }
@@ -328,7 +322,7 @@ bool plAutoProfileImp::MsgReceive(plMessage* msg)
     if (evalMsg)
     {
         if (fStatusMessage.size() > 0)
-            plDebugText::Instance().DrawString(10, 10, fStatusMessage.c_str());
+            plDebugText::Instance().DrawString(10, 10, fStatusMessage);
     }
 
     plAgeLoadedMsg* ageLoaded = plAgeLoadedMsg::ConvertNoRef(msg);
@@ -354,8 +348,8 @@ bool plAutoProfileImp::MsgReceive(plMessage* msg)
                 fAges[fNextAge-1].c_str(),
                 ms);
 
-            plStatusLog::AddLineS("agetimings.log", "Age %s took %.1f ms",
-                fAges[fNextAge-1].c_str(),
+            plStatusLog::AddLineSF("agetimings.log", "Age {} took {.1f} ms",
+                fAges[fNextAge-1],
                 ms);
         }
 

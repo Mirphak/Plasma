@@ -48,6 +48,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
+#include <string_theory/string>
 // global
 #include "pnKeyedObject/hsKeyedObject.h"
 
@@ -83,7 +84,7 @@ public:
                       plMessage *guestAcceptMsg,
                       bool autoStartGuest);
 
-    virtual bool MsgReceive(plMessage *msg);
+    bool MsgReceive(plMessage *msg) override;
 
     void Run();
 
@@ -97,8 +98,8 @@ public:
     GETINTERFACE_ANY( plCoopCoordinator, hsKeyedObject);
 
     // i/o
-    virtual void Read(hsStream *stream, hsResMgr *mgr);
-    virtual void Write(hsStream *stream, hsResMgr *mgr);
+    void Read(hsStream *stream, hsResMgr *mgr) override;
+    void Write(hsStream *stream, hsResMgr *mgr) override;
 
 protected:
     void IStartHost();
@@ -128,6 +129,8 @@ protected:
     bool fGuestAccepted;
 
     bool fGuestLinked; // guest linked, so ignore the timeout timer
+
+    friend class plNetClientMsgScreener; // Needs to screen the brains and message
 };
 
 #endif // plCoopCoordinator_h

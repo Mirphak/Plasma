@@ -40,14 +40,13 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
-#include <string>
-#pragma hdrstop
-
 #include "pyAgeInfoStruct.h"
-#include "pnUtils/pnUtCrypt.h"
-#include "pnEncryption/plChecksum.h"
 
+#include <string_theory/format>
+#include <string_theory/string_stream>
+
+#include "pnEncryption/plChecksum.h"
+#include "pnUUID/pnUUID.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -58,10 +57,6 @@ pyAgeInfoStruct::pyAgeInfoStruct()
 pyAgeInfoStruct::pyAgeInfoStruct(plAgeInfoStruct * info)
 {
     fAgeInfo.CopyFrom( info );
-}
-
-pyAgeInfoStruct::~pyAgeInfoStruct()
-{
 }
 
 bool pyAgeInfoStruct::operator==(const pyAgeInfoStruct &other) const
@@ -121,15 +116,15 @@ void pyAgeInfoStruct::SetAgeDescription( const ST::string & v )
     fAgeInfo.SetAgeDescription( v );
 }
 
-const char * pyAgeInfoStruct::GetAgeInstanceGuid() const
+ST::string pyAgeInfoStruct::GetAgeInstanceGuid() const
 {
     fAgeInstanceGuidStr = fAgeInfo.GetAgeInstanceGuid()->AsString();
-    return fAgeInstanceGuidStr.c_str();
+    return fAgeInstanceGuidStr;
 }
 
-void pyAgeInfoStruct::SetAgeInstanceGuid( const char * guid )
+void pyAgeInfoStruct::SetAgeInstanceGuid(const ST::string& guid)
 {
-    if ( guid[0] == '@' )
+    if (!guid.empty() && guid[0] == '@')
     {
         // if it starts with an @ then do a meta kind of GUID
         ST::string curInst = fAgeInfo.GetAgeInstanceName();
@@ -241,13 +236,13 @@ void pyAgeInfoStructRef::SetAgeUserDefinedName( const ST::string & v )
     fAgeInfo.SetAgeUserDefinedName( v );
 }
 
-const char * pyAgeInfoStructRef::GetAgeInstanceGuid() const
+ST::string pyAgeInfoStructRef::GetAgeInstanceGuid() const
 {
     fAgeInstanceGuidStr = fAgeInfo.GetAgeInstanceGuid()->AsString();
-    return fAgeInstanceGuidStr.c_str();
+    return fAgeInstanceGuidStr;
 }
 
-void pyAgeInfoStructRef::SetAgeInstanceGuid( const char * guid )
+void pyAgeInfoStructRef::SetAgeInstanceGuid(const ST::string& guid)
 {
     plUUID tmp(guid);
     fAgeInfo.SetAgeInstanceGuid( &tmp );

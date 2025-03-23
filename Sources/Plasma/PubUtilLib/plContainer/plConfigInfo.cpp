@@ -45,6 +45,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include <fstream>
 #include <algorithm>
 #include <sstream>
+#include <string_theory/string_stream>
 
 const ST::string& plConfigInfo::GlobalSection()
 {
@@ -267,8 +268,10 @@ ST::string plConfigInfo::GetValueIn(const ST::string & key, const ST::string & d
         if (HasSection(section))
         {
             plKeysAndValues & kv = fSections[section];
-            if (kv.HasKey(key))
+            if (kv.HasKey(key)) {
+                va_end(sections);
                 return kv.GetValue(key,defval,outFound);
+            }
         }
         section = va_arg(sections,const char *);
     }
@@ -302,8 +305,10 @@ int plConfigInfo::GetValueIn(const ST::string & key, int defval, bool * outFound
         if (HasSection(section))
         {
             plKeysAndValues & kv = fSections[section];
-            if (kv.HasKey(key))
+            if (kv.HasKey(key)) {
+                va_end(sections);
                 return kv.GetValue(key,defval,outFound);
+            }
         }
         section = va_arg(sections,const char *);
     }
@@ -337,8 +342,10 @@ double plConfigInfo::GetValueIn(const ST::string & key, double defval, bool * ou
         if (HasSection(section))
         {
             plKeysAndValues & kv = fSections[section];
-            if (kv.HasKey(key))
+            if (kv.HasKey(key)) {
+                va_end(sections);
                 return kv.GetValue(key,defval,outFound);
+            }
         }
         section = va_arg(sections,const char *);
     }
@@ -422,7 +429,7 @@ bool plConfigInfo::WriteTo(plConfigSource * src)
 
 void plConfigSource::SplitAt(ST::string & key, ST::string & value, char splitter, const ST::string & in)
 {
-    if (in.is_empty())
+    if (in.empty())
         return;
     
     ST_ssize_t t = in.find(splitter);
@@ -442,15 +449,15 @@ bool plConfigSource::ReadString(const ST::string & in)
     ST::string work = in.trim();
     
     // comment
-    if (work.char_at(0) == '#')
+    if (work.front() == '#')
         return true;
     
     // comment
-    if (work.char_at(0) == ';')
+    if (work.front() == ';')
         return true;
     
     // section
-    if (work.char_at(0) == '[')
+    if (work.front() == '[')
     {
         ST_ssize_t close = work.find(']');
         if (close < 0)
@@ -490,7 +497,7 @@ bool plConfigSource::ReadPair(ST::string & key, ST::string & value)
     key = key.trim();
     value = value.trim(" \t\r\n\"'");
     
-    if (key.is_empty())
+    if (key.empty())
         return true;
     
     return fConfigInfo->AddValue(fEffectiveSection, key, value, fAddMode);
@@ -499,7 +506,7 @@ bool plConfigSource::ReadPair(ST::string & key, ST::string & value)
 
 bool plConfigSource::ReadList(char ** l)
 {
-    while(*l != NULL)
+    while (*l != nullptr)
     {
         ReadString(*l);
         l++;
@@ -577,7 +584,7 @@ bool plEnvConfigSource::ReadInto(plConfigInfo & configInfo, KAddValueMode mode)
     if (!plConfigSource::ReadInto(configInfo, mode))
         return false;
     
-    if (fEnvp != NULL)
+    if (fEnvp != nullptr)
     {
         fCurrSection = fMySection;
         fEffectiveSection = fCurrSection;
@@ -769,7 +776,7 @@ bool plIniSectionConfigSource::ReadPair(ST::string & key, ST::string & value)
     key = key.trim();
     value = value.trim(" \t\r\n\"'");
     
-    if (key.is_empty())
+    if (key.empty())
         return true;
 
     if (key.compare_i("section") == 0)
@@ -798,11 +805,11 @@ bool plIniNoSectionsConfigSource::ReadString(const ST::string & in)
     ST::string work = in.trim();
     
     // ignore comments
-    if (work.char_at(0)=='#' || work.char_at(0)==';')
+    if (work.front() == '#' || work.front() == ';')
         return true;
     
     // ignore sections
-    if (work.char_at(0) == '[')
+    if (work.front() == '[')
         return true;
 
     // parse key value
@@ -1089,7 +1096,7 @@ void plConfigAggregateValue::AddItem(plConfigValueBase * item)
 plWWWAuthenticateConfigSource::plWWWAuthenticateConfigSource(const ST::string& auth)
 :   fAuth(auth)
 {
-    fEffectiveSection = fCurrSection = ST::null;
+    fEffectiveSection = fCurrSection = ST::string();
 }
 
 bool plWWWAuthenticateConfigSource::ReadInto(plConfigInfo & configInfo, KAddValueMode mode)
@@ -1107,9 +1114,9 @@ bool plWWWAuthenticateConfigSource::ReadInto(plConfigInfo & configInfo, KAddValu
         bool inQuote = false;
         unsigned int begin = i,end;
         while (i < fAuth.size()
-            && ((fAuth.char_at(i) != ',' && !inQuote) || inQuote))
+            && ((fAuth[i] != ',' && !inQuote) || inQuote))
         {
-                if (fAuth.char_at(i) == '"')
+                if (fAuth[i] == '"')
                     inQuote = ! inQuote;
                 i++;
         }

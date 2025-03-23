@@ -52,24 +52,20 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include <vector>
 
 typedef struct _object PyObject;
-typedef struct PyMethodDef PyMethodDef;
 namespace ST { class string; }
 
 class cyAccountManagement
 {
 public:
-    static void         AddPlasmaMethods(std::vector<PyMethodDef> &methods);
+    static void         AddPlasmaMethods(PyObject* m);
     static void         AddPlasmaConstantsClasses(PyObject *m);
 
-    static bool         IsSubscriptionActive();
     static PyObject*    GetPlayerList();
     static ST::string   GetAccountName();
-    static void         CreatePlayer(const char* playerName, const char* avatar, const char* invitationCode);
-    static void         CreatePlayerW(const wchar_t* playerName, const wchar_t* avatar, const wchar_t* invitationCode);
+    static void         CreatePlayer(const ST::string& playerName, const ST::string& avatar, const ST::string& invitationCode);
     static void         DeletePlayer(unsigned playerId);
     static void         SetActivePlayer(unsigned playerId);
     static bool         IsActivePlayerSet();
-    static void         UpgradeVisitorToExplorer(unsigned playerId);
     static void         ChangePassword(const ST::string& password);
 };
 

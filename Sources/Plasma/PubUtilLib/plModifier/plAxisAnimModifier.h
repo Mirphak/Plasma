@@ -77,7 +77,7 @@ protected:
 
     plAxisInputInterface    *fInputIface;
 
-    virtual bool IEval(double secs, float del, uint32_t dirty);
+    bool IEval(double secs, float del, uint32_t dirty) override;
 
 public:
     plAxisAnimModifier(); 
@@ -86,21 +86,21 @@ public:
     CLASSNAME_REGISTER( plAxisAnimModifier );
     GETINTERFACE_ANY( plAxisAnimModifier, plSingleModifier );
 
-    virtual bool    MsgReceive(plMessage* msg);
-    virtual void    SetTarget(plSceneObject* so);
+    bool    MsgReceive(plMessage* msg) override;
+    void    SetTarget(plSceneObject* so) override;
 
     void SetAllOrNothing(bool b) { fAllOrNothing = b; }
 
-    virtual void Read(hsStream* stream, hsResMgr* mgr);
-    virtual void Write(hsStream* stream, hsResMgr* mgr);
+    void Read(hsStream* stream, hsResMgr* mgr) override;
+    void Write(hsStream* stream, hsResMgr* mgr) override;
 
-    void SetXAnim(plKey c) { fXAnim = c; }
-    void SetYAnim(plKey c) { fYAnim = c; }
-    void SetNotificationKey(plKey k) { fNotificationKey = k; }
+    void SetXAnim(plKey c) { fXAnim = std::move(c); }
+    void SetYAnim(plKey c) { fYAnim = std::move(c); }
+    void SetNotificationKey(plKey k) { fNotificationKey = std::move(k); }
     plNotifyMsg* GetNotify() { return fNotify; }
 
     ST::string GetAnimLabel() const { return fAnimLabel; }
-    void SetAnimLabel(const ST::string& a) { fAnimLabel = a; }
+    void SetAnimLabel(ST::string a) { fAnimLabel = std::move(a); }
 
 };
 

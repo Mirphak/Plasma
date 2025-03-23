@@ -67,7 +67,7 @@ void plGenericType::CopyFrom(const plGenericType& c)
 
 //// Conversion Functions ////////////////////////////////////////////////////
 
-int32_t plGenericType::IToInt( void ) const
+int32_t plGenericType::IToInt() const
 {
     hsAssert( fType == kInt || fType == kAny, "Trying to use a non-int parameter as an int!" );
 
@@ -79,7 +79,7 @@ int32_t plGenericType::IToInt( void ) const
     return fI;
 }
 
-uint32_t plGenericType::IToUInt( void ) const
+uint32_t plGenericType::IToUInt() const
 {
     hsAssert( fType == kUInt || fType == kAny, "Trying to use a non-int parameter as an int!" );
 
@@ -91,7 +91,7 @@ uint32_t plGenericType::IToUInt( void ) const
     return fU;
 }
 
-double plGenericType::IToDouble( void ) const
+double plGenericType::IToDouble() const
 {
     hsAssert( fType == kDouble || fType == kAny, "Trying to use a non-float parameter as a Double!" );
 
@@ -103,7 +103,7 @@ double plGenericType::IToDouble( void ) const
     return fD;
 }
 
-float plGenericType::IToFloat( void ) const
+float plGenericType::IToFloat() const
 {
     hsAssert( fType == kFloat || fType == kAny, "Trying to use a non-float parameter as a float!" );
 
@@ -115,7 +115,7 @@ float plGenericType::IToFloat( void ) const
     return fF;
 }
 
-bool plGenericType::IToBool( void ) const
+bool plGenericType::IToBool() const
 {
     hsAssert( fType == kBool || fType == kAny, "Trying to use a non-bool parameter as a bool!" );
 
@@ -127,20 +127,20 @@ bool plGenericType::IToBool( void ) const
     return fB;
 }
 
-ST::string plGenericType::IToString( void ) const
+ST::string plGenericType::IToString() const
 {
     hsAssert( fType == kString || fType == kAny, "Trying to use a non-string parameter as a string!" );
 
     return fS;
 }
 
-char plGenericType::IToChar( void ) const
+char plGenericType::IToChar() const
 {
     hsAssert( fType == kChar || fType == kAny, "Trying to use a non-char parameter as a char!" );
 
     if( fType == kAny )
     {
-        return fS.char_at(0);
+        return fS.front();
     }
     
     return fC;
@@ -148,7 +148,7 @@ char plGenericType::IToChar( void ) const
 
 void    plGenericType::Read(hsStream* s)
 {
-    s->ReadLE(&fType);
+    s->ReadByte(&fType);
 
     switch ( fType )
     {
@@ -157,24 +157,22 @@ void    plGenericType::Read(hsStream* s)
         fS=s->ReadSafeString();
         break;
     case kBool:
-        {int8_t b;
-        s->ReadLE( &b );
-        fB = b?true:false;}
+        fB = s->ReadBool();
         break;
     case kChar:
-        s->ReadLE( &fC );
+        fC = (char)s->ReadByte();
         break;
-    case kInt   :
-        s->ReadLE( &fI );
+    case kInt:
+        s->ReadLE32(&fI);
         break;
     case kUInt:
-        s->ReadLE( &fU );
+        s->ReadLE32(&fU);
         break;
     case kFloat:
-        s->ReadLE( &fF );
+        s->ReadLEFloat(&fF);
         break;
     case kDouble:
-        s->ReadLE( &fD );
+        s->ReadLEDouble(&fD);
         break;
     case kNone :
         break;
@@ -183,7 +181,7 @@ void    plGenericType::Read(hsStream* s)
 
 void    plGenericType::Write(hsStream* s)
 {
-    s->WriteLE(fType);
+    s->WriteByte(fType);
 
     switch ( fType )
     {
@@ -192,23 +190,22 @@ void    plGenericType::Write(hsStream* s)
         s->WriteSafeString(fS);
         break;
     case kBool:
-        {int8_t b = fB?1:0;
-        s->WriteLE( b );}
+        s->WriteBool(fB);
         break;
     case kChar:
-        s->WriteLE( fC );
+        s->WriteByte((uint8_t)fC);
         break;
-    case kInt   :
-        s->WriteLE( fI );
+    case kInt:
+        s->WriteLE32(fI);
         break;
     case kUInt:
-        s->WriteLE( fU );
+        s->WriteLE32(fU);
         break;
     case kFloat:
-        s->WriteLE( fF );
+        s->WriteLEFloat(fF);
         break;
     case kDouble:
-        s->WriteLE( fD );
+        s->WriteLEDouble(fD);
         break;
     case kNone :
         break;
@@ -257,5 +254,5 @@ ST::string plGenericType::GetAsString() const
         hsAssert(false,"plGenericType::GetAsString unknown type");
     }
 
-    return ST::null;
+    return ST::string();
 }

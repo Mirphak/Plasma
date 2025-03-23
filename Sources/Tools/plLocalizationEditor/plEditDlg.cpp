@@ -43,16 +43,16 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plEditDlg.h"
 #include "plLocTreeView.h"
 #include "plAddDlgs.h"
+#include "res/ui_EditDialog.h"
 
 #include "pfLocalizationMgr/pfLocalizationMgr.h"
 #include "pfLocalizationMgr/pfLocalizationDataMgr.h"
 
-#include <QDialog>
-#include <QMessageBox>
-#include <QFileDialog>
-#include "ui_EditDialog.h"
-
 #include <functional>
+#include <QDialog>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QSettings>
 
 static void IAboutDialog(QWidget *parent)
 {
@@ -66,7 +66,7 @@ Copyright (C) 2004 Cyan Worlds, Inc.)"), &dlg);
     ok->setDefault(true);
 
     QHBoxLayout *layout = new QHBoxLayout(&dlg);
-    layout->setMargin(8);
+    layout->setContentsMargins(8, 8, 8, 8);
     layout->setSpacing(10);
     layout->addWidget(image);
     layout->addWidget(text);
@@ -106,7 +106,7 @@ EditDialog::~EditDialog()
 // saves the current localization text to the data manager
 void EditDialog::SaveLocalizationText()
 {
-    if (fCurrentLocPath.is_empty())
+    if (fCurrentLocPath.empty())
         return; // no path to save
 
     ST::string text = fUI->fLocalizationText->toPlainText().toUtf8().constData();
@@ -114,7 +114,7 @@ void EditDialog::SaveLocalizationText()
     ST::string ageName, setName, elementName, elementLanguage;
     SplitLocalizationPath(fCurrentLocPath, ageName, setName, elementName, elementLanguage);
 
-    if (ageName.is_empty() || setName.is_empty() || elementName.is_empty() || elementLanguage.is_empty())
+    if (ageName.empty() || setName.empty() || elementName.empty() || elementLanguage.empty())
         return;
 
     ST::string name = ST::format("{}.{}.{}", ageName, setName, elementName);
@@ -133,7 +133,7 @@ void EditDialog::LoadLocalization(const ST::string &locPath)
     SplitLocalizationPath(locPath, ageName, setName, elementName, elementLanguage);
 
     // now make sure they've drilled down deep enough to enable the dialog
-    if (elementLanguage.is_empty()) // not deep enough
+    if (elementLanguage.empty()) // not deep enough
         EnableEdit(false);
     else
     {
@@ -144,7 +144,7 @@ void EditDialog::LoadLocalization(const ST::string &locPath)
     }
 
     // now to setup the add/delete buttons
-    if (!elementLanguage.is_empty()) // they have selected a language
+    if (!elementLanguage.empty()) // they have selected a language
     {
         fEditMode = kEditLocalization;
         fUI->fAddButton->setText(tr("&Add Localization"));
@@ -160,7 +160,7 @@ void EditDialog::LoadLocalization(const ST::string &locPath)
         fUI->fAddButton->setText(tr("&Add Element"));
         fUI->fAddButton->setEnabled(true);
         fUI->fDeleteButton->setText(tr("&Delete Element"));
-        if (!elementName.is_empty()) // they have selected an individual element
+        if (!elementName.empty()) // they have selected an individual element
         {
             std::vector<ST::string> elementNames = pfLocalizationDataMgr::Instance().GetElementList(ageName, setName);
 
@@ -205,9 +205,12 @@ void EditDialog::closeEvent(QCloseEvent *event)
 
 void EditDialog::OpenDataDirectory()
 {
-    QString path = QFileDialog::getExistingDirectory(this,
+    QSettings settings;
+    QString path = settings.value("dataDir", QDir::current().absolutePath()).toString();
+
+    path = QFileDialog::getExistingDirectory(this,
                 tr("Select a localization data directory:"),
-                QDir::current().absolutePath(),
+                path,
                 QFileDialog::ShowDirsOnly | QFileDialog::ReadOnly);
 
     if (!path.isEmpty())
@@ -218,6 +221,7 @@ void EditDialog::OpenDataDirectory()
 
         fCurrentSavePath = path;
         pfLocalizationMgr::Initialize(fCurrentSavePath.toUtf8().constData());
+        settings.setValue("dataDir", path);
 
         fUI->fLocalizationTree->clear();
         fUI->fLocalizationTree->LoadData("");
@@ -262,6 +266,9 @@ void EditDialog::SaveToDirectory()
         plWaitCursor waitCursor(this);
 
         fCurrentSavePath = path;
+
+        QSettings settings;
+        settings.setValue("dataDir", path);
 
         SetTitle(path);
         pfLocalizationDataMgr::Instance().WriteDatabaseToDisk(fCurrentSavePath.toUtf8().constData());
@@ -312,7 +319,7 @@ void EditDialog::AddClicked()
             else
             {
                 ST::string path = ST::format("{}.{}", key, newLanguage);
-                fCurrentLocPath = ST::null;
+                fCurrentLocPath = ST::string();
                 fUI->fLocalizationTree->clear();
                 fUI->fLocalizationTree->LoadData(path);
                 LoadLocalization(path);
@@ -366,7 +373,7 @@ void EditDialog::DeleteClicked()
 void SplitLocalizationPath(const ST::string &path, ST::string &ageName,
         ST::string &setName, ST::string &locName, ST::string &locLanguage)
 {
-    ageName = setName = locName = locLanguage = ST::null;
+    ageName = setName = locName = locLanguage = ST::string();
 
     std::vector<ST::string> tokens = path.tokenize(".");
     if (tokens.size() >= 1)

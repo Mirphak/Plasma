@@ -39,28 +39,21 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
       Mead, WA   99021
 
 *==LICENSE==*/
-#ifndef NO_AV_MSGS
-#ifndef SERVER
 
 #ifndef plLoadAvatarMsg_INC
 #define plLoadAvatarMsg_INC
 
 #include "plLoadCloneMsg.h"
-
-#include "pnKeyedObject/plUoid.h"
+#include <string_theory/string>
 
 class plAvTask;
+class plKey;
+class plUoid;
 
 //
 // A msg which is sent to the networking system 
 // to cause a player to be loaded or unloaded
 //
-class plKey;
-class hsStream;
-class hsResMgr;
-
-// not sure if we need this yet, but it's already in the index so here's just enough
-// implementation to keep the compiler happy.
 class plLoadAvatarMsg : public plLoadCloneMsg
 {
 public:
@@ -84,7 +77,7 @@ public:
         */
     plLoadAvatarMsg(const plUoid &uoidToClone, const plKey &requestorKey, uint32_t userData,
                     bool isPlayer, const plKey &spawnPoint, plAvTask *initialTask,
-                    const ST::string &userStr = ST::null);
+                    const ST::string &userStr = {});
 
     /** Use this form if you're sending a message about an existing clone -- either
         to propagate it to other machines or to tell them to unload it.
@@ -98,28 +91,28 @@ public:
         \param userStr - a string that the user can set
         */
     plLoadAvatarMsg(const plKey &existing, const plKey &requestorKey, uint32_t userData,
-                    bool isPlayer, bool isLoading, const ST::string &userStr = ST::null);
+                    bool isPlayer, bool isLoading, const ST::string &userStr = {});
 
     void SetIsPlayer(bool is) { fIsPlayer = is; }
-    bool GetIsPlayer() { return fIsPlayer; }
+    bool GetIsPlayer() const { return fIsPlayer; }
 
     void SetSpawnPoint(const plKey &spawnPoint) { fSpawnPoint = spawnPoint; }
-    plKey GetSpawnPoint() { return fSpawnPoint; }
+    plKey GetSpawnPoint() const { return fSpawnPoint; }
 
     void SetInitialTask(plAvTask *task) { fInitialTask = task; }
-    plAvTask * GetInitialTask() { return fInitialTask; }
+    plAvTask* GetInitialTask() const { return fInitialTask; }
 
     void SetUserStr(const ST::string &userStr) { fUserStr = userStr; }
-    ST::string GetUserStr() { return fUserStr; }
+    ST::string GetUserStr() const { return fUserStr; }
 
     CLASSNAME_REGISTER(plLoadAvatarMsg);
     GETINTERFACE_ANY(plLoadAvatarMsg, plLoadCloneMsg);
 
-    void Read(hsStream* stream, hsResMgr* mgr);
-    void Write(hsStream* stream, hsResMgr* mgr);
+    void Read(hsStream* stream, hsResMgr* mgr) override;
+    void Write(hsStream* stream, hsResMgr* mgr) override;
 
-    void ReadVersion(hsStream* stream, hsResMgr* mgr);
-    void WriteVersion(hsStream* stream, hsResMgr* mgr);
+    void ReadVersion(hsStream* stream, hsResMgr* mgr) override;
+    void WriteVersion(hsStream* stream, hsResMgr* mgr) override;
     
 protected:
     bool fIsPlayer;
@@ -130,7 +123,3 @@ protected:
 
 
 #endif  // plLoadAvatarMsg_INC
-
-
-#endif // ndef SERVER
-#endif // ndef NO_AV_MSGS

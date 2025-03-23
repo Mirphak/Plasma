@@ -48,15 +48,16 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "HeadSpin.h"
 #include <vector>
 
-#include "pyGlueHelpers.h"
+#include "HeadSpin.h"
 
-class plStateDataRecord;
-class plSimpleStateVariable;
-class pySimpleStateVariable;
+#include "pyGlueDefinitions.h"
+
 class plKey;
+class plSimpleStateVariable;
+class plStateDataRecord;
+namespace ST { class string; }
 
 // pySDL -- this thing really only exists for the constants
 class pySDL
@@ -125,7 +126,7 @@ public:
     bool    SetFloat( float v, int idx=0 );
     bool    SetDouble( double v, int idx=0 );
     bool    SetInt( int v, int idx=0 );
-    bool    SetString( const char * v, int idx=0 );
+    bool    SetString( const ST::string& v, int idx=0 );
     bool    SetBool(bool v, int idx=0 );
     uint8_t GetByte( int idx=0 ) const;
     short   GetShort( int idx=0 ) const;

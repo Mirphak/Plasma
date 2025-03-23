@@ -79,6 +79,7 @@ enum
     kControlFlagMiddleButtonEx      =   0x08000000,
     kControlFlagMiddleButtonRepeat  =   0x10000000,
     kControlFlagMiddleButtonUp      =   0x20000000,
+    kControlFlagWheel               =   0x40000000
 };
 
 // mouse button flags
@@ -110,39 +111,23 @@ enum
 };
 
 
-struct Win32keyConvert
-{
-    uint32_t  fVKey;
-    const char*   fKeyName;
-};
-
-struct CommandConvert
-{
-    ControlEventCode fCode;
-    const char* fDesc;
-};
-
-
 struct plMouseInfo
 {
-    plMouseInfo(ControlEventCode _code, uint32_t _flags, hsPoint4 _box, const char* _desc)
+    plMouseInfo(ControlEventCode _code, uint32_t _flags, hsPoint4 _box)
     {
         fCode = _code;
         fControlFlags = _flags;
         fBox = _box;
-        fControlDescription = _desc;
     }
-    plMouseInfo(ControlEventCode _code, uint32_t _flags, float pt1, float pt2, float pt3, float pt4, const char* _desc)
+    plMouseInfo(ControlEventCode _code, uint32_t _flags, float pt1, float pt2, float pt3, float pt4)
     {
         fCode = _code;
         fControlFlags = _flags;
         fBox.Set(pt1,pt2,pt3,pt4);
-        fControlDescription = _desc;
     }
     ControlEventCode    fCode;
     uint32_t            fControlFlags;
     hsPoint4            fBox;
-    const char*         fControlDescription;
 };
 
 

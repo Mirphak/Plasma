@@ -40,26 +40,40 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
+#include "plFileSystem.h"
+#include "plProduct.h"
+
 #include "HeadSpin.h"
 
 #if HS_BUILD_FOR_WIN32
 #   include "hsWindows.h"
 #   include <shlobj.h>
 #else
-#   include <limits.h>
-#   include <unistd.h>
-#   include <sys/types.h>
-#   include <dirent.h>
-#   include <fnmatch.h>
 #   include <cstdlib>
 #   include <functional>
 #   include <memory>
-#endif
-#include <sys/stat.h>
-#pragma hdrstop
 
-#include "plFileSystem.h"
-#include "plProduct.h"
+#   include <fnmatch.h>
+#   include <dirent.h>
+#   include <limits.h>
+#   include <sys/param.h>
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
+
+#ifdef HS_BUILD_FOR_APPLE
+#   ifdef HAVE_SYSDIR
+#       include <sysdir.h>
+#   endif
+#
+#   include <CoreFoundation/CoreFoundation.h>
+#   include <mach-o/dyld.h>
+#   include <NSSystemDirectories.h>
+#endif
+
+#include <sys/stat.h>
+
+
 #include <string_theory/format>
 
 /* NOTE For this file:  Windows uses UTF-16 filenames, and does not support
@@ -70,6 +84,9 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 ST::string plFileName::GetFileName() const
 {
+    if (fName.ends_with("/")) {
+        return plFileName(fName.before_last('/')).GetFileName();
+    }
     ST_ssize_t end = fName.find_last('/');
     if (end < 0)
         end = fName.find_last('\\');
@@ -91,7 +108,7 @@ ST::string plFileName::GetFileExt() const
     if (dot > end)
         return fName.substr(dot + 1);
 
-    return ST::null;
+    return ST::string();
 }
 
 ST::string plFileName::GetFileNameNoExt() const
@@ -137,14 +154,14 @@ plFileName plFileName::StripFileExt() const
 plFileName plFileName::Normalize(char slash) const
 {
     ST::char_buffer norm;
-    char *norm_p = norm.create_writable_buffer(fName.size());
+    norm.allocate(fName.size());
+    char *norm_p = norm.data();
     for (const char *p = fName.c_str(); *p; ++p) {
         if (*p == '/' || *p == '\\')
             *norm_p++ = slash;
         else
             *norm_p++ = *p;
     }
-    *norm_p = 0;
     return ST::string(norm, ST::assume_valid);
 }
 
@@ -185,8 +202,8 @@ plFileName plFileName::Join(const plFileName &base, const plFileName &path)
     if (!path.IsValid())
         return base;
 
-    char last = base.fName.char_at(base.GetSize() - 1);
-    char first = path.fName.char_at(0);
+    char last = base.fName.back();
+    char first = path.fName.front();
     if (last != '/' && last != '\\') {
         if (first != '/' && first != '\\')
             return ST::format("{}" PATH_SEPARATOR_STR "{}", base, path);
@@ -268,7 +285,7 @@ FILE *plFileSystem::Open(const plFileName &filename, const char *mode)
 #if HS_BUILD_FOR_WIN32
     wchar_t wmode[8];
     size_t mlen = strlen(mode);
-    hsAssert(mlen < arrsize(wmode), "Mode string too long");
+    hsAssert(mlen < std::size(wmode), "Mode string too long");
 
     // Quick and dirty, because mode should only ever be ANSI chars
     for (size_t i = 0; i < mlen; ++i) {
@@ -322,7 +339,7 @@ bool plFileSystem::Copy(const plFileName &from, const plFileName &to)
     size_t count;
     uint8_t buffer[4096];
     while (!feof(ffrom.get())) {
-        count = fread(buffer, sizeof(uint8_t), arrsize(buffer), ffrom.get());
+        count = fread(buffer, sizeof(uint8_t), std::size(buffer), ffrom.get());
         if (ferror(ffrom.get()))
             return false;
         fwrite(buffer, sizeof(uint8_t), count, fto.get());
@@ -335,7 +352,7 @@ bool plFileSystem::Copy(const plFileName &from, const plFileName &to)
 bool plFileSystem::CreateDir(const plFileName &dir, bool checkParents)
 {
     plFileName fdir = dir;
-    if (fdir.GetFileName().is_empty()) {
+    if (fdir.GetFileName().empty()) {
         hsDebugMessage("WARNING: CreateDir called with useless trailing slash", 0);
         fdir = fdir.StripFileName();
     }
@@ -386,7 +403,7 @@ std::vector<plFileName> plFileSystem::ListDir(const plFileName &path, const char
         return contents;
 
     struct dirent *de;
-    while (de = readdir(dir)) {
+    while (de = readdir(dir), de) {
         plFileName dir_name = plFileName::Join(path, de->d_name);
         if (plFileInfo(dir_name).IsDirectory()) {
             // Should also handle . and ..
@@ -432,8 +449,8 @@ std::vector<plFileName> plFileSystem::ListSubdirs(const plFileName &path)
         return contents;
 
     struct dirent *de;
-    while (de = readdir(dir)) {
-        if (plFileInfo(de->d_name).IsDirectory()) {
+    while (de = readdir(dir), de) {
+        if (plFileInfo(plFileName::Join(path, de->d_name)).IsDirectory()) {
             plFileName name = de->d_name;
             if (name != "." && name != "..")
                 contents.push_back(plFileName::Join(path, name));
@@ -453,12 +470,50 @@ plFileName plFileSystem::GetUserDataPath()
     if (!_userData.IsValid()) {
 #if HS_BUILD_FOR_WIN32
         wchar_t path[MAX_PATH];
-        if (!SHGetSpecialFolderPathW(NULL, path, CSIDL_LOCAL_APPDATA, TRUE))
+        if (!SHGetSpecialFolderPathW(nullptr, path, CSIDL_LOCAL_APPDATA, TRUE))
             return "";
 
         _userData = plFileName::Join(ST::string::from_wchar(path), plProduct::LongName());
+#elif HS_BUILD_FOR_APPLE
+        char path[PATH_MAX] {};
+#if defined(HAVE_BUILTIN_AVAILABLE) && defined(HAVE_SYSDIR)
+        if (__builtin_available(macOS 10.12, *)) {
+            sysdir_search_path_enumeration_state state;
+            state = sysdir_start_search_path_enumeration(SYSDIR_DIRECTORY_APPLICATION_SUPPORT, SYSDIR_DOMAIN_MASK_USER);
+            state = sysdir_get_next_search_path_enumeration(state, path);
+        }
+        else
+#endif
+        {
+            IGNORE_WARNINGS_BEGIN("deprecated-declarations")
+
+            NSSearchPathEnumerationState state;
+            state = NSStartSearchPathEnumeration(NSApplicationSupportDirectory, NSUserDomainMask);
+            state = NSGetNextSearchPathEnumeration(state, path);
+
+            IGNORE_WARNINGS_END
+        }
+
+        if (path[0] == '~') {
+            char home[PATH_MAX] {};
+            strlcat(home, getenv("HOME"), sizeof(home));
+            strlcat(home, &path[1], sizeof(home));
+
+            _userData = plFileName::Join(home, plProduct::LongName());
+        } else {
+            _userData = plFileName::Join(path, plProduct::LongName());
+        }
 #else
-        _userData = plFileName::Join(getenv("HOME"), "." + plProduct::LongName());
+        const char* homedir = getenv("XDG_CONFIG_HOME");
+        if (homedir) {
+            _userData = plFileName::Join(homedir, plProduct::LongName());
+        } else {
+            homedir = getenv("HOME");
+            if (!homedir)
+                return "";
+
+            _userData = plFileName::Join(homedir, ".config", plProduct::LongName());
+        }
 #endif
         plFileSystem::CreateDir(_userData);
     }
@@ -503,10 +558,10 @@ plFileName plFileSystem::GetCurrentAppPath()
     // Neither OS makes this one simple...
 #if HS_BUILD_FOR_WIN32
     wchar_t path[MAX_PATH];
-    size_t size = GetModuleFileNameW(nullptr, path, MAX_PATH);
+    DWORD size = GetModuleFileNameW(nullptr, path, MAX_PATH);
     if (size >= MAX_PATH) {
         // Buffer not big enough
-        size_t bigger = MAX_PATH;
+        DWORD bigger = MAX_PATH;
         do {
             bigger *= 2;
             wchar_t *path_lg = new wchar_t[bigger];
@@ -519,6 +574,21 @@ plFileName plFileSystem::GetCurrentAppPath()
         appPath = ST::string::from_wchar(path);
     }
 
+    return appPath;
+#elif HS_BUILD_FOR_MACOS
+    CFBundleRef myBundle = CFBundleGetMainBundle();
+    if (!myBundle) {
+        char path[MAXPATHLEN];
+        uint32_t pathLen = MAXPATHLEN;
+        _NSGetExecutablePath(path, &pathLen);
+        appPath = ST::string::from_utf8(path, pathLen);
+    } else {
+        CFURLRef url = CFBundleCopyBundleURL(myBundle);
+        CFStringRef path = CFURLCopyPath(url);
+        appPath = ST::string::from_utf8(CFStringGetCStringPtr(path, kCFStringEncodingUTF8));
+        CFRelease(path);
+        CFRelease(url);
+    }
     return appPath;
 #else
     // Look for /proc/self/exe (Linux), /proc/curproc/file (FreeBSD / Mac),
@@ -535,7 +605,8 @@ plFileName plFileSystem::GetCurrentAppPath()
     if (appPath.IsValid())
         return appPath;
 
-    hsAssert(0, "Your OS doesn't make life easy, does it?");
+    FATAL("Your OS doesn't make life easy, does it?");
+    return ".";
 #endif
 }
 
@@ -546,7 +617,7 @@ ST::string plFileSystem::ConvertFileSize(uint64_t size)
         return ST::format("{} B", size);
 
     uint64_t last_div = size;
-    for (size_t i = 0; i < arrsize(labels); ++i) {
+    for (size_t i = 0; i < std::size(labels); ++i) {
         uint64_t my_div = last_div / 1024;
         if (my_div < 1024) {
             float decimal = static_cast<float>(last_div) / 1024.f;
@@ -560,5 +631,5 @@ ST::string plFileSystem::ConvertFileSize(uint64_t size)
     }
 
     // this should never happen
-    return ST::format("{} {}", last_div, labels[arrsize(labels) - 1]);
+    return ST::format("{} {}", last_div, labels[std::size(labels) - 1]);
 }

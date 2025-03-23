@@ -50,8 +50,68 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #endif
 #define PLASMA20_SOURCES_PLASMA_NUCLEUSLIB_PNNETPROTOCOL_PRIVATE_PNNPCOMMON_H
 
+#include "pnNetBase/pnNbConst.h"
 #include "pnUUID/pnUUID.h"
+
 #include "hsRefCnt.h"
+
+
+/****************************************************************************
+*
+*   Connection type functions
+*
+***/
+
+// These codes may not be changed unless ALL servers and clients are
+// simultaneously replaced; so basically forget it =)
+enum EConnType {
+    kConnTypeNil                    = 0,
+    
+    // For test applications
+    kConnTypeDebug                  = 1,
+
+    // Binary connections
+    kConnTypeCliToAuth              = 10,
+    kConnTypeCliToGame              = 11,
+    kConnTypeSrvToAgent             = 12,
+    kConnTypeSrvToMcp               = 13,
+    kConnTypeSrvToVault             = 14,
+    kConnTypeSrvToDb                = 15,
+    kConnTypeCliToFile              = 16,
+    kConnTypeSrvToState             = 17,
+    kConnTypeSrvToLog               = 18,
+    kConnTypeSrvToScore             = 19,
+    kConnTypeCliToCsr               = 20, // DEAD
+    kConnTypeSimpleNet              = 21, // DEAD
+    kConnTypeCliToGateKeeper        = 22,
+    
+    // Text connections
+    kConnTypeAdminInterface         = 97,   // 'a'
+
+    kNumConnTypes
+};
+static_assert(kNumConnTypes <= 0xFF, "EConnType overflows uint8");
+
+#define IS_TEXT_CONNTYPE(c)     \
+    (((int)(c)) == kConnTypeAdminInterface)
+
+
+/****************************************************************************
+*
+*   Socket connect packet
+*
+***/
+
+#pragma pack(push,1)
+struct AsyncSocketConnectPacket {
+    uint8_t     connType;
+    uint16_t    hdrBytes;
+    uint32_t    buildId;
+    uint32_t    buildType;
+    uint32_t    branchId;
+    plUUID      productId;
+};
+#pragma pack(pop)
 
 
 /*****************************************************************************
@@ -62,9 +122,11 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #ifdef USES_NETCLI
 
+#include "pnEncryption/plChecksum.h"
+
 const NetMsgField kNetMsgFieldAccountName   = NET_MSG_FIELD_STRING(kMaxAccountNameLength);
 const NetMsgField kNetMsgFieldPlayerName    = NET_MSG_FIELD_STRING(kMaxPlayerNameLength);
-const NetMsgField kNetMsgFieldShaDigest     = NET_MSG_FIELD_RAW_DATA(sizeof(ShaDigest));
+const NetMsgField kNetMsgFieldShaDigest     = NET_MSG_FIELD_DATA(sizeof(ShaDigest));
 const NetMsgField kNetMsgFieldUuid          = NET_MSG_FIELD_DATA(sizeof(plUUID));
 const NetMsgField kNetMsgFieldTransId       = NET_MSG_FIELD_DWORD();
 const NetMsgField kNetMsgFieldTimeMs        = NET_MSG_FIELD_DWORD();
@@ -85,8 +147,8 @@ const NetMsgField kNetMsgFieldBuildId       = NET_MSG_FIELD_DWORD();
 #pragma pack(push,1)
 struct SrvPlayerInfo {
     unsigned    playerInt;
-    wchar_t       playerName[kMaxPlayerNameLength];
-    wchar_t       avatarShape[kMaxVaultNodeStringLength];
+    char16_t    playerName[kMaxPlayerNameLength];
+    char16_t    avatarShape[kMaxVaultNodeStringLength];
     unsigned    explorer;
 };
 #pragma pack(pop)
@@ -100,10 +162,10 @@ struct SrvPlayerInfo {
 
 struct NetAgeInfo {
     plUUID        ageInstId;
-    wchar_t       ageFilename[kMaxAgeNameLength];
-    wchar_t       ageInstName[kMaxAgeNameLength];
-    wchar_t       ageUserName[kMaxAgeNameLength];
-    wchar_t       ageDesc[1024];
+    char16_t      ageFilename[kMaxAgeNameLength];
+    char16_t      ageInstName[kMaxAgeNameLength];
+    char16_t      ageUserName[kMaxAgeNameLength];
+    char16_t      ageDesc[1024];
     uint32_t      ageSequenceNumber;
     uint32_t      ageLanguage;
     uint32_t      population;         // only used with GetPublicAgeList query results
@@ -124,8 +186,8 @@ struct NetGameScore {
     unsigned    gameType;
     int         value;
 
-    unsigned Read (const uint8_t inbuffer[], unsigned bufsz, uint8_t** end = nil);    // returns number of bytes read
-    unsigned Write (ARRAY(uint8_t) * buffer) const;                                // returns number of bytes written
+    unsigned Read (const uint8_t inbuffer[], unsigned bufsz, uint8_t** end = nullptr); // returns number of bytes read
+    unsigned Write (std::vector<uint8_t> * buffer) const;                             // returns number of bytes written
 
     void CopyFrom (const NetGameScore & score);
 };
@@ -139,10 +201,10 @@ struct NetGameScore {
 struct NetGameRank {
     unsigned    rank;
     int         score;
-    wchar_t       name[kMaxPlayerNameLength];
+    char16_t    name[kMaxPlayerNameLength];
 
-    unsigned Read (const uint8_t inbuffer[], unsigned bufsz, uint8_t** end = nil);    // returns number of bytes read
-    unsigned Write (ARRAY(uint8_t) * buffer) const;                                // returns number of bytes written
+    unsigned Read (const uint8_t inbuffer[], unsigned bufsz, uint8_t** end = nullptr); // returns number of bytes read
+    unsigned Write (std::vector<uint8_t> * buffer) const;                             // returns number of bytes written
 
     void CopyFrom (const NetGameRank & fromRank);
 };
@@ -199,30 +261,7 @@ protected:
                         kIString64_2 | kText_1 | kText_2 | kBlob_1 | kBlob_2)
     };
 
-public:
-    /**
-     * This is public only so that it may be referenced by anonymous functions.
-     * Should not be used outside NetVaultNode.
-     */
-    struct Blob
-    {
-        size_t size;
-        uint8_t* buffer;
-
-        Blob() : size(0), buffer(nullptr) { }
-        Blob(const Blob &rhs);
-        Blob(Blob &&rhs);
-        ~Blob() { delete[] buffer; }
-
-        void operator =(const Blob& rhs);
-        void operator =(Blob&& rhs);
-
-        bool operator ==(const Blob& rhs) const;
-        bool operator !=(const Blob& rhs) const { return !operator==(rhs); }
-    };
-
 private:
-
     uint64_t fUsedFields;
     uint64_t fDirtyFields;
     plUUID fRevision;
@@ -257,8 +296,8 @@ private:
     ST::string fIString64_2;
     ST::string fText_1;
     ST::string fText_2;
-    Blob     fBlob_1;
-    Blob     fBlob_2;
+    std::vector<uint8_t> fBlob_1;
+    std::vector<uint8_t> fBlob_2;
 
     template<typename T>
     inline void ISetVaultField(uint64_t bits, T& field, T value)
@@ -275,7 +314,8 @@ private:
         fUsedFields |= bits;
     }
 
-    void ISetVaultBlob(uint64_t bits, Blob& blob, const uint8_t* buf, size_t size);
+    void ISetVaultBlob(uint64_t bits, std::vector<uint8_t>& blob,
+                       const uint8_t* buf, size_t size);
 
 public:
     enum IOFlags
@@ -308,14 +348,15 @@ public:
 
     bool Matches(const NetVaultNode* rhs) const;
 
-    void Read(const uint8_t* buf, size_t size);
-    void Write(ARRAY(uint8_t)* buf, uint32_t ioFlags=0);
+    bool Read(const uint8_t* buf, size_t bufsz);
+    void Write(std::vector<uint8_t>* buf, uint32_t ioFlags=0);
 
 protected:
     uint64_t GetFieldFlags() const { return fUsedFields; }
 
 public:
     bool IsDirty() const { return fDirtyFields != 0; }
+    bool IsUsed() const { return fUsedFields != 0; }
 
     plUUID GetRevision() const { return fRevision; }
     void GenerateRevision() { fRevision = plUUID::Generate(); }
@@ -350,12 +391,8 @@ public:
     ST::string GetIString64_2() const { return fIString64_2; }
     ST::string GetText_1() const { return fText_1; }
     ST::string GetText_2() const { return fText_2; }
-
-    const uint8_t* GetBlob_1() const { return fBlob_1.buffer; }
-    size_t GetBlob_1Length() const { return fBlob_1.size; }
-
-    const uint8_t* GetBlob_2() const { return fBlob_2.buffer; }
-    size_t GetBlob_2Length() const { return fBlob_2.size; }
+    const std::vector<uint8_t>& GetBlob_1() const { return fBlob_1; }
+    const std::vector<uint8_t>& GetBlob_2() const { return fBlob_2; }
 
 public:
     void SetNodeId(uint32_t value) { ISetVaultField(kNodeId, fNodeId, value); }

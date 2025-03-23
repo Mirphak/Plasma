@@ -1,6 +1,3 @@
-include_directories("../../CoreLib")
-include_directories("../../NucleusLib")
-
 set(pnNetCli_HEADERS
     Intern.h
     Pch.h
@@ -14,7 +11,20 @@ set(pnNetCli_SOURCES
     pnNcUtils.cpp
 )
 
-add_library(pnNetCli STATIC ${pnNetCli_HEADERS} ${pnNetCli_SOURCES})
+plasma_library(pnNetCli
+    FOLDER NucleusLib
+    SOURCES ${pnNetCli_HEADERS} ${pnNetCli_SOURCES}
+)
+target_link_libraries(
+    pnNetCli
+    PUBLIC
+        CoreLib
+        pnNetBase
+        pnEncryption
+    PRIVATE
+        pnAsyncCore
+        pnUUID
+)
 
 source_group("Header Files" FILES ${pnNetCli_HEADERS})
 source_group("Source Files" FILES ${pnNetCli_SOURCES})

@@ -51,6 +51,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 
 #include <cmath>
+#include <string_theory/format>
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 
@@ -58,19 +59,44 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plOGGCodec.h"
 
 #include "hsTimer.h"
-#include "pnNetCommon/plNetApp.h"
 
 plOGGCodec::DecodeFormat    plOGGCodec::fDecodeFormat = plOGGCodec::k16bitSigned;
 uint8_t                       plOGGCodec::fDecodeFlags = 0;
 
+#define VORBIS_ERROR_CASE(constant, message) case constant: return ST_LITERAL("[" #constant "] " message)
+static ST::string IFormatVorbisErrorMessage(int vorbisError) {
+    // List of libvorbis error codes:
+    // https://www.xiph.org/vorbis/doc/libvorbis/return.html
+    switch (vorbisError) {
+        VORBIS_ERROR_CASE(OV_FALSE, "Not true, or no data available");
+        VORBIS_ERROR_CASE(OV_EOF, "End of file"); // not documented on website
+        VORBIS_ERROR_CASE(OV_HOLE, "Missing or corrupt data in the bitstream");
+        VORBIS_ERROR_CASE(OV_EREAD, "Read error while fetching compressed data for decode");
+        VORBIS_ERROR_CASE(OV_EFAULT, "Internal inconsistency in encode or decode state");
+        VORBIS_ERROR_CASE(OV_EIMPL, "Feature not implemented");
+        VORBIS_ERROR_CASE(OV_EINVAL, "Either an invalid argument, or incompletely initialized argument passed to a call");
+        VORBIS_ERROR_CASE(OV_ENOTVORBIS, "The given file/data was not recognized as Ogg Vorbis data");
+        VORBIS_ERROR_CASE(OV_EBADHEADER, "The file/data is apparently an Ogg Vorbis stream, but contains a corrupted or undecipherable header");
+        VORBIS_ERROR_CASE(OV_EVERSION, "The bitstream format revision of the given stream is not supported");
+        VORBIS_ERROR_CASE(OV_ENOTAUDIO, "Not audio"); // not documented on website
+        VORBIS_ERROR_CASE(OV_EBADPACKET, "Bad packet"); // not documented on website
+        VORBIS_ERROR_CASE(OV_EBADLINK, "The given link exists in the Vorbis data stream, but is not decipherable due to garbage or corruption");
+        VORBIS_ERROR_CASE(OV_ENOSEEK, "The given stream is not seekable");
+        case 0: return ST_LITERAL("(no error)");
+        default: return ST_LITERAL("(unknown Vorbis error code)");
+    }
+}
+#undef VORBIS_ERROR_CASE
+
 //// Constructor/Destructor //////////////////////////////////////////////////
 
-plOGGCodec::plOGGCodec( const plFileName &path, plAudioCore::ChannelSelect whichChan ) : fFileHandle( nil )
+plOGGCodec::plOGGCodec(const plFileName &path, plAudioCore::ChannelSelect whichChan)
+    : fFileHandle(),
+      fOggFile(),
+      fCurHeaderPos(),
+      fHeadBuf()
 {
-    fOggFile = nil;
     IOpen( path, whichChan );
-    fCurHeaderPos = 0;
-    fHeadBuf = nil;
 }
 
 void    plOGGCodec::BuildActualWaveHeader()
@@ -116,22 +142,20 @@ void    plOGGCodec::IOpen( const plFileName &path, plAudioCore::ChannelSelect wh
 {
     hsAssert( path.IsValid(), "Invalid path specified in plOGGCodec reader" );
 
-    // plNetClientApp::StaticDebugMsg("Ogg Open {}, t={f}, start", path, hsTimer::GetSeconds());
-
     fFilename = path;
     fWhichChannel = whichChan;
 
     /// Open the file as a plain binary stream
     fFileHandle = plFileSystem::Open(path, "rb");
-    if( fFileHandle != nil )
+    if (fFileHandle != nullptr)
     {
         /// Create the OGG data struct
         fOggFile = new OggVorbis_File;
 
         /// Open the OGG decompressor
-        if( ov_open( fFileHandle, fOggFile, NULL, 0 ) < 0 )
-        {
-            IError( "Unable to open OGG source file" );
+        int openRes = ov_open(fFileHandle, fOggFile, nullptr, 0);
+        if (openRes < 0) {
+            IError(openRes, ST::format("Unable to open OGG source file {}", path));
             return;
         }
 
@@ -178,7 +202,6 @@ void    plOGGCodec::IOpen( const plFileName &path, plAudioCore::ChannelSelect wh
 
         SetPosition( 0 );
     }
-//  plNetClientApp::StaticDebugMsg("Ogg Open {}, t={f}, end", path, hsTimer::GetSeconds());
 }
 
 plOGGCodec::~plOGGCodec()
@@ -186,40 +209,45 @@ plOGGCodec::~plOGGCodec()
     Close();
 }
 
-void    plOGGCodec::Close( void )
+void    plOGGCodec::Close()
 {
-    // plNetClientApp::StaticDebugMsg("Ogg Close, t={f}, start", hsTimer::GetSeconds());
     free(fHeadBuf);
-    fHeadBuf = nil;
-    if( fOggFile != nil )
+    fHeadBuf = nullptr;
+    if (fOggFile != nullptr)
     {
         ov_clear( fOggFile );
         delete fOggFile;
-        fOggFile = nil;
+        fOggFile = nullptr;
+        fFileHandle = nullptr; // ov_clear closes this
     }
 
-    if( fFileHandle != nil )
+    if (fFileHandle != nullptr)
     {
         fclose( fFileHandle );
-        fFileHandle = nil;
+        fFileHandle = nullptr;
     }
-    // plNetClientApp::StaticDebugMsg("Ogg Close, t={f}, end", hsTimer::GetSeconds());
 }
 
-void    plOGGCodec::IError( const char *msg )
+void plOGGCodec::IError(int vorbisError, const ST::string& message)
 {
-    hsAssert( false, msg );
+    ST::string fullMessage;
+    if (vorbisError == 0) {
+        fullMessage = message;
+    } else {
+        fullMessage = ST::format("{}: libvorbis error {}: {}", message, vorbisError, IFormatVorbisErrorMessage(vorbisError));
+    }
+    hsAssert(false, fullMessage.c_str());
     Close();
 }
 
-plWAVHeader &plOGGCodec::GetHeader( void )
+plWAVHeader &plOGGCodec::GetHeader()
 {
     hsAssert( IsValid(), "GetHeader() called on an invalid OGG file" );
 
     return fFakeHeader;
 }
 
-float   plOGGCodec::GetLengthInSecs( void )
+float   plOGGCodec::GetLengthInSecs()
 {
     hsAssert( IsValid(), "GetLengthInSecs() called on an invalid OGG file" );
 
@@ -244,21 +272,18 @@ bool    plOGGCodec::SetPosition( uint32_t numBytes )
 
     // Now please note how freaking easy it is here to do accurate or fast seeking...
     // Also note that if we're doing our channel extraction, we MUST do it the accurate way
+    int seekRes;
     if( ( fDecodeFlags & kFastSeeking ) && fChannelAdjust == 1 )
     {
-        if( ov_pcm_seek_page( fOggFile, newSample ) != 0 )
-        {
-            IError( "Unable to seek OGG stream" );
-            return false;
-        }
+        seekRes = ov_pcm_seek_page(fOggFile, newSample);
     }
     else
     {
-        if( ov_pcm_seek( fOggFile, newSample ) != 0 )
-        {
-            IError( "Unable to seek OGG stream" );
-            return false;
-        }
+        seekRes = ov_pcm_seek(fOggFile, newSample);
+    }
+    if (seekRes != 0) {
+        IError(seekRes, ST_LITERAL("Unable to seek OGG stream"));
+        return false;
     }
     return true;
 }
@@ -266,7 +291,6 @@ bool    plOGGCodec::SetPosition( uint32_t numBytes )
 bool    plOGGCodec::Read( uint32_t numBytes, void *buffer )
 {
     hsAssert( IsValid(), "GetHeader() called on an invalid OGG file" );
-//  plNetClientApp::StaticDebugMsg("Ogg Read, t={f}, start", hsTimer::GetSeconds());
 
     int bytesPerSample = ( fDecodeFormat == k16bitSigned ) ? 2 : 1;
     int isSigned = ( fDecodeFormat == k16bitSigned ) ? 1 : 0;
@@ -285,24 +309,11 @@ bool    plOGGCodec::Read( uint32_t numBytes, void *buffer )
             long bytesRead = ov_read( fOggFile, uBuffer, numBytes, 0, bytesPerSample, isSigned, &currSection );
             
             // Since our job is so simple, do some extra error checking
-            if( bytesRead == OV_HOLE )
-            {
-                IError( "Unable to read from OGG file: missing data" );
+            if (bytesRead == 0) {
+                IError(0, ST_LITERAL("Unable to finish reading from OGG file: end of stream"));
                 return false;
-            }
-            else if( bytesRead == OV_EBADLINK )
-            {
-                IError( "Unable to read from OGG file: corrupt link" );
-                return false;
-            }
-            else if( bytesRead == 0 )
-            {
-                IError( "Unable to finish reading from OGG file: end of stream" );
-                return false;
-            }
-            else if( bytesRead < 0 )
-            {
-                IError( "Unable to read from OGG file: unknown error" );
+            } else if (bytesRead < 0) {
+                IError(bytesRead, ST_LITERAL("Unable to read from OGG file"));
                 return false;
             }
 
@@ -339,11 +350,10 @@ bool    plOGGCodec::Read( uint32_t numBytes, void *buffer )
         }
     }
 
-//  plNetClientApp::StaticDebugMsg("Ogg Read, t={f}, end", hsTimer::GetSeconds());
     return true;
 }
 
-uint32_t  plOGGCodec::NumBytesLeft( void )
+uint32_t  plOGGCodec::NumBytesLeft()
 {
     if(!IsValid())
     {

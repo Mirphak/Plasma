@@ -40,15 +40,18 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include "pyKey.h"
-#pragma hdrstop
-
 #include "pyGameScore.h"
-#include "pfGameScoreMgr/pfGameScoreMgr.h"
+
+#include <string_theory/string>
+
 #include "plVault/plVault.h"
 
+#include "pfGameScoreMgr/pfGameScoreMgr.h"
+
+#include "pyKey.h"
+
 pyGameScore::pyGameScore() 
-    : fScore(nil)
+    : fScore()
 { }
 
 pyGameScore::pyGameScore(pfGameScore * score) 
@@ -87,7 +90,7 @@ ST::string pyGameScore::GetGameName() const
 {
     if (fScore)
         return fScore->GetGameName();
-    return ST::null;
+    return ST::string();
 }
 
 void pyGameScore::AddPoints(int32_t numPoints, pyKey& rcvr)
@@ -101,7 +104,7 @@ void pyGameScore::Delete()
     if (fScore)
     {
         fScore->Delete();
-        fScore = nil;
+        fScore = nullptr;
     }
 }
 

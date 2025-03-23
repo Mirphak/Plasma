@@ -55,10 +55,15 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #ifndef hsG3DDeviceSelector_inc
 #define hsG3DDeviceSelector_inc
 
+#include <functional>
+#include <list>
+#include <vector>
+
+#include "hsBitVector.h"
+#include "hsRefCnt.h"
+
 #include "hsWinRef.h"
 
-#include "hsTemplates.h"
-#include "hsBitVector.h"
 #include <string_theory/string>
 
 #ifdef HS_BUILD_FOR_WIN32
@@ -68,10 +73,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 
 class hsStream;
-struct D3DEnum_DeviceInfo;
-struct D3DEnum_DriverInfo;
-struct D3DEnum_DeviceInfo;
-struct D3DEnum_DriverInfo;
+struct D3DEnum_RendererInfo;
+struct D3DEnum_DisplayInfo;
+struct D3DEnum_RendererInfo;
+struct D3DEnum_DisplayInfo;
 
 class hsG3DDeviceMode
 {
@@ -86,9 +91,9 @@ protected:
     uint32_t              fHeight;
     uint32_t              fDepth;
 
-    hsTArray<uint16_t>    fZStencilDepths;    // Array of supported depth/stencil buffer formats.
-                                            // Each entry is of the form: ( stencil bit count << 8 ) | ( depth bit count )
-    hsTArray<uint8_t>     fFSAATypes;         // Array of multisample types supported (each one 2-16)
+    std::vector<uint16_t> fZStencilDepths;    // Array of supported depth/stencil buffer formats.
+                                              // Each entry is of the form: (stencil bit count << 8) | (depth bit count)
+    std::vector<uint8_t>  fFSAATypes;         // Array of multisample types supported (each one 2-16)
 
     bool                  fCanRenderToCubics;
 
@@ -104,21 +109,21 @@ public:
     uint32_t GetWidth() const { return fWidth; }
     uint32_t GetHeight() const { return fHeight; }
     uint32_t GetColorDepth() const { return fDepth; }
-    uint8_t  GetNumZStencilDepths( void ) const { return fZStencilDepths.GetCount(); }
-    uint16_t GetZStencilDepth( uint8_t i ) const { return fZStencilDepths[ i ]; }
-    uint8_t  GetNumFSAATypes( void ) const { return fFSAATypes.GetCount(); }
-    uint8_t  GetFSAAType( uint8_t i ) const { return fFSAATypes[ i ]; }
-    bool     GetCanRenderToCubics( void ) const { return fCanRenderToCubics; }
+    size_t   GetNumZStencilDepths() const { return fZStencilDepths.size(); }
+    uint16_t GetZStencilDepth(size_t i) const { return fZStencilDepths[i]; }
+    size_t   GetNumFSAATypes() const { return fFSAATypes.size(); }
+    uint8_t  GetFSAAType(size_t i) const { return fFSAATypes[i]; }
+    bool     GetCanRenderToCubics() const { return fCanRenderToCubics; }
 
     void SetDiscarded(bool on=true) { if(on) fFlags |= kDiscarded; else fFlags &= ~kDiscarded; }
     void SetWidth(uint32_t w) { fWidth = w; }
     void SetHeight(uint32_t h) { fHeight = h; }
     void SetColorDepth(uint32_t d) { fDepth = d; }
-    void ClearZStencilDepths( void ) { fZStencilDepths.Reset(); }
-    void AddZStencilDepth( uint16_t depth ) { fZStencilDepths.Append( depth ); }
+    void ClearZStencilDepths() { fZStencilDepths.clear(); }
+    void AddZStencilDepth(uint16_t depth) { fZStencilDepths.emplace_back(depth); }
 
-    void    ClearFSAATypes( void ) { fFSAATypes.Reset(); }
-    void    AddFSAAType( uint8_t type ) { fFSAATypes.Append( type ); }
+    void    ClearFSAATypes() { fFSAATypes.clear(); }
+    void    AddFSAAType(uint8_t type) { fFSAATypes.emplace_back(type); }
 
     void    SetCanRenderToCubics( bool can ) { fCanRenderToCubics = can; }
 };
@@ -155,7 +160,7 @@ protected:
     uint32_t        fLayersAtOnce;
     uint32_t        fMemoryBytes;
 
-    hsTArray<hsG3DDeviceMode> fModes;
+    std::vector<hsG3DDeviceMode> fModes;
 
     float   fZBiasRating;
     float   fLODBiasRating;
@@ -180,7 +185,7 @@ public:
     hsG3DDeviceRecord& operator=(const hsG3DDeviceRecord& src);
 
     uint32_t  GetG3DDeviceType() const { return fG3DDeviceType; }
-    const char* GetG3DDeviceTypeName() const;
+    ST::string GetG3DDeviceTypeName() const;
     uint32_t  GetG3DHALorHEL() const { return fG3DHALorHEL; }
 
     uint32_t GetMemoryBytes() const { return fMemoryBytes; }
@@ -202,10 +207,10 @@ public:
     bool    GetCap(uint32_t cap) const { return fCaps.IsBitSet(cap); }
     void    SetCap(uint32_t cap, bool on=true) { fCaps.SetBit(cap, on); }
 
-    float   GetZBiasRating( void ) const { return fZBiasRating; }
+    float   GetZBiasRating() const { return fZBiasRating; }
     void    SetZBiasRating( float rating ) { fZBiasRating = rating; }
 
-    float   GetLODBiasRating( void ) const { return fLODBiasRating; }
+    float   GetLODBiasRating() const { return fLODBiasRating; }
     void    SetLODBiasRating( float rating ) { fLODBiasRating = rating; }
 
     void    GetFogApproxStarts( float &expApprox, float &exp2Approx ) const { expApprox = fFogExpApproxStart;
@@ -213,7 +218,7 @@ public:
     void    SetFogApproxStarts( float exp, float exp2 ) { fFogExpApproxStart = exp; 
                                                                 fFogExp2ApproxStart = exp2; }
 
-    float   GetFogEndBias( void ) const { return fFogEndBias; }
+    float   GetFogEndBias() const { return fFogEndBias; }
     void    SetFogEndBias( float rating ) { fFogEndBias = rating; }
 
     void    GetFogKneeParams( uint8_t type, float &knee, float &kneeVal ) const { knee = fFogKnees[ type ]; kneeVal = fFogKneeVals[ type ]; }
@@ -225,7 +230,7 @@ public:
     uint8_t   GetAASetting() const { return fAASetting; }
     void    SetAASetting( uint8_t s ) { fAASetting = s; }
 
-    uint8_t   GetMaxAnisotropicSamples( void ) const { return fMaxAnisotropicSamples; }
+    uint8_t   GetMaxAnisotropicSamples() const { return fMaxAnisotropicSamples; }
     void    SetMaxAnisotropicSamples( uint8_t num ) { fMaxAnisotropicSamples = num; }
 
     void SetDiscarded(bool on=true) { if(on)fFlags |= kDiscarded; else fFlags &= ~kDiscarded; }
@@ -234,9 +239,7 @@ public:
     void    SetInvalid( bool on = true ) { if( on ) fFlags |= kInvalid; else fFlags &= ~kInvalid; }
     bool    IsInvalid() const { return 0 != ( fFlags & kInvalid ); }
 
-    hsTArray<hsG3DDeviceMode>& GetModes() { return fModes; }
-
-    hsG3DDeviceMode* GetMode(int i) const { return &fModes[i]; }
+    std::vector<hsG3DDeviceMode>& GetModes() { return fModes; }
 
     void ClearModes();
     void Clear();
@@ -266,6 +269,7 @@ public:
         kDevTypeUnknown     = 0,
         kDevTypeDirect3D,
         kDevTypeOpenGL,
+        kDevTypeMetal,
 
         kNumDevTypes
     };
@@ -316,36 +320,41 @@ public:
         kDefaultDepth   = 32
     };
 
-protected:
-    hsTArray<hsG3DDeviceRecord>     fRecords;
-    char fTempWinClass[ 128 ];
+    typedef std::function<void(std::vector<hsG3DDeviceRecord>&)> DeviceEnumerator;
 
-    char    fErrorString[ 128 ];
+protected:
+    static std::list<DeviceEnumerator>& Enumerators();
+
+    std::vector<hsG3DDeviceRecord> fRecords;
 
     void IClear();
     void IRemoveDiscarded();
 
-    void ITryDirect3DTnLDevice(D3DEnum_DeviceInfo* devInfo, hsG3DDeviceRecord& srcDevRec);
-    void ITryDirect3DTnLDriver(D3DEnum_DriverInfo* drivInfo);
+    void ITryDirect3DTnLDevice(D3DEnum_RendererInfo* devInfo, hsG3DDeviceRecord& srcDevRec);
+    void ITryDirect3DTnLDriver(D3DEnum_DisplayInfo* drivInfo);
     void ITryDirect3DTnL(hsWinRef winRef);
 
     void IFudgeDirectXDevice( hsG3DDeviceRecord &record,
-                                D3DEnum_DriverInfo *driverInfo, D3DEnum_DeviceInfo *deviceInfo );
+                                D3DEnum_DisplayInfo *driverInfo, D3DEnum_RendererInfo *deviceInfo );
     uint32_t  IAdjustDirectXMemory( uint32_t cardMem );
 
     bool      IGetD3DCardInfo( hsG3DDeviceRecord &record, void *driverInfo, void *deviceInfo,
-                               uint32_t *vendorID, uint32_t *deviceID, char **driverString, char **descString );
+                               uint32_t *vendorID, uint32_t *deviceID, ST::string& driverString, ST::string& descString);
 
     void    ISetFudgeFactors( uint8_t chipsetID, hsG3DDeviceRecord &record );
 
 public:
+    static void AddDeviceEnumerator(const DeviceEnumerator& de) { Enumerators().emplace_back(de); }
+
     hsG3DDeviceSelector() { }
     virtual ~hsG3DDeviceSelector();
 
     void RemoveUnusableDevModes(bool bTough); // Removes modes and devices not allowed supported in release
 
-    void Enumerate(hsWinRef winRef);
+    void Enumerate(hsWindowHndl winRef);
+    const std::vector<hsG3DDeviceRecord>& GetDeviceRecords() const { return fRecords; }
 
-    bool GetDefault(hsG3DDeviceModeRecord *dmr);
+    bool GetRequested(hsG3DDeviceModeRecord *dmr, uint32_t devType);
+    bool GetDefault(hsG3DDeviceModeRecord *dmr) { return GetRequested(dmr, kDevTypeUnknown); }
 };
 #endif // hsG3DDeviceSelector_inc

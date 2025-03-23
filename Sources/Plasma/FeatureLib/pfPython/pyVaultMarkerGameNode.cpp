@@ -45,25 +45,30 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 //
 //////////////////////////////////////////////////////////////////////
 
-#include <Python.h>
-#include "pyGeometry3.h"
-#pragma hdrstop
-
 #include "pyVaultMarkerGameNode.h"
-#include "plVault/plVault.h"
-#include "pnUUID/pnUUID.h"
 
-// should only be created from C++ side
-pyVaultMarkerGameNode::pyVaultMarkerGameNode(RelVaultNode* nfsNode)
-: pyVaultNode(nfsNode)
-{
-}
+#include <string_theory/string>
+
+#include "plVault/plVault.h"
+
+#include "pyGeometry3.h"
+#include "pyGlueHelpers.h"
 
 //create from the Python side
-pyVaultMarkerGameNode::pyVaultMarkerGameNode(int n)
-: pyVaultNode(new RelVaultNode)
+pyVaultMarkerGameNode::pyVaultMarkerGameNode()
+    : pyVaultNode()
 {
     fNode->SetNodeType(plVault::kNodeType_MarkerGame);
+}
+
+ST::string pyVaultMarkerGameNode::GetGameGuid() const
+{
+    if (fNode) {
+        VaultMarkerGameNode access(fNode);
+        return access.GetGameGuid().AsString();
+    }
+
+    return plUUID().AsString();
 }
 
 ST::string pyVaultMarkerGameNode::GetGameName () const
@@ -72,7 +77,17 @@ ST::string pyVaultMarkerGameNode::GetGameName () const
         VaultMarkerGameNode access(fNode);
         return access.GetGameName();
     }
-    return ST::null;
+    return ST::string();
+}
+
+void pyVaultMarkerGameNode::SetGameGuid(const ST::string& guid)
+{
+    if (fNode) {
+        plUUID uuid;
+        uuid.FromString(guid.c_str());
+        VaultMarkerGameNode access(fNode);
+        access.SetGameGuid(uuid);
+    }
 }
 
 void pyVaultMarkerGameNode::SetGameName (const ST::string& name)
@@ -89,7 +104,7 @@ ST::string pyVaultMarkerGameNode::GetReward() const
         VaultMarkerGameNode access(fNode);
         return access.GetReward();
     }
-    return ST::null;
+    return ST::string();
 }
 
 void pyVaultMarkerGameNode::SetReward(const ST::string& value)
@@ -112,7 +127,7 @@ PyObject* pyVaultMarkerGameNode::GetMarkers() const
     PyObject* list = PyList_New(collector.size());
     for (size_t i = 0; i < collector.size(); ++i) {
         PyObject* marker_tup = PyTuple_New(4);
-        PyTuple_SET_ITEM(marker_tup, 0, PyInt_FromLong(collector[i].id));
+        PyTuple_SET_ITEM(marker_tup, 0, PyLong_FromLong(collector[i].id));
         PyTuple_SET_ITEM(marker_tup, 1, PyUnicode_FromSTString(collector[i].age));
         PyTuple_SET_ITEM(marker_tup, 2, pyPoint3::New(collector[i].pos));
         PyTuple_SET_ITEM(marker_tup, 3, PyUnicode_FromSTString(collector[i].description));

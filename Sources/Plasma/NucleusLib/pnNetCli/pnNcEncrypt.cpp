@@ -46,7 +46,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 ***/
 
 #include "Pch.h"
-#pragma hdrstop
 
 
 namespace pnNetCli {
@@ -83,31 +82,6 @@ static_assert(IS_POW2(kNetDiffieHellmanKeyBits), "DH Key bit count is not a powe
 
 /*****************************************************************************
 *
-*   Private
-*
-***/
-
-//============================================================================
-// TODO: Cache computed keys
-static void GetCachedServerKey (
-    NetMsgChannel*   channel,
-    plBigNum*        ka,
-    const plBigNum&  dh_y
-) {
-    // Get diffie-hellman constants
-    unsigned         DH_G;
-    const plBigNum*  DH_A;
-    const plBigNum*  DH_N;
-    NetMsgChannelGetDhConstants(channel, &DH_G, &DH_A, &DH_N);
-    hsAssert(!DH_N->isZero(), "DH_N must not be zero in encrypted mode");
-
-    // Compute the result
-    ka->PowMod(dh_y, *DH_A, *DH_N);
-}
-
-
-/*****************************************************************************
-*
 *   Module functions
 *
 ***/
@@ -131,8 +105,10 @@ void NetMsgCryptClientStart (
     else {
         // Client chooses b and y on connect
         plBigNum g(DH_G);
-        plBigNum seed(seedBytes, seedData);
-        plBigNum b; b.Rand(kNetDiffieHellmanKeyBits, &seed);
+        plBigNum seed;
+        seed.FromData_BE(seedBytes, seedData);
+        plBigNum b;
+        b.Rand(kNetDiffieHellmanKeyBits, &seed);
 
         // Client computes key: kb = x^b mod n
         clientSeed->PowMod(*DH_X, b, *DH_N);
@@ -140,18 +116,6 @@ void NetMsgCryptClientStart (
         // Client sends y to server
         serverSeed->PowMod(g, b, *DH_N);
     }
-}
-
-//============================================================================
-void NetMsgCryptServerConnect (
-    NetMsgChannel*  channel,
-    unsigned        seedBytes,
-    const uint8_t   seedData[],
-    plBigNum*       clientSeed
-) {
-    // Server computes client key: ka = y^a mod n
-    const plBigNum dh_y(seedBytes, seedData);
-    GetCachedServerKey(channel, clientSeed, dh_y);
 }
 
 }   // namespace pnNetCli

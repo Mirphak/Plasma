@@ -41,30 +41,27 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 #include "HeadSpin.h"
 #include "hsWindows.h"
-#include <wchar.h>
 
 #ifdef _MSC_VER
 #   include <crtdbg.h>
 #endif
 
-#pragma hdrstop
-
 #if defined(HS_BUILD_FOR_UNIX)
 #   include <cstring>
 #   include <sys/stat.h>
+#   include <sys/utsname.h>
 #   include <fcntl.h>
 #   include <unistd.h>
 #   include <signal.h>
 #endif
 
-#include "hsTemplates.h"
 #include <string_theory/format>
 
 
 ///////////////////////////////////////////////////////////////////////////
 /////////////////// For Status Messages ///////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
-hsDebugMessageProc gHSStatusProc = nil;
+hsDebugMessageProc gHSStatusProc = nullptr;
 
 hsDebugMessageProc hsSetStatusMessageProc(hsDebugMessageProc newProc)
 {
@@ -77,7 +74,7 @@ hsDebugMessageProc hsSetStatusMessageProc(hsDebugMessageProc newProc)
 
 //////////////////////////////////////////////////////////////////////////
 
-hsDebugMessageProc gHSDebugProc = nil;
+hsDebugMessageProc gHSDebugProc = nullptr;
 
 hsDebugMessageProc hsSetDebugMessageProc(hsDebugMessageProc newProc)
 {
@@ -120,19 +117,26 @@ void ErrorEnableGui(bool enabled)
     s_GuiAsserts = enabled;
 }
 
+#if !defined(HS_DEBUGGING)
+[[noreturn]]
+#endif // defined(HS_DEBUGGING)
 void ErrorAssert(int line, const char* file, const char* fmt, ...)
 {
 #if defined(HS_DEBUGGING) || !defined(PLASMA_EXTERNAL_RELEASE)
     char msg[1024];
     va_list args;
     va_start(args, fmt);
-    vsnprintf(msg, arrsize(msg), fmt, args);
+    vsnprintf(msg, std::size(msg), fmt, args);
+    va_end(args);
 #if defined(HS_DEBUGGING)
 #if defined(_MSC_VER)
     if (s_GuiAsserts)
     {
-        if (_CrtDbgReport(_CRT_ASSERT, file, line, NULL, msg))
+        if (_CrtDbgReport(_CRT_ASSERT, file, line, nullptr, msg))
             DebugBreakAlways();
+
+        // All handling was done by the GUI, so bail.
+        return;
     } else
 #endif // _MSC_VER
     {
@@ -146,6 +150,11 @@ void ErrorAssert(int line, const char* file, const char* fmt, ...)
 #else
     DebugBreakIfDebuggerPresent();
 #endif // defined(HS_DEBUGGING) || !defined(PLASMA_EXTERNAL_RELEASE)
+
+    // If no debugger break occurred, just crash.
+#if !defined(HS_DEBUGGING)
+    std::abort();
+#endif // defined(HS_DEBUGGING)
 }
 
 bool DebugIsDebuggerPresent()
@@ -212,7 +221,8 @@ void DebugMsg(const char* fmt, ...)
     char msg[1024];
     va_list args;
     va_start(args, fmt);
-    vsnprintf(msg, arrsize(msg), fmt, args);
+    vsnprintf(msg, std::size(msg), fmt, args);
+    va_end(args);
     fprintf(stderr, "%s\n", msg);
 
 #ifdef _MSC_VER
@@ -236,12 +246,12 @@ void hsStatusMessage(const char* message)
   } else {
 #if HS_BUILD_FOR_UNIX
     printf("%s",message);
-    int len = strlen(message);
+    size_t len = strlen(message);
     if (len>0 && message[len-1]!='\n')
         printf("\n");
 #elif HS_BUILD_FOR_WIN32
     OutputDebugString(message);
-    int len = strlen(message);
+    size_t len = strlen(message);
     if (len>0 && message[len-1]!='\n')
         OutputDebugString("\n");
 #endif
@@ -251,7 +261,7 @@ void hsStatusMessage(const char* message)
 void hsStatusMessageV(const char * fmt, va_list args)
 {
     char  buffer[2000];
-    vsnprintf(buffer, arrsize(buffer), fmt, args);
+    vsnprintf(buffer, std::size(buffer), fmt, args);
     hsStatusMessage(buffer);
 }
 
@@ -263,331 +273,4 @@ void hsStatusMessageF(const char * fmt, ...)
     va_end(args);
 }
 
-#endif
-
-class hsMinimizeClientGuard
-{
-#ifdef CLIENT
-    hsWindowHndl fWnd;
-
-public:
-    hsMinimizeClientGuard()
-    {
-#ifdef HS_BUILD_FOR_WIN32
-        fWnd = GetActiveWindow();
-        // If the application's topmost window is fullscreen, minimize it before displaying an error
-        if ((GetWindowLong(fWnd, GWL_STYLE) & WS_POPUP) != 0)
-            ShowWindow(fWnd, SW_MINIMIZE);
-#endif // HS_BUILD_FOR_WIN32
-    }
-
-    ~hsMinimizeClientGuard()
-    {
-#ifdef HS_BUILD_FOR_WIN32
-        ShowWindow(fWnd, SW_RESTORE);
-#endif // HS_BUILD_FOR_WIN32
-    }
-#endif // CLIENT
-};
-
-bool hsMessageBox_SuppressPrompts = false;
-
-int hsMessageBoxWithOwner(hsWindowHndl owner, const char* message, const char* caption, int kind, int icon)
-{
-    if (hsMessageBox_SuppressPrompts)
-        return hsMBoxOk;
-
-#if HS_BUILD_FOR_WIN32
-    uint32_t flags = 0;
-
-    if (kind == hsMessageBoxNormal)
-        flags |= MB_OK;
-    else if (kind == hsMessageBoxAbortRetyIgnore)
-        flags |= MB_ABORTRETRYIGNORE;
-    else if (kind == hsMessageBoxOkCancel)
-        flags |= MB_OKCANCEL;
-    else if (kind == hsMessageBoxRetryCancel)
-        flags |= MB_RETRYCANCEL;
-    else if (kind == hsMessageBoxYesNo)
-        flags |= MB_YESNO;
-    else if (kind == hsMessageBoxYesNoCancel)
-        flags |= MB_YESNOCANCEL;
-    else
-        flags |= MB_OK;
-
-    if (icon == hsMessageBoxIconError)
-        flags |= MB_ICONERROR;
-    else if (icon == hsMessageBoxIconQuestion)
-        flags |= MB_ICONQUESTION;
-    else if (icon == hsMessageBoxIconExclamation)
-        flags |= MB_ICONEXCLAMATION;
-    else if (icon == hsMessageBoxIconAsterisk)
-        flags |= MB_ICONASTERISK;
-    else
-        flags |= MB_ICONERROR;
-
-    hsMinimizeClientGuard guard;
-    int ans = MessageBox(owner, message, caption, flags);
-
-    switch (ans)
-    {
-    case IDOK:          return hsMBoxOk;
-    case IDCANCEL:      return hsMBoxCancel;
-    case IDABORT:       return hsMBoxAbort;
-    case IDRETRY:       return hsMBoxRetry;
-    case IDIGNORE:      return hsMBoxIgnore;
-    case IDYES:         return hsMBoxYes;
-    case IDNO:          return hsMBoxNo;
-    default:            return hsMBoxCancel;
-    }
-
-#endif
-    return hsMBoxCancel;
-}
-
-int hsMessageBoxWithOwner(hsWindowHndl owner, const wchar_t* message, const wchar_t* caption, int kind, int icon)
-{
-    if (hsMessageBox_SuppressPrompts)
-        return hsMBoxOk;
-
-#if HS_BUILD_FOR_WIN32
-    uint32_t flags = 0;
-
-    if (kind == hsMessageBoxNormal)
-        flags |= MB_OK;
-    else if (kind == hsMessageBoxAbortRetyIgnore)
-        flags |= MB_ABORTRETRYIGNORE;
-    else if (kind == hsMessageBoxOkCancel)
-        flags |= MB_OKCANCEL;
-    else if (kind == hsMessageBoxRetryCancel)
-        flags |= MB_RETRYCANCEL;
-    else if (kind == hsMessageBoxYesNo)
-        flags |= MB_YESNO;
-    else if (kind == hsMessageBoxYesNoCancel)
-        flags |= MB_YESNOCANCEL;
-    else
-        flags |= MB_OK;
-
-    if (icon == hsMessageBoxIconError)
-        flags |= MB_ICONERROR;
-    else if (icon == hsMessageBoxIconQuestion)
-        flags |= MB_ICONQUESTION;
-    else if (icon == hsMessageBoxIconExclamation)
-        flags |= MB_ICONEXCLAMATION;
-    else if (icon == hsMessageBoxIconAsterisk)
-        flags |= MB_ICONASTERISK;
-    else
-        flags |= MB_ICONERROR;
-
-    hsMinimizeClientGuard guard;
-    int ans = MessageBoxW(owner, message, caption, flags);
-
-    switch (ans)
-    {
-    case IDOK:          return hsMBoxOk;
-    case IDCANCEL:      return hsMBoxCancel;
-    case IDABORT:       return hsMBoxAbort;
-    case IDRETRY:       return hsMBoxRetry;
-    case IDIGNORE:      return hsMBoxIgnore;
-    case IDYES:         return hsMBoxYes;
-    case IDNO:          return hsMBoxNo;
-    default:            return hsMBoxCancel;
-    }
-
-#endif
-    return hsMBoxCancel;
-}
-
-int hsMessageBox(const char* message, const char* caption, int kind, int icon)
-{
-    return hsMessageBoxWithOwner((hsWindowHndl)nil,message,caption,kind,icon);
-}
-
-int hsMessageBox(const wchar_t* message, const wchar_t* caption, int kind, int icon)
-{
-    return hsMessageBoxWithOwner((hsWindowHndl)nil,message,caption,kind,icon);
-}
-
-/**************************************/
-char* hsStrcpy(char* dst, const char* src)
-{
-    if (src)
-    {
-        if (dst == nil)
-        {
-            size_t count = strlen(src);
-            dst = new char[count + 1];
-            memcpy(dst, src, count);
-            dst[count] = 0;
-            return dst;
-        }
-
-        int32_t i;
-        for (i = 0; src[i] != 0; i++)
-            dst[i] = src[i];
-        dst[i] = 0;
-    }
-
-    return dst;
-}
-
-void hsStrLower(char *s)
-{
-    if (s)
-    {
-        int i;
-        for (i = 0; i < strlen(s); i++)
-            s[i] = tolower(s[i]);
-    }
-}
-
-//// IStringToWString /////////////////////////////////////////////////////////
-// Converts a char * string to a wchar_t * string
-
-wchar_t *hsStringToWString( const char *str )
-{
-    // convert the char string to a wchar_t string
-    int len = strlen(str);
-    wchar_t *wideString = new wchar_t[len+1];
-    for (int i=0; i<len; i++)
-        wideString[i] = btowc(str[i]);
-    wideString[len] = L'\0';
-    return wideString;
-}
-
-//// IWStringToString /////////////////////////////////////////////////////////
-// Converts a wchar_t * string to a char * string
-
-char    *hsWStringToString( const wchar_t *str )
-{
-    // convert the wchar_t string to a char string
-    int len = wcslen(str);
-    char *sStr = new char[len+1];
-
-    int i;
-    for (i = 0; i < len; i++)
-    {
-        char temp = wctob(str[i]);
-        if (temp == EOF)
-        {
-            sStr[i] = '\0';
-            i = len;
-        }
-        else
-            sStr[i] = temp;
-    }
-    sStr[len] = '\0';
-
-    return sStr;
-}
-
-//
-// Microsoft SAMPLE CODE
-// returns array of allocated version info strings or nil
-//
-std::vector<ST::string> DisplaySystemVersion()
-{
-    std::vector<ST::string> versionStrs;
-#if HS_BUILD_FOR_WIN32
-#ifndef VER_SUITE_PERSONAL
-#define VER_SUITE_PERSONAL 0x200
-#endif
-    const RTL_OSVERSIONINFOEXW& version = hsGetWindowsVersion();
-
-    switch (version.dwPlatformId)
-    {
-    case VER_PLATFORM_WIN32_NT:
-
-        // Test for the product.
-
-        if ( version.dwMajorVersion <= 4 )
-            versionStrs.push_back("Microsoft Windows NT ");
-
-        if ( version.dwMajorVersion == 5 && version.dwMinorVersion == 0 )
-            versionStrs.push_back("Microsoft Windows 2000 ");
-
-        if ( version.dwMajorVersion == 5 && version.dwMinorVersion == 1 )
-            versionStrs.push_back("Microsoft Windows XP ");
-
-        if ( version.dwMajorVersion == 6 && version.dwMinorVersion == 0 )
-            versionStrs.push_back("Microsoft Windows Vista ");
-
-        if ( version.dwMajorVersion == 6 && version.dwMinorVersion == 1 )
-            versionStrs.push_back("Microsoft Windows 7 ");
-
-        if ( version.dwMajorVersion == 6 && version.dwMinorVersion == 2 )
-            versionStrs.push_back("Microsoft Windows 8 ");
-
-        if ( version.dwMajorVersion == 6 && version.dwMinorVersion == 3 )
-            versionStrs.push_back("Microsoft Windows 8.1 ");
-
-        if ( version.dwMajorVersion == 10 && version.dwMinorVersion == 0 )
-            versionStrs.push_back("Microsoft Windows 10 ");
-
-        // Test for product type.
-
-        if ( version.wProductType == VER_NT_WORKSTATION )
-        {
-            if( version.wSuiteMask & VER_SUITE_PERSONAL )
-                versionStrs.push_back("Personal ");
-            else
-                versionStrs.push_back("Professional ");
-        }
-        else if ( version.wProductType == VER_NT_SERVER )
-        {
-            if( version.wSuiteMask & VER_SUITE_DATACENTER )
-                versionStrs.push_back("DataCenter Server ");
-            else if( version.wSuiteMask & VER_SUITE_ENTERPRISE )
-                versionStrs.push_back("Advanced Server ");
-            else
-                versionStrs.push_back("Server ");
-        }
-
-        // Display version, service pack (if any), and build number.
-
-        if ( version.dwMajorVersion <= 4 )
-        {
-            versionStrs.push_back(ST::format("version {}.{} {} (Build {})\n",
-                version.dwMajorVersion,
-                version.dwMinorVersion,
-                version.szCSDVersion,
-                version.dwBuildNumber & 0xFFFF));
-        }
-        else
-        {
-            versionStrs.push_back(ST::format("{} (Build {})\n",
-                version.szCSDVersion,
-                version.dwBuildNumber & 0xFFFF));
-        }
-        break;
-    }
-#endif
-    return versionStrs;
-}
-
-#ifdef HS_BUILD_FOR_WIN32
-static RTL_OSVERSIONINFOEXW s_WinVer;
-
-const RTL_OSVERSIONINFOEXW& hsGetWindowsVersion()
-{
-    static bool done = false;
-    if (!done) {
-        memset(&s_WinVer, 0, sizeof(RTL_OSVERSIONINFOEXW));
-        HMODULE ntdll = LoadLibraryW(L"ntdll.dll");
-        hsAssert(ntdll, "Failed to LoadLibrary on ntdll???");
-
-        if (ntdll) {
-            s_WinVer.dwOSVersionInfoSize = sizeof(RTL_OSVERSIONINFOEXW);
-            typedef LONG(WINAPI* RtlGetVersionPtr)(RTL_OSVERSIONINFOEXW*);
-            RtlGetVersionPtr getVersion = (RtlGetVersionPtr)GetProcAddress(ntdll, "RtlGetVersion");
-            hsAssert(getVersion, "Could not find RtlGetVersion in ntdll");
-            if (getVersion) {
-                getVersion(&s_WinVer);
-                done = true;
-            }
-        }
-        FreeLibrary(ntdll);
-    }
-    return s_WinVer;
-}
 #endif

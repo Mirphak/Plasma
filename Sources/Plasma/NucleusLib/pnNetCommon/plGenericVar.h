@@ -83,13 +83,13 @@ public:
 protected:
     uint8_t   fType;
     
-    int32_t   IToInt( void ) const;
-    uint32_t  IToUInt( void ) const;
-    float     IToFloat( void ) const;
-    double    IToDouble( void ) const;
-    bool      IToBool( void ) const;
-    ST::string  IToString( void ) const;
-    char      IToChar( void ) const;
+    int32_t   IToInt() const;
+    uint32_t  IToUInt() const;
+    float     IToFloat() const;
+    double    IToDouble() const;
+    bool      IToBool() const;
+    ST::string  IToString() const;
+    char      IToChar() const;
 
 public:
 
@@ -110,7 +110,7 @@ public:
     operator char() const { return IToChar(); }
 
     void    SetType(Types t)        { fType=t; }
-    uint8_t GetType( void ) const   { return fType; }
+    uint8_t GetType() const   { return fType; }
 
     ST::string GetAsString() const;
 
@@ -132,7 +132,7 @@ public:
     void    SetString( const ST::string& s )  { fS = s; fType = kString; }
     void    SetChar( char c )       { fC = c; fType = kChar; }
     void    SetAny( const ST::string& s )     { fS = s; fType = kAny; }
-    void    SetNone( void )         { fType = kNone; }
+    void    SetNone()         { fType = kNone; }
 
     virtual void    Read(hsStream* s);
     virtual void    Write(hsStream* s);
@@ -148,7 +148,7 @@ protected:
     ST::string    fName;
 public:
     plGenericVar(const plGenericVar &c) { CopyFrom(c); }
-    plGenericVar(const ST::string& name=ST::null) : fName(name) { }
+    plGenericVar(const ST::string& name={}) : fName(name) { }
     virtual ~plGenericVar() { }
 
     virtual void Reset() { Value().Reset(); }   // reset runtime state, not inherent state
@@ -174,10 +174,10 @@ public:
     CLASSNAME_REGISTER(plCreatableGenericValue);
     GETINTERFACE_ANY(plCreatableGenericValue, plCreatable);
 
-    void Read(hsStream* s, hsResMgr*) HS_OVERRIDE {
+    void Read(hsStream* s, hsResMgr*) override {
         fValue.Read(s);
     }
-    void Write(hsStream* s, hsResMgr*) HS_OVERRIDE {
+    void Write(hsStream* s, hsResMgr*) override {
         fValue.Write(s);
     }
 

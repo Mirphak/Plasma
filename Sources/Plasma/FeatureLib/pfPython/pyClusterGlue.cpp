@@ -40,11 +40,10 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
-#include <Python.h>
-#include "pyKey.h"
-#pragma hdrstop
-
 #include "pyCluster.h"
+
+#include "pyGlueHelpers.h"
+#include "pyKey.h"
 
 // glue functions
 PYTHON_CLASS_DEFINITION(ptCluster, pyCluster);
@@ -54,7 +53,7 @@ PYTHON_DEFAULT_DEALLOC_DEFINITION(ptCluster)
 
 PYTHON_INIT_DEFINITION(ptCluster, args, keywords)
 {
-    PyObject* keyObj = NULL;
+    PyObject* keyObj = nullptr;
     if (!PyArg_ParseTuple(args, "O", &keyObj))
     {
         PyErr_SetString(PyExc_TypeError, "__init__ expects a ptKey");
@@ -83,23 +82,23 @@ PYTHON_METHOD_DEFINITION(ptCluster, setVisible, args)
 }
 
 PYTHON_START_METHODS_TABLE(ptCluster)
-    PYTHON_METHOD(ptCluster, setVisible, "Params:visible\nShows or hides the cluster object"),
+    PYTHON_METHOD(ptCluster, setVisible, "Params: visible\nShows or hides the cluster object"),
 PYTHON_END_METHODS_TABLE;
 
 // Type structure definition
-PLASMA_DEFAULT_TYPE(ptCluster, "Params:key\nCreates a new ptCluster");
+PLASMA_DEFAULT_TYPE(ptCluster, "Params: key\nCreates a new ptCluster");
 
 // required functions for PyObject interoperability
 PyObject *pyCluster::New(plKey key)
 {
-    ptCluster *newObj = (ptCluster*)ptCluster_type.tp_new(&ptCluster_type, NULL, NULL);
-    newObj->fThis->fClusterKey = key;
+    ptCluster *newObj = (ptCluster*)ptCluster_type.tp_new(&ptCluster_type, nullptr, nullptr);
+    newObj->fThis->fClusterKey = std::move(key);
     return (PyObject*)newObj;
 }
 
 PyObject *pyCluster::New(pyKey& key)
 {
-    ptCluster *newObj = (ptCluster*)ptCluster_type.tp_new(&ptCluster_type, NULL, NULL);
+    ptCluster *newObj = (ptCluster*)ptCluster_type.tp_new(&ptCluster_type, nullptr, nullptr);
     newObj->fThis->fClusterKey = key.getKey();
     return (PyObject*)newObj;
 }
