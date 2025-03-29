@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Last edit: 2023-02-18
+# Last edit: 2024-11-31
  
 from Plasma   import *
 from Basic    import *
@@ -63,8 +63,15 @@ def shorty():
 def babybahro():
     Avatars.ChangeSize(0.5, "me")
 
+def youngbahro():
+    Avatars.ChangeSize(0.7, "me")
 def adultbahro():
     Avatars.ChangeSize(2, "me")
+
+def encasedBahro():
+    PtConsoleNet("Avatar.Warp.WarpToXYZ 215.35, -804.22, 49981.98", True)
+    print("ori 1.00 0.02 0.00")
+    print("//rot y 45")
 
 def helmet():
     name = "03_" + ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "HAcc_SuitHelmet"
@@ -161,10 +168,10 @@ def warpmeTokiva4():
 def warpmeTokivaball():
     PtConsoleNet("Avatar.Warp.WarpToXYZ -894.06, -1062.67, -0.03", True)
 
-def toMTGomePub():
+def toMTGome():
     PtConsole("Net.LinkToAgeInstance GoMePubNew 28a73c56-949c-4327-ad56-7df8753933e6")
 
-def toKGomePub():
+def toKGome():
     PtConsole("Net.LinkToAgeInstance GoMePubNew 19a3b778-fac7-4f2a-8795-316dffd292df")
 
 def toKWatcher():
@@ -175,6 +182,21 @@ def toKChiso():
 
 def toKVothol():
     PtConsole("Net.LinkToAgeInstance Vothol f3693cc1-c795-4895-94e6-aa40b232e34a")
+    
+def toKBavanter():
+    PtConsole("Net.LinkToAgeInstance EderBahvahnter 901be94d-b342-468f-8542-53d67572825d")
+
+def toKElonin():
+    PtConsole("Net.LinkToAgeInstance Elonin a6caa200-c138-41d7-b85b-05832d1a501c")
+
+def toKKalamee():
+    PtConsole("Net.LinkToAgeInstance Kalamee e679fc83-81a9-4b34-9780-686398491b6b")
+
+def toKVeelay():
+    PtConsole("Net.LinkToAgeInstance VeeTsah 1324bd33-acb3-4faf-b49e-378ab52c4003")
+
+def toKMemorial():
+    PtConsole("Net.LinkToAgeInstance MemorialIsland 6f3aa89d-14b0-46b4-be45-1b389e32db60")
 
 # CUSTOM LOCATION PAGE-IN
 
@@ -242,13 +264,16 @@ def pageoutTlaloft():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
     PtConsoleNet("Nav.PageOutNode TLALoft_Default", True)
 
-def pageinTlaloftedit():
+def pageinTlaloftedit():   # !toggle Wall  0 0
     PtConsoleNet("Nav.PageInNode TLALoftEdit_Default", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ 492.08, -796.92, 79.00", True)
 
 def pageoutTlaloftedit():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
     PtConsoleNet("Nav.PageOutNode TLALoftEdit_Default", True)
+
+def pageinTlaloftedit2():   # !toggle Wall  0 0
+    PtConsoleNet("Nav.PageInNode TLALoftEdit_Default", True)
 
 def pageinAltroom():
     PtConsoleNet("Nav.PageInNode AltSecretRoom_Default", True)
@@ -270,13 +295,17 @@ def pageoutTestroom():
 
 def pageinGameroom():
     PtConsoleNet("Nav.PageInNode GameRoom_mainRoom", True)
-    PtConsoleNet("Nav.PageInNode GameRoom_Textures", True)
+    #PtConsoleNet("Nav.PageInNode GameRoom_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ 222.37, -801.80, 49980.93", True)
 
 def pageoutGameroom():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
     #PtConsoleNet("Nav.PageOutNode GameRoom_Textures", True)
     PtConsoleNet("Nav.PageOutNode GameRoom_mainRoom", True)
+
+def pageinGameroom2():
+    PtConsoleNet("Nav.PageInNode GameRoom_mainRoom", True)
+    #PtConsoleNet("Nav.PageInNode GameRoom_Textures", True)
 
 def gameroomup():
     PtConsoleNet("Avatar.Warp.WarpToXYZ 222.37, -801.80, 49980.93", True)
@@ -295,6 +324,7 @@ def pageoutMonitor():     # !! CRASHES THE CLIENT !!
     PtConsoleNet("Nav.PageOutNode TLABahroRoom_mainRoom", True)
 
 def pageinPlanet():
+    # //event 24    for the sky
     PtConsoleNet("Nav.PageInNode TLAPlanet_mainRoom", True)
     #PtConsoleNet("Nav.PageInNode TLAPlanet_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ -109.90, -17.58, 3001.20", True)
@@ -310,8 +340,55 @@ def miniplanet():
 def bigplanet():
     PtConsoleNet("Avatar.Warp.WarpToXYZ -109.90, -17.58, 3001.20", True)
 
-# NOT NEEDED ANYMORE
+def pageinBasement():
+    PtConsoleNet("Nav.PageInNode TLABasement_Default", True)
+    #PtConsoleNet("Nav.PageInNode TLABasement_Textures", True)
+    PtConsoleNet("Avatar.Warp.WarpToXYZ 4.55, -2.41, -13.04", True)
 
+def pageoutBasement():
+    PtConsoleNet("Avatar.Spawn.Go 2", True)
+    #PtConsoleNet("Nav.PageOutNode TLABasement_Textures", True)
+    PtConsoleNet("Nav.PageOutNode TLABasement_Default", True)
+
+def pageinClarity():
+    PtConsoleNet("Nav.PageInNode TLAClarityCave_Default", True)
+    PtConsoleNet("Avatar.Warp.WarpToXYZ 18.09, -214.95, 5003.10", True)
+
+def pageoutClarity():
+    PtConsoleNet("Avatar.Spawn.Go 2", True)
+    PtConsoleNet("Nav.PageOutNode TLAClarityCave_Default", True)
+
+def pageinBooks():
+    PtConsoleNet("Nav.PageInNode city_LibraryGarrisonVis", True)  # book 1
+    PtConsoleNet("Nav.PageInNode city_LibraryTeledahnVis", True)  # book 2
+    PtConsoleNet("Nav.PageInNode city_LibraryKadishVis", True)    # book 3
+    PtConsoleNet("Nav.PageInNode city_LibraryAhnonayVis", True)   # book 4
+    PtConsoleNet("Nav.PageInNode city_LibraryErcanaVis", True)    # book 5
+
+def pageoutBooks():
+    PtConsoleNet("Nav.PageOutNode city_LibraryGarrisonVis", True)  # book 1
+    PtConsoleNet("Nav.PageOutNode city_LibraryTeledahnVis", True)  # book 2
+    PtConsoleNet("Nav.PageOutNode city_LibraryKadishVis", True)    # book 3
+    PtConsoleNet("Nav.PageOutNode city_LibraryAhnonayVis", True)   # book 4
+    PtConsoleNet("Nav.PageOutNode city_LibraryErcanaVis", True)    # book 5
+
+def pageinBanners():
+    PtConsoleNet("Nav.PageInNode city_islmLibBanners02Vis", True) # banner 1
+    PtConsoleNet("Nav.PageInNode city_islmLibBanners00Vis", True) # banner 2
+    PtConsoleNet("Nav.PageInNode city_islmLibBanners03Vis", True) # banner 3
+
+def pageoutBanners():
+    PtConsoleNet("Nav.PageOutNode city_islmLibBanners02Vis", True) # banner 1
+    PtConsoleNet("Nav.PageOutNode city_islmLibBanners00Vis", True) # banner 2
+    PtConsoleNet("Nav.PageOutNode city_islmLibBanners03Vis", True) # banner 3
+
+def showDrcstage():
+    setsdl("islmDRCStageState", 2)
+
+def hideDrcstage():
+    setsdl("islmDRCStageState", 0)
+
+# NOT NEEDED ANYMORE
 def pageinGome():
     PtConsoleNet("Nav.PageInNode GoMePubNew_Alcoves", True)
     PtConsoleNet("Nav.PageInNode GoMePubNew_Entry", True)
@@ -319,9 +396,10 @@ def pageinGome():
     PtConsoleNet("Nav.PageInNode GoMePubNew_GoMePub", True)
     PtConsoleNet("Nav.PageInNode GoMePubNew_StoreRoom", True)
     #PtConsoleNet("Nav.PageInNode GoMePubNew_Textures", True)
-    PtConsoleNet("Avatar.Warp.WarpToXYZ 1.93, 96.17, 19.99", True)
+    PtConsoleNet("Avatar.Warp.WarpToXYZ 10.46, -15.91, -0.01", True)
+    #PtConsoleNet("Avatar.Warp.WarpToXYZ 1.93, 96.17, 19.99", True)
 
-def pageoutGome():
+def pageoutGome():     # !! CRASHES THE CLIENT !!
     PtConsoleNet("Avatar.Spawn.Go 2", True)
     #PtConsoleNet("Nav.PageOutNode GoMePubNew_Textures", True)
     PtConsoleNet("Nav.PageOutNode GoMePubNew_StoreRoom", True)
@@ -336,7 +414,7 @@ def pageinChiso():
 
 def pageoutChiso():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    PtConsoleNet("Nav.PageOutNode ChisoPreniv_Textures", True)
+    #PtConsoleNet("Nav.PageOutNode ChisoPreniv_Textures", True)
     PtConsoleNet("Nav.PageOutNode ChisoPreniv_Chiso", True)
 
 def pageinVeelay():
@@ -400,6 +478,11 @@ def pageoutHighgarden():     # !! CRASHES THE CLIENT !!
     #PtConsoleNet("Nav.PageOutNode FahetsHighgarden_Textures", True)
     PtConsoleNet("Nav.PageOutNode FahetsHighgarden_Default", True)
 
+def pageinMemorial():
+    PtConsoleNet("Nav.PageInNode MemorialIsland_Default", True)
+    #PtConsoleNet("Nav.PageInNode MemorialIsland_Textures", True)
+    PtConsoleNet("Avatar.Warp.WarpToXYZ -44.25, -124.61, 7.46", True)
+
 # GREENSCREENS
 
 def greenscreen():
@@ -439,6 +522,7 @@ def tapki():
     PtEmoteAvatar("KITap")
 
 def talkseat():
+    # if /sit, precede with //rot y 20
     name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()]
     if name == "M":
         PtGetLocalAvatar().avatar.playSimpleAnimation("MaleTalk")
@@ -492,6 +576,16 @@ def resetcamera():
 
 # UTILITIES
 
+# Remove the blue beam
+def nobluebeam():
+    sdl = PtGetAgeSDL()
+    sdl["islmGZBeamVis"] = (0,)
+
+# Add the blue beam back in
+def bluebeam():
+    sdl = PtGetAgeSDL()
+    sdl["islmGZBeamVis"] = (1,)
+
 # Show how many people are in the current Age
 def popcount():
     print(1 + len(PtGetPlayerList()), " avatars present")
@@ -518,7 +612,7 @@ def ageinfo():
     print("GUID of this Age: ", guid)
     PlayerList = PtGetPlayerList()
     idList = map(lambda player:player.getPlayerID(), PlayerList)
-    nbavi=1 + PtGetNumRemotePlayers()
+    nbavi = 1 + PtGetNumRemotePlayers()
     print(str(nbavi), " avatars present")
     for playerId in idList:
         key = PtGetAvatarKeyFromClientID(playerId)
