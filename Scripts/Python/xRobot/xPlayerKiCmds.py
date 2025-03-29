@@ -60,52 +60,52 @@ bBlockCmds = False
 adminList = [32319, 31420, 2332508]  # Mir-o-Bot, Mirphak, mob
 # For the dance events
 adminList += [
-    11243,   # Luluberlu
-    11896,   # MagicYoda
-    115763,  # Willy
-    #119426,  # Edith
-    127131,  # tsuno
-    #133403,  # sendlinger
-    137998,  # Mabe
-    254640,  # Eternal Seeker
-    254930, # Kamikatze
-    #966183, # y e e s h a
-    #2975513, # Didi
-    #1261291, # Y E E R K
-    1474572, # Fog_man
+    #11243,   # Luluberlu
+    #11896,   # MagicYoda
+    #115763,  # Willy
+    ##119426,  # Edith
+    #127131,  # tsuno
+    ##133403,  # sendlinger
+    #137998,  # Mabe
+    #254640,  # Eternal Seeker
+    #254930, # Kamikatze
+    ##966183, # y e e s h a
+    ##2975513, # Didi
+    ##1261291, # Y E E R K
+    #1474572, # Fog_man
     5667000, # Minasunda
-    #5710565, # Salirama
-    #6362551, # vony
-    6495949, # Lu*
-    6551797, # ondine
-    #6559861, # Kawliga
-    #6583813, # Roland (Mav Hungary)
-    #6670690, # Billy the Cat
-    #6682907, # LaDeeDah
-    #6725908, # Raymondo
-    #6833983, # malcg
-    6961947, # Calisia (= Terry L. Britton)
-    7060111, # Aeonihya
+    ##5710565, # Salirama
+    ##6362551, # vony
+    #6495949, # Lu*
+    #6551797, # ondine
+    ##6559861, # Kawliga
+    ##6583813, # Roland (Mav Hungary)
+    ##6670690, # Billy the Cat
+    ##6682907, # LaDeeDah
+    ##6725908, # Raymondo
+    ##6833983, # malcg
+    #6961947, # Calisia (= Terry L. Britton)
+    #7060111, # Aeonihya
     7132841, # Mina Sunda
-    #7172637, # Baeda
-    #7227499, # Lidia (Mav Hungary)
-    #7327507, # artopia
-    #7517653, # ladylora
-    #7731330, # My.St'ro
-    #7796072, # Klaide
-    #7881034, # Yakoso
-    7939982, # Claidi Song
-    #7965725, # Z A N D l
-    8068100, # NDG Eternal Seeker
-    #8315178, # Roland (Mav Hungary)
+    ##7172637, # Baeda
+    ##7227499, # Lidia (Mav Hungary)
+    ##7327507, # artopia
+    ##7517653, # ladylora
+    ##7731330, # My.St'ro
+    ##7796072, # Klaide
+    ##7881034, # Yakoso
+    #7939982, # Claidi Song
+    ##7965725, # Z A N D l
+    #8068100, # NDG Eternal Seeker
+    ##8315178, # Roland (Mav Hungary)
 	9292763, # MinBot
-    #9843955, # CatYoh
-    9995228, # NDGSeeker
-    #10287894, # Thallan
-    #10360615, # Thallane
-    11884030, # Patsy
-    12348922, # ben2
-    #12480587, # Tituss
+    ##9843955, # CatYoh
+    #9995228, # NDGSeeker
+    ##10287894, # Thallan
+    ##10360615, # Thallane
+    #11884030, # Patsy
+    #12348922, # ben2
+    ##12480587, # Tituss
 ]
 
 # For the Cavern Tours : Larry Ledeay and CT Hostess Susa'n
@@ -321,6 +321,9 @@ def WarpToSpawnPoint(self, cFlags, args = []):
     else:
         return 0
     if isinstance(pos, ptMatrix44):
+        m = ptMatrix44()
+        m.translate(ptVector3(0.0, 0.0, 5.0))
+        pos = pos * m
         soAvatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
         soAvatar.netForce(1)
         soAvatar.physics.warp(pos)
@@ -2628,6 +2631,12 @@ def SpecialEventCommand(self, cFlags, args = []):
             soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
             LightForKveer2(av=soPlayer, num=8, bLoadShowOn=bOn, bAttachOn=bOn)
             SendChatMessage(self, myself, [player], "Event 98 (Projectors) is {0}".format(onOff), cFlags.flags)
+        elif eventNumber == 981:
+            # -- 981 -- 
+            print("==> event 981 : not atached envent 98")
+            soPlayer = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+            LightForKveer2(av=soPlayer, num=8, bLoadShowOn=bOn, bAttachOn=False)
+            SendChatMessage(self, myself, [player], "Event 98 (Projectors not following you) is {0}".format(onOff), cFlags.flags)
         elif eventNumber == 99:
             # -- 99 -- 
             print("==> event 99 : K'veer, Lights for NULP Dance Show")
@@ -3611,10 +3620,13 @@ def ToggleVisibility(self, cFlags, args=[]):
 # Unload all the clones
 def UnloadClones(objectName, ageFileName):
     print(">> UnloadClones(objectName='{}', ageFileName='{}') <<".format(objectName, ageFileName))
-    demandeur = xFireCamp.placeCleftFireCamp.Demandeur
+    demandeur = None
+    if xFireCamp.placeCleftFireCamp is not None:
+        demandeur = xFireCamp.placeCleftFireCamp.Demandeur
     print("demandeur = {}".format(demandeur))
     masterKey = PtFindSceneobject(objectName, ageFileName).getKey()
-    xFireCamp.GestionClones.CacheCloneInutile(demandeur, masterKey, 0)
+    if demandeur is not None:
+        xFireCamp.GestionClones.CacheCloneInutile(demandeur, masterKey, 0)
     cloneKeys = PtFindClones(masterKey)
     for ck in cloneKeys:
         PtCloneKey(ck, 0)
@@ -3662,6 +3674,61 @@ def PutCampFireHere(self, cFlags, args=[]):
         print("Apres : DicDemandeursClones = {}".format(xFireCamp.GestionClones.VarPerso.AccessVarPerso.DicDemandeursClones))
         bCampFireOn = False
         return 1
+
+def PutBahroHere(self, cFlags, args=[]):
+    """
+    PutBahroHere creates 9 clones of Bahro1, put one where the player is, show or hide it,
+    change the scale. At first 9 clones are created and puted visible where you are.
+    Parameters :
+    - bahroNumber (1 to 9), optional, default 1
+    - bahroShow (show, hide), optional, default shows all the bahro clones
+    - bahroScale (0.1 to 10), optional, default 1
+    """
+    global bBahroOn
+    myself = PtGetLocalPlayer()
+    player = args[0]
+    if not isPlayerInAge(player):
+        SendChatMessage(self, myself, [player], "You must be in my age, use link to join me.", cFlags.flags)
+        return 1
+    bahroNumber = 0
+    bahroShow = True
+    bahroScale = 1
+    if len(args) > 1:
+        # We have at least one parameter
+        params = args[1].split()
+        if len(params) > 0:
+            # param 1 = bahro number
+            param = params[0].strip()
+            try:
+                bahroNumber = int(param) - 1
+            except ValueError:
+                bahroNumber = 0
+        if len(params) > 1:
+            # param 2 : can be show/hide or scale
+            param = params[1].strip()
+            try:
+                bahroScale = float(param)
+            except ValueError:
+                if param.lower() in ("hide", "off", "false"):
+                    bahroShow = False
+                else:
+                    bahroShow = True
+        if len(params) > 2:
+            # param 3 : can be show/hide or scale
+            param = params[1].strip()
+            try:
+                bahroScale = float(param)
+            except ValueError:
+                if param.lower() in ("hide", "off", "false"):
+                    bahroShow = False
+                else:
+                    bahroShow = True
+    #else: no parameter given we show bahro 1 at normal size
+    soAvatar = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
+    bahroPos = soAvatar.getLocalToWorld()
+    CloneObjects.PutBahroHere(show=bahroShow, load=True, nb=9, num=bahroNumber, scale=bahroScale, pos=bahroPos, attach=False)
+    return 1
+
 """
 #Exemple:
 #Appelle la fonction maFonction de monModule.py
@@ -4163,6 +4230,7 @@ cmdDict = {
     'restoreme':(RestoreMe,["restoreme [name]: Loads the clothing named [name]."]),
     'vis':(ToggleVisibility,["vis [on/off]: Makes you visible or invisible."]),
     'campfire':(PutCampFireHere,["campfire [on/off]: Puts a campfire where you are."]),
+    'bahro':(PutBahroHere,["bahro [bahro number (1 to 9)] [show/hide] [bahro size (0.1 to 10)]: Puts bahro where you are."]),
     #exemple:
     #'macommande':(MaMethode,["ligne d'aide 1", "ligne d'aide 2", "etc."]),
     'help':(Help, ["help: sends you a help text note.", "help [command name]: PM you a specific help on a command."])
@@ -4440,6 +4508,8 @@ def RetreaveSPCmd(altCmdName):
             "m3", "k3", "cave3", "kiva3", 
             "m4", "k4", "cave4", "kiva4", 
             "m5", "k5", "cave5", "kiva5", 
+            "m6", "k6", "cage", "kiva6", 
+            "m7", "k7", "soccer", 
             ], 
         "teledahn":["t", "t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8", "t9", "t10", "t11", "t12", "t13", "t14", "t15", "t16", "t17", "t18", "t19"],
         "garrison":[
@@ -4584,9 +4654,9 @@ def CallMethod(self, cmdName, cFlags, pAmIRobot, args=[]):
             myself = PtGetLocalPlayer()
             if myself.getPlayerID() != 2332508: # si je ne suis pas mob, j'en debloque quelques unes
                 #authorizedCmds = ('link', 'to', 'onbot', 'wd', 'warp', 'onlake', 'nolake', 'coord', 'save', 'ws', 'agoto', 'rgoto', 'dnigoto', 'land', 'turn', 'rot', 'float', 'jump', 'find', 'list', 'anim', 'sp', 'ki', 'light', 'nopanic', 'sdl', 'sendme', 'help')
-                #authorizedCmds = ('link', 'to', 'onbot', 'wd', 'warp', 'coord', 'save', 'ws', 'agoto', 'rgoto', 'land', 'turn', 'rot', 'float', 'jump', 'find', 'list', 'anim', 'sp', 'ki', 'light', 'nopanic', 'saveme', 'sendme', 'restoreme', 'help')
+                authorizedCmds = ('link', 'to', 'onbot', 'wd', 'warp', 'coord', 'save', 'ws', 'agoto', 'rgoto', 'land', 'turn', 'rot', 'float', 'jump', 'find', 'list', 'anim', 'sp', 'ki', 'light', 'nopanic', 'saveme', 'sendme', 'restoreme', 'help')
                 #authorizedCmds = ('onbot', 'link')
-                authorizedCmds = () # ou pas!
+                #authorizedCmds = () # ou pas!
             if cmdName not in authorizedCmds:
                 #myself = PtGetLocalPlayer()
                 player = args[0]

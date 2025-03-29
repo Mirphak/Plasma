@@ -16,6 +16,7 @@ def WarpToMe(player=None, params=[]):
     print("WarpToMe(player={}, params={}".format(player, params))
     ageName = PtGetAgeInfo().getAgeFilename()
     xBotAge.ToggleSceneObjects("Panic", age=ageName, bDrawOn=False, bPhysicsOn=False)
+    xBotAge.ToggleSceneObjects("Cam", age=ageName, bDrawOn=False, bPhysicsOn=False)
     try:
         av = PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject()
         so = PtGetLocalAvatar()

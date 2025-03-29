@@ -178,6 +178,215 @@
                     - !sp 27 : Salle de controle 2 (ou !sp 28, ou !sp 35)
                     - //ws 17 ct : Au pied du mur
                     - //ws 18 ct : un des wall nexus (prenons !sp 30 + //walk) + //event 26
+
+    Version 4 : 27/01/2024
+        ** Gahreesen # 1 : 27/01/2024 **
+            Larry F lun. 22/01/2024 21:47 to Zeke, Susan, moi, Guild
+
+            Yep. 
+            Earlier this month r'Tay and I went over the script to try to make sure it's current.
+
+            Necessary effects...
+
+            Once we all link to the Age, the first thing needed will be to warp us over the chasm in the floor on the way to the KI dispenser.
+            After we're done with the first floor, we'll need to warp up to the guardroom with the sniper's window in it.
+
+            Once we're done with the second floor, we need to warp to the roof of building #1, bypassing the elevator. 
+            That's always hard because of the building rotation.
+
+            When we're done with that, we'll need to warp to the small island with the maintainer's mark on it.
+            From there, we'll need to warp to the center island between the buildings.
+            If posible, I'd like for him to build an invisible platform down at lake level so that the guests can take KI photos from down there.
+
+            From there, we'll need to warp to the interior of building #2, into one of the mudrooms. 
+            Preferably one on the side that has the maintainer's armor in the dressing room.
+
+            When we get to the dressing room, instead of warping into the wall chamber, I'll enter it by the machine since that works now. 
+            All Mirphak will need to do before that is make sure his bot has the lastest PRP. 
+            Once I'm in the wall chamber dressed in the armor, we'll just have the guests use the "find larry" command to join me.
+
+            This year, I want to try something new. 
+            When we're done in the Wall chamber, we'll need for everyone except me to be warped into the maintainer's nexus outside the little elevator. 
+            That way they should be able to watch me linking in and riding up on the elevator.
+
+            For the prison, we'll need to be in the cell to start, and then either warp to the lower level or I can jump down and have everyone "find larry" to join me. 
+            Then we'll want to warp up to the ring corridor on the prison cell level to avoid the ladder, and later warp again to the top level to avoid the ladders in the control room.
+
+            And I think that's everything.
+
+            -----------------------------------
+
+            Larry F lun. 22/01/2024 21:47 à Zeke, Susan, moi, Guild
+
+            Yep. 
+            Au début du mois, r'Tay et moi avons revu le script pour nous assurer qu'il était à jour.
+
+            Effets nécessaires...
+
+            Une fois que nous serons tous reliés à l'Age, 
+            la première chose à faire sera de nous faire traverser le gouffre dans le sol en direction du distributeur de KI.
+            Une fois que nous aurons terminé le premier étage, 
+            nous devrons nous téléporter jusqu'à la salle de garde avec la fenêtre du tireur d'élite.
+
+            Une fois que nous aurons terminé le deuxième étage, 
+            nous devrons nous rendre sur le toit du bâtiment 1, 
+            en contournant l'ascenseur. 
+            C'est toujours difficile à cause de la rotation des bâtiments.
+
+            Une fois que nous aurons terminé, 
+            nous devrons nous rendre sur la petite île portant la marque du mainteneur.
+            De là, nous devrons nous rendre sur l'île centrale entre les bâtiments.
+            Si possible, j'aimerais qu'il construise une plateforme invisible au niveau du lac 
+            pour que les invités puissent prendre des photos du KI depuis cet endroit.
+
+            De là, nous devrons nous rendre à l'intérieur du bâtiment n°2, dans l'un des vestibules. 
+            De préférence du côté où se trouve l'armure du mainteneur dans le vestiaire.
+
+            Quand nous arriverons à la loge, au lieu de passer par la pièce du mur, 
+            j'entrerai par la machine, puisque cela fonctionne maintenant. 
+            Mirphak n'aura plus qu'à s'assurer que son robot a le dernier PRP. 
+            Une fois que j'aurai revêtu l'armure dans la pièce du mur, 
+            les invités n'auront plus qu'à utiliser la commande "find larry" pour me rejoindre.
+
+            Cette année, je veux essayer quelque chose de nouveau. 
+            Quand nous aurons terminé dans la pièce du mur, il faudra que tout le monde, sauf moi, 
+            soit transféré dans le nexus du mainteneur, à l'extérieur du petit ascenseur. 
+            De cette façon, ils pourront me voir me connecter et monter dans l'ascenseur.
+
+            Pour la prison, nous devrons être dans la cellule pour commencer, 
+            puis soit nous nous téléporterons au niveau inférieur, 
+            soit je sauterai en bas et je demanderai à tout le monde de "trouver Larry" pour me rejoindre. 
+            Ensuite, 
+            nous devrons nous diriger vers le couloir de l'anneau au niveau de la cellule de la prison 
+            pour éviter l'échelle, et plus tard, 
+            nous devrons nous diriger à nouveau vers le niveau supérieur pour éviter les échelles 
+            dans la salle de contrôle.
+
+            Et je pense que c'est tout.
+
+            ---------------
+            - Preparation -
+            ---------------
+                - 1 - Arrivee normale : !to gahreesen (= !sp 0)
+                    !check noladder
+                    import xRobot.xGahreesen as g
+                    //nopanic
+                    
+                    !warpall
+                    
+                    Gar I, 2nd floor = //ws 1 ct + !warpall ou g.wa(1)
+                    Petite ile avec marque des mainteneurs = //ws 2 ct
+                    Petite ile entre les 2 immeubles = !sp 8 (ou !sp 7 contre l'etoffe) + !warpall ou g.wa(3)
+                    Vestibule / mudroom = !sp 15 (ce n'est pas celle que Larry veut) + !warpall ou g.wa(4)
+                    Vestibule côté pièce avec armure mainteneur = //ws 4 ct
+                    Pièce avec armure = !sp 16
+                    
+                    Prison = !sp 19 (ou !sp 18) + !warpall ou g.wa(5)
+                    Prison os 1 = //ws 10 ct
+                    Prison os 2 = //ws 11 ct
+                    Prison bas echelle = //ws 12 ct
+                    Prison haut echelle = //ws 13 ct
+                    Prison haut devant salle = //ws 14 ct = !sp 20
+                    Prison haut centre salle = //ws 15 ct
+                    Veranda centre = //ws 16 ct (véranda étoffe = !sp 21; véranda !sp 22)
+                    
+                    Chambre observation mur avec étoffe = !sp 23 ou !sp 24
+                    Chambre observation mur sans étoffe = !sp 25
+                    Equipe 1 = !sp 26 ou !sp 35
+                    Equipe 2 = !sp 27 ou !sp 28
+                    Nexus 1 = !sp 29
+                    Nexus 2 = !sp 30
+                    Gar I sommet bout avancée = !sp 31 ou !sp 33 (/!\ !sp 32 c'est casse gueule)
+                    (on peut faire des bonds entre !sp 8 et !sp 31 ou 33
+                    Gar I sommet centre = !sp 34 (peut être utilisé depuis le bas de gar I, mais pas dans l'autre sens)
+                    
+                    Mur centre salle = //ws 17 ct + !warpall ou g.wa(6)
+                - 2 - 
+                - 3 - 
+                - 4 - 
+                - 5 - 
+
+    Version 5 : 24/02/2024
+        I did recall something to that effect coming up next weekend. 
+        I'm thinking about where I'd like to start. 
+        I was thinking it should be in the mudroom outside the training room on the yellow side. 
+        I think that's the trianing room that connects to the locker room that has 
+        the Maintainer armor hanging in one of the niches. 
+        I'll have to check to be sure.
+
+        Oh yeah, before I forget again, 
+        it occurred to me that Mirphak will need to do some setup first. 
+        I wanted to try to demonstrate the dressing machine in the locker room, and for that, 
+        I think he needs to set up the wall on both sides of the building to make 
+        the dressing machines active. 
+        Unless he can figure out a command to do that, anyway.
+
+        Once I've used the machine to drop into the wall chamber, 
+        I'd like to have another of us wait until everyone has been warped to the Wall 
+        and then use the machine to follow us in. 
+        I don't know what if anything it looks like to see another person appear 
+        in the room from the machine, and this is as good an opportunity as any to find out.
+
+        Other than those notes, everything else should be the same as my last message.
+        
+        We were trying to set up a photo op platform. 
+        I didn't mention that because in the end, it's not all that important.
+        But we can try it again if you think we should.
+        
+        I like getting shots upward from the water surface because it shows just 
+        how big Gahreesen II really is, but there's a really pesky panic link zone 
+        that gives Mirphak no end of trouble when he tries to set up a platform down there 
+        and warp everyone to it.
+        
+        Yeah, it’s the yellow side that has the suit on display. 
+        So we’ll want to start in the mudroom outside the training room on that side. 
+        As a reminder, 
+        the training room is the middle one with the Wall control seat at the end of it.
+        
+        ---
+        
+        Je me souviens d'un événement à cet effet qui aura lieu le week-end prochain. 
+        Je réfléchis à l'endroit où je voudrais commencer. 
+        Je pensais que ce serait dans le vestiaire à l'extérieur de la salle d'entraînement, 
+        du côté jaune. 
+        Je pense que c'est la salle d'entraînement qui est reliée au vestiaire 
+        où se trouve l'armure du mainteneur. 
+        l'armure Maintainer suspendue dans l'une des niches. 
+        Il faudra que je vérifie pour être sûr.
+
+        Ah oui, avant que je n'oublie à nouveau, 
+        il m'est venu à l'esprit que Mirphak devra d'abord s'occuper de l'installation. 
+        Je voulais essayer de faire une démonstration de la machine à habiller dans les vestiaires, 
+        et pour cela, je pense qu'il doit installer la machine à habiller, 
+        je pense qu'il doit installer le mur des deux côtés du bâtiment pour rendre 
+        pour que les machines à habiller soient actives. 
+        À moins qu'il ne trouve une commande pour le faire, en tout cas.
+
+        Une fois que j'ai utilisé la machine pour descendre dans la chambre murale, 
+        j'aimerais qu'un autre d'entre nous attende que tout le monde ait été téléporté au Mur 
+        et utiliser la machine pour nous suivre à l'intérieur. 
+        Je ne sais pas à quoi ça ressemble de voir une autre personne apparaître 
+        dans la pièce à partir de la machine. 
+        dans la pièce à partir de la machine, et c'est l'occasion ou jamais de le découvrir.
+
+        À part ces notes, tout le reste devrait être identique à mon dernier message.
+        
+        Nous essayions de mettre en place une plateforme de photos. 
+        Je n'en ai pas parlé parce qu'en fin de compte, ce n'est pas si important.
+        Mais nous pouvons réessayer si vous le souhaitez.
+        
+        J'aime bien prendre des photos à partir de la surface de l'eau, 
+        car cela montre à quel point le Gahreesen II est grand. 
+        Gahreesen II est vraiment grand, mais il y a une zone de panique très ennuyeuse 
+        qui donne du fil à retordre à Mirphak. 
+        qui donne du fil à retordre à Mirphak lorsqu'il essaie d'installer une plateforme en bas 
+        et d'y téléporter tout le monde.
+        
+        Oui, c'est du côté jaune que la combinaison est exposée. 
+        Nous devrons donc commencer par la salle d'entraînement de ce côté. 
+        Pour rappel, 
+        la salle d'entraînement est celle du milieu avec le siège de contrôle du mur au bout.
+        
 """
 
 from Plasma import *
@@ -351,7 +560,7 @@ def Cercle(coef=3.0, h=10.0, avCentre=None, bPhys=True):
     "16": Prison centre salle echelles bas
     "17": Veranda centre echelles haut
 """
-def wa(n=0, bCircle=False):
+def wa(n=0, bCircle=False, bSpeaker=False):
     # les points de warp
     ws = { 
         #"0": ((0.986239790916, 0.165321528912, 0.0, 92.0742950439), (-0.165321528912, 0.986239790916, 0.0, -421.575561523), (0.0, 0.0, 1.0, 10087.4404297), (0.0, 0.0, 0.0, 1.0)), 
@@ -387,6 +596,9 @@ def wa(n=0, bCircle=False):
         #recuperer tous les joueurs
         playerList = PtGetPlayerList()
         playerList.append(PtGetLocalPlayer())
+        if bSpeaker:
+            playerList = [p for p in playerList if p.getPlayerID() != plSpeakerID]
+        
         """
         for player in playerList:
             objKey = PtGetAvatarKeyFromClientID(player.getPlayerID())
@@ -592,3 +804,9 @@ def la(ageName):
     # Lier les joueurs connus dans l'age choisi
     for playerId in playerIdList:
         LinkPlayerTo(age, playerID=playerId, spawnPointNumber=None)
+
+# Set SDL Wall State to 4
+def wall(state=4):
+    ageSDL = PtGetAgeSDL()
+    ageSDL["nState"] = (state,)
+    ageSDL["sState"] = (state,)

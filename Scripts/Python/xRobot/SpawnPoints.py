@@ -176,8 +176,19 @@ spDict = {
         , "LinkInPointBevinBalcony" #, "StartPoint01-4" non trouve
         , "Perf-SpawnPointPrivateRooms"
     ],
+    """
     "Minkata":["LinkInPointDefault"
-        , "LinkInPointCave01", "LinkInPointCave04", "LinkInPointCave05", "LinkInPointCave02", "LinkInPointCave03"
+        , "LinkInPointCave01", "LinkInPointCave04", "LinkInPointCave03", "LinkInPointCave05", "LinkInPointCave02", "LinkInPointCageInterior"
+    ],
+    """
+    """
+    "Minkata":["LinkInPointDefault"
+        , "Cave01BehNode", "Cave04BehNode", "Cave03BehNode", "Cave05BehNode", "Cave02BehNode", "CenterCraterBehNode"
+    ],
+    """
+    "Minkata":["Flag01_Master"
+        , "Cave01OuterCamRegion", "Cave04OuterCamRegion", "Cave03OuterCamRegion", "Cave05OuterCamRegion", "Cave02OuterCamRegion", "CenterCraterBehNode"
+        , "SoccerBall"
     ],
     "PelletBahroCave":["LinkInPointDefault"
         , "LinkInWithPellet", "LinkInPointLower"
@@ -315,30 +326,99 @@ aliasKadishSP = {
     "Minkata":["LinkInPointDefault"
         , "LinkInPointCave01", "LinkInPointCave04", "LinkInPointCave05", "LinkInPointCave02", "LinkInPointCave03"
 """
+"""
 aliasMinkataSP = {
     "m0":"LinkInPointDefault",         # = sp  0 # Default/Center : m0     *
     "m1":"LinkInPointCave01",          # = sp  1 # Cave 1 : m1     *
     "m2":"LinkInPointCave04",          # = sp  2 # Cave 2 : m2     *
-    "m3":"LinkInPointCave05",          # = sp  3 # Cave 3 : m3     *
-    "m4":"LinkInPointCave02",          # = sp  4 # Cave 4 : m4     *
-    "m5":"LinkInPointCave03",          # = sp  5 # Cave 5 : m5     *
-    "cave1":"LinkInPointCave01",          # = sp  1 # Cave 1 : m1     *
-    "cave2":"LinkInPointCave04",          # = sp  2 # Cave 2 : m2     *
-    "cave3":"LinkInPointCave05",          # = sp  3 # Cave 3 : m3     *
-    "cave4":"LinkInPointCave02",          # = sp  4 # Cave 4 : m4     *
-    "cave5":"LinkInPointCave03",          # = sp  5 # Cave 5 : m5     *
+    "m3":"LinkInPointCave03",          # = sp  3 # Cave 3 : m3     *
+    "m4":"LinkInPointCave05",          # = sp  4 # Cave 4 : m4     *
+    "m5":"LinkInPointCave02",          # = sp  5 # Cave 5 : m5     *
+    "m6":"LinkInPointCageInterior",    # = sp  6 # Cage Interior  : m6     *
+    "cave1":"LinkInPointCave01",       # = sp  1 # Cave 1 : m1     *
+    "cave2":"LinkInPointCave04",       # = sp  2 # Cave 2 : m2     *
+    "cave3":"LinkInPointCave03",       # = sp  3 # Cave 3 : m3     *
+    "cave4":"LinkInPointCave05",       # = sp  4 # Cave 4 : m4     *
+    "cave5":"LinkInPointCave02",       # = sp  5 # Cave 5 : m5     *
+    "cage":"LinkInPointCageInterior",  # = sp  6 # Cage Interior  : m6     *
     "k0":"LinkInPointDefault",         # = sp  0 # Default/Center : m0     *
     "k1":"LinkInPointCave01",          # = sp  1 # Cave 1 : m1     *
     "k2":"LinkInPointCave04",          # = sp  2 # Cave 2 : m2     *
-    "k3":"LinkInPointCave05",          # = sp  3 # Cave 3 : m3     *
-    "k4":"LinkInPointCave02",          # = sp  4 # Cave 4 : m4     *
-    "k5":"LinkInPointCave03",          # = sp  5 # Cave 5 : m5     *
-    "kiva0":"LinkInPointDefault",         # = sp  0 # Default/Center : m0     *
-    "kiva1":"LinkInPointCave01",          # = sp  1 # Cave 1 : m1     *
-    "kiva2":"LinkInPointCave04",          # = sp  2 # Cave 2 : m2     *
-    "kiva3":"LinkInPointCave05",          # = sp  3 # Cave 3 : m3     *
-    "kiva4":"LinkInPointCave02",          # = sp  4 # Cave 4 : m4     *
-    "kiva5":"LinkInPointCave03",          # = sp  5 # Cave 5 : m5     *
+    "k3":"LinkInPointCave03",          # = sp  3 # Cave 3 : m3     *
+    "k4":"LinkInPointCave05",          # = sp  4 # Cave 4 : m4     *
+    "k5":"LinkInPointCave02",          # = sp  5 # Cave 5 : m5     *
+    "k6":"LinkInPointCageInterior",    # = sp  6 # Cage Interior  : m6     *
+    "kiva0":"LinkInPointDefault",      # = sp  0 # Default/Center : m0     *
+    "kiva1":"LinkInPointCave01",       # = sp  1 # Cave 1 : m1     *
+    "kiva2":"LinkInPointCave04",       # = sp  2 # Cave 2 : m2     *
+    "kiva3":"LinkInPointCave03",       # = sp  3 # Cave 3 : m3     *
+    "kiva4":"LinkInPointCave05",       # = sp  4 # Cave 4 : m4     *
+    "kiva5":"LinkInPointCave02",       # = sp  5 # Cave 5 : m5     *
+    "kiva6":"LinkInPointCageInterior", # = sp  6 # Cage Interior  : m6     *
+}
+"""
+"""
+aliasMinkataSP = {
+    "m0":"LinkInPointDefault",         # = sp  0 # Default/Center : m0     *
+    "m1":"Cave01BehNode",          # = sp  1 # Cave 1 : m1     *
+    "m2":"Cave04BehNode",          # = sp  2 # Cave 2 : m2     *
+    "m3":"Cave03BehNode",          # = sp  3 # Cave 3 : m3     *
+    "m4":"Cave05BehNode",          # = sp  4 # Cave 4 : m4     *
+    "m5":"Cave02BehNode",          # = sp  5 # Cave 5 : m5     *
+    "m6":"CenterCraterBehNode",    # = sp  6 # Cage Interior  : m6     *
+    "cave1":"Cave01BehNode",       # = sp  1 # Cave 1 : m1     *
+    "cave2":"Cave04BehNode",       # = sp  2 # Cave 2 : m2     *
+    "cave3":"Cave03BehNode",       # = sp  3 # Cave 3 : m3     *
+    "cave4":"Cave05BehNode",       # = sp  4 # Cave 4 : m4     *
+    "cave5":"Cave02BehNode",       # = sp  5 # Cave 5 : m5     *
+    "cage":"CenterCraterBehNode",  # = sp  6 # Cage Interior  : m6     *
+    "k0":"LinkInPointDefault",         # = sp  0 # Default/Center : m0     *
+    "k1":"Cave01BehNode",          # = sp  1 # Cave 1 : m1     *
+    "k2":"Cave04BehNode",          # = sp  2 # Cave 2 : m2     *
+    "k3":"Cave03BehNode",          # = sp  3 # Cave 3 : m3     *
+    "k4":"Cave05BehNode",          # = sp  4 # Cave 4 : m4     *
+    "k5":"Cave02BehNode",          # = sp  5 # Cave 5 : m5     *
+    "k6":"CenterCraterBehNode",    # = sp  6 # Cage Interior  : m6     *
+    "kiva0":"LinkInPointDefault",      # = sp  0 # Default/Center : m0     *
+    "kiva1":"Cave01BehNode",       # = sp  1 # Cave 1 : m1     *
+    "kiva2":"Cave04BehNode",       # = sp  2 # Cave 2 : m2     *
+    "kiva3":"Cave03BehNode",       # = sp  3 # Cave 3 : m3     *
+    "kiva4":"Cave05BehNode",       # = sp  4 # Cave 4 : m4     *
+    "kiva5":"Cave02BehNode",       # = sp  5 # Cave 5 : m5     *
+    "kiva6":"CenterCraterBehNode", # = sp  6 # Cage Interior  : m6     *
+}
+"""
+aliasMinkataSP = {
+    "m0":"Flag01_Master",         # = sp  0 # Default/Center : m0     *
+    "m1":"Cave01OuterCamRegion",          # = sp  1 # Cave 1 : m1     *
+    "m2":"Cave04OuterCamRegion",          # = sp  2 # Cave 2 : m2     *
+    "m3":"Cave03OuterCamRegion",          # = sp  3 # Cave 3 : m3     *
+    "m4":"Cave05OuterCamRegion",          # = sp  4 # Cave 4 : m4     *
+    "m5":"Cave02OuterCamRegion",          # = sp  5 # Cave 5 : m5     *
+    "m6":"CenterCraterBehNode",    # = sp  6 # Cage Interior  : m6     *
+    "m7":"SoccerBall",    # = sp  7 # Soccer Ball  : m7     *
+    "cave1":"Cave01OuterCamRegion",       # = sp  1 # Cave 1 : m1     *
+    "cave2":"Cave04OuterCamRegion",       # = sp  2 # Cave 2 : m2     *
+    "cave3":"Cave03OuterCamRegion",       # = sp  3 # Cave 3 : m3     *
+    "cave4":"Cave05OuterCamRegion",       # = sp  4 # Cave 4 : m4     *
+    "cave5":"Cave02OuterCamRegion",       # = sp  5 # Cave 5 : m5     *
+    "cage":"CenterCraterBehNode",  # = sp  6 # Cage Interior  : m6     *
+    "k0":"Flag01_Master",         # = sp  0 # Default/Center : m0     *
+    "k1":"Cave01OuterCamRegion",          # = sp  1 # Cave 1 : m1     *
+    "k2":"Cave04OuterCamRegion",          # = sp  2 # Cave 2 : m2     *
+    "k3":"Cave03OuterCamRegion",          # = sp  3 # Cave 3 : m3     *
+    "k4":"Cave05OuterCamRegion",          # = sp  4 # Cave 4 : m4     *
+    "k5":"Cave02OuterCamRegion",          # = sp  5 # Cave 5 : m5     *
+    "k6":"CenterCraterBehNode",    # = sp  6 # Cage Interior  : m6     *
+    "k7":"SoccerBall",    # = sp  7 # Soccer Ball  : m7     *
+    "kiva0":"Flag01_Master",      # = sp  0 # Default/Center : m0     *
+    "kiva1":"Cave01OuterCamRegion",       # = sp  1 # Cave 1 : m1     *
+    "kiva2":"Cave04OuterCamRegion",       # = sp  2 # Cave 2 : m2     *
+    "kiva3":"Cave03OuterCamRegion",       # = sp  3 # Cave 3 : m3     *
+    "kiva4":"Cave05OuterCamRegion",       # = sp  4 # Cave 4 : m4     *
+    "kiva5":"Cave02OuterCamRegion",       # = sp  5 # Cave 5 : m5     *
+    "kiva6":"CenterCraterBehNode", # = sp  6 # Cage Interior  : m6     *
+    "soccer":"SoccerBall",    # = sp  7 # Soccer Ball  : m7     *
 }
 aliasTeledahnSP = {
     "t0":"LinkInPointDefault",        # = sp 0

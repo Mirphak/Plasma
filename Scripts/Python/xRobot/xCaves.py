@@ -194,9 +194,9 @@ def panic():
 
 """
 # -*- coding: utf-8 -*-
-"""
 
-from Plasma import *
+#from Plasma import *
+"""
 
 """
  1 : Cleft - Caverne du livre de Relto

@@ -124,7 +124,8 @@ def Suivre(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
     elif (objet.lower()) == 'raie2' :
     # Raie 2 de Dereno
         defobjet = ("Dereno,DrnoExterior,C02_Body,0,0,0")
-    elif (objet.lower()) == 'poissond' :
+    #elif (objet.lower()) == 'poissond' :
+    elif objet.lower() in ('poissond', 'fishd') :
     # Poisson de Dereno  
         defobjet = ("Dereno,DrnoExterior,FishC06,0,0,90")
     elif (objet.lower()) == 'poissong1' :
@@ -422,6 +423,8 @@ def Action (animal='singe',action='grimper'):
     elif (animal.lower()) == 'shroomie':
         shro1 = PtFindSceneobject('MasterShroomie','Teledahn')
         shro2 = PtFindSceneobject('LakeShoomieHandle','Teledahn')
+        shro1.netForce(True)
+        shro2.netForce(True)
         spwn1 = PtFindSceneobject('SpawnPtNear01','Teledahn').getLocalToWorld()
         spwn2 = PtFindSceneobject('SpawnPtNear02','Teledahn').getLocalToWorld()
         spwn3 = PtFindSceneobject('SpawnPtNear03','Teledahn').getLocalToWorld()

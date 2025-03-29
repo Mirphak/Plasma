@@ -36,7 +36,7 @@ def WriteMatrix44(self, player = None, ageFileName = None, prefix = None):
     #    file.write(str(id) + ": \"" + game.getGameName() + "\"\n")
     file.write(strPos)
     file.close()
-    PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " has been saved his (her) position.")
+    #PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " has been saved his (her) position.")
 
 def WarpToSaved(self, player = None, ageFileName = None, prefix = None):
     #PtSendKIMessage(kKILocalChatStatusMsg, "> WarpToSaved")
@@ -71,7 +71,7 @@ def WarpToSaved(self, player = None, ageFileName = None, prefix = None):
         matPos.setData(tuplePos)
         soAvatar.netForce(1)
         soAvatar.physics.warp(matPos)
-        PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " is going to his (her) saved position.")
+        #PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " is going to his (her) saved position.")
         return 1
     except:
         PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " has no saved position.")

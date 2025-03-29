@@ -64,8 +64,9 @@ imax = len(f)
 def next():
     global i
     #SendChatMessage(msg="Loading structure '{}' from {} ...".format(f[i][0], f[i][1]))
-    SendChatMessage(msg="Loading structure '{}' ...".format(f[i][0], ))
-    LoadStruct(nomFichier=f[i][0], nomAvatar=f[i][1])
+    try:
+        SendChatMessage(msg="Loading structure '{}' ...".format(f[i][0], ))
+        LoadStruct(nomFichier=f[i][0], nomAvatar=f[i][1])
     i += 1
     if i >= imax :
         i = 0

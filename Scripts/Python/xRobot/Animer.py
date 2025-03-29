@@ -6,7 +6,7 @@ Michel Lacoste
 
 from Plasma import *
 import math
-
+import sys
 
 def SCOJoueur(nom):
     """Retourne un SCO joueur a partir de son nom ou son numero d'ID de KI """
@@ -20,13 +20,13 @@ def SCOJoueur(nom):
             return joueur
             break
 
-def SCOListAvatars ():    
+def SCOListAvatars():    
     """Retourne la liste des avatars presents dans l'age courant sous forme de SceneObjects"""
     Listejoueurs = PtGetPlayerList()
     Liste = [PtGetAvatarKeyFromClientID(player.getPlayerID()).getSceneObject() for player in Listejoueurs]
     Liste.append(PtGetLocalAvatar())
     return Liste
-    
+
 def SCOAvatar(nom):
     """Retourne le SceneObject d'un avatar d'apres son nom ou son ID"""
     nom = nom.lower()
@@ -36,11 +36,9 @@ def SCOAvatar(nom):
         return PtGetAvatarKeyFromClientID(SCOJoueur(nom).getPlayerID()).getSceneObject()
 
 #*****************************#
-#                             #
 #Suivre objets en mouvements  #
-#                             #
 #*****************************#
-def Suivre(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
+def Suivre(objet='sandscrit', Avatar='moi', duree=300): #la duree est en secondes
     """Attacher un avatar sur un objet en mouvement dont la taille est xxx %
     et le suivre durant xx secondes puis atterrir au point par defaut"""
     if isinstance(duree, int):
@@ -125,8 +123,8 @@ def Suivre(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
     # Shroomie de Teledahn    
         defobjet = ("Teledahn,tldnHarvest,Sniff_SB_Spine01,0,0,0")
     else:
-            print("{} inconnu".format(objet))
-            return
+        print(f"{objet} inconnu")
+        return
     animal = defobjet.split(',')
     Age = animal[0]
     Prp = animal[1]
@@ -134,7 +132,7 @@ def Suivre(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
     Anglex = float(animal[3])
     Angley = float(animal[4])
     Anglez = float(animal[5])
-    PtConsoleNet('Nav.PageInNode '+ Prp ,1)
+    PtConsoleNet(f'Nav.PageInNode {Prp}', True)
     if Avatar == 'moi':
         Joueur = PtGetLocalAvatar()
     else:
@@ -142,10 +140,10 @@ def Suivre(objet='sandscrit',Avatar='moi',duree=300): #la duree est en secondes
     Joueur.netForce(1)
     Joueur.physics.netForce(1)
     Joueur.physics.disable()
-    PtSetAlarm(1, Lier(Age,Joueur,Objet,duree,Anglex,Angley,Anglez), 1)
-    
+    PtSetAlarm(1, Lier(Age, Joueur, Objet, duree, Anglex, Angley, Anglez), 1)
+
 class Lier:
-    def __init__(self,age,joueur,obj,duree,anglex,angley,anglez):
+    def __init__(self, age, joueur, obj, duree, anglex, angley, anglez):
         self._age = age
         self._joueur = joueur
         self._obj = obj
@@ -153,41 +151,39 @@ class Lier:
         self._anglex = anglex
         self._angley = angley
         self._anglez = anglez
-    def onAlarm (self, param):
+    def onAlarm(self, param):
         Aobj = PtFindSceneobject(self._obj, self._age)
         Aobj.netForce(1)
         Aobj.draw.enable(1)
         centreobj = Aobj.getLocalToWorld()
         rotx = ptMatrix44()
-        rotx.makeRotateMat(0, -math.pi * self._anglex/180)
+        rotx.makeRotateMat(0, -math.pi * self._anglex / 180)
         roty = ptMatrix44()
-        roty.makeRotateMat(1, -math.pi * self._angley/180)
+        roty.makeRotateMat(1, -math.pi * self._angley / 180)
         rotz = ptMatrix44()
-        rotz.makeRotateMat(2, -math.pi * self._anglez/180)
+        rotz.makeRotateMat(2, -math.pi * self._anglez / 180)
         self._joueur.physics.warp(centreobj * rotx * roty * rotz)
         PtAttachObject(self._joueur, Aobj,1)
         PtSetAlarm(self._duree, Delier(self._age, self._joueur, Aobj), 1)
-        
+
 class Delier:
-    def __init__(self,age,joueur,obj):
+    def __init__(self, age, joueur, obj):
         self._age = age
         self._joueur = joueur
         self._obj = obj
-    def onAlarm (self, param):
-        PtDetachObject(self._joueur,self._obj,1)
-        Robj=PtFindSceneobject('LinkInPointDefault',PtGetAgeName())
+    def onAlarm(self, param):
+        PtDetachObject(self._joueur, self._obj, 1)
+        Robj = PtFindSceneobject('LinkInPointDefault', PtGetAgeName())
         centreobj = Robj.getLocalToWorld()
         self._joueur.physics.warp(centreobj)
         self._joueur.physics.enable(1)
+
 #*****************************#
 #   Animer un objet animable  #
-#                             #
 #*****************************# 
-import sys
-    
-        
-#Cette fonction ne s'utilise pas seule, elle est appelée par Action()
-def runResp(key, resp, stateidx = None, netForce = 1, netPropagate = 1, fastforward = 0):
+
+# Cette fonction ne s'utilise pas seule, elle est appelée par Action()
+def runResp(key, resp, stateidx=None, netForce=1, netPropagate=1, fastforward=0):
     nt = ptNotify(key)
     nt.addReceiver(resp)
     nt.netPropagate(netPropagate)
@@ -201,12 +197,12 @@ def runResp(key, resp, stateidx = None, netForce = 1, netPropagate = 1, fastforw
     nt.setActivate(1.0)
     nt.send()
 
-def Action (animal='singe',action='grimper'):
+def Action (animal='singe', action='grimper'):
     #Cette fonction permet d'animer les objets animables
 	#Utiliser d'abord la fonction Suivre() ci dessus
     surmoi = PtGetLocalAvatar().getLocalToWorld()
     if (animal.lower()) == 'singe':
-        obj = PtFindSceneobject('TempMonkeyHandle','Negilahn')
+        obj = PtFindSceneobject('TempMonkeyHandle', 'Negilahn')
         responders = obj.getResponders()
         if (action.lower()) == 'alarme':
             runResp(obj.getKey(), responders[3], 0)
@@ -234,9 +230,9 @@ def Action (animal='singe',action='grimper'):
         elif (action.lower()) == 'sur moi':
             obj.physics.warp(surmoi)            
         else :
-            PtSendKIMessage(45,"L'action %s n'existe pas !" % action)
+            PtSendKIMessage(45, f"L'action {action} n'existe pas !")
     elif (animal.lower()) == 'urwin':
-        obj = PtFindSceneobject('Dummy04','Negilahn')
+        obj = PtFindSceneobject('Dummy04', 'Negilahn')
         responders = obj.getResponders()
         if (action.lower()) == 'start':
             runResp(obj.getKey(), responders[1], 5) #cri
@@ -252,9 +248,9 @@ def Action (animal='singe',action='grimper'):
         elif (action.lower()) == 'sur moi':
             obj.physics.warp(surmoi)            
         else :
-            PtSendKIMessage(45,"L'action %s n'existe pas !" % action)        
+            PtSendKIMessage(45, f"L'action {action} n'existe pas !")        
     elif (animal.lower()) == 'sandscrit':
-        obj = PtFindSceneobject('Sandscrit_Mover','Payiferen')
+        obj = PtFindSceneobject('Sandscrit_Mover', 'Payiferen')
         responders = obj.getResponders()
         if (action.lower()) == 'start':
             runResp(obj.getKey(), responders[6], 0) #mouvement de tete
@@ -268,15 +264,15 @@ def Action (animal='singe',action='grimper'):
         elif (action.lower()) == 'sur moi':
             obj.physics.warp(surmoi)    
         else :
-            PtSendKIMessage(45,"L'action %s n'existe pas !" % action)              
+            PtSendKIMessage(45, f"L'action {action} n'existe pas !")              
     elif (animal.lower()) == 'shroomie':
-        shro1 = PtFindSceneobject('MasterShroomie','Teledahn')
-        shro2 = PtFindSceneobject('LakeShoomieHandle','Teledahn')
-        spwn1 = PtFindSceneobject('SpawnPtNear01','Teledahn').getLocalToWorld()
-        spwn2 = PtFindSceneobject('SpawnPtNear02','Teledahn').getLocalToWorld()
-        spwn3 = PtFindSceneobject('SpawnPtNear03','Teledahn').getLocalToWorld()
-        spwn4 = PtFindSceneobject('SpawnPtNear04','Teledahn').getLocalToWorld()
-        spwn5 = PtFindSceneobject('SpawnPtNear05','Teledahn').getLocalToWorld()
+        shro1 = PtFindSceneobject('MasterShroomie', 'Teledahn')
+        shro2 = PtFindSceneobject('LakeShoomieHandle', 'Teledahn')
+        spwn1 = PtFindSceneobject('SpawnPtNear01', 'Teledahn').getLocalToWorld()
+        spwn2 = PtFindSceneobject('SpawnPtNear02', 'Teledahn').getLocalToWorld()
+        spwn3 = PtFindSceneobject('SpawnPtNear03', 'Teledahn').getLocalToWorld()
+        spwn4 = PtFindSceneobject('SpawnPtNear04', 'Teledahn').getLocalToWorld()
+        spwn5 = PtFindSceneobject('SpawnPtNear05', 'Teledahn').getLocalToWorld()
         if (action.lower()) == 'visible':
             responders = shro1.getResponders()
             runResp(shro1.getKey(), responders[1], 0)
@@ -308,6 +304,6 @@ def Action (animal='singe',action='grimper'):
         elif (action.lower()) == 'sur moi':
             shro2.physics.warp(surmoi)    
         else :
-            PtSendKIMessage(45,"L'action %s n'existe pas !" % action)
+            PtSendKIMessage(45, f"L'action {action} n'existe pas !")
     else :
-        PtSendKIMessage(45,"%s n'existe pas !" % animal)
+        PtSendKIMessage(45, f"{animal} n'existe pas !")

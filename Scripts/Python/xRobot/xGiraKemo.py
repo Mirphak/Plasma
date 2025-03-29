@@ -55,6 +55,9 @@
 
         If we run short I may do something for Direbo, but I’m not expecting to have that much time left over after Kēmo.
     
+    V4 : 22/06/2024
+        
+    
 """
 from Plasma import *
 import math
@@ -358,6 +361,7 @@ def togglesdl(name):
     dicNames = {
         "wings":"ercaHrvstrWingsOk", 
         "wd":"ercaHrvstrWingLeverDown", 
+        "winter":"dlnWinterVis",
     }
     if (name in list(dicNames.keys())):
         sdl.ToggleBoolSDL(dicNames[name])
@@ -410,7 +414,7 @@ def platform(name="sun"):
         matPos = ptMatrix44()
         matPos.setData(tupPos)
     else:
-        pass
+        matPos = PtGetLocalAvatar().getLocalToWorld()
     Platform.CreatePlatform(bShow=False, matAv=matPos)
 
 #

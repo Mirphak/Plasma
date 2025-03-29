@@ -126,14 +126,14 @@ PtConsoleNet("Nav.PageInNode {0}".format(pages[i]) ,1)
 """
 #
 def PageInAllCaves():
-    pages = ["YeeshaCave", "BlueSpiralCave", "PODcave", "MINKcave", "POTScave", "Cave"]
+    pages = ["YeeshaCave", "BlueSpiralCave", "PODcave", "MINKcave", "POTScave", "TheSpecialPage", "Cave"]
     #PtPageInNode(pages)
     for page in pages:
         PtConsoleNet("Nav.PageInNode {0}".format(page), 1)
 
 #
 def PageOutAllCaves():
-    pages = ["YeeshaCave", "BlueSpiralCave", "PODcave", "MINKcave", "POTScave", "Cave"]
+    pages = ["YeeshaCave", "BlueSpiralCave", "PODcave", "MINKcave", "POTScave", "TheSpecialPage", "Cave"]
     #PtPageOutNode(page, 1)
     for page in pages:
         PtConsoleNet("Nav.PageOutNode {0}".format(page), 0)
@@ -312,3 +312,24 @@ def LakeOnMe():
         sos.draw.enable(False)
         sos.physics.enable(False)
         sos.physics.warp(mPos)
+
+# Cleft "Bahro" Cave (In the tree, where the relto book is)
+def paint(n=0):
+    """
+    1 = volcano
+    2 = Cavern
+    3 = Book
+    4 = Spiral
+    5 = Man
+    """
+    if n in range(1, 6):
+        for i in range(1, 6):
+            so = PtFindSceneobject(f"WallPainting0{i}", "Cleft")
+            so.netForce(True)
+            so.draw.enable(i == n)
+    else:
+        for i in range(1, 6):
+            so = PtFindSceneobject(f"WallPainting0{i}", "Cleft")
+            so.netForce(True)
+            so.draw.enable(True)
+#

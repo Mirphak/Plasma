@@ -137,9 +137,11 @@ def WriteMatrix44(self, n=None, player=None, ageFileName=None, prefix=None, alia
     content = content[:len(content) - 1]
     # Edit the file
     #PtSendKIMessage(kKILocalChatStatusMsg, "==> content length : "+str(len(content)))
-    if WriteFile(fileName, content) == 1:
-        PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " has been saved his (her) position.")
-    else:
+    #if WriteFile(fileName, content) == 1:
+    #    PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " has been saved his (her) position.")
+    #else:
+    #    PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " - Error while saving position!")
+    if WriteFile(fileName, content) != 1:
         PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " - Error while saving position!")
 
 def WarpToSaved(self, n=None, player=None, ageFileName=None, prefix=None, aliasName=None):
@@ -158,7 +160,7 @@ def WarpToSaved(self, n=None, player=None, ageFileName=None, prefix=None, aliasN
         matPos.setData(tuplePos)
         soAvatar.netForce(1)
         soAvatar.physics.warp(matPos)
-        PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " is going to his (her) saved position.")
+        #PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " is going to his (her) saved position.")
         return 1
     except:
         PtSendKIMessage(kKILocalChatStatusMsg, player.getPlayerName() + " has no saved position.")

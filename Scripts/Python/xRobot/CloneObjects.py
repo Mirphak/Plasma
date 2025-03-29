@@ -580,7 +580,7 @@ class WaitAndDoStuff3:
     _nbFois = 0
 
     def __init__(self, masterkey, bShow, nb, num, scale, matPos, bAttach):
-        print("WaitAndDoStuff2: init")
+        print("WaitAndDoStuff3: init")
         self._masterKey = masterkey
         self._bShow = bShow
         self._nb = nb
@@ -590,39 +590,40 @@ class WaitAndDoStuff3:
         self._bAttach = bAttach
     
     def onAlarm(self, param):
-        print("WaitAndDoStuff2: onAlarm")
+        print("WaitAndDoStuff3: onAlarm")
         if param == 1:
-            print("WaitAndDoStuff2: onAlarm 1")
+            print("WaitAndDoStuff3: onAlarm 1")
             if nomAction in YodaClones.dicDemandeurs:
-                print("WaitAndDoStuff2: onAlarm 1 a")
+                print("WaitAndDoStuff3: onAlarm 1 a")
                 if self._masterKey.getName() in YodaClones.dicDemandeurs[nomAction]:
-                    print("WaitAndDoStuff2: onAlarm 1 b")
+                    print("WaitAndDoStuff3: onAlarm 1 b")
                     nbClonesLoaded = len(YodaClones.dicDemandeurs[nomAction][self._masterKey.getName()])
                     if (nbClonesLoaded < self._nb and self._nbFois < 20):
-                        print("WaitAndDoStuff2: onAlarm 1 c")
+                        print("WaitAndDoStuff3: onAlarm 1 c")
                         self._nbFois += 1
                         print(">>> Attente 3 nb: %i" % self._nbFois)
                         PtSetAlarm(1, self, 1)
                     else:
-                        print("WaitAndDoStuff2: onAlarm 1 c trouve")
+                        print("WaitAndDoStuff3: onAlarm 1 c trouve")
                         PtSetAlarm(1, self, 2)
                 else:
-                    print("WaitAndDoStuff2: onAlarm 1 b non trouve")
+                    print("WaitAndDoStuff3: onAlarm 1 b non trouve")
                     self._nbFois += 1
                     print(">>> Attente 2 nb: %i" % self._nbFois)
                     PtSetAlarm(1, self, 1)
             else:
-                print("WaitAndDoStuff2: onAlarm 1 a non trouve")
+                print("WaitAndDoStuff3: onAlarm 1 a non trouve")
                 self._nbFois += 1
                 print(">>> Attente 1 nb: %i" % self._nbFois)
                 PtSetAlarm(1, self, 1)
         elif param == 2:
-            print("WaitAndDoStuff2: onAlarm 2")
+            print("WaitAndDoStuff3: onAlarm 2")
             if nomAction in YodaClones.dicDemandeurs:
-                print("WaitAndDoStuff2: onAlarm 2 a")
+                print("WaitAndDoStuff3: onAlarm 2 a")
                 if self._masterKey.getName() in YodaClones.dicDemandeurs[nomAction]:
-                    print("WaitAndDoStuff2: onAlarm 2 b")
+                    print("WaitAndDoStuff3: onAlarm 2 b")
                     cloneKeys = YodaClones.dicDemandeurs[nomAction][self._masterKey.getName()]
+                    """
                     cloneNb = 0
                     for cloneKey in cloneKeys:
                         #mtrans = ptMatrix44()
@@ -633,6 +634,12 @@ class WaitAndDoStuff3:
                         #if self._num >= 0 and self._num < cloneNb:
                         DoStuff3([self._masterKey, self._bShow, cloneNb, self._num, self._scale, pos, self._bAttach])
                         cloneNb += 1
+                    """
+                    if len(cloneKeys) < self._nb or len(cloneKeys) < self._num:
+                        print("WaitAndDoStuff3 no enough clones found!")
+                    else:
+                        pos = self._matPos
+                        DoStuff3([self._masterKey, self._bShow, self._nb, self._num, self._scale, pos, self._bAttach])
 
 #=========================================
 # Cree un clone a la position desiree
@@ -768,6 +775,44 @@ def Bahro(bOnOff=True, nb=1, num=0, x=0, y=0, z=0, scale=1, bAttacher=False):
     vScale = ptVector3(scale, scale, scale)
     #nb = 1
     CloneThat(objName=obj, age="CustomAvatars", bShow=bOnOff, bLoad=bOnOff, number=nb, thisone=num, scale=vScale, matPos=pos, bAttach=bAttacher, fct=DoStuff2)
+
+def PutBahroHere(show=True, load=True, nb=1, num=0, scale=1, pos=None, attach=False):
+    if nb > 0 and num >= 0 and num < nb:
+        if not isinstance(pos, ptMatrix44):
+            pos = ptMatrix44().translate(ptVector3(-10000, -10000, -10000))
+        vScale = ptVector3(scale, scale, scale)
+        CloneThat(objName="Bahro1", age="CustomAvatars", bShow=show, bLoad=load, number=nb, thisone=num, scale=vScale, matPos=pos, bAttach=attach, fct=DoStuff2)
+    else:
+        pass
+
+def PutYeeshaGlowHere(show=True, load=True, nb=1, num=0, scale=1, pos=None, attach=False, dx=0, dy=0, dz=0, rx=0, ry=0, rz=0, cr=1, cg=1, cb=1, ca=1):
+    if nb > 0 and num >= 0 and num < nb:
+        if not isinstance(pos, ptMatrix44):
+            pos = ptMatrix44().translate(ptVector3(-10000, -10000, -10000))
+        #pos1 = pos
+        #pos1.translate(ptVector3(dx, dy, dz))
+        pos.translate(ptVector3(dx, dy, dz))
+        mRot = ptMatrix44()
+        mRot.rotate(0, (math.pi * rx) / 180)
+        mRot.rotate(1, (math.pi * ry) / 180)
+        mRot.rotate(2, (math.pi * rz) / 180)
+        #pos1 = pos1 * mRot
+        pos = pos * mRot
+        vScale = ptVector3(scale, scale, scale)
+        #CloneThat(objName="RTGlowLight", age="CustomAvatars", bShow=show, bLoad=load, number=nb, thisone=num, scale=vScale, matPos=pos1, bAttach=attach, fct=DoStuff2)
+        CloneThat(objName="RTGlowLight", age="CustomAvatars", bShow=show, bLoad=load, number=nb, thisone=num, scale=vScale, matPos=pos, bAttach=attach, fct=DoStuff2)
+        mso = PtFindSceneobject("RTGlowLight", "CustomAvatars")
+        cloneKeys = PtFindClones(mso.getKey())
+        if len(cloneKeys) > num:
+            ck = cloneKeys[num]
+        #for ck in cloneKeys:
+            so = ck.getSceneObject()
+            so.netForce(True)
+            
+            #PtSetLightValue(key=ck, name="RTGlowLight", r=cr, g=cg, b=cb, a=ca)
+            PtSetLightValue(ck, "RTGlowLight", cr, cg, cb, ca)
+    else:
+        pass
 
 #=========================================
 # Clonage de Billes

@@ -124,6 +124,8 @@ MirobotAgeDict = {
     "mobMaintainers":["GuildPub-Maintainers", "GuildPub-Maintainers", "a9e45d08-dfdf-48a7-9539-bdaaa60c13e9", "Mir-o-Bot's", ""],
     "mobMessengers":["GuildPub-Messengers", "GuildPub-Messengers", "950e27bb-77a5-427a-8d7a-c121feb6a74c", "Mir-o-Bot's", ""],
     "mobWriters":["GuildPub-Writers", "GuildPub-Writers", "bf869aee-48b7-406b-a717-8e7c04dc24c0", "Mir-o-Bot's", ""],
+    "mobEderBahvahnter":["EderBahvahnter", "EderBahvahnter", "9c5f0961-8299-492f-9f9b-2f3d48f58a55", "Mir-o-Bot's", ""],
+    "MobMemorial":["Memorial Island", "MemorialIsland", "bf0c191e-32f5-42a4-a975-5d5656f29796", "Mir-o-Bot's", ""],
     "mobGahreesen":["Gahreesen", "Garrison", "f3e10b6e-069c-4329-903e-3b0377f7e510", "mob's", ""],
     "Tiam":["Tiam", "Tiam", "0c3db58b-0c1a-47a9-8e33-8c061640b9cb", "Mir-o-Bot's", ""],
     "mobTiam":["Tiam", "Tiam", "5e018f72-0ae7-4db8-ba52-101117eb3d15", "mob's", ""],
@@ -167,6 +169,7 @@ MagicbotAgeDict = {
     "MagicGreatTreePub":["GreatTreePub", "GreatTreePub", "75bdd14e-a525-4283-a5a0-579878f7305c", "Magic", ""],
     "MBDescent":["Descent", "Descent", "5db9ede0-afa4-47e8-ba15-02cb72b9117b", "Magic", ""],
     "MBGTP":["GreatTreePub", "GreatTreePub", "75bdd14e-a525-4283-a5a0-579878f7305c", "Magic", ""],
+    "MBBahvahnter":["EderBahvahnter", "EderBahvahnter", "2c6778c1-ad8c-55aa-ae30-75087164f938", "EderBahvahnter", ""],
 }
 tmp = dict()
 for k, v in MagicbotAgeDict.items():
@@ -207,11 +210,13 @@ PublicAgeDict = {
     "trebivdil":["Tre'bivdil", "trebivdil", "5b06b39d-27ff-4a80-a00e-40bbdb802e8a", "", ""],
     "vothol":["Vothol Gallery", "Vothol", "303478a8-9e47-4aa7-adc5-985a09033ee8", "", ""],
     "Eder Naybree":["Eder Naybree", "EderNaybree", "1a9f4c27-3603-4252-896a-c460ae3a8dbb", "", ""],
+    "Beach":["Eder Naybree", "EderNaybree", "1a9f4c27-3603-4252-896a-c460ae3a8dbb", "", "LinkInPoint-MagicEvent"],
     "Elonin":["Elonin", "Elonin", "81bdc28e-c365-51b3-8c97-59e153db5bf4", "", ""],
     "Fahets Highgarden":["Fahets: Highgarden", "FahetsHighgarden", "744ba6f4-65ce-504f-b623-210ed73d6721", "", ""],
     "Fahets":["Fahets: Highgarden", "FahetsHighgarden", "744ba6f4-65ce-504f-b623-210ed73d6721", "", ""],
     "Highgarden":["Fahets: Highgarden", "FahetsHighgarden", "744ba6f4-65ce-504f-b623-210ed73d6721", "", ""],
     "EderBahvahnter":["EderBahvahnter", "EderBahvahnter", "2c6778c1-ad8c-55aa-ae30-75087164f829", "EderBahvahnter", ""],
+    "Memorial":["Memorial Island", "MemorialIsland", "53126f35-8170-401a-8d91-0024886055e9", "", ""],
 }
 tmp = dict()
 for k, v in PublicAgeDict.items():
