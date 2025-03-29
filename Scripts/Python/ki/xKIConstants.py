@@ -401,6 +401,12 @@ class kCommands:
         "/pageoutboat" : "PageOutBoat", # PageOut the CoD Boat
         "/pageingameroom" : "PageInGameRoom", # PageIn the Mystitech's GameRoom
         "/pageoutgameroom" : "PageOutGameRoom", # PageOut the Mystitech's GameRoom
+        "/pageinmonitor" : "PageInMonitor", # PageIn the Mystitech's Monitor
+        "/pageoutmonitor" : "PageOutMonitor", # PageOut the Mystitech's Monitor
+        "/pageinplanet" : "PageInPlanet", # PageIn the Mystitech's Planet
+        "/pageoutplanet" : "PageOutPlanet", # PageOut the Mystitech's Planet
+        "/pageinbasement" : "PageInBasement", # PageIn the Mystitech's Basement
+        "/pageoutbasement" : "PageOutBasement", # PageOut the Mystitech's Basement
         "/minkatahide" : "MinkataHide", # To hide some objects of Minkata 
         "/minkatarestore" : "MinkataRestore", # To restore some objects of Minkata
         "/tokiva4" : "WarpMeToKiva4", # To move you to Kiva4
@@ -419,11 +425,17 @@ class kCommands:
         "/hidecursor" : "HideCursor", # To hide your cursor 
         "/linkgroup" : "LinkGroup", # To link a group of players knowing their names or KI numbers (you can mix) # param : list of KI numbers or player names ([kinum1, ..., kinumN])
         "/rotahny" : "RotAhny", # To rotate the Ahnonay Sphere (Param = sphere number in [1, 2, 3, 4])
+        "/shorty" : "Shorty", # 
+        "/babybahro" : "BabyBahro", # 
+        "/youngbahro" : "YoungBahro", # 
+        "/adultbahro" : "AdultBahro", # 
+        "/bluebeam" : "ToggleBeam", # 
     }
 
 ## Numeric limits for the KI.
 class kLimits:
-    JournalTextSize = 2048
+    #JournalTextSize = 2048
+    JournalTextSize = 65536
     MaxPictures = 15
     MaxNotes = 30
     MaxMarkerFolders = 10

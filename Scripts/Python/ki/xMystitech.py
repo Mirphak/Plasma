@@ -4,11 +4,13 @@
 # From mystitech.py (edit: 2018-08-04 by Cesare)
 # Update 2018-11-18 from edit 2018-11-17 by Cesare
 # Update 2020-09-10 from edit 2020-04-14 or 2020-05-08 by Cesare
+# Update 2023-11-16
 """
-
 
 from Plasma import *
 from . import xBoat
+import Shroomie
+import Avatars
 
 # Find the KI number of a player you know his exact name (case insensitive)
 def FindPlayerByName(playerName):
@@ -116,6 +118,26 @@ def KodamaMe():
     PtChangeAvatar("Kodama")
     RemoveReltoBook()
 
+def EngbergMe():
+    PtChangeAvatar("Engberg")
+    RemoveReltobook()
+
+def SutherMe():
+    PtChangeAvatar("Sutherland")
+    RemoveReltobook()
+
+def VictorMe():
+    PtChangeAvatar("Victor")
+    RemoveReltobook()
+
+def WatsonMe():
+    PtChangeAvatar("DrWatson")
+    RemoveReltobook()
+
+def ZandiMe():
+    PtChangeAvatar("Zandi")
+    RemoveReltobook()
+
 ## Change your avatar to Sharper (He does not exist)
 #def SharperMe():
 #    PtChangeAvatar("Sharper")
@@ -163,73 +185,139 @@ def Change(name):
     except:
         pass
 
-""" Methods to add or remove avatar's Relto book or KI """
+""" Methods to change my size, in TLA we use it for bahro """
+
+def Shorty():
+    Avatars.ChangeSize(1.3, "me")
+
+def BabyBahro():
+    Avatars.ChangeSize(0.5, "me")
+
+def YoungBahro():
+    Avatars.ChangeSize(0.7, "me")
+
+def AdultBahro():
+    Avatars.ChangeSize(2, "me")
+
+
+""" Methods to add or remove avatar's clothin item like Relto book, KI, helmet, ... """
+
+def WearClothingItem(outfitName, prefix="", kiNumOrName=None):
+    #name = f"{prefix}{('M', 'F')[PtGetLocalAvatar().avatar.getAvatarClothingGroup()]}{outfitName}"
+    #PtGetLocalAvatar().avatar.wearClothingItem(name)
+    if kiNumOrName is None:
+        #so = PtGetLocalAvatar()
+        name = f"{prefix}{('M', 'F')[PtGetLocalAvatar().avatar.getAvatarClothingGroup()]}{outfitName}"
+        PtGetLocalAvatar().avatar.wearClothingItem(name)
+    else:
+        so = GetAvatarSceneObject(kiNumOrName)
+        if not isinstance(so, ptSceneobject):
+            return
+        so.netForce(True) # so the camera operator can see the effect
+        name = f"{prefix}{('M', 'F')[so.avatar.getAvatarClothingGroup()]}{outfitName}"
+        so.avatar.wearClothingItem(name)
+
+def RemoveClothingItem(outfitName, prefix="", kiNumOrName=None):
+    #name = f"{prefix}{('M', 'F')[PtGetLocalAvatar().avatar.getAvatarClothingGroup()]}{outfitName}"
+    #PtGetLocalAvatar().avatar.removeClothingItem(name)
+    if kiNumOrName is None:
+        #so = PtGetLocalAvatar()
+        name = f"{prefix}{('M', 'F')[PtGetLocalAvatar().avatar.getAvatarClothingGroup()]}{outfitName}"
+        PtGetLocalAvatar().avatar.removeClothingItem(name)
+    else:
+        so = GetAvatarSceneObject(kiNumOrName)
+        if not isinstance(so, ptSceneobject):
+            return
+        so.netForce(True) # so the camera operator can see the effect
+        name = f"{prefix}{('M', 'F')[so.avatar.getAvatarClothingGroup()]}{outfitName}"
+        so.avatar.removeClothingItem(name)
 
 # Remove your Relto book
 def RemoveReltoBook():
-    name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "AccPlayerBook"
-    PtGetLocalAvatar().avatar.removeClothingItem(name)
+    #name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "AccPlayerBook"
+    #PtGetLocalAvatar().avatar.removeClothingItem(name)
+    RemoveClothingItem(outfitName="AccPlayerBook")
 
 # Wear your Relto book
 def WearReltoBook():
-    name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "AccPlayerBook"
-    PtGetLocalAvatar().avatar.wearClothingItem(name)
+    #name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "AccPlayerBook"
+    #PtGetLocalAvatar().avatar.wearClothingItem(name)
+    WearClothingItem(outfitName="AccPlayerBook")
 
 # Remove your KI
 def RemoveKI():
-    name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "AccKI"
-    PtGetLocalAvatar().avatar.removeClothingItem(name)
+    #name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "AccKI"
+    #PtGetLocalAvatar().avatar.removeClothingItem(name)
+    RemoveClothingItem(outfitName="AccKI")
 
 # Wear your KI
 def WearKI():
-    name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "AccKI"
-    PtGetLocalAvatar().avatar.wearClothingItem(name)
+    #name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "AccKI"
+    #PtGetLocalAvatar().avatar.wearClothingItem(name)
+    WearClothingItem(outfitName="AccKI")
+
+def Helmet():
+    WearClothingItem(outfitName="HAcc_SuitHelmet", prefix="03_")
+
+def CityGuard():
+    outfitNames = [
+        "HAcc_DniFace", "Torso_Suit", "RHand_Suit", "LHand_Suit", 
+        "Legs_Suit", "RFoot_Suit", "LFoot_Suit"
+    ]
+    for name in outfitNames:
+        WearClothingItem(outfitName=name, prefix="03_")
 
 # Remove your Suit Helmet
 def RemoveSuitHelmet():
-    name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "HAcc_SuitHelmet"
-    PtGetLocalAvatar().avatar.removeClothingItem(name)
+    #name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "HAcc_SuitHelmet"
+    #PtGetLocalAvatar().avatar.removeClothingItem(name)
+    RemoveClothingItem(outfitName="HAcc_SuitHelmet")
 
 # Wear your Suit Helmet
 def WearSuitHelmet():
-    name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "HAcc_SuitHelmet"
-    PtGetLocalAvatar().avatar.wearClothingItem(name)
+    #name = ("M", "F")[PtGetLocalAvatar().avatar.getAvatarClothingGroup()] + "HAcc_SuitHelmet"
+    #PtGetLocalAvatar().avatar.wearClothingItem(name)
+    WearClothingItem(outfitName="HAcc_SuitHelmet")
 
 # Remove other player Relto book knowing his name or KI number
 def RemoveOtherRelto(kiNumOrName):
-    x = GetAvatarSceneObject(kiNumOrName)
-    if not isinstance(x, ptSceneobject):
-        return
-    x.netForce(True) # so the camera operator can see the effect
-    name = ("M", "F")[x.avatar.getAvatarClothingGroup()] + "AccPlayerBook"
-    x.avatar.removeClothingItem(name)
+    #x = GetAvatarSceneObject(kiNumOrName)
+    #if not isinstance(x, ptSceneobject):
+    #    return
+    #x.netForce(True) # so the camera operator can see the effect
+    #name = ("M", "F")[x.avatar.getAvatarClothingGroup()] + "AccPlayerBook"
+    #x.avatar.removeClothingItem(name)
+    RemoveClothingItem(outfitName="AccPlayerBook", kiNumOrName=kiNumOrName)
 
 # Wear other player Relto book knowing his name or KI number
 def WearOtherRelto(kiNumOrName):
-    x = GetAvatarSceneObject(kiNumOrName)
-    if not isinstance(x, ptSceneobject):
-        return
-    x.netForce(True) # so the camera operator can see the effect
-    name = ("M", "F")[x.avatar.getAvatarClothingGroup()] + "AccPlayerBook"
-    x.avatar.wearClothingItem(name)
+    #x = GetAvatarSceneObject(kiNumOrName)
+    #if not isinstance(x, ptSceneobject):
+    #    return
+    #x.netForce(True) # so the camera operator can see the effect
+    #name = ("M", "F")[x.avatar.getAvatarClothingGroup()] + "AccPlayerBook"
+    #x.avatar.wearClothingItem(name)
+    WearClothingItem(outfitName="AccPlayerBook", kiNumOrName=kiNumOrName)
 
 # Remove other player KI knowing his name or KI number
 def RemoveOtherKI(kiNumOrName):
-    x = GetAvatarSceneObject(kiNumOrName)
-    if not isinstance(x, ptSceneobject):
-        return
-    x.netForce(True) # so the camera operator can see the effect
-    name = ("M", "F")[x.avatar.getAvatarClothingGroup()] + "AccKI"
-    x.avatar.removeClothingItem(name)
+    #x = GetAvatarSceneObject(kiNumOrName)
+    #if not isinstance(x, ptSceneobject):
+    #    return
+    #x.netForce(True) # so the camera operator can see the effect
+    #name = ("M", "F")[x.avatar.getAvatarClothingGroup()] + "AccKI"
+    #x.avatar.removeClothingItem(name)
+    RemoveClothingItem(outfitName="AccKI", kiNumOrName=kiNumOrName)
 
 # Wear other player KI knowing his name or KI number
 def WearOtherKI(kiNumOrName):
-    x = GetAvatarSceneObject(kiNumOrName)
-    if not isinstance(x, ptSceneobject):
-        return
-    x.netForce(True) # so the camera operator can see the effect
-    name = ("M", "F")[x.avatar.getAvatarClothingGroup()] + "AccKI"
-    x.avatar.wearClothingItem(name)
+    #x = GetAvatarSceneObject(kiNumOrName)
+    #if not isinstance(x, ptSceneobject):
+    #    return
+    #x.netForce(True) # so the camera operator can see the effect
+    #name = ("M", "F")[x.avatar.getAvatarClothingGroup()] + "AccKI"
+    #x.avatar.wearClothingItem(name)
+    WearClothingItem(outfitName="AccKI", kiNumOrName=kiNumOrName)
 
 """ Method to avoid panic """
 
@@ -242,12 +330,12 @@ def DontPanic():
 # Link a player in my age knowing his name or KI number
 def LinkHere(kiNumOrName):
     kiNum = GetKiNumber(kiNumOrName)
-    PtConsoleNet("Net.LinkPlayerHere {}".format(kiNum), True)
+    PtConsoleNet(f"Net.LinkPlayerHere {kiNum}", True)
 
 # Link me in a player's age knowing his name or KI number
 def LinkMeThere(kiNumOrName):
     kiNum = GetKiNumber(kiNumOrName)
-    PtConsoleNet("Net.LinkToPlayersAge {}".format(kiNum), True)
+    PtConsoleNet(f"Net.LinkToPlayersAge {kiNum}", True)
 
 # Move a player to my position (we must be in the same age) knowing his name or KI number
 def WarpHere(kiNumOrName):
@@ -413,37 +501,41 @@ def PageInGameRoom():
 def PageOutGameRoom():
     PtConsoleNet("Nav.PageOutNode GameRoom_mainRoom", True)
 
-def gameroomup():
-    PtConsoleNet("Avatar.Warp.WarpToXYZ 222.37, -801.80, 49980.93", True)
+def GameRoomUp():
+    WarpPlayerToXyz(None, 222.37, -801.80, 49980.93)
 
-def gameroomdown():
-    PtConsoleNet("Avatar.Warp.WarpToXYZ 209.41, -854.58, 49946.63", True)
+def GameRoomDown():
+    WarpPlayerToXyz(None, 209.41, -854.58, 49946.63)
 
 def PageInMonitor():
     PtConsoleNet("Nav.PageInNode TLABahroRoom_mainRoom", True)
-    #PtConsoleNet("Nav.PageInNode TLABahroRoom_Textures", True)
-    PtConsoleNet("Avatar.Warp.WarpToXYZ 18.50, 7.33, 15.69", True)
+    WarpPlayerToXyz(None, 18.50, 7.33, 15.69)
 
 def PageOutMonitor():     # !! CRASHES THE CLIENT !!
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode TLABahroRoom_Textures", True)
     PtConsoleNet("Nav.PageOutNode TLABahroRoom_mainRoom", True)
 
 def PageInPlanet():
     PtConsoleNet("Nav.PageInNode TLAPlanet_mainRoom", True)
-    #PtConsoleNet("Nav.PageInNode TLAPlanet_Textures", True)
-    PtConsoleNet("Avatar.Warp.WarpToXYZ -109.90, -17.58, 3001.20", True)
+    WarpPlayerToXyz(None, -109.90, -17.58, 3001.20)
 
 def PageOutPlanet():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode TLAPlanet_Textures", True)
     PtConsoleNet("Nav.PageOutNode TLAPlanet_mainRoom", True)
 
-def miniplanet():
-    PtConsoleNet("Avatar.Warp.WarpToXYZ 18.08, -145.56, -4962.47", True)
+def MiniPlanet():
+    WarpPlayerToXyz(None, 18.08, -145.56, -4962.47)
 
-def bigplanet():
-    PtConsoleNet("Avatar.Warp.WarpToXYZ -109.90, -17.58, 3001.20", True)
+def BigPlanet():
+    WarpPlayerToXyz(None, -109.90, -17.58, 3001.20)
+
+def PageInBasement():
+    PtConsoleNet("Nav.PageInNode TLABasement_Default", True)
+    WarpPlayerToXyz(None, 4.55, -2.41, -13.04)
+
+def PageOutBasement():
+    PtConsoleNet("Avatar.Spawn.Go 2", True)
+    PtConsoleNet("Nav.PageOutNode TLABasement_Default", True)
 
 """ Methods for Mintata """
 
@@ -471,12 +563,10 @@ def MinkataRestore():
 
 # To move you to Kiva4
 def WarpMeToKiva4():
-    #PtConsoleNet("Avatar.Warp.WarpToXYZ -883.98, -523.17, 0.12", True)
     WarpPlayerToXyz(None, -883.98, -523.17, 0.12)
 
 # To move you to Kiva soccer ball default position
 def WarpMeToKivaBall():
-    #PtConsoleNet("Avatar.Warp.WarpToXYZ -894.06, -1062.67, -0.03", True)
     WarpPlayerToXyz(None, -894.06, -1062.67, -0.03)
 
 """ Methods for camera(wo)man """
@@ -564,6 +654,11 @@ def LinkGroup(strParams):
 
 # UTILITIES
 
+# Toggle blue beam
+def ToggleBlueBeam():
+    sdl = PtGetAgeSDL()
+    sdl["islmGZBeamVis"] = (not sdl["islmGZBeamVis"][0],)
+
 # Show how many people are in the current Age
 def PopCount():
     print(1 + len(PtGetPlayerList()), " avatars present")
@@ -585,6 +680,38 @@ def GuidInfo():
     age = ptDniInfoSource()
     print("GUID of this Age: ", age.getAgeGuid())
 
+# Get some info about the current Age
+def AgeInfo():
+    age = ptDniInfoSource()
+    guid = age.getAgeGuid()
+    print("GUID of this Age: ", guid)
+    PlayerList = PtGetPlayerList()
+    idList = map(lambda player:player.getPlayerID(), PlayerList)
+    nbavi = 1 + PtGetNumRemotePlayers()
+    print(str(nbavi), " avatars present")
+    for playerId in idList:
+        key = PtGetAvatarKeyFromClientID(playerId)
+        name = PtGetClientName(key)
+        print("Avatars in this Age: ", str(playerId), name)
+
+# Simple tool for setting SDLs (look in the SDL folder for the values)
+def SetSDL(name, value):
+    sdl = PtGetAgeSDL()
+    sdl[name] = (value,)
+
+# Enable KI-GPS coord
+def GetKiGPS():
+    import Plasma
+    import PlasmaKITypes
+    vault = Plasma.ptVault()
+    psnlSDL = vault.getPsnlAgeSDL()
+    if psnlSDL:
+        GPSVar = psnlSDL.findVar('GPSEnabled')
+        GPSVar.setBool(1)
+        vault.updatePsnlAgeSDL(psnlSDL)
+
+""" Methods to link to specific age instances """
+
 # Visit The Fun House
 def ToFunHouse():
     PtConsole("Net.LinkToAgeInstance Neighborhood 33a235b1-9fe0-47f0-a73e-6fbd0044717a")
@@ -597,4 +724,42 @@ def ToFunHouse():
 def ToIllusions():
     PtConsole("Net.LinkToAgeInstance Neighborhood 3cc44d4b-31e1-4dec-b6e6-4b63c72becc3")
 
-#
+# Following age instances have been created for MystiTech The Lost Art usage
+def ToMTGome():
+    PtConsole("Net.LinkToAgeInstance GoMePubNew 28a73c56-949c-4327-ad56-7df8753933e6")
+
+def ToKGome():
+    PtConsole("Net.LinkToAgeInstance GoMePubNew 19a3b778-fac7-4f2a-8795-316dffd292df")
+
+def ToKWatcher():
+    PtConsole("Net.LinkToAgeInstance GreatTreePub 8ff0504c-3433-4b02-ae6c-79b824edb715")
+
+def ToKChiso():
+    PtConsole("Net.LinkToAgeInstance ChisoPreniv 28e65caa-f0c5-46c7-ac95-3b2a1dc08b7a")
+
+def ToKVothol():
+    PtConsole("Net.LinkToAgeInstance Vothol f3693cc1-c795-4895-94e6-aa40b232e34a")
+    
+def ToKBavanter():
+    PtConsole("Net.LinkToAgeInstance EderBahvahnter 901be94d-b342-468f-8542-53d67572825d")
+
+def ToKElonin():
+    PtConsole("Net.LinkToAgeInstance Elonin a6caa200-c138-41d7-b85b-05832d1a501c")
+
+def ToKalamee():
+    PtConsole("Net.LinkToAgeInstance Kalamee e679fc83-81a9-4b34-9780-686398491b6b")
+
+def ToKVeelay():
+    PtConsole("Net.LinkToAgeInstance VeeTsah 1324bd33-acb3-4faf-b49e-378ab52c4003")
+
+def ToKMemorial():
+    PtConsole("Net.LinkToAgeInstance MemorialIsland 6f3aa89d-14b0-46b4-be45-1b389e32db60")
+
+# I can't get shroosummon(type) to work, s.WarpToPlayer("Me") is not
+# understood if inside a function. Typing the lines manually should work.
+def shroosummon(type):  # type: 1-3
+    s = Shroomie.Shroomie()
+    s.WarpToPlayer("me")
+    s.MakeVisible()
+    s.RunBehavior(format(type))
+
