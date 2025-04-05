@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Python/fun/mystitech/eggFloor.py
 
 """
@@ -51,30 +52,24 @@ matrices = (
 # Create a solid floor in the inner chamber of the Kirel meditation room using columns from Jalak.
 # Then disable the walls so we can walk to the egg.
 def RunMe():
-    PtSetAlarm( 4, __Callback(), buildFloor )
-    PtSetAlarm( 6, __Callback(), disableWalls )
-    PtConsoleNet( 'Nav.PageInNode jlakArena', 1 )
+    PtSetAlarm(4, __Callback(), buildFloor)
+    PtSetAlarm(6, __Callback(), disableWalls)
+    PtConsoleNet('Nav.PageInNode jlakArena', True)
 
 class __Callback:
     def onAlarm(self, context):
-
         if context == buildFloor:
-           for i in range( len( matrices ) ):
-
+           for i in range(len(matrices)):
                 m = ptMatrix44()
-                m.setData( matrices[ i ] )
-
-                p = PtFindSceneobject( 'columnPhys_%02d' %  i, 'Jalak' ).physics
-                p.netForce( 1 )
-                p.warp( m )
-
+                m.setData(matrices[i])
+                p = PtFindSceneobject('columnPhys_%02d' % i, 'Jalak').physics
+                p.netForce(True)
+                p.warp(m)
                 if i != 12:
-                    d = PtFindSceneobject( 'column_%02d' %  i, 'Jalak' ).draw
-                    d.netForce( 1 )
-                    d.enable( 0 )
-
+                    d = PtFindSceneobject('column_%02d' % i, 'Jalak').draw
+                    d.netForce(True)
+                    d.enable(False)
         elif context == disableWalls:
-            p = PtFindSceneobject( 'prvtrm1CameraBlocker', 'Neighborhood02' ).physics
-            p.netForce( 1 )
-            p.enable( 0 )
-
+            p = PtFindSceneobject('prvtrm1CameraBlocker', 'Neighborhood02').physics
+            p.netForce(True)
+            p.enable(False)

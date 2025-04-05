@@ -18,7 +18,7 @@ def Hide():
         so = PtFindSceneobject(objectName, ageName)
         so.netForce(True)
         so.draw.enable(False)
-    # Physical pat
+    # Physical part
     objectName = 'PodiumCol'
     so = PtFindSceneobject(objectName, ageName)
     so.netForce(True)

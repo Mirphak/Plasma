@@ -1,6 +1,6 @@
-# -*- coding: cp1252 -*-
+# -*- coding: utf-8 -*-
 # Last edit: 2019-03-01
- 
+
 from Plasma import *
 
 def cThomas():
@@ -25,4 +25,3 @@ def cAnnie():
     PtConsoleNet("Avatar.Warp.WarpToXYZ 226.96,  14.03,  16.25", True)
 def cZarek():
     PtConsoleNet("Avatar.Warp.WarpToXYZ 231.32,   5.39,  16.25", True)
-

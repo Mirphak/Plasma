@@ -54,11 +54,11 @@ from PlasmaTypes import *
 # max wiring
 # ---------
 
-actTrigger = ptAttribActivator(1,"Activator")
-holdingKeyVarName = ptAttribString(2,"Holding Key Age SDL Var Name")
-doorUnlockedVarName = ptAttribString(3,"Door Unlocked Age SDL Var Name")
-doorOpenVarName = ptAttribString(4,"Door Open Age SDL Var Name")
-doorPreviouslyOpenVarName = ptAttribString(5,"Door Previously Open Age SDL Var Name")
+actTrigger = ptAttribActivator(1, "Activator")
+holdingKeyVarName = ptAttribString(2, "Holding Key Age SDL Var Name")
+doorUnlockedVarName = ptAttribString(3, "Door Unlocked Age SDL Var Name")
+doorOpenVarName = ptAttribString(4, "Door Open Age SDL Var Name")
+doorPreviouslyOpenVarName = ptAttribString(5, "Door Previously Open Age SDL Var Name")
 doorLockedResponder = ptAttribResponder(6, "Responder to run if door is locked")
 
 class ExplorersEmporiumLockableDoor(ptResponder):
@@ -77,33 +77,29 @@ class ExplorersEmporiumLockableDoor(ptResponder):
             PtDebugPrint("ERROR: ExplorersEmporiumLockableDoor.OnFirstUpdate():\tERROR: missing SDL var door open name in max file")
         if not doorPreviouslyOpenVarName.value:
             PtDebugPrint("ERROR: ExplorersEmporiumLockableDoor.OnFirstUpdate():\tERROR: missing SDL var door previously open name in max file")
-    
+
     def OnServerInitComplete(self):
         ageSDL = PtGetAgeSDL()
-        ageSDL.setFlags(holdingKeyVarName.value,1,1)
+        ageSDL.setFlags(holdingKeyVarName.value, 1, 1)
         ageSDL.sendToClients(holdingKeyVarName.value)
-        
-        ageSDL.setFlags(doorUnlockedVarName.value,1,1)
+        ageSDL.setFlags(doorUnlockedVarName.value, 1, 1)
         ageSDL.sendToClients(doorUnlockedVarName.value)
-        
-        ageSDL.setFlags(doorOpenVarName.value,1,1)
+        ageSDL.setFlags(doorOpenVarName.value, 1, 1)
         ageSDL.sendToClients(doorOpenVarName.value)
-        
-        ageSDL.setFlags(doorPreviouslyOpenVarName.value,1,1)
+        ageSDL.setFlags(doorPreviouslyOpenVarName.value, 1, 1)
         ageSDL.sendToClients(doorPreviouslyOpenVarName.value)
 
-    def OnNotify(self,state,id,events):
-        # is this notify something I should act on?
+    def OnNotify(self, state, id, events):
+        # Is this notify something I should act on?
         if not state or id != actTrigger.id:
             return
         if not PtWasLocallyNotified(self.key):
             return
         else:
             if actTrigger.value:
-                PtDebugPrint("DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tLocal player requesting change via %s" % (actTrigger.value[0].getName()) )
+                PtDebugPrint(f"DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tLocal player requesting change via {actTrigger.value[0].getName()}")
                 pass
-                
-        # error check
+        # Error check
         if not holdingKeyVarName.value:
             PtDebugPrint("ERROR: ExplorersEmporiumLockableDoor.OnNotify():\tERROR: missing SDL var holding key name")
             return
@@ -116,19 +112,15 @@ class ExplorersEmporiumLockableDoor(ptResponder):
         if not doorPreviouslyOpenVarName.value:
             PtDebugPrint("ERROR: ExplorersEmporiumLockableDoor.OnNotify():\tERROR: missing SDL var door previously open name")
             return
-    
         ageSDL = PtGetAgeSDL()
-        
         holdingKey = ageSDL[holdingKeyVarName.value][0]
         doorUnlocked = ageSDL[doorUnlockedVarName.value][0]
         doorOpen = ageSDL[doorOpenVarName.value][0]
         doorPreviouslyOpen = ageSDL[doorPreviouslyOpenVarName.value][0]
-        
-        PtDebugPrint("DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tSDL var %s is currently %d" % (holdingKeyVarName.value,holdingKey) )
-        PtDebugPrint("DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tSDL var %s is currently %d" % (doorUnlockedVarName.value,doorUnlocked) )
-        PtDebugPrint("DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tSDL var %s is currently %d" % (doorOpenVarName.value,doorOpen) )
-        PtDebugPrint("DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tSDL var %s is currently %d" % (doorPreviouslyOpenVarName.value,doorPreviouslyOpen) )
-        
+        PtDebugPrint(f"DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tSDL var {holdingKeyVarName.value} is currently {holdingKey}")
+        PtDebugPrint(f"DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tSDL var {doorUnlockedVarName.value} is currently {doorUnlocked}")
+        PtDebugPrint(f"DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tSDL var {doorOpenVarName.value} is currently {doorOpen}")
+        PtDebugPrint(f"DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tSDL var {doorPreviouslyOpenVarName.value} is currently {doorPreviouslyOpen}")
         if doorOpen:
             doorOpen = False
         else:
@@ -140,15 +132,13 @@ class ExplorersEmporiumLockableDoor(ptResponder):
                     doorOpen = True
                 else:
                     self.TriggerDoorLockedResponder(events)
-        
         if doorUnlocked != ageSDL[doorUnlockedVarName.value][0]:
-            PtDebugPrint("DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tsetting SDL var %s to %d" % (doorUnlockedVarName.value,doorUnlocked) )
+            PtDebugPrint(f"DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tsetting SDL var {doorUnlockedVarName.value} to {doorUnlocked}")
             ageSDL[doorUnlockedVarName.value] = (doorUnlocked,)
-            
         if doorOpen != ageSDL[doorOpenVarName.value][0]:
-            PtDebugPrint("DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tsetting SDL var %s to %d" % (doorOpenVarName.value,doorOpen) )
+            PtDebugPrint(f"DEBUG: ExplorersEmporiumLockableDoor.OnNotify():\tsetting SDL var {doorOpenVarName.value} to {doorOpen}")
             ageSDL[doorOpenVarName.value] = (doorOpen,)
-            
-    def TriggerDoorLockedResponder(self,events):
+
+    def TriggerDoorLockedResponder(self, events):
         PtDebugPrint("DEBUG: ExplorersEmporiumLockableDoor.TriggerDoorLockedResponder():\tTriggering door locked responder")
         doorLockedResponder.run(self.key, avatar=PtFindAvatar(events))

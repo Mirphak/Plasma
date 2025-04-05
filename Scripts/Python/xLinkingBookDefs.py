@@ -272,7 +272,7 @@ else:
         "BahroCaveLower":     ( 'xLinkPanelBahroCaveLower','bkBahroRockBook','Bahro' ),
         "islmGreatTree":        ( 'xLinkPanelCityGreatTree','bkBahroRockBook','Bahro' ),
 # Begin Fan Ages
-        "Trebivdil":          ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpaneltrebivdil' + LinkEnd ),
+        "Trebivdil":            ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpaneltrebivdil' + LinkEnd ),
         "FehnirHouse":          ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpanelfehnirhouse' + LinkEnd ),
         "GoMePubNew":           ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpanelgomepubnew' + LinkEnd ),
         "VeeTsah":              ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpanelsheten' + LinkEnd ),

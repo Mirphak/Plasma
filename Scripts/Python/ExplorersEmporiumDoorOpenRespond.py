@@ -51,15 +51,14 @@ Author: Seejay
 from Plasma import *
 from PlasmaTypes import *
 
-doorOpenVarName = ptAttribString(1,"Door Open Age SDL Var Name")
-doorPreviouslyOpenVarName = ptAttribString(2,"Door Previously Open Age SDL Var Name")
+doorOpenVarName = ptAttribString(1, "Door Open Age SDL Var Name")
+doorPreviouslyOpenVarName = ptAttribString(2, "Door Previously Open Age SDL Var Name")
 openDoorResponder = ptAttribResponder(3, "Responder to open the door")
 unlockAndOpenDoorResponder = ptAttribResponder(4, "Responder to unlock and open the door")
 closeDoorResponder = ptAttribResponder(5, "Responder to close the door:")
 vmFastFwd = ptAttribBoolean(6, "F-Forward on VM notify", default=True)
 initFastFwd = ptAttribBoolean(7, "F-Forward on Init", default=True)
 evalOnFirstUpdate = ptAttribBoolean(8, "Init SDL On First Update?", default=False)
-
 
 class ExplorersEmporiumDoorOpenRespond(ptResponder):
     """Runs a given responder based on the values of two SDL booleans"""
@@ -72,11 +71,11 @@ class ExplorersEmporiumDoorOpenRespond(ptResponder):
     def OnFirstUpdate(self):
         if evalOnFirstUpdate.value:
             self._Setup()
-            
+
     def OnServerInitComplete(self):
         if not evalOnFirstUpdate.value:
             self._Setup()
-            
+
     def _Setup(self):
         ageSDL = PtGetAgeSDL()
         ageSDL.setFlags(doorOpenVarName.value, 1, 1)
@@ -89,7 +88,7 @@ class ExplorersEmporiumDoorOpenRespond(ptResponder):
         try:
             self._Execute(ageSDL[doorOpenVarName.value][0], ageSDL[doorPreviouslyOpenVarName.value][0], initFastFwd.value)
         except LookupError:
-            PtDebugPrint("xAgeSDLBoolRespond._Setup():\tVariable '%s' is invalid on object '%s'" % (doorOpenVarName.value, self.sceneobject.getName()))
+            PtDebugPrint(f"xAgeSDLBoolRespond._Setup():\tVariable '{doorOpenVarName.value}' is invalid on object '{self.sceneobject.getName()}'")
 
     def OnSDLNotify(self, VARname, SDLname, playerID, tag):
         if VARname != doorOpenVarName.value:
@@ -98,7 +97,7 @@ class ExplorersEmporiumDoorOpenRespond(ptResponder):
         ageSDL = PtGetAgeSDL()
         doorOpen = ageSDL[doorOpenVarName.value][0]
         doorPreviouslyOpen = ageSDL[doorPreviouslyOpenVarName.value][0]
-        PtDebugPrint("ExplorersEmporiumDoorOpenRespond.OnSDLNotify():\tVARname:%s, SDLname:%s, value:%d, playerID:%d" % (VARname, SDLname, doorOpen, playerID))
+        PtDebugPrint(f"ExplorersEmporiumDoorOpenRespond.OnSDLNotify():\tVARname:{VARname}, SDLname:{SDLname}, value:{doorOpen}, playerID:{playerID}")
 
         # A playerID of zero indicates a vault mangler change
         if playerID:
@@ -117,14 +116,14 @@ class ExplorersEmporiumDoorOpenRespond(ptResponder):
 
         if doorOpen:
             if doorPreviouslyOpen:
-                PtDebugPrint("ExplorersEmporiumDoorOpenRespond._Execute():\tRunning openDoorResponder on %s ff=%d" % (self.sceneobject.getName(), ff))
+                PtDebugPrint(f"ExplorersEmporiumDoorOpenRespond._Execute():\tRunning openDoorResponder on {self.sceneobject.getName()} ff={ff}")
                 openDoorResponder.run(self.key, avatar=avatar, fastforward=ff)
             else:
-                PtDebugPrint("ExplorersEmporiumDoorOpenRespond._Execute():\tRunning unlockAndOpenDoorResponder on %s ff=%d" % (self.sceneobject.getName(), ff))
+                PtDebugPrint(f"ExplorersEmporiumDoorOpenRespond._Execute():\tRunning unlockAndOpenDoorResponder on {self.sceneobject.getName()} ff={ff}")
                 unlockAndOpenDoorResponder.run(self.key, avatar=avatar, fastforward=ff)
                 doorPreviouslyOpen = True
-                PtDebugPrint("DEBUG: ExplorersEmporiumDoorOpenRespond._Execute():\tsetting SDL var %s to %d" % (doorPreviouslyOpenVarName.value, doorPreviouslyOpen) )
+                PtDebugPrint(f"DEBUG: ExplorersEmporiumDoorOpenRespond._Execute():\tsetting SDL var {doorPreviouslyOpenVarName.value} to {doorPreviouslyOpen}")
                 ageSDL[doorPreviouslyOpenVarName.value] = (doorPreviouslyOpen,)
         else:
-            PtDebugPrint("ExplorersEmporiumDoorOpenRespond._Execute():\tRunning closeDoorResponder on %s ff=%d" % (self.sceneobject.getName(), ff))
+            PtDebugPrint(f"ExplorersEmporiumDoorOpenRespond._Execute():\tRunning closeDoorResponder on {self.sceneobject.getName()} ff={ff}")
             closeDoorResponder.run(self.key, avatar=avatar, fastforward=ff)
