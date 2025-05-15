@@ -1,5 +1,8 @@
-# -*- coding: utf-8 -*-
-# Last edit: 2024-11-31
+"""
+Not needed anymore as UTF8 is the default in Python 3
+ -*- coding: utf-8 -*- 
+"""
+# Last edit: 2025-05-08
  
 from Plasma   import *
 from Basic    import *
@@ -65,6 +68,7 @@ def babybahro():
 
 def youngbahro():
     Avatars.ChangeSize(0.7, "me")
+
 def adultbahro():
     Avatars.ChangeSize(2, "me")
 
@@ -195,8 +199,17 @@ def toKKalamee():
 def toKVeelay():
     PtConsole("Net.LinkToAgeInstance VeeTsah 1324bd33-acb3-4faf-b49e-378ab52c4003")
 
+def toKNaybree():
+    PtConsole("Net.LinkToAgeInstance EderNaybree ca71ea3e-20bf-472b-9cd7-b5520e52f6db")
+
 def toKMemorial():
     PtConsole("Net.LinkToAgeInstance MemorialIsland 6f3aa89d-14b0-46b4-be45-1b389e32db60")
+
+def toKEmporium():
+    PtConsole("Net.LinkToAgeInstance ExplorersEmporium 9dc0d58d-ae5f-4444-aa75-5c7019819784")
+
+def toKSameehn():
+    PtConsole("Net.LinkToAgeInstance Sameehn 20afdb47-af6d-469c-8f9b-f05475580ba7")
 
 # CUSTOM LOCATION PAGE-IN
 
@@ -266,7 +279,7 @@ def pageoutTlaloft():
 
 def pageinTlaloftedit():   # !toggle Wall  0 0
     PtConsoleNet("Nav.PageInNode TLALoftEdit_Default", True)
-    PtConsoleNet("Avatar.Warp.WarpToXYZ 492.08, -796.92, 79.00", True)
+    PtConsoleNet("Avatar.Warp.WarpToXYZ 529.75, -813.61, 72.72", True)
 
 def pageoutTlaloftedit():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
@@ -285,27 +298,22 @@ def pageoutAltroom():
 
 def pageinTestroom():
     PtConsoleNet("Nav.PageInNode TLATestChamber_Default", True)
-    #PtConsoleNet("Nav.PageInNode TLATestChamber_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ -21.44, 4.12, 0.36", True)
 
 def pageoutTestroom():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode TLATestChamber_Textures", True)
     PtConsoleNet("Nav.PageOutNode TLATestChamber_Default", True)
 
 def pageinGameroom():
     PtConsoleNet("Nav.PageInNode GameRoom_mainRoom", True)
-    #PtConsoleNet("Nav.PageInNode GameRoom_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ 222.37, -801.80, 49980.93", True)
 
 def pageoutGameroom():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode GameRoom_Textures", True)
     PtConsoleNet("Nav.PageOutNode GameRoom_mainRoom", True)
 
 def pageinGameroom2():
     PtConsoleNet("Nav.PageInNode GameRoom_mainRoom", True)
-    #PtConsoleNet("Nav.PageInNode GameRoom_Textures", True)
 
 def gameroomup():
     PtConsoleNet("Avatar.Warp.WarpToXYZ 222.37, -801.80, 49980.93", True)
@@ -315,23 +323,19 @@ def gameroomdown():
 
 def pageinMonitor():
     PtConsoleNet("Nav.PageInNode TLABahroRoom_mainRoom", True)
-    #PtConsoleNet("Nav.PageInNode TLABahroRoom_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ 18.50, 7.33, 15.69", True)
 
 def pageoutMonitor():     # !! CRASHES THE CLIENT !!
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode TLABahroRoom_Textures", True)
     PtConsoleNet("Nav.PageOutNode TLABahroRoom_mainRoom", True)
 
 def pageinPlanet():
     # //event 24    for the sky
     PtConsoleNet("Nav.PageInNode TLAPlanet_mainRoom", True)
-    #PtConsoleNet("Nav.PageInNode TLAPlanet_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ -109.90, -17.58, 3001.20", True)
 
 def pageoutPlanet():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode TLAPlanet_Textures", True)
     PtConsoleNet("Nav.PageOutNode TLAPlanet_mainRoom", True)
 
 def miniplanet():
@@ -342,12 +346,10 @@ def bigplanet():
 
 def pageinBasement():
     PtConsoleNet("Nav.PageInNode TLABasement_Default", True)
-    #PtConsoleNet("Nav.PageInNode TLABasement_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ 4.55, -2.41, -13.04", True)
 
 def pageoutBasement():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode TLABasement_Textures", True)
     PtConsoleNet("Nav.PageOutNode TLABasement_Default", True)
 
 def pageinClarity():
@@ -395,13 +397,11 @@ def pageinGome():
     PtConsoleNet("Nav.PageInNode GoMePubNew_GoMeConfRoom", True)
     PtConsoleNet("Nav.PageInNode GoMePubNew_GoMePub", True)
     PtConsoleNet("Nav.PageInNode GoMePubNew_StoreRoom", True)
-    #PtConsoleNet("Nav.PageInNode GoMePubNew_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ 10.46, -15.91, -0.01", True)
     #PtConsoleNet("Avatar.Warp.WarpToXYZ 1.93, 96.17, 19.99", True)
 
 def pageoutGome():     # !! CRASHES THE CLIENT !!
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode GoMePubNew_Textures", True)
     PtConsoleNet("Nav.PageOutNode GoMePubNew_StoreRoom", True)
     PtConsoleNet("Nav.PageOutNode GoMePubNew_GoMePub", True)
     PtConsoleNet("Nav.PageOutNode GoMePubNew_GoMeConfRoom", True)
@@ -410,77 +410,62 @@ def pageoutGome():     # !! CRASHES THE CLIENT !!
 
 def pageinChiso():
     PtConsoleNet("Nav.PageInNode ChisoPreniv_Chiso", True)
-    #PtConsoleNet("Nav.PageInNode ChisoPreniv_Textures", True)
 
 def pageoutChiso():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode ChisoPreniv_Textures", True)
     PtConsoleNet("Nav.PageOutNode ChisoPreniv_Chiso", True)
 
 def pageinVeelay():
     PtConsoleNet("Nav.PageInNode VeeTsah_Temple", True)
-    #PtConsoleNet("Nav.PageInNode VeeTsah_Textures", True)
 
 def pageoutVeelay():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode VeeTsah_Textures", True)
     PtConsoleNet("Nav.PageOutNode VeeTsah_Temple", True)
 
 def pageinSerene():
     PtConsoleNet("Nav.PageInNode Serene_mainRoom", True)
-    #PtConsoleNet("Nav.PageInNode Serene_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ -46.27, -46.03, 0.23", True)
 
 def pageoutSerene():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode Serene_Textures", True)
     PtConsoleNet("Nav.PageOutNode Serene_mainRoom", True)
 
 def pageinVothol():
     PtConsoleNet("Nav.PageInNode Vothol_visitorlink", True)
-    #PtConsoleNet("Nav.PageInNode Vothol_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ -103.88, -15.68, -0.01", True)
 
 def pageoutVothol():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode Vothol_Textures", True)
     PtConsoleNet("Nav.PageOutNode Vothol_visitorlink", True)
 
 def pageinTrebiv():
     PtConsoleNet("Nav.PageInNode trebivdil_mainRoom", True)
-    #PtConsoleNet("Nav.PageInNode trebivdil_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ -17.09, 8.60, 22.53", True)
 
 def pageoutTrebiv():
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode trebivdil_Textures", True)
     PtConsoleNet("Nav.PageOutNode trebivdil_mainRoom", True)
 
 def pageinNaybree():
     PtConsoleNet("Nav.PageInNode EderNaybree_garden", True)
     PtConsoleNet("Nav.PageInNode EderNaybree_GardenGround", True)
-    #PtConsoleNet("Nav.PageInNode EderNaybree_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ 52.47, -265.22, -5.27", True)
 
 def pageoutNaybree():     # !! CRASHES THE CLIENT !!
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode EderNaybree_Textures", True)
     PtConsoleNet("Nav.PageOutNode EderNaybree_GardenGround", True)
     PtConsoleNet("Nav.PageOutNode EderNaybree_garden", True)
 
 def pageinHighgarden():
     PtConsoleNet("Nav.PageInNode FahetsHighgarden_Default", True)
-    #PtConsoleNet("Nav.PageInNode FahetsHighgarden_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ -78.52, 43.27, 42.35", True)
 
 def pageoutHighgarden():     # !! CRASHES THE CLIENT !!
     PtConsoleNet("Avatar.Spawn.Go 2", True)
-    #PtConsoleNet("Nav.PageOutNode FahetsHighgarden_Textures", True)
     PtConsoleNet("Nav.PageOutNode FahetsHighgarden_Default", True)
 
 def pageinMemorial():
     PtConsoleNet("Nav.PageInNode MemorialIsland_Default", True)
-    #PtConsoleNet("Nav.PageInNode MemorialIsland_Textures", True)
     PtConsoleNet("Avatar.Warp.WarpToXYZ -44.25, -124.61, 7.46", True)
 
 # GREENSCREENS
