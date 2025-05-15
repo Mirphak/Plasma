@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """ *==LICENSE==*
 
 CyanWorlds.com Engine - MMOG client, server and tools
-Copyright (C) 2011  Cyan Worlds, Inc.
+Copyright (C) 2011 Cyan Worlds, Inc.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -11,11 +10,11 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 Additional permissions under GNU GPL version 3 section 7
 
@@ -119,6 +118,8 @@ class clftRS(ptModifier):
         # set camera to telescope
         virtCam = ptCamera()
         virtCam.save(Camera.sceneobject.getKey())
+        # Disable Forward Movement so the camera does not stay active when the avvie walks forwards.
+        PtDisableForwardMovement() 
         # show the cockpit
         if Vignette.value:
             PtLoadDialog(Vignette.value,self.key)
@@ -139,6 +140,8 @@ class clftRS(ptModifier):
         virtCam = ptCamera()
         virtCam.restore(Camera.sceneobject.getKey())
         PtRecenterCamera()
+        # Enable Forward Movement because the avvie is outside of the telescope.
+        PtEnableForwardMovement() 
         #disable the Control key events
         PtDisableControlKeyEvents(self.key)
         #Re-enable first person camera
