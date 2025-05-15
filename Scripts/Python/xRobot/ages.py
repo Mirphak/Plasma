@@ -18,8 +18,6 @@ def GetMyAges():
     for age in ages:
         ageInfo = age.getChild().upcastToAgeLinkNode().getAgeInfo()
         ageInfoList = (ageInfo.getAgeInstanceName(), ageInfo.getAgeFilename(), ageInfo.getAgeInstanceGuid(), ageInfo.getAgeUserDefinedName(), "")
-        #print ageInfoList
-        #ageDict.update({ageInfo.getAgeInstanceName():ageInfoList})
         myKey = ageInfo.getAgeInstanceName()
         myKey = myKey.lower()
         myKey = myKey.replace(" ", "")
@@ -119,6 +117,7 @@ MirobotAgeDict = {
     "mobVothol":["Vothol Gallery", "vothol", "09d93976-b95d-4a31-b2e7-0e63903d77ff", "Mir-o-Bot's", ""],
     "MoB Elonin":["Elonin", "Elonin", "15f9fae2-c9bc-4db4-96ad-f32067840cce", "Mir-o-Bot's", ""],
     "MoB Eder Naybree":["Eder Naybree", "EderNaybree", "ec3f9b55-d6ff-4006-9061-4b8ebc2bd6d2", "Mir-o-Bot's", ""],
+    "MoB Beach":["Eder Naybree", "EderNaybree", "ec3f9b55-d6ff-4006-9061-4b8ebc2bd6d2", "Mir-o-Bot's", "LinkInPoint-MagicEvent"],
     "mobCartographers":["GuildPub-Cartographers", "GuildPub-Cartographers", "23ac83d3-dc52-4572-9b0a-ad13c298276c", "Mir-o-Bot's", ""],
     "mobGreeters":["GuildPub-Greeters", "GuildPub-Greeters", "7a69bacf-2dd0-4b8c-88ae-9878ea1157d3", "Mir-o-Bot's", ""],
     "mobMaintainers":["GuildPub-Maintainers", "GuildPub-Maintainers", "a9e45d08-dfdf-48a7-9539-bdaaa60c13e9", "Mir-o-Bot's", ""],
@@ -135,6 +134,8 @@ MirobotAgeDict = {
     "mobHighgarden":["FahetsHighgarden", "FahetsHighgarden", "039c7539-ba3d-41d5-a571-0de8da6cb7fd", "mob's", ""],
     "mobKalamee":["Kalamee", "Kalamee", "a035e8c5-a7c1-459b-bfc7-fbbb84014562", "mob's", ""],
     "Kalamee":["Kalamee", "Kalamee", "cb7d9652-4f46-485d-966e-8b144519f413", "Mir-o-Bot's", ""],
+    "Explorers Emporium":["Explorers' Emporium", "ExplorersEmporium", "f2237222-74db-4f3a-8455-37d7f0252525", "Mir-o-Bot's", ""],
+    "Sameehn":["Sameehn", "Sameehn", "03e63f9f-276e-4dc2-93b8-c7d73bf204a5", "Mir-o-Bot's", ""],
 }
 
 tmp = dict()
