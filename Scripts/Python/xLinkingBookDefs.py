@@ -104,13 +104,14 @@ xYeeshaPage28 = ( "YeeshaPage28", '<pb><img src="xYeeshaPageBlueFlower.dds" alig
 xYeeshaPage29 = ( "YeeshaPage29", '<pb><img src="xYeeshaPageTiamCrystal.dds" align=center check=00ff18,00800c,%d link=30>' )
 xYeeshaPage30 = ( "YeeshaPage30", '<pb><img src="xYeeshaPageEBIsland.dds" align=center check=00ff18,00800c,%d link=31>' )
 xYeeshaPage31 = ( "YeeshaPage31", '<pb><img src="xYeeshaPageFerns.dds" align=center check=00ff18,00800c,%d link=32>' )
+xYeeshaPage32 = ( "YeeshaPage32", '<pb><img src="xYeeshaPageGreenBushes.dds" align=center check=00ff18,00800c,%d link=33>' )
 
 
 xYeeshaPages = [ xYeeshaPage1, xYeeshaPage2, xYeeshaPage3, xYeeshaPage4, xYeeshaPage5, xYeeshaPage6, xYeeshaPage7,\
                 xYeeshaPage8, xYeeshaPage9, xYeeshaPage10, xYeeshaPage12, xYeeshaPage13, xYeeshaPage14, xYeeshaPage15,\
                 xYeeshaPage16, xYeeshaPage17, xYeeshaPage18, xYeeshaPage19, xYeeshaPage20, xYeeshaPage21, xYeeshaPage22,\
                 xYeeshaPage23, xYeeshaPage24, xYeeshaPage25, xYeeshaPage26, xYeeshaPage27, xYeeshaPage28, xYeeshaPage29,\
-                xYeeshaPage30, xYeeshaPage31]
+                xYeeshaPage30, xYeeshaPage31, xYeeshaPage32]
 
 
 
@@ -146,6 +147,8 @@ ShareBookDelete = '<img src="xBookmarkDniZero*1#0.hsm" pos=15,0 blend=alpha link
 ShareBookDelete2 = '<img src="xBookmarkDniZero2*1#0.hsm" pos=20,0 blend=alpha link=%d><pb>' % kShareBookDeleteID
 BahroShare = '<img src="xBahroYeeshaShare*1#0.hsm" pos=0,0 blend=alpha link=%d>' % kShareBookLinkID
 BahroNoShare = ''
+CrystalShare = '<img src="xCrystalShare*1#0.hsm" pos=0,0 blend=alpha link=%d>' % kShareBookLinkID
+CrystalNoShare = ''
 
 LinkStart = '<img src="'
 TransLinkStart = '<img opacity=0.7 src="'
@@ -291,6 +294,11 @@ else:
         "Mirtahm":              ( 1, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + DRCStampHolder + ShareBookDelete2 + LinkStart + 'xlinkpanelmirtahm' + LinkEnd ),
         "EderNaybreeBeach":     ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpaneledernaybreebeach' + LinkEnd ),
         "ExplorersEmporium":    ( 1, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + DRCStampHolder + ShareBookDelete2 + LinkStart + 'xlinkpanelexplorersemporium' + LinkEnd ),
+        "EderNaybreeFissure":   ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpaneledernaybreefissure' + LinkEnd ),
+        "ReischuApartment":     ( 'xlinkpanelreischuapt','bkCrystalBook','Crystal' ),
+        "Sameehn":              ( 1, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + DRCStampHolder + ShareBookDelete2 + LinkStart + 'xlinkpanelsameehn' + LinkEnd ),
+        "Pod12Default":         ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xLinkPanelPod12Default' + LinkEnd ),
+        "EderNaybreeCliff":     ( 0, 1.0, 1.0, NoDRCStamp, BookStart1 + DRCStampHolder + NoShare + LinkStart + 'xlinkpaneledernaybreecliff' + LinkEnd ),
 }
 
 # cross-references the book name with the age and spawn point it links to
@@ -372,12 +380,17 @@ xLinkDestinations = {\
     "Elonin":                 ( "Elonin", "LinkInPointDefault" ),
     "EderNaybree":            ( "EderNaybree", "LinkInPointDefault" ),
     "EderBahvahnter":         ( "EderBahvahnter", "LinkInPointDefault" ),
-    "FahetsHighgarden":      ( "FahetsHighgarden", "LinkInPointDefault" ),
+    "FahetsHighgarden":       ( "FahetsHighgarden", "LinkInPointDefault" ),
     "Kalamee":                ( "Kalamee", "LinkInPointDefault" ),
     "MemorialIsland":         ( "MemorialIsland", "LinkInPointDefault" ),
     "Mirtahm":                ( "Mirtahm", "LinkInPointDefault" ),
     "EderNaybreeBeach":       ( "EderNaybree", "LinkInPoint-MagicEvent" ),
     "ExplorersEmporium":      ( "ExplorersEmporium", "LinkInPointDefault" ),
+    "EderNaybreeFissure":     ( "EderNaybree", "LinkInPointFissure" ),
+    "ReischuApartment":       ( "ReischuApartment","LinkInPointDefault" ),
+    "Sameehn":                ( "Sameehn", "LinkInPointDefault" ),
+    "Pod12Default":           ( "Pod12Cal618", "LinkInPointDefault" ),
+    "EderNaybreeCliff":       ( "EderNaybree", "LinkInPointCliff" ),
 }
 
 #
