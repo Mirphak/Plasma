@@ -54,6 +54,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "HeadSpin.h"
 #include "plgDispatch.h"
 
+#include <string_theory/format>
+
 // other
 #include "pnKeyedObject/plKey.h"
 #include "pnMessage/plCameraMsg.h"
@@ -407,7 +409,7 @@ bool plAvAnimTask::Start(plArmatureMod *avatar, plArmatureBrain *brain, double t
         }
         else
         {
-            hsStatusMessageF("Couldn't find animation <%s> for plAvAnimTask: will try again", fAnimName.c_str());
+            hsStatusMessageF("Couldn't find animation <{}> for plAvAnimTask: will try again", fAnimName);
         }
     }
     else
@@ -581,7 +583,7 @@ bool plAvOneShotTask::Start(plArmatureMod *avatar, plArmatureBrain *brain, doubl
         {
             // Must do the physics re-enable through a callback so that it happens before the "done" callback and we don't
             // step over some script's attempt to disable physics again.
-            plAvatarPhysicsEnableCallbackMsg *epMsg = new plAvatarPhysicsEnableCallbackMsg(avatar->GetKey(), kStop, 0, 0, 0, 0);
+            plAvatarPhysicsEnableCallbackMsg *epMsg = new plAvatarPhysicsEnableCallbackMsg(avatar->GetKey(), plEventCallbackMsg::kStop, 0, 0, 0, 0);
             fAnimInstance->GetTimeConvert()->AddCallback(epMsg);
             hsRefCnt_SafeUnRef(epMsg);
         }   

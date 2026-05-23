@@ -40,6 +40,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
+// Used in Ahnonay on the edge of the sphere
+
 #include <metal_stdlib>
 using namespace metal;
 
@@ -58,13 +60,10 @@ typedef struct
     float4 CosConsts;
     float4 PiConsts;
     float4 NumericConsts;
-    float4 Tex0_Row0;
-    float4 Tex0_Row1;
+    float2x4 Tex0;
     float4 Tex1_Row0;
     float4 Tex1_Row1;
-    float4 L2WRow0;
-    float4 L2WRow1;
-    float4 L2WRow2;
+    float3x4 L2W;
     float4 Lengths;
     float4 WaterLevel;
     float4 DepthFalloff;
@@ -98,14 +97,7 @@ vertex vs_WaveDev1Lay_7InOut vs_WaveDec1Lay_7(Vertex in                         
 {
     vs_WaveDev1Lay_7InOut out;
     // Store our input position in world space in r6
-    float4 worldPosition = float4(0);
-    worldPosition.x = dot(float4(in.position, 1.0), uniforms.L2WRow0);
-    worldPosition.y = dot(float4(in.position, 1.0), uniforms.L2WRow1);
-    worldPosition.z = dot(float4(in.position, 1.0), uniforms.L2WRow2);
-    // Fill out our w (m4x3 doesn't touch w).
-    worldPosition.w = 1.0;
-
-    //
+    float4 worldPosition = float4(float4(in.position, 1.f) * uniforms.L2W, 1.f);
 
     // Input diffuse v5 color is:
     // v5.r = overall transparency
@@ -199,8 +191,7 @@ vertex vs_WaveDev1Lay_7InOut vs_WaveDec1Lay_7(Vertex in                         
     depth = clamp(depth, 0, 1);
 
     // Calc our filter (see above).
-    float4 inColor = float4(in.color) / 255.0f;
-    float4 filter = inColor.wwww * uniforms.Lengths;
+    float4 filter = in.color.wwww * uniforms.Lengths;
     filter = max(filter, uniforms.NumericConsts.xxxx);
     filter = min(filter, uniforms.NumericConsts.zzzz);
 
@@ -262,13 +253,10 @@ vertex vs_WaveDev1Lay_7InOut vs_WaveDec1Lay_7(Vertex in                         
     // Output alpha is vertex red (vtx alpha is used for wave filtering)
     // Whole thing modulated by material color/opacity.
 
-    out.c0 = half4(in.color.yyyz)/255.0 * half4(uniforms.MatColor);
+    out.c0 = half4(in.color.yyyz) * half4(uniforms.MatColor);
 
     // Usual texture transform
-    out.texCoord0.x = dot(float4(in.texCoord1, 1.0), uniforms.Tex0_Row0);
-    out.texCoord0.y = dot(float4(in.texCoord1, 1.0), uniforms.Tex0_Row1);
-    out.texCoord0.z = 0.0f;
-    out.texCoord0.w = 0.0f;
+    out.texCoord0 = float4(float4(in.texCoord1, 1.0) * uniforms.Tex0, 0.f, 0.f);
 
     return out;
 }

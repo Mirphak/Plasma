@@ -65,9 +65,7 @@ typedef struct
     float4 WindRot;
     float4 EnvAdjust;
     float4 EnvTint;
-    float4 LocalToWorldRow1;
-    float4 LocalToWorldRow2;
-    float4 LocalToWorldRow3;
+    float3x4 LocalToWorld;
     float4 Lengths;
     float4 WaterLevel;
     float4 DepthFalloff;
@@ -101,20 +99,7 @@ vertex vs_WaveFixedFin7InOut vs_WaveFixedFin7(Vertex in                     [[st
     vs_WaveFixedFin7InOut out;
 
     // Store our input position in world space in r6
-    float3 column1 = float3(uniforms.LocalToWorldRow1[0], uniforms.LocalToWorldRow2[0], uniforms.LocalToWorldRow3[0]);
-    float3 column2 = float3(uniforms.LocalToWorldRow1[1], uniforms.LocalToWorldRow2[1], uniforms.LocalToWorldRow3[1]);
-    float3 column3 = float3(uniforms.LocalToWorldRow1[2], uniforms.LocalToWorldRow2[2], uniforms.LocalToWorldRow3[2]);
-    float3 column4 = float3(uniforms.LocalToWorldRow1[3], uniforms.LocalToWorldRow2[3], uniforms.LocalToWorldRow3[3]);
-
-    matrix_float4x3 localToWorld;
-    localToWorld[0] = column1;
-    localToWorld[1] = column2;
-    localToWorld[2] = column3;
-    localToWorld[3] = column4;
-
-    float4 worldPosition = float4(localToWorld * float4(in.position, 1.0), 1.0);
-
-    //
+    float4 worldPosition = float4(float4(in.position, 1.f) * uniforms.LocalToWorld, 1.f);
 
     // Input diffuse v5 color is:
     // v5.r = overall transparency
@@ -214,8 +199,7 @@ vertex vs_WaveFixedFin7InOut vs_WaveFixedFin7(Vertex in                     [[st
     depth = clamp(depth, 0, 1);
 
     // Calc our filter (see above).
-    float4 inColor = float4(in.color) / 255.0f;
-    float4 filter = inColor.wwww * uniforms.Lengths;
+    float4 filter = in.color.wwww * uniforms.Lengths;
     filter = max(filter, uniforms.NumericConsts.xxxx);
     filter = min(filter, uniforms.NumericConsts.zzzz);
 
@@ -424,7 +408,7 @@ vertex vs_WaveFixedFin7InOut vs_WaveFixedFin7(Vertex in                     [[st
     // vector from this point to camera and normalize stashed in r5
     // Dot that with the computed normal
     r1.x = dot(-r5, r11);
-    r1.x = r1.x * inColor.z;
+    r1.x = r1.x * in.color.z;
     r1.xyzw = uniforms.NumericConsts.z - r1.x;
     r1.w += uniforms.NumericConsts.z;
     r1.w *= uniforms.NumericConsts.y;
@@ -432,7 +416,7 @@ vertex vs_WaveFixedFin7InOut vs_WaveFixedFin7(Vertex in                     [[st
     // will saturate [0..1] anyway.
     r1 *= depth.yyyx; // HACKTESTCOLOR
     //R in the in color is the alpha value, but remember it's encoded ARGB
-    r1.w *= inColor.g;
+    r1.w *= in.color.g;
     r1.w *= uniforms.WaterTint.w;
     out.c1 = clamp(r1 * uniforms.EnvTint, 0, 1);
     out.c2 = uniforms.WaterTint; // SEENORM
@@ -472,8 +456,8 @@ fragment float4 ps_WaveFixed(vs_WaveFixedFin7InOut in           [[stage_in]],
     float3 N = float3(u, v, w);
     float3 E = float3(in.texCoord1.w, in.texCoord2.w, in.texCoord3.w);
 
-    //float3 coord = reflect(E, N);
-    float3 coord = 2*(dot(N, E) / dot(N, N))*N - E;
+    // Invert the normal to an incident ray, then reflect
+    float3 coord = reflect(-E, N);
 
     float4 out = float4(environmentMap.sample(colorSampler, coord));
     out = (out * in.c1) + in.c2;

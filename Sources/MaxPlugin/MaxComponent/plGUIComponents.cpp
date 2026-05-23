@@ -41,6 +41,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 *==LICENSE==*/
 
 #include "HeadSpin.h"
+#include "hsMath.h"
 #include "plgDispatch.h"
 
 #include "plComponent.h"
@@ -1438,15 +1439,12 @@ void    plGUIDialogProc::ILoadPages( HWND hWnd, IParamBlock2 *pb )
     if (aged == nullptr)
         return;
 
-    plAgePage   *page;
     ST::string selPageName = M2ST(pb->GetStr( plGUIDialogComponent::kRefDialogName ));
-    aged->SeekFirstPage();
     ComboBox_ResetContent( hWnd );
 
-    while ((page = aged->GetNextPage()) != nullptr)
-    {
-        int idx = ComboBox_AddString( hWnd, ST2T(page->GetName()) );
-        if( !selPageName.empty() && page->GetName().compare_i( selPageName ) == 0 )
+    for (const auto& page : aged->GetPages()) {
+        int idx = ComboBox_AddString(hWnd, ST2T(page.GetName()));
+        if (!selPageName.empty() && page.GetName().compare_i(selPageName) == 0)
             ComboBox_SetCurSel( hWnd, idx );
     }
 
@@ -4790,10 +4788,10 @@ bool plGUISkinComp::Convert(plMaxNode *node, plErrorMsg *pErrMsg)
     plLayerTex *layer= (plLayerTex *)fCompPB->GetTexmap( kRefBitmap );
     if (layer != nullptr)
     {
-        PBBitmap *texture = layer->GetPBBitmap();
-        if (texture != nullptr)
+        plFileName texturePath = layer->GetBitmapFileName();
+        if (texturePath.IsValid())
         {
-            plBitmap *bMap = plLayerConverter::Instance().CreateSimpleTexture( M2ST(texture->bi.Name()), fConvertedSkin->GetKey()->GetUoid().GetLocation(), 0, plMipmap::kForceNonCompressed | plMipmap::kAlphaChannelFlag | plMipmap::kNoMaxSize );
+            plBitmap *bMap = plLayerConverter::Instance().CreateSimpleTexture( texturePath, fConvertedSkin->GetKey()->GetUoid().GetLocation(), 0, plMipmap::kForceNonCompressed | plMipmap::kAlphaChannelFlag | plMipmap::kNoMaxSize );
             if (bMap != nullptr && plMipmap::ConvertNoRef(bMap) != nullptr)
             {
                 hsgResMgr::ResMgr()->AddViaNotify( bMap->GetKey(), new plGenRefMsg( fConvertedSkin->GetKey(), 

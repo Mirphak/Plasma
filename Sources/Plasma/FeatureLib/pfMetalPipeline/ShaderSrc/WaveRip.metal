@@ -40,6 +40,8 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 
+// Used in Kemo to render ripples when the player swims
+
 #include <metal_stdlib>
 using namespace metal;
 
@@ -69,10 +71,12 @@ typedef struct
     float4 Tex1_Row0;
     float4 Tex1_Row1;
     float4 Tex1_Row2;
-    float4 L2WRow0;
-    float4 L2WRow1;
-    float4 L2WRow2;
-    float4 L2WRow3;
+    float3x4 L2W;
+    // This is defined in plWaveSetShaderConsts - but L2W is only a 3x4 matrix?
+    // Never used by the HLSL shader.
+    // Ripple is the only one where kLocalToWorld and kL2WRow0 have different indexes,
+    // Likely a mistake when the uniform indexes were written.
+    float4 L2WUnused;
     float4 Lengths;
     float4 WaterLevel;
     float4 DepthFalloff;
@@ -96,14 +100,7 @@ vertex waveRipInOut vs_WaveRip7(Vertex in                               [[stage_
     waveRipInOut out;
 
     // Store our input position in world space in r6
-    float4 worldPosition = float4(0);
-    worldPosition.x = dot(float4(in.position, 1.0), uniforms.L2WRow0);
-    worldPosition.y = dot(float4(in.position, 1.0), uniforms.L2WRow1);
-    worldPosition.z = dot(float4(in.position, 1.0), uniforms.L2WRow2);
-    // Fill out our w (m4x3 doesn't touch w).
-    worldPosition.w = 1.0;
-
-    //
+    float4 worldPosition = float4(float4(in.position, 1.f) * uniforms.L2W, 1.f);
 
     // Input diffuse v5 color is:
     // v5.r = overall transparency
@@ -198,8 +195,7 @@ vertex waveRipInOut vs_WaveRip7(Vertex in                               [[stage_
     depth = clamp(depth, 0, 1);
 
     // Calc our filter (see above).
-    float4 inColor = float4(in.color) / 255.0f;
-    float4 filter = inColor.wwww * uniforms.Lengths;
+    float4 filter = in.color.wwww * uniforms.Lengths;
     filter = clamp(filter, 0.0f, 1.0f);
 
     //mov    r2, r1;

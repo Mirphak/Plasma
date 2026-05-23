@@ -128,6 +128,30 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
     [self updateClientMouseLocation:event];
 }
 
+// MARK: Mouse scroll
+- (void)scrollWheel:(NSEvent *)event
+{
+    plMouseEventMsg* pMsg = new plMouseEventMsg;
+    float zDelta = [event scrollingDeltaY];
+    pMsg->SetWheelDelta(zDelta);
+    if (zDelta < 0)
+        pMsg->SetButton(kWheelNeg);
+    else
+        pMsg->SetButton(kWheelPos);
+
+    CGPoint windowLocation = [event locationInWindow];
+    CGPoint viewLocation = [self convertPoint:windowLocation fromView:nil];
+
+    NSRect windowViewBounds = self.bounds;
+    CGFloat xNormal = (windowLocation.x) / windowViewBounds.size.width;
+    CGFloat yNormal =
+        (windowViewBounds.size.height - windowLocation.y) / windowViewBounds.size.height;
+    pMsg->SetXPos(xNormal);
+    pMsg->SetYPos(yNormal);
+
+    pMsg->Send();
+}
+
 // MARK: Mouse movement
 - (void)mouseMoved:(NSEvent*)event
 {
@@ -170,8 +194,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
     if (event.type == NSEventTypeLeftMouseUp) {
         pBMsg->fButton |= kLeftButtonUp;
+        if (event.clickCount == 2)
+            pBMsg->fButton |= kLeftButtonDblClk;
     } else if (event.type == NSEventTypeRightMouseUp) {
         pBMsg->fButton |= kRightButtonUp;
+        if (event.clickCount == 2)
+            pBMsg->fButton |= kRightButtonDblClk;
     } else if (event.type == NSEventTypeLeftMouseDown) {
         pBMsg->fButton |= kLeftButtonDown;
     } else if (event.type == NSEventTypeRightMouseDown) {
@@ -275,13 +303,6 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
     if (newSize.width <= 0 || newSize.width <= 0) {
         return;
     }
-
-#if PLASMA_PIPELINE_METAL
-    _metalLayer.drawableSize = newSize;
-#endif
-    [self.delegate renderView:self
-          didChangeOutputSize:newSize
-                        scale:scaleFactor];
 }
 
 @end

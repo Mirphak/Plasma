@@ -16,6 +16,15 @@ find_program(
     DOC "Path to pngcrush"
 )
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 4.0 AND CMAKE_CROSSCOMPILING)
+    set(Python3_ARTIFACTS_PREFIX "_HOST")
+    find_package(Python3 3.8 COMPONENTS Interpreter)
+endif()
+
+if(Python3_EXECUTABLE AND NOT Python3_HOST_EXECUTABLE)
+    set(Python3_HOST_EXECUTABLE "${Python3_EXECUTABLE}")
+endif()
+
 # Can we generate the resource.dat file?
 python_test_modules(
     MODULES cairosvg PIL
@@ -37,7 +46,7 @@ if(PLASMA_BUILD_RESOURCE_DAT)
 
     add_custom_command(
         OUTPUT ${external_DAT}
-        COMMAND "${Python3_EXECUTABLE}"
+        COMMAND "${Python3_HOST_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/external/makeres.py"
                 --render --package
                 ${OPTIMIZE_ARGUMENT}
@@ -64,6 +73,7 @@ set(plClient_SOURCES
     pfAllCreatables.cpp
     plAllCreatables.cpp
     plClient.cpp
+    plClientCreatable.cpp
     plClientLoader.cpp
     pnAllCreatables.cpp
 )
@@ -95,6 +105,7 @@ elseif(APPLE)
         Mac-Cocoa/NSString+StringTheory.mm
         Mac-Cocoa/PLSKeyboardEventMonitor.mm
         Mac-Cocoa/PLSView.mm
+        Mac-Cocoa/PLSLoginController.mm
         Mac-Cocoa/PLSLoginWindowController.mm
         Mac-Cocoa/PLSPatcherWindowController.mm
         Mac-Cocoa/PLSPatcher.mm
@@ -104,6 +115,7 @@ elseif(APPLE)
         Mac-Cocoa/NSString+StringTheory.h
         Mac-Cocoa/PLSKeyboardEventMonitor.h
         Mac-Cocoa/PLSView.h
+        Mac-Cocoa/PLSLoginController.h
         Mac-Cocoa/PLSLoginWindowController.h
         Mac-Cocoa/PLSPatcherWindowController.h
         Mac-Cocoa/PLSPatcher.h
@@ -174,6 +186,7 @@ if(PLASMA_PIPELINE_METAL)
     target_embed_metal_shader_libraries(plClient
         pfMetalPipelineShadersMSL21
         pfMetalPipelineShadersMSL23
+        pfMetalPipelineShadersMSL30
     )
 endif()
 
@@ -196,6 +209,7 @@ target_link_libraries(
         pnFactory
         pnKeyedObject
         pnMessage
+        pnNetBase
         pnSceneObject
         plAgeLoader
         plAnimation
@@ -228,6 +242,7 @@ target_link_libraries(
         pfConsole
         pfConsoleCore
         $<$<PLATFORM_ID:Windows>:pfCrashHandler>
+        pfDisplayHelpers
         pfGameGUIMgr
         pfJournalBook
         pfLocalizationMgr
@@ -241,6 +256,8 @@ target_link_libraries(
         CURL::libcurl
         "$<$<PLATFORM_ID:Darwin>:-framework Cocoa>"
         "$<$<PLATFORM_ID:Darwin>:-framework QuartzCore>"
+        # Only need IOKit when targeting Mac OS X < 10.9
+        "$<$<AND:$<PLATFORM_ID:Darwin>,$<VERSION_LESS:${CMAKE_OSX_DEPLOYMENT_TARGET},10.9>>:-framework IOKit>"
         $<$<PLATFORM_ID:Darwin>:${LibArchive_LIBRARIES}>
 )
 target_include_directories(plClient PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -249,7 +266,7 @@ if(PLASMA_EXTERNAL_RELEASE)
     set_target_properties(plClient PROPERTIES OUTPUT_NAME "UruExplorer")
 endif(PLASMA_EXTERNAL_RELEASE)
 
-if(APPLE)
+if(APPLE AND NOT CMAKE_CROSSCOMPILING)
     # CMake will attempt to strip rpaths, thus preventing fixup_bundle from finding libraries.
     # Not sure why - turning that off.
     set_target_properties(plClient PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)

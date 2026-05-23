@@ -127,7 +127,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "pfCamera/plVirtualCamNeu.h"
 
 #include <algorithm>
-#include <string_theory/string>
+#include <string_theory/format>
 #include <utility>
 
 //#define MF_TOSSER
@@ -517,6 +517,8 @@ bool plRenderTriListFunc::RenderPrims() const
 }   
 
 //// Constructor & Destructor /////////////////////////////////////////////////
+
+plDXEnumerate plDXPipeline::enumerator;
 
 uint32_t plDXPipeline::fTexUsed(0);
 uint32_t plDXPipeline::fTexManaged(0);
@@ -1347,7 +1349,7 @@ bool plDXPipeline::ICreateDevice(bool windowed)
 #ifdef DBG_WRITE_FORMATS
     for (D3DFORMAT fmt : fCurrentMode->fDepthFormats)
     {
-        hsDebugMessage(ST::format("-- Valid depth buffer format: {}", IGetDXFormatName(fmt)).c_str(), 0);
+        hsStatusMessageF("-- Valid depth buffer format: {}", IGetDXFormatName(fmt));
     }
 #endif
 
@@ -1381,13 +1383,13 @@ bool plDXPipeline::ICreateDevice(bool windowed)
         fSettings.fD3DCaps &= ~kCapsZBias;
 
 #ifdef DBG_WRITE_FORMATS
-    hsDebugMessage(ST::format("-- Requesting depth buffer format: {}", IGetDXFormatName(params.AutoDepthStencilFormat)).c_str(), 0);
+    hsStatusMessageF("-- Requesting depth buffer format: {}", IGetDXFormatName(params.AutoDepthStencilFormat));
 #endif
 
 
     params.BackBufferFormat = dispMode.Format;
 #ifdef DBG_WRITE_FORMATS
-    hsDebugMessage(ST::format("-- Requesting back buffer format: {}", IGetDXFormatName(params.BackBufferFormat)).c_str(), 0);
+    hsStatusMessageF("-- Requesting back buffer format: {}", IGetDXFormatName(params.BackBufferFormat));
 #endif
 
     params.hDeviceWindow = fDevice.fHWnd;
@@ -1727,7 +1729,7 @@ void    plDXPipeline::IReleaseDeviceObjects()
         LONG ret;
         while( ret = fD3DDevice->Release() )
         {
-            hsStatusMessageF("%d - Error releasing device", ret);
+            hsStatusMessageF("{} - Error releasing device", ret);
         }
         fD3DDevice = nullptr;
     }
@@ -2196,7 +2198,7 @@ void    plDXPipeline::Resize( uint32_t width, uint32_t height )
     {
         /// Direct3D is reporting that we lost the device but are unable to reset
         /// it yet, so ignore.
-        hsStatusMessage( "Received Resize() request at an invalid time. Ignoring...\n" );
+        hsStatusMessage("Received Resize() request at an invalid time. Ignoring...");
         return;
     }
     if( !width && !height )
@@ -2240,7 +2242,7 @@ void    plDXPipeline::Resize( uint32_t width, uint32_t height )
     else
     {
         // Just for debug
-        hsStatusMessage( "Recreating the pipeline...\n" );
+        hsStatusMessage("Recreating the pipeline...");
     }
 
     // Recreate
@@ -8646,7 +8648,7 @@ void plDXPipeline::IEndAllocUnManaged()
 // a new age.
 void plDXPipeline::LoadResources()
 {
-    hsStatusMessageF("Begin Device Reload t=%f",hsTimer::GetSeconds());
+    hsStatusMessageF("Begin Device Reload t={}", hsTimer::GetSeconds());
     plNetClientApp::StaticDebugMsg("Begin Device Reload");
 
     // Just to be safe.
@@ -8704,7 +8706,7 @@ void plDXPipeline::LoadResources()
 
     plProfile_IncCount(PipeReload, 1);
 
-    hsStatusMessageF("End Device Reload t=%f",hsTimer::GetSeconds());
+    hsStatusMessageF("End Device Reload t={}", hsTimer::GetSeconds());
     plNetClientApp::StaticDebugMsg("End Device Reload");
 }
 

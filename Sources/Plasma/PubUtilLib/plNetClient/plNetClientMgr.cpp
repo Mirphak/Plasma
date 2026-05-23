@@ -73,6 +73,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 #include "plMessage/plVaultNotifyMsg.h"
 #include "plMessageBox/hsMessageBox.h"
 #include "plModifier/plResponderModifier.h"
+#include "plModifier/plSDLModifier.h"
 #include "plNetClientRecorder/plNetClientRecorder.h"
 #include "plNetCommon/plNetObjectDebugger.h"
 #include "plNetMessage/plNetMessage.h"
@@ -252,27 +253,25 @@ void plNetClientMgr::ICreateStatusLog() const
 //
 // override for plLoggable
 //
-bool plNetClientMgr::Log(const ST::string& str) const
+void plNetClientMgr::Log(const ST::string& str) const
 {
     if (str.empty()) {
-        return true;
+        return;
     }
 
     // prepend raw time
     ST::string buf2 = ST::format("{.2f} {}", hsTimer::GetSeconds(), ProcessTab(str.c_str()));
 
     if ( GetConsoleOutput() )
-        hsStatusMessage(buf2.c_str());
+        hsStatusMessage(buf2);
 
     GetLog();
 
     plNetObjectDebugger::GetInstance()->LogMsgIfMatch(buf2);
 
     if (fStatusLog) {
-        return fStatusLog->AddLine(buf2);
+        fStatusLog->AddLine(buf2);
     }
-
-    return true;
 }
 
 //
@@ -861,7 +860,7 @@ bool plNetClientMgr::MsgReceive( plMessage* msg )
     plCCRPetitionMsg* petMsg=plCCRPetitionMsg::ConvertNoRef(msg);
     if (petMsg)
     {
-        ISendCCRPetition(petMsg);
+        hsAssert(false, "CCR petitions are not implemented");
         return true;
     }
 
@@ -914,12 +913,14 @@ bool plNetClientMgr::MsgReceive( plMessage* msg )
     plClientMsg* clientMsg = plClientMsg::ConvertNoRef(msg);
     if (clientMsg && clientMsg->GetClientMsgFlag()==plClientMsg::kInitComplete)
     {
+#ifdef HS_DEBUGGING
         // add 1 debug object for age sdl
         if (plNetObjectDebugger::GetInstance())
         {
             plNetObjectDebugger::GetInstance()->RemoveDebugObject(ST_LITERAL("AgeSDLHook"));
             plNetObjectDebugger::GetInstance()->AddDebugObject(ST_LITERAL("AgeSDLHook"));
         }
+#endif
 
         // if we're linking to startup we don't need (or want) a player set
         ST::string ageName = NetCommGetStartupAge()->ageDatasetName;
@@ -1194,7 +1195,7 @@ bool plNetClientMgr::IHandlePlayerPageMsg(plPlayerPageMsg *playerMsg)
         plSceneObject *playerSO = plSceneObject::ConvertNoRef(playerKey->ObjectIsLoaded());
         if (!playerSO)
         {
-            hsStatusMessageF("Ignoring player page message for non-existant player.");
+            hsStatusMessage("Ignoring player page message for non-existant player.");
         }
         else
         if(playerMsg->fPlayer)
@@ -1305,6 +1306,27 @@ plUoid plNetClientMgr::GetAgeSDLObjectUoid(const ST::string& ageName) const
     }
 
     return plUoid(loc, plSceneObject::Index(), plSDL::kAgeSDLObjectName);
+}
+
+plSDLModifier* plNetClientMgr::GetAgeSDLModifier() const
+{
+    if (fAgeSDLObjectKey && fAgeSDLObjectKey->ObjectIsLoaded()) {
+        if (const plSceneObject* ageSDLHook = plSceneObject::ConvertNoRef(fAgeSDLObjectKey->GetObjectPtr())) {
+            plSDLModifier* sdlMod = plSDLModifier::ConvertNoRef(const_cast<plModifier*>(ageSDLHook->GetModifierByType(plSDLModifier::Index())));
+            if (sdlMod != nullptr) {
+                return sdlMod;
+            } else {
+                ErrorMsg("Cannot get age SDL, because the AgeSDLHook doesn't have a plSDLModifier");
+            }
+        } else {
+            ErrorMsg("Cannot get age SDL, because the AgeSDLHook isn't a scene object???");
+        }
+    } else {
+        ErrorMsg("Cannot get age SDL, because the AgeSDLHook isn't loaded yet");
+    }
+
+    // couldn't find one
+    return nullptr;
 }
 
 //

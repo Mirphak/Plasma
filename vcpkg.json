@@ -46,12 +46,13 @@
         "name": "libuuid",
         "platform": "linux"
       },
+      "tl-expected",
       "zlib"
     ],
     "overrides": [
       {
         "name": "physx",
-        "version": "4.1.2#6",
+        "version": "4.1.2#7",
         "$comment": "Upstream vcpkg updated to PhysX 5, which drops support for several target platforms. Stick with 4.1.2 for now."
       }
     ],
@@ -61,12 +62,13 @@
         "dependencies": [
           {
             "name": "python3-cairosvg",
-            "host": true
+            "host": true,
+            "platform": "!(windows & arm64)"
           }
         ]
       }
     },
-    "builtin-baseline": "d5ec528843d29e3a52d745a64b469f810b2cedbf",
+    "builtin-baseline": "dd3097e305afa53f7b4312371f62058d2e665320",
     "vcpkg-configuration": {
       "overlay-ports": ["./Scripts/Ports"],
       "overlay-triplets": ["./Scripts/Triplets"]

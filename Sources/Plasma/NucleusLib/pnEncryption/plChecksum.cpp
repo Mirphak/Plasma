@@ -40,9 +40,12 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 *==LICENSE==*/
 #include "plChecksum.h"
+
+#include "hsEndian.h"
 #include "hsStream.h"
 
 #include <cstring>
+#include <string_theory/codecs>
 
 struct _InitOpenSSL
 {
@@ -215,23 +218,11 @@ void plMD5Checksum::Finish()
     fContext = nullptr;
 }
 
-const char* plMD5Checksum::GetAsHexString() const
+ST::string plMD5Checksum::GetAsHexString() const
 {
-    const int   kHexStringSize = (2 * MD5_DIGEST_LENGTH) + 1;
-    static char tempString[kHexStringSize];
-
-    int     i;
-    char    *ptr;
-
-
     hsAssert(fValid, "Trying to get string version of invalid checksum");
 
-    for (i = 0, ptr = tempString; i < sizeof(fChecksum); i++, ptr += 2)
-        sprintf(ptr, "%02x", fChecksum[i]);
-
-    *ptr = 0;
-
-    return tempString;
+    return ST::hex_encode(fChecksum, sizeof(fChecksum));
 }
 
 void plMD5Checksum::SetFromHexString(const char* string)
@@ -368,22 +359,11 @@ void plSHAChecksum::Finish()
     fValid = true;
 }
 
-const char* plSHAChecksum::GetAsHexString() const
+ST::string plSHAChecksum::GetAsHexString() const
 {
-    const int kHexStringSize = (2 * SHA_DIGEST_LENGTH) + 1;
-    static char tempString[kHexStringSize];
-
-    int i;
-    char* ptr;
-
     hsAssert(fValid, "Trying to get string version of invalid checksum");
 
-    for (i = 0, ptr = tempString; i < sizeof(fChecksum); i++, ptr += 2)
-        sprintf(ptr, "%02x", fChecksum[i]);
-
-    *ptr = 0;
-
-    return tempString;
+    return ST::hex_encode(fChecksum, sizeof(fChecksum));
 }
 
 void plSHAChecksum::SetFromHexString(const char* string)
@@ -510,22 +490,11 @@ void plSHA1Checksum::Finish()
     fContext = nullptr;
 }
 
-const char* plSHA1Checksum::GetAsHexString() const
+ST::string plSHA1Checksum::GetAsHexString() const
 {
-    const int kHexStringSize = (2 * SHA_DIGEST_LENGTH) + 1;
-    static char tempString[kHexStringSize];
-
-    int i;
-    char* ptr;
-
     hsAssert(fValid, "Trying to get string version of invalid checksum");
 
-    for (i = 0, ptr = tempString; i < sizeof(fChecksum); i++, ptr += 2)
-        sprintf(ptr, "%02x", fChecksum[i]);
-
-    *ptr = 0;
-
-    return tempString;
+    return ST::hex_encode(fChecksum, sizeof(fChecksum));
 }
 
 void plSHA1Checksum::SetFromHexString(const char* string)

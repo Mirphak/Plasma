@@ -42,6 +42,7 @@ You can contact Cyan Worlds, Inc. by email legal@cyan.com
 
 #include "HeadSpin.h"
 #include "plgDispatch.h"
+#include "hsMath.h"
 #include "hsResMgr.h"
 
 #include "plComponent.h"
@@ -461,12 +462,12 @@ bool plClickDragComponent::Convert(plMaxNode *node, plErrorMsg *pErrMsg)
 
         // add callbacks for beginning and end of animation
         plEventCallbackMsg* pCall1 = new plEventCallbackMsg;
-        pCall1->fEvent = kBegin;
+        pCall1->fEvent = plEventCallbackMsg::kBegin;
         pCall1->fRepeats = -1;
         pCall1->AddReceiver(axisKey);
         
         plEventCallbackMsg* pCall2 = new plEventCallbackMsg;
-        pCall2->fEvent = kEnd;
+        pCall2->fEvent = plEventCallbackMsg::kEnd;
         pCall2->fRepeats = -1;
         pCall2->AddReceiver(axisKey);
 
