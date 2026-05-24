@@ -112,7 +112,7 @@ def CreatePossessiveString(possessorName, possessionName):
         return f"{possessorName}' {possessionName}"
     else:
         # otherwise throw it through the localized possessive formatter
-        return PtGetLocalizedString("Global.Formats.Possessive", [possessorName, possessionName])
+        return PtGetLocalizedString("Global.Formats.Possesive", [possessorName, possessionName])
 
 def GetLocalAvatarPossessivePronounLocKey():
 
