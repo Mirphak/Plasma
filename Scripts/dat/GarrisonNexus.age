@@ -1,7 +1,7 @@
 StartDateTime=0946713600
-DayLength=24.000000
+DayLength=24
 MaxCapacity=10
 LingerTime=180
-SequencePrefix=9
+SequencePrefix=37
 ReleaseVersion=0
-Page=TreasureBookShaft,15
+Page=grsnWhiteRoom,1

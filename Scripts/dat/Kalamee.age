@@ -1,0 +1,14 @@
+StartDateTime=0000000000
+DayLength=24.000000
+MaxCapacity=10
+LingerTime=180
+SequencePrefix=22100
+ReleaseVersion=0
+Page=mainroom,1
+Page=BookIntro,2
+Page=BookCredits,3
+Page=SketchbookA,4
+Page=SketchbookB,5
+Page=SketchbookC,6
+Page=ScopeA,8
+Page=SpwnB,12

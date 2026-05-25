@@ -1,0 +1,13 @@
+StartDateTime=0672211080
+DayLength=15.777800
+MaxCapacity=50
+LingerTime=180
+SequencePrefix=622
+ReleaseVersion=0
+Page=GardenGround,1
+Page=garden,2
+Page=fiyaFX-P3,3
+Page=MSObserv,4
+Page=MSObserve-GUI,5
+Page=bkCrystalBook,68,1
+Page=Default,0
