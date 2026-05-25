@@ -962,11 +962,12 @@ class CommandsProcessor:
                     callableCommandFn(*theMessage[1:])
                 else:
                     callableCommandFn(None)
-                # GoMe.
-                try:
-                    getattr(self, function)(params)
-                except:  # In case one of the GoMe functions malfunctions.
-                    traceback.print_exc()
+                # Ca ne sert à rien et ça ne fnctionne pas!
+                ## GoMe.
+                #try:
+                #    getattr(self, function)(params)
+                #except:  # In case one of the GoMe functions malfunctions.
+                #    traceback.print_exc()
                 return None
 
         # Is it a simple text-based command?
